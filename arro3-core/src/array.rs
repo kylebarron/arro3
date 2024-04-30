@@ -7,6 +7,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
+use crate::interop::numpy::to_numpy::to_numpy;
 
 #[pyclass(module = "arro3.core._rust", name = "Array", subclass)]
 pub struct PyArray {
@@ -22,6 +23,12 @@ impl PyArray {
 
 #[pymethods]
 impl PyArray {
+    /// An implementation of the Array interface, for interoperability with numpy and other
+    /// array libraries.
+    pub fn __array__(&self, py: Python) -> PyResult<PyObject> {
+        to_numpy(py, &self.array)
+    }
+
     /// An implementation of the [Arrow PyCapsule
     /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
     /// This dunder method should not be called directly, but enables zero-copy
@@ -56,5 +63,10 @@ impl PyArray {
     #[classmethod]
     pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
         input.extract()
+    }
+
+    /// Copy this array to a `numpy` NDArray
+    pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+        self.__array__(py)
     }
 }

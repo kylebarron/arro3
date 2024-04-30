@@ -8,6 +8,7 @@ use pyo3::types::PyCapsule;
 
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::ffi_stream::new_stream;
+use crate::interop::numpy::to_numpy::chunked_to_numpy;
 
 // Note: we include the field so that we can round-trip extension types, which would otherwise lose
 // their metadata.
@@ -25,6 +26,17 @@ impl PyChunkedArray {
 
 #[pymethods]
 impl PyChunkedArray {
+    /// An implementation of the Array interface, for interoperability with numpy and other
+    /// array libraries.
+    pub fn __array__(&self, py: Python) -> PyResult<PyObject> {
+        let chunk_refs = self
+            .chunks
+            .iter()
+            .map(|arr| arr.as_ref())
+            .collect::<Vec<_>>();
+        chunked_to_numpy(py, chunk_refs.as_slice())
+    }
+
     /// An implementation of the [Arrow PyCapsule
     /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
     /// This dunder method should not be called directly, but enables zero-copy
@@ -46,5 +58,10 @@ impl PyChunkedArray {
             let stream_capsule = PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?;
             Ok(stream_capsule.to_object(py))
         })
+    }
+
+    /// Copy this array to a `numpy` NDArray
+    pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+        self.__array__(py)
     }
 }
