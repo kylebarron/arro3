@@ -47,4 +47,12 @@ impl PyTable {
             Ok(stream_capsule.to_object(py))
         })
     }
+
+    pub fn __eq__(&self, other: &PyTable) -> bool {
+        self.batches == other.batches && self.schema == other.schema
+    }
+
+    pub fn __len__(&self) -> usize {
+        self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
+    }
 }

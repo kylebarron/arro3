@@ -58,4 +58,8 @@ impl PySchema {
     pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
         input.extract()
     }
+
+    pub fn __eq__(&self, other: &PySchema) -> bool {
+        self.0 == other.0
+    }
 }

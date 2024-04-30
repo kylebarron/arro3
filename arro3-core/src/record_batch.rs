@@ -56,4 +56,8 @@ impl PyRecordBatch {
             Ok(tuple.to_object(py))
         })
     }
+
+    pub fn __eq__(&self, other: &PyRecordBatch) -> bool {
+        self.0 == other.0
+    }
 }

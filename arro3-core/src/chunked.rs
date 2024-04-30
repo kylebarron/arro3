@@ -60,6 +60,14 @@ impl PyChunkedArray {
         })
     }
 
+    pub fn __eq__(&self, other: &PyChunkedArray) -> bool {
+        self.field == other.field && self.chunks == other.chunks
+    }
+
+    pub fn __len__(&self) -> usize {
+        self.chunks.iter().fold(0, |acc, x| acc + x.len())
+    }
+
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py)

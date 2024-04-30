@@ -53,6 +53,14 @@ impl PyArray {
         })
     }
 
+    pub fn __eq__(&self, other: &PyArray) -> bool {
+        self.array.as_ref() == other.array.as_ref() && self.field == other.field
+    }
+
+    pub fn __len__(&self) -> usize {
+        self.array.len()
+    }
+
     /// Construct this object from existing Arrow data
     ///
     /// Args:

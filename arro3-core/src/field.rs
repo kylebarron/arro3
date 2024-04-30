@@ -46,4 +46,8 @@ impl PyField {
             Ok(schema_capsule.to_object(py))
         })
     }
+
+    pub fn __eq__(&self, other: &PyField) -> bool {
+        self.0 == other.0
+    }
 }
