@@ -29,11 +29,5 @@ fn _rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<schema::PySchema>()?;
     m.add_class::<table::PyTable>()?;
 
-    // Top-level array/chunked array functions
-    // m.add_function(wrap_pyfunction!(
-    //     crate::algorithm::geo::affine_ops::affine_transform,
-    //     m
-    // )?)?;
-
     Ok(())
 }
