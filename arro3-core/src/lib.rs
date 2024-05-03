@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 pub mod array;
 pub mod chunked;
+pub mod datatypes;
 pub mod error;
 pub mod ffi;
 pub mod field;
