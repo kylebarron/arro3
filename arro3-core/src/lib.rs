@@ -7,6 +7,7 @@ pub mod ffi;
 pub mod field;
 pub mod interop;
 pub mod record_batch;
+pub mod record_batch_reader;
 pub mod schema;
 pub mod table;
 
@@ -26,6 +27,7 @@ fn _rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<chunked::PyChunkedArray>()?;
     m.add_class::<field::PyField>()?;
     m.add_class::<record_batch::PyRecordBatch>()?;
+    m.add_class::<record_batch_reader::PyRecordBatchReader>()?;
     m.add_class::<schema::PySchema>()?;
     m.add_class::<table::PyTable>()?;
 
