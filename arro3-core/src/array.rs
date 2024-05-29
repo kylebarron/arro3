@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::sync::Arc;
 
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::ArrayRef;
@@ -7,6 +8,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::interop::numpy::to_numpy::to_numpy;
 
 #[pyclass(module = "arro3.core._rust", name = "Array", subclass)]
@@ -71,6 +73,17 @@ impl PyArray {
     #[classmethod]
     pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
         input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(
+        _cls: &PyType,
+        schema_capsule: &PyCapsule,
+        array_capsule: &PyCapsule,
+    ) -> PyResult<Self> {
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        Ok(Self::new(array, Arc::new(field)))
     }
 
     /// Copy this array to a `numpy` NDArray

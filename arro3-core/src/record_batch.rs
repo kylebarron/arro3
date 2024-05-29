@@ -1,11 +1,16 @@
 use std::ffi::CString;
+use std::sync::Arc;
 
+use arrow::array::AsArray;
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::{Array, RecordBatch, StructArray};
+use arrow_schema::{DataType, SchemaBuilder};
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple};
+use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_array_pycapsules;
 
 #[pyclass(module = "arro3.core._rust", name = "RecordBatch", subclass)]
 #[derive(Debug)]
@@ -59,5 +64,49 @@ impl PyRecordBatch {
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {
         self.0 == other.0
+    }
+
+    /// Construct this object from existing Arrow data
+    ///
+    /// Args:
+    ///     input: Arrow array to use for constructing this object
+    ///
+    /// Returns:
+    ///     Self
+    #[classmethod]
+    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+        input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(
+        _cls: &PyType,
+        schema_capsule: &PyCapsule,
+        array_capsule: &PyCapsule,
+    ) -> PyResult<Self> {
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        match field.data_type() {
+            DataType::Struct(fields) => {
+                let struct_array = array.as_struct();
+                let schema = SchemaBuilder::from(fields)
+                    .finish()
+                    .with_metadata(field.metadata().clone());
+                assert_eq!(
+                    struct_array.null_count(),
+                    0,
+                    "Cannot convert nullable StructArray to RecordBatch"
+                );
+
+                let columns = struct_array.columns().to_vec();
+                let batch = RecordBatch::try_new(Arc::new(schema), columns)
+                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
+                Ok(Self::new(batch))
+            }
+            dt => Err(PyValueError::new_err(format!(
+                "Unexpected data type {}",
+                dt
+            ))),
+        }
     }
 }

@@ -2,11 +2,12 @@ use std::ffi::CString;
 
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::RecordBatchReader;
-use pyo3::exceptions::PyIOError;
+use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::PyCapsule;
+use pyo3::types::{PyCapsule, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_stream_pycapsule;
 
 /// A wrapper around an [arrow_array::RecordBatchReader]
 #[pyclass(module = "arro3.core._rust", name = "RecordBatchReader", subclass)]
@@ -47,5 +48,20 @@ impl PyRecordBatchReader {
             let stream_capsule = PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?;
             Ok(stream_capsule.to_object(py))
         })
+    }
+
+    #[classmethod]
+    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+        input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+        Ok(Self(Some(Box::new(stream_reader))))
     }
 }

@@ -3,9 +3,12 @@ use std::sync::Arc;
 
 use arrow_array::Array;
 use arrow_schema::FieldRef;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::PyCapsule;
+use pyo3::types::{PyCapsule, PyType};
 
+use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
+use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::ffi_stream::new_stream;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
@@ -71,5 +74,29 @@ impl PyChunkedArray {
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py)
+    }
+
+    #[classmethod]
+    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+        input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+
+        let stream_reader = ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+        let field = stream_reader.field();
+
+        let mut chunks = vec![];
+        for array in stream_reader {
+            let array = array.map_err(|err| PyTypeError::new_err(err.to_string()))?;
+            chunks.push(array);
+        }
+
+        Ok(PyChunkedArray::new(chunks, field))
     }
 }

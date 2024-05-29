@@ -1,11 +1,13 @@
-use std::ffi::CString;
+use std::sync::Arc;
 
-use arrow::ffi::FFI_ArrowSchema;
-use arrow_schema::SchemaRef;
+use arrow_schema::{Schema, SchemaRef};
+use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_schema_pycapsule;
+use crate::ffi::to_python::schema::ToSchemaPyCapsule;
 
 #[pyclass(module = "arro3.core._rust", name = "Schema", subclass)]
 pub struct PySchema(SchemaRef);
@@ -28,6 +30,12 @@ impl From<SchemaRef> for PySchema {
     }
 }
 
+impl AsRef<Schema> for PySchema {
+    fn as_ref(&self) -> &Schema {
+        &self.0
+    }
+}
+
 #[pymethods]
 impl PySchema {
     /// An implementation of the [Arrow PyCapsule
@@ -37,14 +45,8 @@ impl PySchema {
     ///
     /// For example, you can call [`pyarrow.schema()`][pyarrow.schema] to convert this array
     /// into a pyarrow schema, without copying memory.
-    fn __arrow_c_schema__(&self) -> PyArrowResult<PyObject> {
-        let ffi_schema = FFI_ArrowSchema::try_from(self.0.as_ref())?;
-        let schema_capsule_name = CString::new("arrow_schema").unwrap();
-
-        Python::with_gil(|py| {
-            let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-            Ok(schema_capsule.to_object(py))
-        })
+    fn __arrow_c_schema__(&self, py: Python) -> PyArrowResult<PyObject> {
+        Ok(self.to_py_capsule(py)?.to_object(py))
     }
 
     /// Construct this object from existing Arrow data
@@ -57,6 +59,15 @@ impl PySchema {
     #[classmethod]
     pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
         input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let schema =
+            Schema::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(Arc::new(schema)))
     }
 
     pub fn __eq__(&self, other: &PySchema) -> bool {

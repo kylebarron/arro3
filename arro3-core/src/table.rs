@@ -1,23 +1,31 @@
 use std::ffi::CString;
 
+use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow::ffi_stream::FFI_ArrowArrayStream;
+use arrow_array::RecordBatchReader;
 use arrow_array::{RecordBatch, RecordBatchIterator};
 use arrow_schema::SchemaRef;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::PyCapsule;
+use pyo3::types::{PyCapsule, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_stream_pycapsule;
 
 #[pyclass(module = "arro3.core._rust", name = "Table", subclass)]
 #[derive(Debug)]
 pub struct PyTable {
-    schema: SchemaRef,
     batches: Vec<RecordBatch>,
+    schema: SchemaRef,
 }
 
 impl PyTable {
     pub fn new(schema: SchemaRef, batches: Vec<RecordBatch>) -> Self {
         Self { schema, batches }
+    }
+
+    pub fn into_inner(self) -> (Vec<RecordBatch>, SchemaRef) {
+        (self.batches, self.schema)
     }
 }
 
@@ -54,5 +62,34 @@ impl PyTable {
 
     pub fn __len__(&self) -> usize {
         self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
+    }
+
+    /// Construct this object from existing Arrow data
+    ///
+    /// Args:
+    ///     input: Arrow array to use for constructing this object
+    ///
+    /// Returns:
+    ///     Self
+    #[classmethod]
+    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+        input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = ArrowRecordBatchStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+        let schema = stream_reader.schema();
+
+        let mut batches = vec![];
+        for batch in stream_reader {
+            let batch = batch.map_err(|err| PyTypeError::new_err(err.to_string()))?;
+            batches.push(batch);
+        }
+
+        Ok(Self::new(schema, batches))
     }
 }

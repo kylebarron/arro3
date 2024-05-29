@@ -1,11 +1,14 @@
 use std::ffi::CString;
+use std::sync::Arc;
 
 use arrow::ffi::FFI_ArrowSchema;
-use arrow_schema::FieldRef;
+use arrow_schema::{Field, FieldRef};
+use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
-use pyo3::types::PyCapsule;
+use pyo3::types::{PyCapsule, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::from_python::utils::import_schema_pycapsule;
 
 #[pyclass(module = "arro3.core._rust", name = "Field", subclass)]
 pub struct PyField(FieldRef);
@@ -25,6 +28,12 @@ impl From<PyField> for FieldRef {
 impl From<FieldRef> for PyField {
     fn from(value: FieldRef) -> Self {
         Self(value)
+    }
+}
+
+impl AsRef<Field> for PyField {
+    fn as_ref(&self) -> &Field {
+        &self.0
     }
 }
 
@@ -49,5 +58,19 @@ impl PyField {
 
     pub fn __eq__(&self, other: &PyField) -> bool {
         self.0 == other.0
+    }
+
+    #[classmethod]
+    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+        input.extract()
+    }
+
+    /// Construct this object from a bare Arrow PyCapsule
+    #[classmethod]
+    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let field =
+            Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(Arc::new(field)))
     }
 }
