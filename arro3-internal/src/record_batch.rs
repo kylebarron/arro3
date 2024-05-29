@@ -6,6 +6,7 @@ use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::{Array, RecordBatch, StructArray};
 use arrow_schema::{DataType, SchemaBuilder};
 use pyo3::exceptions::PyValueError;
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
@@ -19,6 +20,17 @@ pub struct PyRecordBatch(RecordBatch);
 impl PyRecordBatch {
     pub fn new(batch: RecordBatch) -> Self {
         Self(batch)
+    }
+
+    pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod
+            .getattr(intern!(py, "RecordBatch"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                self.__arrow_c_array__(py, None)?,
+            )?;
+        Ok(core_obj.to_object(py))
     }
 }
 
@@ -34,6 +46,12 @@ impl From<PyRecordBatch> for RecordBatch {
     }
 }
 
+impl AsRef<RecordBatch> for PyRecordBatch {
+    fn as_ref(&self) -> &RecordBatch {
+        &self.0
+    }
+}
+
 #[pymethods]
 impl PyRecordBatch {
     /// An implementation of the [Arrow PyCapsule
@@ -44,7 +62,11 @@ impl PyRecordBatch {
     /// For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this array
     /// into a pyarrow array, without copying memory.
     #[allow(unused_variables)]
-    pub fn __arrow_c_array__(&self, requested_schema: Option<PyObject>) -> PyArrowResult<PyObject> {
+    pub fn __arrow_c_array__<'py>(
+        &'py self,
+        py: Python<'py>,
+        requested_schema: Option<PyObject>,
+    ) -> PyArrowResult<&'py PyTuple> {
         let schema = self.0.schema();
         let array = StructArray::from(self.0.clone());
 
@@ -53,13 +75,9 @@ impl PyRecordBatch {
 
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
         let array_capsule_name = CString::new("arrow_array").unwrap();
-
-        Python::with_gil(|py| {
-            let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-            let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
-            let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule]);
-            Ok(tuple.to_object(py))
-        })
+        let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
+        let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
+        Ok(PyTuple::new(py, vec![schema_capsule, array_capsule]))
     }
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=1.4.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "arro3-compute"
+requires-python = ">=3.8"
+dependencies = ["arro3-core"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "arro3.compute._rust"
+python-source = "python"
+
+[tool.poetry]
+name = "arro3-compute"
+version = "0.0.0"
+description = ""
+authors = []
+packages = [{ include = "python/arro3/compute" }]

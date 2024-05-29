@@ -1,0 +1,24 @@
+[package]
+name = "arro3-internal"
+version = "0.1.0"
+authors = ["Kyle Barron <kylebarron2@gmail.com>"]
+edition = "2021"
+description = "Internal structs for representing Arrow data in Python."
+readme = "README.md"
+repository = "https://github.com/kylebarron/arro3"
+license = "MIT OR Apache-2.0"
+keywords = ["python", "arrow"]
+categories = []
+rust-version = "1.75"
+
+[dependencies]
+arrow-array = "51"
+arrow-buffer = "51"
+arrow-schema = "51"
+arrow = { version = "51", features = ["ffi"] }
+pyo3 = { version = "0.20.0", features = ["abi3-py38"] }
+numpy = { version = "0.20", features = ["half"] }
+thiserror = "1"
+
+[lib]
+crate-type = ["rlib"]
