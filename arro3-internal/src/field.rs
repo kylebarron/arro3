@@ -4,8 +4,9 @@ use std::sync::Arc;
 use arrow::ffi::FFI_ArrowSchema;
 use arrow_schema::{Field, FieldRef};
 use pyo3::exceptions::PyTypeError;
+use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyType};
+use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
@@ -16,6 +17,15 @@ pub struct PyField(FieldRef);
 impl PyField {
     pub fn new(field: FieldRef) -> Self {
         Self(field)
+    }
+
+    pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod.getattr(intern!(py, "Field"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?]),
+        )?;
+        Ok(core_obj.to_object(py))
     }
 }
 
@@ -46,14 +56,10 @@ impl PyField {
     ///
     /// For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this array
     /// into a pyarrow field, without copying memory.
-    fn __arrow_c_schema__(&self) -> PyArrowResult<PyObject> {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<&'py PyCapsule> {
         let ffi_schema = FFI_ArrowSchema::try_from(self.0.as_ref())?;
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
-
-        Python::with_gil(|py| {
-            let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-            Ok(schema_capsule.to_object(py))
-        })
+        Ok(PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?)
     }
 
     pub fn __eq__(&self, other: &PyField) -> bool {

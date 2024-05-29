@@ -1,12 +1,13 @@
 use std::ffi::CString;
-use std::sync::Arc;
 
 use arrow_array::{Array, ArrayRef};
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyType};
+use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+use crate::error::PyArrowResult;
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
@@ -17,17 +18,36 @@ use crate::interop::numpy::to_numpy::chunked_to_numpy;
 // their metadata.
 #[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
-    chunks: Vec<Arc<dyn Array>>,
+    chunks: Vec<ArrayRef>,
     field: FieldRef,
 }
 
 impl PyChunkedArray {
-    pub fn new(chunks: Vec<Arc<dyn Array>>, field: FieldRef) -> Self {
+    pub fn new(chunks: Vec<ArrayRef>, field: FieldRef) -> Self {
         Self { chunks, field }
+    }
+
+    pub fn chunks(&self) -> &[ArrayRef] {
+        &self.chunks
+    }
+
+    pub fn field(&self) -> &FieldRef {
+        &self.field
     }
 
     pub fn into_inner(self) -> (Vec<ArrayRef>, FieldRef) {
         (self.chunks, self.field)
+    }
+
+    pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod
+            .getattr(intern!(py, "ChunkedArray"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?]),
+            )?;
+        Ok(core_obj.to_object(py))
     }
 }
 
@@ -53,18 +73,18 @@ impl PyChunkedArray {
     /// [`pyarrow.chunked_array()`][pyarrow.chunked_array] to convert this array into a
     /// pyarrow array, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__(&self, requested_schema: Option<PyObject>) -> PyResult<PyObject> {
+    fn __arrow_c_stream__<'py>(
+        &'py self,
+        py: Python<'py>,
+        requested_schema: Option<PyObject>,
+    ) -> PyResult<&'py PyCapsule> {
         let field = self.field.clone();
         let chunks = self.chunks.clone();
 
         let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
         let ffi_stream = new_stream(array_reader);
         let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-
-        Python::with_gil(|py| {
-            let stream_capsule = PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?;
-            Ok(stream_capsule.to_object(py))
-        })
+        PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))
     }
 
     pub fn __eq__(&self, other: &PyChunkedArray) -> bool {

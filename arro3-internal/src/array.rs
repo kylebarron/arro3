@@ -23,6 +23,18 @@ impl PyArray {
         Self { array, field }
     }
 
+    pub fn array(&self) -> &ArrayRef {
+        &self.array
+    }
+
+    pub fn field(&self) -> &FieldRef {
+        &self.field
+    }
+
+    pub fn into_inner(self) -> (ArrayRef, FieldRef) {
+        (self.array, self.field)
+    }
+
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(

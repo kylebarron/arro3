@@ -3,8 +3,9 @@ use std::ffi::CString;
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::RecordBatchReader;
 use pyo3::exceptions::{PyIOError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyType};
+use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
@@ -21,6 +22,17 @@ impl PyRecordBatchReader {
             .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
         Ok(stream)
     }
+
+    pub fn to_python(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod
+            .getattr(intern!(py, "RecordBatchReader"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?]),
+            )?;
+        Ok(core_obj.to_object(py))
+    }
 }
 
 #[pymethods]
@@ -32,10 +44,12 @@ impl PyRecordBatchReader {
     ///
     /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
     /// into a pyarrow table, without copying memory.
-    fn __arrow_c_stream__(
-        &mut self,
-        _requested_schema: Option<PyObject>,
-    ) -> PyArrowResult<PyObject> {
+    #[allow(unused_variables)]
+    fn __arrow_c_stream__<'py>(
+        &'py mut self,
+        py: Python<'py>,
+        requested_schema: Option<PyObject>,
+    ) -> PyResult<&'py PyCapsule> {
         let reader = self
             .0
             .take()
@@ -43,11 +57,7 @@ impl PyRecordBatchReader {
 
         let ffi_stream = FFI_ArrowArrayStream::new(reader);
         let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-
-        Python::with_gil(|py| {
-            let stream_capsule = PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?;
-            Ok(stream_capsule.to_object(py))
-        })
+        PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))
     }
 
     #[classmethod]
