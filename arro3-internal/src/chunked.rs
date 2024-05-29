@@ -1,7 +1,7 @@
 use std::ffi::CString;
 use std::sync::Arc;
 
-use arrow_array::Array;
+use arrow_array::{Array, ArrayRef};
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
@@ -24,6 +24,10 @@ pub struct PyChunkedArray {
 impl PyChunkedArray {
     pub fn new(chunks: Vec<Arc<dyn Array>>, field: FieldRef) -> Self {
         Self { chunks, field }
+    }
+
+    pub fn into_inner(self) -> (Vec<ArrayRef>, FieldRef) {
+        (self.chunks, self.field)
     }
 }
 
