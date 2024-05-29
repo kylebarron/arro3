@@ -1,39 +1,17 @@
-use std::sync::Arc;
-
-use crate::ffi::from_python::utils::import_arrow_c_array;
+use crate::ffi::from_python::utils::call_arrow_c_array;
 use crate::record_batch::PyRecordBatch;
-use arrow::array::AsArray;
-use arrow::datatypes::{DataType, SchemaBuilder};
-use arrow_array::Array;
-use arrow_array::RecordBatch;
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::{PyAny, PyResult};
 
 impl<'a> FromPyObject<'a> for PyRecordBatch {
     fn extract(ob: &'a PyAny) -> PyResult<Self> {
-        let (array, field) = import_arrow_c_array(ob)?;
-        match field.data_type() {
-            DataType::Struct(fields) => {
-                let struct_array = array.as_struct();
-                let schema = SchemaBuilder::from(fields)
-                    .finish()
-                    .with_metadata(field.metadata().clone());
-                assert_eq!(
-                    struct_array.null_count(),
-                    0,
-                    "Cannot convert nullable StructArray to RecordBatch"
-                );
-
-                let columns = struct_array.columns().to_vec();
-                let batch = RecordBatch::try_new(Arc::new(schema), columns)
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
-                Ok(Self::new(batch))
-            }
-            dt => Err(PyValueError::new_err(format!(
-                "Unexpected data type {}",
-                dt
-            ))),
-        }
+        let (schema_capsule, array_capsule) = call_arrow_c_array(ob)?;
+        Python::with_gil(|py| {
+            Self::from_arrow_pycapsule(
+                py.get_type::<PyRecordBatch>(),
+                schema_capsule,
+                array_capsule,
+            )
+        })
     }
 }
