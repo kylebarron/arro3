@@ -4,6 +4,7 @@ use std::sync::Arc;
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::ArrayRef;
 use arrow_schema::FieldRef;
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
@@ -20,6 +21,15 @@ pub struct PyArray {
 impl PyArray {
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
         Self { array, field }
+    }
+
+    pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            self.__arrow_c_array__(py, None)?,
+        )?;
+        Ok(core_obj.to_object(py))
     }
 }
 
