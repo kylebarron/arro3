@@ -11,7 +11,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 
 #[pyclass(module = "arro3.core._rust", name = "Field", subclass)]
-pub struct PyField(FieldRef);
+pub struct PyField(pub(crate) FieldRef);
 
 impl PyField {
     pub fn new(field: FieldRef) -> Self {
