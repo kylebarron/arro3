@@ -39,7 +39,11 @@ impl PyArray {
     /// For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this array
     /// into a pyarrow array, without copying memory.
     #[allow(unused_variables)]
-    pub fn __arrow_c_array__(&self, requested_schema: Option<PyObject>) -> PyArrowResult<PyObject> {
+    pub fn __arrow_c_array__<'py>(
+        &'py self,
+        py: Python<'py>,
+        requested_schema: Option<PyObject>,
+    ) -> PyArrowResult<&'py PyTuple> {
         let field = &self.field;
         let ffi_schema = FFI_ArrowSchema::try_from(field)?;
         let ffi_array = FFI_ArrowArray::new(&self.array.to_data());
@@ -47,12 +51,11 @@ impl PyArray {
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
         let array_capsule_name = CString::new("arrow_array").unwrap();
 
-        Python::with_gil(|py| {
-            let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-            let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
-            let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule]);
-            Ok(tuple.to_object(py))
-        })
+        let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
+        let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
+        let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule]);
+
+        Ok(tuple)
     }
 
     pub fn __eq__(&self, other: &PyArray) -> bool {

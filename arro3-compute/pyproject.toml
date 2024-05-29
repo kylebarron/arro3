@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "arro3-compute"
 requires-python = ">=3.8"
-dependencies = []
+dependencies = ["arro3-core"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
