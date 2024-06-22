@@ -4,6 +4,7 @@ use arrow_array::Array;
 use arrow_schema::DataType;
 use numpy::ToPyArray;
 use pyo3::exceptions::PyValueError;
+use pyo3::types::PyAnyMethods;
 use pyo3::{intern, PyObject, PyResult, Python, ToPyObject};
 
 pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
@@ -17,7 +18,7 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
         ($arrow_type:ty) => {
             arr.as_primitive::<$arrow_type>()
                 .values()
-                .to_pyarray(py)
+                .to_pyarray_bound(py)
                 .to_object(py)
         };
     }
@@ -36,7 +37,7 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
         DataType::Int64 => impl_primitive!(Int64Type),
         DataType::Boolean => {
             let bools = arr.as_boolean().values().iter().collect::<Vec<_>>();
-            bools.to_pyarray(py).to_object(py)
+            bools.to_pyarray_bound(py).to_object(py)
         }
         _ => todo!(),
     };
@@ -49,7 +50,7 @@ pub fn chunked_to_numpy(py: Python, arrs: &[&dyn Array]) -> PyResult<PyObject> {
         .map(|arr| to_numpy(py, *arr))
         .collect::<PyResult<Vec<_>>>()?;
 
-    let numpy_mod = py.import(intern!(py, "numpy"))?;
+    let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
     Ok(numpy_mod
         .call_method1(intern!(py, "concatenate"), (py_arrays,))?
         .to_object(py))

@@ -20,10 +20,10 @@ impl PySchema {
     }
 
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?]),
+            PyTuple::new_bound(py, vec![self.__arrow_c_schema__(py)?]),
         )?;
         Ok(core_obj.to_object(py))
     }
@@ -56,10 +56,10 @@ impl PySchema {
     ///
     /// For example, you can call [`pyarrow.schema()`][pyarrow.schema] to convert this array
     /// into a pyarrow schema, without copying memory.
-    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<&'py PyCapsule> {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let ffi_schema = FFI_ArrowSchema::try_from(self.as_ref())?;
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
-        let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
+        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
         Ok(schema_capsule)
     }
 
@@ -71,13 +71,16 @@ impl PySchema {
     /// Returns:
     ///     Self
     #[classmethod]
-    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
     /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
-    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+    pub fn from_arrow_pycapsule(
+        _cls: &Bound<PyType>,
+        capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
         let schema_ptr = import_schema_pycapsule(capsule)?;
         let schema =
             Schema::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;

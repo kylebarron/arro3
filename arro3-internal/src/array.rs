@@ -36,7 +36,7 @@ impl PyArray {
     }
 
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
@@ -65,7 +65,7 @@ impl PyArray {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<PyObject>,
-    ) -> PyArrowResult<&'py PyTuple> {
+    ) -> PyArrowResult<Bound<PyTuple>> {
         let field = &self.field;
         let ffi_schema = FFI_ArrowSchema::try_from(field)?;
         let ffi_array = FFI_ArrowArray::new(&self.array.to_data());
@@ -73,9 +73,9 @@ impl PyArray {
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
         let array_capsule_name = CString::new("arrow_array").unwrap();
 
-        let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-        let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
-        let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule]);
+        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
+        let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
+        let tuple = PyTuple::new_bound(py, vec![schema_capsule, array_capsule]);
 
         Ok(tuple)
     }
@@ -96,16 +96,16 @@ impl PyArray {
     /// Returns:
     ///     Self
     #[classmethod]
-    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
     /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
-        _cls: &PyType,
-        schema_capsule: &PyCapsule,
-        array_capsule: &PyCapsule,
+        _cls: &Bound<PyType>,
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
         let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
         Ok(Self::new(array, Arc::new(field)))

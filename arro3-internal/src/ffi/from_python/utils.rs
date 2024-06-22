@@ -8,7 +8,7 @@ use pyo3::types::{PyCapsule, PyTuple};
 use pyo3::{PyAny, PyResult};
 
 /// Validate PyCapsule has provided name
-pub fn validate_pycapsule_name(capsule: &PyCapsule, expected_name: &str) -> PyResult<()> {
+pub fn validate_pycapsule_name(capsule: &Bound<PyCapsule>, expected_name: &str) -> PyResult<()> {
     let capsule_name = capsule.name()?;
     if let Some(capsule_name) = capsule_name {
         let capsule_name = capsule_name.to_str()?;
@@ -28,19 +28,19 @@ pub fn validate_pycapsule_name(capsule: &PyCapsule, expected_name: &str) -> PyRe
 }
 
 /// Import `__arrow_c_schema__` across Python boundary
-pub(crate) fn call_arrow_c_schema(ob: &PyAny) -> PyResult<&PyCapsule> {
+pub(crate) fn call_arrow_c_schema<'py>(ob: &'py Bound<PyAny>) -> PyResult<Bound<'py, PyCapsule>> {
     if !ob.hasattr("__arrow_c_schema__")? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_schema__",
         ));
     }
 
-    Ok(PyTryInto::try_into(
-        ob.getattr("__arrow_c_schema__")?.call0()?,
-    )?)
+    Ok(ob.getattr("__arrow_c_schema__")?.call0()?.downcast_into()?)
 }
 
-pub(crate) fn import_schema_pycapsule(capsule: &PyCapsule) -> PyResult<&FFI_ArrowSchema> {
+pub(crate) fn import_schema_pycapsule<'py>(
+    capsule: &'py Bound<PyCapsule>,
+) -> PyResult<&'py FFI_ArrowSchema> {
     validate_pycapsule_name(capsule, "arrow_schema")?;
 
     let schema_ptr = unsafe { capsule.reference::<FFI_ArrowSchema>() };
@@ -48,7 +48,9 @@ pub(crate) fn import_schema_pycapsule(capsule: &PyCapsule) -> PyResult<&FFI_Arro
 }
 
 /// Import `__arrow_c_array__` across Python boundary
-pub(crate) fn call_arrow_c_array(ob: &PyAny) -> PyResult<(&PyCapsule, &PyCapsule)> {
+pub(crate) fn call_arrow_c_array<'py>(
+    ob: &'py Bound<PyAny>,
+) -> PyResult<(Bound<'py, PyCapsule>, Bound<'py, PyCapsule>)> {
     if !ob.hasattr("__arrow_c_array__")? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_array__",
@@ -62,14 +64,14 @@ pub(crate) fn call_arrow_c_array(ob: &PyAny) -> PyResult<(&PyCapsule, &PyCapsule
         ));
     }
 
-    let schema_capsule = PyTryInto::try_into(tuple.get_item(0)?)?;
-    let array_capsule = PyTryInto::try_into(tuple.get_item(1)?)?;
+    let schema_capsule = tuple.get_item(0)?.downcast_into()?;
+    let array_capsule = tuple.get_item(1)?.downcast_into()?;
     Ok((schema_capsule, array_capsule))
 }
 
 pub(crate) fn import_array_pycapsules(
-    schema_capsule: &PyCapsule,
-    array_capsule: &PyCapsule,
+    schema_capsule: &Bound<PyCapsule>,
+    array_capsule: &Bound<PyCapsule>,
 ) -> PyResult<(ArrayRef, Field)> {
     validate_pycapsule_name(schema_capsule, "arrow_schema")?;
     validate_pycapsule_name(array_capsule, "arrow_array")?;
@@ -84,18 +86,20 @@ pub(crate) fn import_array_pycapsules(
 }
 
 /// Import `__arrow_c_stream__` across Python boundary.
-pub(crate) fn call_arrow_c_stream(ob: &PyAny) -> PyResult<&PyCapsule> {
+pub(crate) fn call_arrow_c_stream<'py>(ob: &'py Bound<PyAny>) -> PyResult<Bound<'py, PyCapsule>> {
     if !ob.hasattr("__arrow_c_stream__")? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_stream__",
         ));
     }
 
-    let capsule = PyTryInto::try_into(ob.getattr("__arrow_c_stream__")?.call0()?)?;
+    let capsule = ob.getattr("__arrow_c_stream__")?.call0()?.downcast_into()?;
     Ok(capsule)
 }
 
-pub(crate) fn import_stream_pycapsule(capsule: &PyCapsule) -> PyResult<FFI_ArrowArrayStream> {
+pub(crate) fn import_stream_pycapsule(
+    capsule: &Bound<PyCapsule>,
+) -> PyResult<FFI_ArrowArrayStream> {
     validate_pycapsule_name(capsule, "arrow_array_stream")?;
 
     let stream = unsafe { FFI_ArrowArrayStream::from_raw(capsule.pointer() as _) };
