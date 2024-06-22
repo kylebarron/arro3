@@ -23,7 +23,7 @@ impl PyRecordBatch {
     }
 
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatch"))?
             .call_method1(
@@ -66,7 +66,7 @@ impl PyRecordBatch {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<PyObject>,
-    ) -> PyArrowResult<&'py PyTuple> {
+    ) -> PyArrowResult<Bound<'py, PyTuple>> {
         let schema = self.0.schema();
         let array = StructArray::from(self.0.clone());
 
@@ -75,9 +75,9 @@ impl PyRecordBatch {
 
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
         let array_capsule_name = CString::new("arrow_array").unwrap();
-        let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-        let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
-        Ok(PyTuple::new(py, vec![schema_capsule, array_capsule]))
+        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
+        let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
+        Ok(PyTuple::new_bound(py, vec![schema_capsule, array_capsule]))
     }
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {
@@ -92,16 +92,16 @@ impl PyRecordBatch {
     /// Returns:
     ///     Self
     #[classmethod]
-    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
     /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
-        _cls: &PyType,
-        schema_capsule: &PyCapsule,
-        array_capsule: &PyCapsule,
+        _cls: &Bound<PyType>,
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
         let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
         match field.data_type() {

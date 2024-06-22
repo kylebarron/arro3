@@ -40,12 +40,12 @@ impl PyChunkedArray {
     }
 
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "ChunkedArray"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?]),
+                PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
             )?;
         Ok(core_obj.to_object(py))
     }
@@ -77,14 +77,14 @@ impl PyChunkedArray {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<PyObject>,
-    ) -> PyResult<&'py PyCapsule> {
+    ) -> PyResult<Bound<'py, PyCapsule>> {
         let field = self.field.clone();
         let chunks = self.chunks.clone();
 
         let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
         let ffi_stream = new_stream(array_reader);
         let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-        PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))
+        PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
     }
 
     pub fn __eq__(&self, other: &PyChunkedArray) -> bool {
@@ -101,13 +101,16 @@ impl PyChunkedArray {
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
     /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
-    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+    pub fn from_arrow_pycapsule(
+        _cls: &Bound<PyType>,
+        capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
 
         let stream_reader = ArrowArrayStreamReader::try_new(stream)

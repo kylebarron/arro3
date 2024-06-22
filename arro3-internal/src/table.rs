@@ -34,10 +34,10 @@ impl PyTable {
     }
 
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?]),
+            PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
         )?;
         Ok(core_obj.to_object(py))
     }
@@ -57,7 +57,7 @@ impl PyTable {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<PyObject>,
-    ) -> PyResult<&'py PyCapsule> {
+    ) -> PyResult<Bound<'py, PyCapsule>> {
         let batches = self.batches.clone();
 
         let record_batch_reader = Box::new(RecordBatchIterator::new(
@@ -67,7 +67,7 @@ impl PyTable {
         let ffi_stream = FFI_ArrowArrayStream::new(record_batch_reader);
 
         let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-        PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))
+        PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
     }
 
     pub fn __eq__(&self, other: &PyTable) -> bool {
@@ -86,13 +86,16 @@ impl PyTable {
     /// Returns:
     ///     Self
     #[classmethod]
-    pub fn from_arrow(_cls: &PyType, input: &PyAny) -> PyResult<Self> {
+    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
     /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
-    pub fn from_arrow_pycapsule(_cls: &PyType, capsule: &PyCapsule) -> PyResult<Self> {
+    pub fn from_arrow_pycapsule(
+        _cls: &Bound<PyType>,
+        capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
         let stream_reader = ArrowRecordBatchStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
