@@ -12,10 +12,10 @@ categories = []
 rust-version = "1.75"
 
 [dependencies]
-arrow-array = "51"
-arrow-buffer = "51"
-arrow-schema = "51"
-arrow = { version = "51", features = ["ffi"] }
+arrow-array = "52"
+arrow-buffer = "52"
+arrow-schema = "52"
+arrow = { version = "52", features = ["ffi"] }
 pyo3 = { version = "0.20.0", features = ["abi3-py38"] }
 numpy = { version = "0.20", features = ["half"] }
 thiserror = "1"
