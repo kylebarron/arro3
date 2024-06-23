@@ -1,0 +1,12 @@
+[workspace]
+members = ["arro3-compute", "arro3-core", "arro3-internal"]
+
+[workspace.dependencies]
+arrow = { version = "52", features = ["ffi"] }
+arrow-array = "52"
+arrow-buffer = "52"
+arrow-schema = "52"
+arrow-select = "52"
+numpy = "0.21"
+pyo3 = "0.21"
+thiserror = "1"
