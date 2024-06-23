@@ -34,9 +34,9 @@ jobs:
             target: s390x
           - runner: ubuntu-latest
             target: ppc64le
-        cargo_path:
-          - arro3-core/Cargo.toml
-          - arro3-compute/Cargo.toml
+        module:
+          - arro3-core
+          - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,13 +46,13 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --manifest-path ${{ matrix.cargo_path }}
+          args: --release --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: auto
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.platform.target }}-${{ matrix.cargo_path }}
+          name: wheels-linux-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
   windows:
@@ -64,9 +64,9 @@ jobs:
             target: x64
           - runner: windows-latest
             target: x86
-        cargo_path:
-          - arro3-core/Cargo.toml
-          - arro3-compute/Cargo.toml
+        module:
+          - arro3-core
+          - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -77,12 +77,12 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --manifest-path ${{ matrix.cargo_path }}
+          args: --release --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.cargo_path }}
+          name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
   macos:
@@ -94,9 +94,9 @@ jobs:
             target: x86_64
           - runner: macos-14
             target: aarch64
-        cargo_path:
-          - arro3-core/Cargo.toml
-          - arro3-compute/Cargo.toml
+        module:
+          - arro3-core
+          - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -106,32 +106,32 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --manifest-path ${{ matrix.cargo_path }}
+          args: --release --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.cargo_path }}
+          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
   sdist:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cargo_path:
-          - arro3-core/Cargo.toml
-          - arro3-compute/Cargo.toml
+        module:
+          - arro3-core
+          - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out dist --manifest-path ${{ matrix.cargo_path }}
+          args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-sdist-${{ matrix.cargo_path }}
+          name: wheels-sdist-${{ matrix.module }}
           path: dist
 
   # release:
