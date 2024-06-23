@@ -1,0 +1,37 @@
+name: Rust
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Cargo fmt
+        run: cargo fmt --all -- --check
+
+      - name: "clippy --all"
+        run: cargo clippy --all --all-features --tests -- -D warnings
+
+      - name: "cargo check"
+        run: cargo check --all --all-features
+
+      - name: "cargo test"
+        run: |
+          cargo test --all
+          cargo test --all --all-features
