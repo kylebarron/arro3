@@ -18,4 +18,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 arro3-internal = { path = "../arro3-internal" }
-pyo3 = { version = "0.21.0", features = ["abi3-py38"] }
+pyo3 = { workspace = true, features = ["abi3-py38"] }
