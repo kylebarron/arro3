@@ -1,5 +1,6 @@
 [workspace]
 members = ["arro3-compute", "arro3-core", "arro3-internal"]
+resolver = "2"
 
 [workspace.dependencies]
 arrow = { version = "52", features = ["ffi"] }
