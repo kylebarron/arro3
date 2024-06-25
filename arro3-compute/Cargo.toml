@@ -1,6 +1,6 @@
 [package]
 name = "arro3-compute"
-version = "0.1.0"
+version = "0.1.0-beta.1"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Rust-based compute kernels for Arrow in Python."
@@ -24,4 +24,4 @@ arrow-select = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
 pyo3 = { workspace = true, features = ["abi3-py38"] }
 thiserror = { workspace = true }
-arro3-internal = { path = "../arro3-internal" }
+pyo3-arrow = { path = "../pyo3-arrow" }
