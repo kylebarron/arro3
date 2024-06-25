@@ -1,5 +1,5 @@
 [workspace]
-members = ["arro3-compute", "arro3-core", "arro3-internal"]
+members = ["arro3-compute", "arro3-core", "pyo3-arrow"]
 resolver = "2"
 
 [workspace.dependencies]

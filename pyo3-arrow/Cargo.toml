@@ -1,5 +1,5 @@
 [package]
-name = "arro3-internal"
+name = "pyo3-arrow"
 version = "0.1.0"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"

@@ -1,7 +1,7 @@
-use arro3_internal::array::PyArray;
-use arro3_internal::chunked::PyChunkedArray;
-use arro3_internal::error::PyArrowResult;
 use pyo3::prelude::*;
+use pyo3_arrow::array::PyArray;
+use pyo3_arrow::chunked::PyChunkedArray;
+use pyo3_arrow::error::PyArrowResult;
 
 #[pyfunction]
 pub fn concat(input: PyChunkedArray) -> PyArrowResult<PyObject> {

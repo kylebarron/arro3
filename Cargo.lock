@@ -42,37 +42,24 @@ dependencies = [
 
 [[package]]
 name = "arro3-compute"
-version = "0.1.0"
+version = "0.1.0-beta.1"
 dependencies = [
- "arro3-internal",
  "arrow",
  "arrow-array",
  "arrow-buffer",
  "arrow-schema",
  "arrow-select",
  "pyo3",
+ "pyo3-arrow",
  "thiserror",
 ]
 
 [[package]]
 name = "arro3-core"
-version = "0.1.0"
+version = "0.1.0-beta.1"
 dependencies = [
- "arro3-internal",
  "pyo3",
-]
-
-[[package]]
-name = "arro3-internal"
-version = "0.1.0"
-dependencies = [
- "arrow",
- "arrow-array",
- "arrow-buffer",
- "arrow-schema",
- "numpy",
- "pyo3",
- "thiserror",
+ "pyo3-arrow",
 ]
 
 [[package]]
@@ -805,6 +792,19 @@ dependencies = [
  "pyo3-ffi",
  "pyo3-macros",
  "unindent",
+]
+
+[[package]]
+name = "pyo3-arrow"
+version = "0.1.0"
+dependencies = [
+ "arrow",
+ "arrow-array",
+ "arrow-buffer",
+ "arrow-schema",
+ "numpy",
+ "pyo3",
+ "thiserror",
 ]
 
 [[package]]
