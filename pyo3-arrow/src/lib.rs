@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 pub mod array;
 pub mod chunked;
 pub mod error;

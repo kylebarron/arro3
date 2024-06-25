@@ -10,7 +10,9 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 
-/// A wrapper around an [arrow_array::RecordBatchReader]
+/// A Python-facing Arrow record batch reader.
+///
+/// This is a wrapper around a [RecordBatchReader].
 #[pyclass(module = "arro3.core._rust", name = "RecordBatchReader", subclass)]
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
@@ -23,6 +25,7 @@ impl PyRecordBatchReader {
         Ok(stream)
     }
 
+    /// Convert this to a Python `arro3.core.RecordBatchReader`.
     pub fn to_python(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod

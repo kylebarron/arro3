@@ -12,6 +12,9 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::interop::numpy::to_numpy::to_numpy;
 
+/// A Python-facing Arrow array.
+///
+/// This is a wrapper around an [ArrayRef] and a [FieldRef].
 #[pyclass(module = "arro3.core._rust", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -19,22 +22,29 @@ pub struct PyArray {
 }
 
 impl PyArray {
+    /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
         Self { array, field }
     }
 
+    /// Access the underlying [ArrayRef].
     pub fn array(&self) -> &ArrayRef {
         &self.array
     }
 
+    /// Access the underlying [FieldRef].
     pub fn field(&self) -> &FieldRef {
         &self.field
     }
 
+    /// Consume self to access the underlying [ArrayRef] and [FieldRef].
     pub fn into_inner(self) -> (ArrayRef, FieldRef) {
         (self.array, self.field)
     }
 
+    /// Export to a Python Array.
+    ///
+    /// This requires that you depend on arro3-core from your Python package.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(

@@ -13,6 +13,9 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 
+/// A Python-facing Arrow table.
+///
+/// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
 #[pyclass(module = "arro3.core._rust", name = "Table", subclass)]
 #[derive(Debug)]
 pub struct PyTable {
@@ -33,6 +36,7 @@ impl PyTable {
         (self.batches, self.schema)
     }
 
+    /// Convert this to a Python `arro3.core.Table`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
