@@ -2,7 +2,7 @@
 //! of any data type that is not expected to represent record batches.
 //!
 //! This is derived from
-//! https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs
+//! <https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs>
 
 use std::ffi::CStr;
 use std::sync::Arc;
