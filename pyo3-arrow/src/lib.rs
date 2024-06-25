@@ -1,12 +1,20 @@
 #![doc = include_str!("../README.md")]
 
-pub mod array;
-pub mod chunked;
+mod array;
+mod chunked;
 pub mod error;
-pub mod ffi;
-pub mod field;
-pub mod interop;
-pub mod record_batch;
-pub mod record_batch_reader;
-pub mod schema;
-pub mod table;
+mod ffi;
+mod field;
+mod interop;
+mod record_batch;
+mod record_batch_reader;
+mod schema;
+mod table;
+
+pub use array::PyArray;
+pub use chunked::PyChunkedArray;
+pub use field::PyField;
+pub use record_batch::PyRecordBatch;
+pub use record_batch_reader::PyRecordBatchReader;
+pub use schema::PySchema;
+pub use table::PyTable;

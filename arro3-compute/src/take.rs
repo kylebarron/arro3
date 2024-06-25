@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
-use pyo3_arrow::array::PyArray;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::PyArray;
 
 #[pyfunction]
 pub fn take(values: PyArray, indices: PyArray) -> PyArrowResult<PyObject> {

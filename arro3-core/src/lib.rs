@@ -12,13 +12,13 @@ fn ___version() -> &'static str {
 fn _rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(___version))?;
 
-    m.add_class::<pyo3_arrow::array::PyArray>()?;
-    m.add_class::<pyo3_arrow::chunked::PyChunkedArray>()?;
-    m.add_class::<pyo3_arrow::field::PyField>()?;
-    m.add_class::<pyo3_arrow::record_batch::PyRecordBatch>()?;
-    m.add_class::<pyo3_arrow::record_batch_reader::PyRecordBatchReader>()?;
-    m.add_class::<pyo3_arrow::schema::PySchema>()?;
-    m.add_class::<pyo3_arrow::table::PyTable>()?;
+    m.add_class::<pyo3_arrow::PyArray>()?;
+    m.add_class::<pyo3_arrow::PyChunkedArray>()?;
+    m.add_class::<pyo3_arrow::PyField>()?;
+    m.add_class::<pyo3_arrow::PyRecordBatch>()?;
+    m.add_class::<pyo3_arrow::PyRecordBatchReader>()?;
+    m.add_class::<pyo3_arrow::PySchema>()?;
+    m.add_class::<pyo3_arrow::PyTable>()?;
 
     Ok(())
 }
