@@ -1,7 +1,7 @@
 //! A custom implementation of ffi_stream to export chunked arrays, not RecordBatches
 //!
 //! This is derived from
-//! https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs
+//! <https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs>
 
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use std::ptr::addr_of;

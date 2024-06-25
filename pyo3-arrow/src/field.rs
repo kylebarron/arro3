@@ -11,6 +11,9 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 
+/// A Python-facing Arrow field.
+///
+/// This is a wrapper around a [FieldRef].
 #[pyclass(module = "arro3.core._rust", name = "Field", subclass)]
 pub struct PyField(FieldRef);
 
@@ -19,6 +22,7 @@ impl PyField {
         Self(field)
     }
 
+    /// Convert this to a Python `arro3.core.Field`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Field"))?.call_method1(

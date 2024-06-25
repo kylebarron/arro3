@@ -14,8 +14,9 @@ use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::ffi_stream::new_stream;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 
-// Note: we include the field so that we can round-trip extension types, which would otherwise lose
-// their metadata.
+/// A Python-facing Arrow chunked array.
+///
+/// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
@@ -39,6 +40,7 @@ impl PyChunkedArray {
         (self.chunks, self.field)
     }
 
+    /// Convert this to a Python `arro3.core.ChunkedArray`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
