@@ -9,6 +9,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
+use crate::PyTable;
 
 /// A Python-facing Arrow record batch reader.
 ///
@@ -17,6 +18,14 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
 impl PyRecordBatchReader {
+    /// Returns `true` if this reader has already been consumed.
+    pub fn closed(&self) -> bool {
+        self.0.is_none()
+    }
+
+    /// Consume this reader and convert into a [RecordBatchReader].
+    ///
+    /// The reader can only be consumed once. Calling `into_reader`
     pub fn into_reader(mut self) -> PyArrowResult<Box<dyn RecordBatchReader + Send>> {
         let stream = self
             .0
@@ -25,7 +34,21 @@ impl PyRecordBatchReader {
         Ok(stream)
     }
 
-    /// Convert this to a Python `arro3.core.RecordBatchReader`.
+    /// Consume this reader and create a [PyTable] object
+    pub fn into_table(mut self) -> PyArrowResult<PyTable> {
+        let stream = self
+            .0
+            .take()
+            .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
+        let schema = stream.schema();
+        let mut batches = vec![];
+        for batch in stream {
+            batches.push(batch?);
+        }
+        Ok(PyTable::new(schema, batches))
+    }
+
+    /// Export this to a Python `arro3.core.RecordBatchReader`.
     pub fn to_python(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
@@ -63,12 +86,16 @@ impl PyRecordBatchReader {
         PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
     }
 
+    /// Construct this from an existing Arrow object.
+    ///
+    /// It can be called on anything that exports the Arrow stream interface
+    /// (`__arrow_c_stream__`), such as a `Table` or `RecordBatchReader`.
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
+    /// Construct this object from a bare Arrow PyCapsule.
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,

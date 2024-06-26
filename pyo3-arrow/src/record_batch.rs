@@ -25,7 +25,7 @@ impl PyRecordBatch {
         Self(batch)
     }
 
-    /// Convert this to a Python `arro3.core.RecordBatch`.
+    /// Export this to a Python `arro3.core.RecordBatch`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
@@ -88,7 +88,10 @@ impl PyRecordBatch {
         self.0 == other.0
     }
 
-    /// Construct this object from existing Arrow data
+    /// Construct this from an existing Arrow RecordBatch.
+    ///
+    /// It can be called on anything that exports the Arrow data interface
+    /// (`__arrow_c_array__`) and returns a StructArray..
     ///
     /// Args:
     ///     input: Arrow array to use for constructing this object

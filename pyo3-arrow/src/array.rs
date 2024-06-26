@@ -98,7 +98,10 @@ impl PyArray {
         self.array.len()
     }
 
-    /// Construct this object from existing Arrow data
+    /// Construct this object from an existing Arrow object.
+    ///
+    /// It can be called on anything that exports the Arrow data interface
+    /// (`__arrow_c_array__`).
     ///
     /// Args:
     ///     input: Arrow array to use for constructing this object

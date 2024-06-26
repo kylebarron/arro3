@@ -22,7 +22,7 @@ impl PyField {
         Self(field)
     }
 
-    /// Convert this to a Python `arro3.core.Field`.
+    /// Export this to a Python `arro3.core.Field`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Field"))?.call_method1(
@@ -74,6 +74,10 @@ impl PyField {
         self.0 == other.0
     }
 
+    /// Construct this from an existing Arrow object.
+    ///
+    /// It can be called on anything that exports the Arrow schema interface
+    /// (`__arrow_c_schema__`).
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()

@@ -40,7 +40,7 @@ impl PyChunkedArray {
         (self.chunks, self.field)
     }
 
-    /// Convert this to a Python `arro3.core.ChunkedArray`.
+    /// Export this to a Python `arro3.core.ChunkedArray`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
@@ -102,6 +102,10 @@ impl PyChunkedArray {
         self.__array__(py)
     }
 
+    /// Construct this from an existing Arrow object.
+    ///
+    /// It can be called on anything that exports the Arrow stream interface
+    /// (`__arrow_c_stream__`). All batches will be materialized in memory.
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()

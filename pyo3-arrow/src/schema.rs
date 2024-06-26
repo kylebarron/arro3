@@ -22,7 +22,7 @@ impl PySchema {
         Self(schema)
     }
 
-    /// Convert this to a Python `arro3.core.Schema`.
+    /// Export this to a Python `arro3.core.Schema`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
@@ -67,7 +67,10 @@ impl PySchema {
         Ok(schema_capsule)
     }
 
-    /// Construct this object from existing Arrow data
+    /// Construct this object from an existing Arrow object
+    ///
+    /// It can be called on anything that exports the Arrow data interface
+    /// (`__arrow_c_array__`) and returns a struct field.
     ///
     /// Args:
     ///     input: Arrow array to use for constructing this object
