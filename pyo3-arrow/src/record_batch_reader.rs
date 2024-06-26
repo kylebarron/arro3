@@ -2,6 +2,7 @@ use std::ffi::CString;
 
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::RecordBatchReader;
+use arrow_schema::SchemaRef;
 use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -18,6 +19,10 @@ use crate::PyTable;
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
 impl PyRecordBatchReader {
+    pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
+        Self(Some(reader))
+    }
+
     /// Returns `true` if this reader has already been consumed.
     pub fn closed(&self) -> bool {
         self.0.is_none()
@@ -46,6 +51,17 @@ impl PyRecordBatchReader {
             batches.push(batch?);
         }
         Ok(PyTable::new(schema, batches))
+    }
+
+    /// Access the [SchemaRef] of this RecordBatchReader.
+    ///
+    /// If the stream has already been consumed, this method will error.
+    pub fn schema_ref(&self) -> PyArrowResult<SchemaRef> {
+        let stream = self
+            .0
+            .as_ref()
+            .ok_or(PyIOError::new_err("Stream already closed."))?;
+        Ok(stream.schema())
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
