@@ -36,7 +36,7 @@ impl PyTable {
         (self.batches, self.schema)
     }
 
-    /// Convert this to a Python `arro3.core.Table`.
+    /// Export this to a Python `arro3.core.Table`.
     pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
@@ -82,7 +82,12 @@ impl PyTable {
         self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
     }
 
-    /// Construct this object from existing Arrow data
+    /// Construct this object from an existing Arrow object.
+    ///
+    /// It can be called on anything that exports the Arrow stream interface
+    /// (`__arrow_c_stream__`) and yields a StructArray for each item. This Table will materialize
+    /// all items from the iterator in memory at once. Use RecordBatchReader if you don't wish to
+    /// materialize all batches in memory at once.
     ///
     /// Args:
     ///     input: Arrow array to use for constructing this object

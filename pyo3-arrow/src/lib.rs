@@ -5,6 +5,7 @@ mod chunked;
 pub mod error;
 mod ffi;
 mod field;
+pub mod input;
 mod interop;
 mod record_batch;
 mod record_batch_reader;
