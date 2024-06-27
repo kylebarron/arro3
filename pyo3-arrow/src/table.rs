@@ -37,13 +37,24 @@ impl PyTable {
     }
 
     /// Export this to a Python `arro3.core.Table`.
-    pub fn to_python(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
         )?;
         Ok(core_obj.to_object(py))
+    }
+
+    /// Export to a pyarrow.Table
+    ///
+    /// Requires pyarrow >=14
+    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_obj = pyarrow_mod
+            .getattr(intern!(py, "table"))?
+            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
+        Ok(pyarrow_obj.to_object(py))
     }
 }
 
