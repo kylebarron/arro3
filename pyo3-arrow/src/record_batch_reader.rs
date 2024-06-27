@@ -65,7 +65,7 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
-    pub fn to_python(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
@@ -74,6 +74,19 @@ impl PyRecordBatchReader {
                 PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
             )?;
         Ok(core_obj.to_object(py))
+    }
+
+    /// Export to a pyarrow.RecordBatchReader
+    ///
+    /// Requires pyarrow >=15
+    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let record_batch_reader_class = pyarrow_mod.getattr(intern!(py, "RecordBatchReader"))?;
+        let pyarrow_obj = record_batch_reader_class.call_method1(
+            intern!(py, "from_stream"),
+            PyTuple::new_bound(py, vec![self.into_py(py)]),
+        )?;
+        Ok(pyarrow_obj.to_object(py))
     }
 }
 
