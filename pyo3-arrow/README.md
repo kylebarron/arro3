@@ -96,35 +96,51 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 
 #### Using `arro3.core`
 
-`arro3.core` is a very minimal Python Arrow implementation, designed to be lightweight (<1MB) and relatively stable. In comparison, pyarrow is on the order of ~100MB.
+[`arro3.core`](https://github.com/kylebarron/arro3) is a very minimal Python Arrow implementation, designed to be lightweight (<1MB) and relatively stable. In comparison, pyarrow is on the order of ~100MB.
 
 You must depend on the `arro3-core` Python package; then you can use the `to_arro3` method of each exported Arrow object to pass the data into an `arro3.core` class.
 
 | Rust struct           | arro3 class                    |
 | --------------------- | ------------------------------ |
-| `PyArray`             | `arro3.core.Array`             |
-| `PyChunkedArray`      | `arro3.core.ChunkedArray`      |
 | `PyField`             | `arro3.core.Field`             |
 | `PySchema`            | `arro3.core.Schema`            |
-| `PyTable`             | `arro3.core.Table`             |
+| `PyArray`             | `arro3.core.Array`             |
 | `PyRecordBatch`       | `arro3.core.RecordBatch`       |
+| `PyChunkedArray`      | `arro3.core.ChunkedArray`      |
+| `PyTable`             | `arro3.core.Table`             |
 | `PyRecordBatchReader` | `arro3.core.RecordBatchReader` |
 
 #### Using `pyarrow`
 
-`pyarrow`, the canonical Python Arrow implementation, is a very large dependency. It's roughly 100MB in size on its own, plus 35MB more for its hard depdnency on numpy. However, `numpy` is very likely already in the user environment, and `pyarrow` is quite common as well, so requiring a `pyarrow` dependency may not be a problem.
+[`pyarrow`](https://arrow.apache.org/docs/python/index.html), the canonical Python Arrow implementation, is a very large dependency. It's roughly 100MB in size on its own, plus 35MB more for its hard dependency on numpy. However, `numpy` is very likely already in the user environment, and `pyarrow` is quite common as well, so requiring a `pyarrow` dependency may not be a problem.
 
 In this case, you must depend on `pyarrow` and you can use the `to_pyarrow` method of Python structs to return data to Python. This requires `pyarrow>=14` (`pyarrow>=15` is required to return `PyRecordBatchReader`).
 
 | Rust struct           | pyarrow class               |
 | --------------------- | --------------------------- |
-| `PyArray`             | `pyarrow.Array`             |
-| `PyChunkedArray`      | `pyarrow.ChunkedArray`      |
 | `PyField`             | `pyarrow.Field`             |
 | `PySchema`            | `pyarrow.Schema`            |
-| `PyTable`             | `pyarrow.Table`             |
+| `PyArray`             | `pyarrow.Array`             |
 | `PyRecordBatch`       | `pyarrow.RecordBatch`       |
+| `PyChunkedArray`      | `pyarrow.ChunkedArray`      |
+| `PyTable`             | `pyarrow.Table`             |
 | `PyRecordBatchReader` | `pyarrow.RecordBatchReader` |
+
+#### Using `nanoarrow`
+
+[`nanoarrow`](https://arrow.apache.org/nanoarrow/latest/index.html) is an alternative Python library for working with Arrow data. It's similar in goals to arro3, but is written in C instead of Rust. Additionally, it has a smaller type system than `pyarrow` or `arro3`, with logical arrays and record batches both represented by the `nanoarrow.Array` class.
+
+In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` method of Python structs to return data to Python.
+
+| Rust struct           | nanoarrow class         |
+| --------------------- | ----------------------- |
+| `PyField`             | `nanoarrow.Schema`      |
+| `PySchema`            | `nanoarrow.Schema`      |
+| `PyArray`             | `nanoarrow.Array`       |
+| `PyRecordBatch`       | `nanoarrow.Array`       |
+| `PyChunkedArray`      | `nanoarrow.ArrayStream` |
+| `PyTable`             | `nanoarrow.ArrayStream` |
+| `PyRecordBatchReader` | `nanoarrow.ArrayStream` |
 
 ## Why not use arrow-rs's Python integration?
 

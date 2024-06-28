@@ -10,6 +10,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
+use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 
 /// A Python-facing Arrow field.
 ///
@@ -23,7 +24,7 @@ impl PyField {
     }
 
     /// Export this to a Python `arro3.core.Field`.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Field"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -32,10 +33,15 @@ impl PyField {
         Ok(core_obj.to_object(py))
     }
 
+    /// Export this to a Python `nanoarrow.Schema`.
+    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+        to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
+    }
+
     /// Export to a pyarrow.Field
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "field"))?

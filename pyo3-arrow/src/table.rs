@@ -12,6 +12,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
+use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 
 /// A Python-facing Arrow table.
 ///
@@ -44,6 +45,11 @@ impl PyTable {
             PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
         )?;
         Ok(core_obj.to_object(py))
+    }
+
+    /// Export this to a Python `nanoarrow.ArrayStream`.
+    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+        to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
     /// Export to a pyarrow.Table
