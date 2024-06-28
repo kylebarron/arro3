@@ -50,13 +50,13 @@ output = take(arr, arr)
 output
 # <arro3.core._rust.Array at 0x10787b510>
 pa.array(output)
-<pyarrow.lib.Int64Array object at 0x10aa11000>
-[
-  0,
-  1,
-  2,
-  3
-]
+# <pyarrow.lib.Int64Array object at 0x10aa11000>
+# [
+#   0,
+#   1,
+#   2,
+#   3
+# ]
 ```
 
 In this example, we use pyarrow to create the original array and to view the result, but the use of pyarrow is not required. It does, at least, show how the Arrow PyCapsule Interface makes it seamless to share these Arrow objects between Python Arrow implementations.
