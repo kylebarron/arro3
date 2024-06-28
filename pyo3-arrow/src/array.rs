@@ -2,8 +2,8 @@ use std::ffi::CString;
 use std::sync::Arc;
 
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
-use arrow_array::ArrayRef;
-use arrow_schema::FieldRef;
+use arrow_array::{Array, ArrayRef};
+use arrow_schema::{Field, FieldRef};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -69,6 +69,19 @@ impl PyArray {
             .getattr(intern!(py, "array"))?
             .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
         Ok(pyarrow_obj.to_object(py))
+    }
+}
+
+impl From<ArrayRef> for PyArray {
+    fn from(value: ArrayRef) -> Self {
+        let field = Field::new("", value.data_type().clone(), true);
+        Self::new(value, Arc::new(field))
+    }
+}
+
+impl AsRef<ArrayRef> for PyArray {
+    fn as_ref(&self) -> &ArrayRef {
+        &self.array
     }
 }
 
