@@ -10,6 +10,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
+use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::interop::numpy::to_numpy::to_numpy;
 
 /// A Python-facing Arrow array.
@@ -52,6 +53,11 @@ impl PyArray {
             self.__arrow_c_array__(py, None)?,
         )?;
         Ok(core_obj.to_object(py))
+    }
+
+    /// Export this to a Python `nanoarrow.Array`.
+    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+        to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)
     }
 
     /// Export to a pyarrow.Array

@@ -12,6 +12,7 @@ use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::ffi_stream::new_stream;
+use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 
 /// A Python-facing Arrow chunked array.
@@ -50,6 +51,11 @@ impl PyChunkedArray {
                 PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
             )?;
         Ok(core_obj.to_object(py))
+    }
+
+    /// Export this to a Python `nanoarrow.ArrayStream`.
+    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+        to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
     /// Export to a pyarrow.ChunkedArray
