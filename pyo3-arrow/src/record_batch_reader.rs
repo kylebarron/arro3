@@ -96,6 +96,12 @@ impl PyRecordBatchReader {
     }
 }
 
+impl From<Box<dyn RecordBatchReader + Send>> for PyRecordBatchReader {
+    fn from(value: Box<dyn RecordBatchReader + Send>) -> Self {
+        Self::new(value)
+    }
+}
+
 #[pymethods]
 impl PyRecordBatchReader {
     /// An implementation of the [Arrow PyCapsule

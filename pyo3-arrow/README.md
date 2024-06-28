@@ -18,7 +18,7 @@ We can wrap a function to be used in Python with just a few lines of code.
 
 When you use a struct defined in `pyo3_arrow` as an argument to your function, it will automatically convert user input to a Rust `arrow` object via zero-copy FFI. Then once you're done, call `to_arro3` or `to_pyarrow` to export the data back to Python.
 
-```rs
+```rust
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::PyArray;
@@ -27,18 +27,15 @@ use pyo3_arrow::PyArray;
 /// indexes.
 #[pyfunction]
 pub fn take(py: Python, values: PyArray, indices: PyArray) -> PyArrowResult<PyObject> {
-    let (values_array, values_field) = values.into_inner();
-    let (indices, _) = indices.into_inner();
-
     // We can call py.allow_threads to ensure the GIL is released during our
     // operations
     // This example just wraps `arrow_select::take::take`
     let output_array =
-        py.allow_threads(|| arrow_select::take::take(&values_array, &indices, None))?;
+        py.allow_threads(|| arrow_select::take::take(values.as_ref(), indices.as_ref(), None))?;
 
     // Construct a PyArray and export it to the arro3 Python Arrow
     // implementation
-    PyArray::new(output_array, values_field).to_arro3(py)
+    PyArray::new(output_array, values.field().clone()).to_arro3(py)
 }
 ```
 
@@ -53,13 +50,13 @@ output = take(arr, arr)
 output
 # <arro3.core._rust.Array at 0x10787b510>
 pa.array(output)
-<pyarrow.lib.Int64Array object at 0x10aa11000>
-[
-  0,
-  1,
-  2,
-  3
-]
+# <pyarrow.lib.Int64Array object at 0x10aa11000>
+# [
+#   0,
+#   1,
+#   2,
+#   3
+# ]
 ```
 
 In this example, we use pyarrow to create the original array and to view the result, but the use of pyarrow is not required. It does, at least, show how the Arrow PyCapsule Interface makes it seamless to share these Arrow objects between Python Arrow implementations.

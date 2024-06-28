@@ -1,13 +1,14 @@
 use std::ffi::CString;
+use std::sync::Arc;
 
 use arrow_array::{Array, ArrayRef};
-use arrow_schema::FieldRef;
+use arrow_schema::{ArrowError, Field, FieldRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
-use crate::error::PyArrowResult;
+use crate::error::{PyArrowError, PyArrowResult};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
@@ -67,6 +68,35 @@ impl PyChunkedArray {
             .getattr(intern!(py, "chunked_array"))?
             .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
         Ok(pyarrow_obj.to_object(py))
+    }
+}
+
+impl TryFrom<Vec<ArrayRef>> for PyChunkedArray {
+    type Error = PyArrowError;
+
+    fn try_from(value: Vec<ArrayRef>) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            return Err(ArrowError::SchemaError(
+                "Cannot infer data type from empty Vec<ArrayRef>".to_string(),
+            )
+            .into());
+        }
+
+        if !value
+            .windows(2)
+            .all(|w| w[0].data_type() == w[1].data_type())
+        {
+            return Err(ArrowError::SchemaError("Mismatched data types".to_string()).into());
+        }
+
+        let field = Field::new("", value.first().unwrap().data_type().clone(), true);
+        Ok(Self::new(value, Arc::new(field)))
+    }
+}
+
+impl AsRef<[ArrayRef]> for PyChunkedArray {
+    fn as_ref(&self) -> &[ArrayRef] {
+        &self.chunks
     }
 }
 

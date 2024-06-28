@@ -20,5 +20,8 @@ pyo3 = { workspace = true, features = ["abi3-py38"] }
 numpy = { workspace = true, features = ["half"] }
 thiserror = { workspace = true }
 
+[dev-dependencies]
+arrow-select = { workspace = true }
+
 [lib]
 crate-type = ["rlib"]
