@@ -8,7 +8,7 @@
 [docs.rs_badge]: https://docs.rs/pyo3-arrow/badge.svg
 [docs.rs_link]: https://docs.rs/pyo3-arrow
 
-Lightweight [Apache Arrow](https://arrow.apache.org/docs/index.html) integration for [pyo3](https://pyo3.rs/). Designed to simplify making interoperable, zero-copy Python packages with Rust and Arrow.
+Lightweight [Apache Arrow](https://arrow.apache.org/docs/index.html) integration for [pyo3](https://pyo3.rs/). Designed to make it easier for Rust libraries to add interoperable, zero-copy Python bindings.
 
 Specifically, pyo3-arrow implements zero-copy FFI conversions between Python objects and Rust representations using the `arrow` crate. This relies heavily on the [Arrow PyCapsule Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html) for seamless interoperability across the Python Arrow ecosystem.
 
@@ -144,13 +144,12 @@ In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` 
 
 ## Why not use arrow-rs's Python integration?
 
-arrow-rs has some existing Python integration, but in my opinion it is too tightly connected to pyo3 and pyarrow. pyo3 updates don't always line up with arrow-rs's release cadence, which means it could be a bit of a wait to use the latest pyo3 version with arrow.
+arrow-rs has [some existing Python integration](https://docs.rs/arrow/latest/arrow/pyarrow/index.html), but there are a few reasons why I created `pyo3-arrow`:
 
-pyarrow is a very large dependency and some projects may wish not to use it. Now that the Arrow PyCapsule interface exists, it's possible to have a modular approach, where a very small library contains core Arrow objects, and works seamlessly with other libraries.
-
-arrow-rs's Python FFI support does not support extension types, because it omits field metadata when constructing an `Arc<dyn Array>`. pyo3-arrow gets around this by storing both an `ArrayRef` (`Arc<dyn Array>`) and a `FieldRef` (`Arc<Field>`) in a `PyArray` struct.
-
-arrow-rs also and doesn't have a way to interface with `Table` and `ChunkedArray` constructs.
+- In my opinion arrow-rs is too tightly connected to pyo3 and pyarrow. pyo3 releases don't line up with arrow-rs's release cadence, which means it could be a bit of a wait to use the latest pyo3 version with arrow-rs, especially with arrow-rs [waiting longer to release breaking changes](https://github.com/apache/arrow-rs#release-versioning-and-schedule).
+- arrow-rs only supports returning data as pyarrow classes. pyarrow is a very large dependency and some projects may wish not to use it. Now that the Arrow PyCapsule interface exists, it's possible to have a modular approach, where a very small library contains core Arrow objects, and works seamlessly with other libraries.
+- arrow-rs's Python FFI integration does not support extension types, because it omits field metadata when constructing an `Arc<dyn Array>`. pyo3-arrow gets around this by storing both an `ArrayRef` (`Arc<dyn Array>`) and a `FieldRef` (`Arc<Field>`) in a `PyArray` struct.
+- arrow-rs doesn't have a way to interface with `Table` and `ChunkedArray` constructs. It suggests to use a `RecordBatchReader` instead of a `Table`, but regardless arrow-rs has no ability to work with an Arrow stream of bare arrays that are not record batches.
 
 ## Scope
 
