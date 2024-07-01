@@ -1,7 +1,7 @@
 use std::ffi::CString;
 use std::sync::Arc;
 
-use arrow_array::{Array, ArrayRef};
+use arrow_array::{make_array, Array, ArrayRef};
 use arrow_schema::{ArrowError, Field, FieldRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
@@ -30,6 +30,35 @@ impl PyChunkedArray {
         Self { chunks, field }
     }
 
+    pub fn from_arrays<A: Array>(chunks: &[A]) -> PyArrowResult<Self> {
+        let arrays = chunks
+            .iter()
+            .map(|chunk| make_array(chunk.to_data()))
+            .collect::<Vec<_>>();
+        Self::from_array_refs(arrays)
+    }
+
+    /// Create a new PyChunkedArray from a vec of [ArrayRef]s, inferring their data type
+    /// automatically.
+    pub fn from_array_refs(chunks: Vec<ArrayRef>) -> PyArrowResult<Self> {
+        if chunks.is_empty() {
+            return Err(ArrowError::SchemaError(
+                "Cannot infer data type from empty Vec<ArrayRef>".to_string(),
+            )
+            .into());
+        }
+
+        if !chunks
+            .windows(2)
+            .all(|w| w[0].data_type() == w[1].data_type())
+        {
+            return Err(ArrowError::SchemaError("Mismatched data types".to_string()).into());
+        }
+
+        let field = Field::new("", chunks.first().unwrap().data_type().clone(), true);
+        Ok(Self::new(chunks, Arc::new(field)))
+    }
+
     pub fn chunks(&self) -> &[ArrayRef] {
         &self.chunks
     }
@@ -43,7 +72,7 @@ impl PyChunkedArray {
     }
 
     /// Export this to a Python `arro3.core.ChunkedArray`.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "ChunkedArray"))?
@@ -62,7 +91,7 @@ impl PyChunkedArray {
     /// Export to a pyarrow.ChunkedArray
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "chunked_array"))?
@@ -75,22 +104,7 @@ impl TryFrom<Vec<ArrayRef>> for PyChunkedArray {
     type Error = PyArrowError;
 
     fn try_from(value: Vec<ArrayRef>) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(ArrowError::SchemaError(
-                "Cannot infer data type from empty Vec<ArrayRef>".to_string(),
-            )
-            .into());
-        }
-
-        if !value
-            .windows(2)
-            .all(|w| w[0].data_type() == w[1].data_type())
-        {
-            return Err(ArrowError::SchemaError("Mismatched data types".to_string()).into());
-        }
-
-        let field = Field::new("", value.first().unwrap().data_type().clone(), true);
-        Ok(Self::new(value, Arc::new(field)))
+        Self::from_array_refs(value)
     }
 }
 

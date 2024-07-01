@@ -10,9 +10,9 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
-use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::PySchema;
 
 /// A Python-facing Arrow table.
 ///
@@ -38,7 +38,7 @@ impl PyTable {
     }
 
     /// Export this to a Python `arro3.core.Table`.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -55,7 +55,7 @@ impl PyTable {
     /// Export to a pyarrow.Table
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "table"))?
@@ -134,5 +134,17 @@ impl PyTable {
         }
 
         Ok(Self::new(schema, batches))
+    }
+
+    /// Number of columns in this table.
+    #[getter]
+    fn num_columns(&self) -> usize {
+        self.schema.fields().len()
+    }
+
+    /// Access the schema of this table
+    #[getter]
+    fn schema(&self, py: Python) -> PyResult<PyObject> {
+        PySchema::new(self.schema.clone()).to_arro3(py)
     }
 }

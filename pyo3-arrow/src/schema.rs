@@ -24,7 +24,7 @@ impl PySchema {
     }
 
     /// Export this to a Python `arro3.core.Schema`.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -41,7 +41,7 @@ impl PySchema {
     /// Export to a pyarrow.Schema
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "schema"))?

@@ -11,7 +11,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
-use crate::PyTable;
+use crate::{PySchema, PyTable};
 
 /// A Python-facing Arrow record batch reader.
 ///
@@ -24,15 +24,10 @@ impl PyRecordBatchReader {
         Self(Some(reader))
     }
 
-    /// Returns `true` if this reader has already been consumed.
-    pub fn closed(&self) -> bool {
-        self.0.is_none()
-    }
-
     /// Consume this reader and convert into a [RecordBatchReader].
     ///
     /// The reader can only be consumed once. Calling `into_reader`
-    pub fn into_reader(mut self) -> PyArrowResult<Box<dyn RecordBatchReader + Send>> {
+    pub fn into_reader(mut self) -> PyResult<Box<dyn RecordBatchReader + Send>> {
         let stream = self
             .0
             .take()
@@ -57,7 +52,7 @@ impl PyRecordBatchReader {
     /// Access the [SchemaRef] of this RecordBatchReader.
     ///
     /// If the stream has already been consumed, this method will error.
-    pub fn schema_ref(&self) -> PyArrowResult<SchemaRef> {
+    pub fn schema_ref(&self) -> PyResult<SchemaRef> {
         let stream = self
             .0
             .as_ref()
@@ -66,7 +61,7 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
-    pub fn to_arro3(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
@@ -85,7 +80,7 @@ impl PyRecordBatchReader {
     /// Export to a pyarrow.RecordBatchReader
     ///
     /// Requires pyarrow >=15
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let record_batch_reader_class = pyarrow_mod.getattr(intern!(py, "RecordBatchReader"))?;
         let pyarrow_obj = record_batch_reader_class.call_method1(
@@ -127,6 +122,11 @@ impl PyRecordBatchReader {
         PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
     }
 
+    /// Returns `true` if this reader has already been consumed.
+    pub fn closed(&self) -> bool {
+        self.0.is_none()
+    }
+
     /// Construct this from an existing Arrow object.
     ///
     /// It can be called on anything that exports the Arrow stream interface
@@ -147,5 +147,11 @@ impl PyRecordBatchReader {
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
         Ok(Self(Some(Box::new(stream_reader))))
+    }
+
+    /// Access the schema of this table
+    #[getter]
+    fn schema(&self, py: Python) -> PyResult<PyObject> {
+        PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
     }
 }

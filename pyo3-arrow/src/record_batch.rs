@@ -26,6 +26,10 @@ impl PyRecordBatch {
         Self(batch)
     }
 
+    pub fn into_inner(self) -> RecordBatch {
+        self.0
+    }
+
     /// Export this to a Python `arro3.core.RecordBatch`.
     pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
