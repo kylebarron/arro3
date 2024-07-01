@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::sync::Arc;
 
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
-use arrow_array::{Array, ArrayRef};
+use arrow_array::{make_array, Array, ArrayRef};
 use arrow_schema::{Field, FieldRef};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -26,6 +26,17 @@ impl PyArray {
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
         Self { array, field }
+    }
+
+    pub fn from_array<A: Array>(array: A) -> Self {
+        let array = make_array(array.into_data());
+        Self::from_array_ref(array)
+    }
+
+    /// Create a new PyArray from an [ArrayRef], inferring its data type automatically.
+    pub fn from_array_ref(array: ArrayRef) -> Self {
+        let field = Field::new("", array.data_type().clone(), true);
+        Self::new(array, Arc::new(field))
     }
 
     /// Access the underlying [ArrayRef].
@@ -74,8 +85,7 @@ impl PyArray {
 
 impl From<ArrayRef> for PyArray {
     fn from(value: ArrayRef) -> Self {
-        let field = Field::new("", value.data_type().clone(), true);
-        Self::new(value, Arc::new(field))
+        Self::from_array_ref(value)
     }
 }
 
