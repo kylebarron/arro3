@@ -34,3 +34,7 @@ mkdocs = "^1.4.3"
 mkdocs-material = { version = "^9.5", extras = ["imaging"] }
 mkdocstrings = { version = "^0.25.1", extras = ["python"] }
 mike = "^2"
+
+[tool.poetry.group.dev.dependencies]
+maturin = "^1.6.0"
+
