@@ -3,6 +3,9 @@ repo_name: kylebarron/arro3
 repo_url: https://github.com/kylebarron/arro3
 site_description: A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation.
 site_author: Kyle Barron
+# Note: trailing slash recommended with mike:
+# https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/#publishing-a-new-version
+site_url: https://kylebarron.dev/arro3/core/
 docs_dir: docs
 
 extra:
