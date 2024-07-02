@@ -1,0 +1,82 @@
+name: Publish arro3-core docs
+
+# Only run on new tags starting with `py-core-v`
+on:
+  push:
+    tags:
+      - "py-core-v*"
+  workflow_dispatch:
+
+# https://stackoverflow.com/a/77412363
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  build:
+    name: Deploy Python docs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: arro3-core
+    steps:
+      - uses: actions/checkout@v4
+        # We need to additionally fetch the gh-pages branch for mike deploy
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Set up Python 3.11
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Build python package
+        run: |
+          poetry run maturin develop
+
+      - name: Install root project
+        run: poetry install --no-interaction
+
+      - name: Deploy docs
+        env:
+          GIT_COMMITTER_NAME: CI
+          GIT_COMMITTER_EMAIL: ci-bot@example.com
+        run: |
+          # Get most recent git tag
+          # https://stackoverflow.com/a/7261049
+          # https://stackoverflow.com/a/3867811
+          # We don't use {{github.ref_name}} because if triggered manually, it
+          # will be a branch name instead of a tag version.
+          # Then remove `py-core-` from the tag
+          VERSION=$(git describe --tags --match="py-core-*" --abbrev=0 | cut -c 9-)
+
+          # Only push docs if no letters in git tag after the first character
+          # (usually the git tag will have v as the first character)
+          if echo $VERSION | cut -c 1- | grep -q "[A-Za-z]"; then
+            poetry run mike deploy $VERSION latest --update-aliases --push --deploy-prefix core/
+          fi
