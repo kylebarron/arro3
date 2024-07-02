@@ -36,7 +36,7 @@ jobs:
             target: ppc64le
         module:
           - arro3-core
-          - arro3-compute
+          # - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -66,7 +66,7 @@ jobs:
             target: x86
         module:
           - arro3-core
-          - arro3-compute
+          # - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -96,7 +96,7 @@ jobs:
             target: aarch64
         module:
           - arro3-core
-          - arro3-compute
+          # - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -120,7 +120,7 @@ jobs:
       matrix:
         module:
           - arro3-core
-          - arro3-compute
+          # - arro3-compute
     steps:
       - uses: actions/checkout@v4
       - name: Build sdist
@@ -134,17 +134,25 @@ jobs:
           name: wheels-sdist-${{ matrix.module }}
           path: dist
 
-  # release:
-  #   name: Release
-  #   runs-on: ubuntu-latest
-  #   if: "startsWith(github.ref, 'refs/tags/')"
-  #   needs: [linux, windows, macos, sdist]
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #     - name: Publish to PyPI
-  #       uses: PyO3/maturin-action@v1
-  #       env:
-  #         MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-  #       with:
-  #         command: upload
-  #         args: --non-interactive --skip-existing wheels-*/*
+  release:
+    name: Release
+    environment:
+      name: release
+      url: https://pypi.org/p/arro3-core
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
+    needs: [linux, windows, macos, sdist]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

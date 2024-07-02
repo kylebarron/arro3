@@ -56,7 +56,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-core"
-version = "0.1.0-beta.1"
+version = "0.1.0"
 dependencies = [
  "pyo3",
  "pyo3-arrow",
