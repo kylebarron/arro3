@@ -10,7 +10,7 @@ A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.
 - **Minimal**. The core library (`arro3-core`) has a very small scope. Other functionality, such as compute kernels, will be distributed in other namespace packages.
 - **Modular**. The [Arrow PyCapsule Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html) makes it easier to create small Arrow libraries that communicate via zero-copy data transfer. arro3's Python functions accept Arrow data from any Python Arrow library that implements the PyCapsule interface, including `pyarrow` and `nanoarrow`.
 - **Extensible**. Over time, can connect to [compute kernels provided by the Rust Arrow implementation](https://docs.rs/arrow/latest/arrow/compute/index.html).
-- **Compliant**. Full support for the Arrow specification*, including extension types. (*Limited to what the Arrow Rust supports, which does not yet support Arrow view types.)
+- **Compliant**. Full support for the Arrow specification*, including extension types. (*Limited to what the Arrow Rust crate supports, which does not yet support Arrow view types.)
 
 ## Drawbacks
 

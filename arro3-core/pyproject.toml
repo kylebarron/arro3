@@ -19,6 +19,7 @@ python-source = "python"
 
 [tool.poetry]
 name = "arro3-core"
+# Overwritten by version in Cargo.toml
 version = "0.0.0"
 description = ""
 authors = []
@@ -37,4 +38,3 @@ mike = "^2"
 
 [tool.poetry.group.dev.dependencies]
 maturin = "^1.6.0"
-
