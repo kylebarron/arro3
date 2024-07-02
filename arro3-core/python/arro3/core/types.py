@@ -4,20 +4,20 @@ from typing import Protocol, Tuple
 
 
 class ArrowSchemaExportable(Protocol):
-    """An Arrow or GeoArrow schema or field."""
+    """A C-level reference to an Arrow Schema or Field."""
 
     def __arrow_c_schema__(self) -> object: ...
 
 
 class ArrowArrayExportable(Protocol):
-    """An Arrow or GeoArrow array or RecordBatch."""
+    """A C-level reference to an Arrow Array or RecordBatch."""
 
     def __arrow_c_array__(
-        self, requested_schema: object | None = None
+        self, requested_schema: object = None
     ) -> Tuple[object, object]: ...
 
 
 class ArrowStreamExportable(Protocol):
-    """An Arrow or GeoArrow ChunkedArray or Table."""
+    """A C-level reference to an Arrow RecordBatchReader, Table, or ChunkedArray."""
 
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+    def __arrow_c_stream__(self, requested_schema: object = None) -> object: ...
