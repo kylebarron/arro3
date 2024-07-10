@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::RecordBatchReader;
@@ -11,6 +12,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::schema::display_schema;
 use crate::{PySchema, PyTable};
 
 /// A Python-facing Arrow record batch reader.
@@ -97,6 +99,18 @@ impl From<Box<dyn RecordBatchReader + Send>> for PyRecordBatchReader {
     }
 }
 
+impl Display for PyRecordBatchReader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "arro3.RecordBatchReader")?;
+        writeln!(f, "-----------------------")?;
+        if let Ok(schema) = self.schema_ref() {
+            display_schema(&schema, f)
+        } else {
+            writeln!(f, "Closed stream")
+        }
+    }
+}
+
 #[pymethods]
 impl PyRecordBatchReader {
     /// An implementation of the [Arrow PyCapsule
@@ -120,6 +134,10 @@ impl PyRecordBatchReader {
         let ffi_stream = FFI_ArrowArrayStream::new(reader);
         let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
         PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Returns `true` if this reader has already been consumed.

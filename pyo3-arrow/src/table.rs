@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 
 use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow::ffi_stream::FFI_ArrowArrayStream;
@@ -12,6 +13,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::schema::display_schema;
 use crate::PySchema;
 
 /// A Python-facing Arrow table.
@@ -64,6 +66,14 @@ impl PyTable {
     }
 }
 
+impl Display for PyTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "arro3.Table")?;
+        writeln!(f, "-----------")?;
+        display_schema(&self.schema, f)
+    }
+}
+
 #[pymethods]
 impl PyTable {
     /// An implementation of the [Arrow PyCapsule
@@ -97,6 +107,10 @@ impl PyTable {
 
     pub fn __len__(&self) -> usize {
         self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Construct this object from an existing Arrow object.

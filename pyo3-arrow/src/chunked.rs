@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_array::{make_array, Array, ArrayRef};
@@ -114,6 +115,15 @@ impl AsRef<[ArrayRef]> for PyChunkedArray {
     }
 }
 
+impl Display for PyChunkedArray {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "arro3.ChunkedArray<")?;
+        self.field.data_type().fmt(f)?;
+        writeln!(f, ">")?;
+        Ok(())
+    }
+}
+
 #[pymethods]
 impl PyChunkedArray {
     /// An implementation of the Array interface, for interoperability with numpy and other
@@ -156,6 +166,10 @@ impl PyChunkedArray {
 
     pub fn __len__(&self) -> usize {
         self.chunks.iter().fold(0, |acc, x| acc + x.len())
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Copy this array to a `numpy` NDArray
