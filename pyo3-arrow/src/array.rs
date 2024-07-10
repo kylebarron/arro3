@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
@@ -95,6 +96,15 @@ impl AsRef<ArrayRef> for PyArray {
     }
 }
 
+impl Display for PyArray {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "arro3.Array<")?;
+        self.array.data_type().fmt(f)?;
+        writeln!(f, ">")?;
+        Ok(())
+    }
+}
+
 #[pymethods]
 impl PyArray {
     /// An implementation of the Array interface, for interoperability with numpy and other
@@ -136,6 +146,10 @@ impl PyArray {
 
     pub fn __len__(&self) -> usize {
         self.array.len()
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Construct this object from an existing Arrow object.

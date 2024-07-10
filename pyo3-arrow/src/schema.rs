@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::ffi::FFI_ArrowSchema;
@@ -68,6 +69,25 @@ impl AsRef<Schema> for PySchema {
     }
 }
 
+impl Display for PySchema {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "arro3.Schema")?;
+        writeln!(f, "------------")?;
+        display_schema(&self.0, f)
+    }
+}
+
+pub(crate) fn display_schema(schema: &Schema, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    schema.fields().iter().try_for_each(|field| {
+        f.write_str(field.name().as_str())?;
+        write!(f, ": ")?;
+        field.data_type().fmt(f)?;
+        writeln!(f)?;
+        Ok::<_, std::fmt::Error>(())
+    })?;
+    Ok(())
+}
+
 #[pymethods]
 impl PySchema {
     /// An implementation of the [Arrow PyCapsule
@@ -82,6 +102,10 @@ impl PySchema {
         let schema_capsule_name = CString::new("arrow_schema").unwrap();
         let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
         Ok(schema_capsule)
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Construct this object from an existing Arrow object

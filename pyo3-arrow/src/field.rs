@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::ffi::FFI_ArrowSchema;
@@ -68,6 +69,20 @@ impl AsRef<Field> for PyField {
     }
 }
 
+impl Display for PyField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "arro3.Field<")?;
+        f.write_str(self.0.name().as_str())?;
+        write!(f, ": ")?;
+        self.0.data_type().fmt(f)?;
+        if !self.0.is_nullable() {
+            write!(f, " not null")?;
+        }
+        writeln!(f, ">")?;
+        Ok(())
+    }
+}
+
 #[pymethods]
 impl PyField {
     /// An implementation of the [Arrow PyCapsule
@@ -89,6 +104,10 @@ impl PyField {
 
     pub fn __eq__(&self, other: &PyField) -> bool {
         self.0 == other.0
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Construct this from an existing Arrow object.

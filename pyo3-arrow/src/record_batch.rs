@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
@@ -13,6 +14,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::schema::display_schema;
 
 /// A Python-facing Arrow record batch.
 ///
@@ -77,6 +79,14 @@ impl AsRef<RecordBatch> for PyRecordBatch {
     }
 }
 
+impl Display for PyRecordBatch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "arro3.RecordBatch")?;
+        writeln!(f, "-----------------")?;
+        display_schema(&self.0.schema(), f)
+    }
+}
+
 #[pymethods]
 impl PyRecordBatch {
     /// An implementation of the [Arrow PyCapsule
@@ -107,6 +117,10 @@ impl PyRecordBatch {
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {
         self.0 == other.0
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.to_string()
     }
 
     /// Construct this from an existing Arrow RecordBatch.
