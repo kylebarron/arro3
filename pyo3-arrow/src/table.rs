@@ -27,7 +27,7 @@ pub struct PyTable {
 }
 
 impl PyTable {
-    pub fn new(schema: SchemaRef, batches: Vec<RecordBatch>) -> Self {
+    pub fn new(batches: Vec<RecordBatch>, schema: SchemaRef) -> Self {
         Self { schema, batches }
     }
 
@@ -147,7 +147,7 @@ impl PyTable {
             batches.push(batch);
         }
 
-        Ok(Self::new(schema, batches))
+        Ok(Self::new(batches, schema))
     }
 
     /// Number of columns in this table.
