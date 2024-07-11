@@ -71,7 +71,7 @@ impl AsRef<Schema> for PySchema {
 
 impl Display for PySchema {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "arro3.Schema")?;
+        writeln!(f, "arro3.core.Schema")?;
         writeln!(f, "------------")?;
         display_schema(&self.0, f)
     }

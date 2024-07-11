@@ -71,7 +71,7 @@ impl AsRef<Field> for PyField {
 
 impl Display for PyField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "arro3.Field<")?;
+        write!(f, "arro3.core.Field<")?;
         f.write_str(self.0.name().as_str())?;
         write!(f, ": ")?;
         self.0.data_type().fmt(f)?;
