@@ -101,7 +101,7 @@ impl From<Box<dyn RecordBatchReader + Send>> for PyRecordBatchReader {
 
 impl Display for PyRecordBatchReader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "arro3.RecordBatchReader")?;
+        writeln!(f, "arro3.core.RecordBatchReader")?;
         writeln!(f, "-----------------------")?;
         if let Ok(schema) = self.schema_ref() {
             display_schema(&schema, f)

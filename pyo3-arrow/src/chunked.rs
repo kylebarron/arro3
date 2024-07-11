@@ -117,7 +117,7 @@ impl AsRef<[ArrayRef]> for PyChunkedArray {
 
 impl Display for PyChunkedArray {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "arro3.ChunkedArray<")?;
+        write!(f, "arro3.core.ChunkedArray<")?;
         self.field.data_type().fmt(f)?;
         writeln!(f, ">")?;
         Ok(())

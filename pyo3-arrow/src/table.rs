@@ -68,7 +68,7 @@ impl PyTable {
 
 impl Display for PyTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "arro3.Table")?;
+        writeln!(f, "arro3.core.Table")?;
         writeln!(f, "-----------")?;
         display_schema(&self.schema, f)
     }

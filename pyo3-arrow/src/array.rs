@@ -98,7 +98,7 @@ impl AsRef<ArrayRef> for PyArray {
 
 impl Display for PyArray {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "arro3.Array<")?;
+        write!(f, "arro3.core.Array<")?;
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
         Ok(())

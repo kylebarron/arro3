@@ -81,7 +81,7 @@ impl AsRef<RecordBatch> for PyRecordBatch {
 
 impl Display for PyRecordBatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "arro3.RecordBatch")?;
+        writeln!(f, "arro3.core.RecordBatch")?;
         writeln!(f, "-----------------")?;
         display_schema(&self.0.schema(), f)
     }
