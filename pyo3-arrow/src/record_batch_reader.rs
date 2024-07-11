@@ -48,7 +48,7 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::new(schema, batches))
+        Ok(PyTable::new(batches, schema))
     }
 
     /// Access the [SchemaRef] of this RecordBatchReader.
