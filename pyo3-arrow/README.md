@@ -91,6 +91,27 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 
 ### Returning Arrow data back to Python
 
+#### Using your own classes
+
+If you're exporting your own Arrow-compatible classes to Python, you can implement the relevant Arrow PyCapsule Interface methods directly on your own classes.
+
+To export stream data, add a method to your class with the following signature:
+```rs
+fn __arrow_c_stream__<'py>(
+    &'py self,
+    py: Python<'py>,
+    requested_schema: Option<PyObject>,
+) -> PyResult<Bound<'py, PyCapsule>> {
+    // Construct a PyTable from your data
+    let table: PyTable = todo!();
+    table.__arrow_c_stream__(py, requested_schema)
+}
+```
+
+Exporting schema or array data is similar, just with the `__arrow_c_schema__` and `__arrow_c_array__` methods instead.
+
+If you don't wish to export your own classes, refer to one of the solutions below.
+
 #### Using `arro3.core`
 
 [`arro3.core`](https://github.com/kylebarron/arro3) is a very minimal Python Arrow implementation, designed to be lightweight (<1MB) and relatively stable. In comparison, pyarrow is on the order of ~100MB.
