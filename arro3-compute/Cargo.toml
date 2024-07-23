@@ -19,6 +19,7 @@ crate-type = ["cdylib"]
 [dependencies]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
+arrow-cast = { workspace = true }
 arrow-schema = { workspace = true }
 arrow-select = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }

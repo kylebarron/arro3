@@ -3,6 +3,7 @@
 mod array;
 mod array_reader;
 mod chunked;
+mod datatypes;
 pub mod error;
 pub mod ffi;
 mod field;
@@ -14,7 +15,9 @@ mod schema;
 mod table;
 
 pub use array::PyArray;
+pub use array_reader::PyArrayReader;
 pub use chunked::PyChunkedArray;
+pub use datatypes::PyDataType;
 pub use field::PyField;
 pub use record_batch::PyRecordBatch;
 pub use record_batch_reader::PyRecordBatchReader;

@@ -6,6 +6,7 @@ resolver = "2"
 arrow = { version = "52", features = ["ffi"] }
 arrow-array = "52"
 arrow-buffer = "52"
+arrow-cast = "52"
 arrow-schema = "52"
 arrow-select = "52"
 numpy = "0.21"
