@@ -88,6 +88,7 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 | `PyTable`             | Yes                                    | Yes                    |
 | `PyRecordBatchReader` | Yes                                    | No                     |
 | `PyChunkedArray`      | No                                     | Yes                    |
+| `PyArrayReader`       | No                                     | No                     |
 
 ### Returning Arrow data back to Python
 
