@@ -13,6 +13,8 @@ use arrow::ffi::{from_ffi_and_data_type, FFI_ArrowArray, FFI_ArrowSchema};
 use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::{make_array, Array};
 
+use crate::ffi::ArrayReader;
+
 #[derive(Debug)]
 pub struct ArrowArrayStreamReader {
     stream: FFI_ArrowArrayStream,
@@ -92,5 +94,11 @@ impl Iterator for ArrowArrayStreamReader {
             let err = ArrowError::CDataInterface(last_error.unwrap());
             Some(Err(err))
         }
+    }
+}
+
+impl ArrayReader for ArrowArrayStreamReader {
+    fn field(&self) -> FieldRef {
+        self.field.clone()
     }
 }

@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 
 mod array;
+mod array_reader;
 mod chunked;
 pub mod error;
 pub mod ffi;
