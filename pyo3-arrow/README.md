@@ -35,7 +35,7 @@ pub fn take(py: Python, values: PyArray, indices: PyArray) -> PyArrowResult<PyOb
 
     // Construct a PyArray and export it to the arro3 Python Arrow
     // implementation
-    PyArray::new(output_array, values.field().clone()).to_arro3(py)
+    Ok(PyArray::new(output_array, values.field().clone()).to_arro3(py)?)
 }
 ```
 
@@ -97,12 +97,16 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 If you're exporting your own Arrow-compatible classes to Python, you can implement the relevant Arrow PyCapsule Interface methods directly on your own classes.
 
 To export stream data, add a method to your class with the following signature:
+
 ```rs
+use pyo3_arrow::ffi::to_stream_pycapsule;
+
 fn __arrow_c_stream__<'py>(
     &'py self,
     py: Python<'py>,
-    requested_schema: Option<PyObject>,
+    requested_schema: Option<Bound<PyCapsule>>,
 ) -> PyResult<Bound<'py, PyCapsule>> {
+
     // Construct a PyTable from your data
     let table: PyTable = todo!();
     table.__arrow_c_stream__(py, requested_schema)
