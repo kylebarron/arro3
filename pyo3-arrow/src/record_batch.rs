@@ -1,11 +1,9 @@
-use std::ffi::CString;
 use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
-use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
-use arrow_array::{Array, RecordBatch, StructArray};
-use arrow_schema::{DataType, SchemaBuilder};
+use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
+use arrow_schema::{DataType, Field, SchemaBuilder};
 use pyo3::exceptions::PyValueError;
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -14,6 +12,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::ffi::to_python::to_array_pycapsules;
 use crate::schema::display_schema;
 
 /// A Python-facing Arrow record batch.
@@ -100,19 +99,23 @@ impl PyRecordBatch {
     pub fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<PyObject>,
+        requested_schema: Option<Bound<PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyTuple>> {
-        let schema = self.0.schema();
-        let array = StructArray::from(self.0.clone());
+        let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false);
+        let array: ArrayRef = Arc::new(StructArray::from(self.0.clone()));
+        to_array_pycapsules(py, field.into(), &array, requested_schema)
 
-        let ffi_schema = FFI_ArrowSchema::try_from(schema.as_ref())?;
-        let ffi_array = FFI_ArrowArray::new(&array.to_data());
+        // let schema = self.0.schema();
+        // let array = StructArray::from(self.0.clone());
 
-        let schema_capsule_name = CString::new("arrow_schema").unwrap();
-        let array_capsule_name = CString::new("arrow_array").unwrap();
-        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
-        let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
-        Ok(PyTuple::new_bound(py, vec![schema_capsule, array_capsule]))
+        // let ffi_schema = FFI_ArrowSchema::try_from(schema.as_ref())?;
+        // let ffi_array = FFI_ArrowArray::new(&array.to_data());
+
+        // let schema_capsule_name = CString::new("arrow_schema").unwrap();
+        // let array_capsule_name = CString::new("arrow_array").unwrap();
+        // let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
+        // let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
+        // Ok(PyTuple::new_bound(py, vec![schema_capsule, array_capsule]))
     }
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {

@@ -1,8 +1,6 @@
-use std::ffi::CString;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::ffi::FFI_ArrowSchema;
 use arrow_schema::{Schema, SchemaRef};
 use pyo3::exceptions::PyTypeError;
 use pyo3::intern;
@@ -12,6 +10,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
+use crate::ffi::to_python::to_schema_pycapsule;
 
 /// A Python-facing Arrow schema.
 ///
@@ -98,10 +97,7 @@ impl PySchema {
     /// For example, you can call [`pyarrow.schema()`][pyarrow.schema] to convert this array
     /// into a pyarrow schema, without copying memory.
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        let ffi_schema = FFI_ArrowSchema::try_from(self.as_ref())?;
-        let schema_capsule_name = CString::new("arrow_schema").unwrap();
-        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
-        Ok(schema_capsule)
+        to_schema_pycapsule(py, self.0.as_ref())
     }
 
     pub fn __repr__(&self) -> String {

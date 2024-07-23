@@ -1,4 +1,3 @@
-use std::ffi::CString;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -13,8 +12,8 @@ use crate::error::{PyArrowError, PyArrowResult};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
-use crate::ffi::to_python::ffi_stream::new_stream;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::ffi::to_python::to_stream_pycapsule;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 
 /// A Python-facing Arrow chunked array.
@@ -149,15 +148,13 @@ impl PyChunkedArray {
     fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<PyObject>,
+        requested_schema: Option<Bound<PyCapsule>>,
     ) -> PyResult<Bound<'py, PyCapsule>> {
-        let field = self.field.clone();
-        let chunks = self.chunks.clone();
-
-        let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
-        let ffi_stream = new_stream(array_reader);
-        let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-        PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
+        let array_reader = Box::new(ArrayIterator::new(
+            self.chunks.clone().into_iter().map(Ok),
+            self.field.clone(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
     pub fn __eq__(&self, other: &PyChunkedArray) -> bool {
