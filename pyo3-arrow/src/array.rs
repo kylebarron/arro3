@@ -1,8 +1,6 @@
-use std::ffi::CString;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::{make_array, Array, ArrayRef};
 use arrow_schema::{Field, FieldRef};
 use pyo3::intern;
@@ -11,6 +9,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
+use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::interop::numpy::to_numpy::to_numpy;
 
@@ -124,20 +123,9 @@ impl PyArray {
     pub fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<PyObject>,
+        requested_schema: Option<Bound<PyCapsule>>,
     ) -> PyArrowResult<Bound<PyTuple>> {
-        let field = &self.field;
-        let ffi_schema = FFI_ArrowSchema::try_from(field)?;
-        let ffi_array = FFI_ArrowArray::new(&self.array.to_data());
-
-        let schema_capsule_name = CString::new("arrow_schema").unwrap();
-        let array_capsule_name = CString::new("arrow_array").unwrap();
-
-        let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
-        let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
-        let tuple = PyTuple::new_bound(py, vec![schema_capsule, array_capsule]);
-
-        Ok(tuple)
+        to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
     pub fn __eq__(&self, other: &PyArray) -> bool {

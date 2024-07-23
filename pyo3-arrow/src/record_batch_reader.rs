@@ -1,9 +1,8 @@
-use std::ffi::CString;
 use std::fmt::Display;
+use std::sync::Arc;
 
-use arrow::ffi_stream::FFI_ArrowArrayStream;
-use arrow_array::RecordBatchReader;
-use arrow_schema::SchemaRef;
+use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
+use arrow_schema::{Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -11,7 +10,9 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
+use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::ffi::to_python::to_stream_pycapsule;
 use crate::schema::display_schema;
 use crate::{PySchema, PyTable};
 
@@ -124,16 +125,23 @@ impl PyRecordBatchReader {
     fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
-        requested_schema: Option<PyObject>,
+        requested_schema: Option<Bound<PyCapsule>>,
     ) -> PyResult<Bound<'py, PyCapsule>> {
         let reader = self
             .0
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
 
-        let ffi_stream = FFI_ArrowArrayStream::new(reader);
-        let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-        PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
+        let schema = reader.schema().clone();
+        let array_reader = reader.into_iter().map(|maybe_batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(maybe_batch?));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", schema.fields().clone(), false).into(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
     pub fn __repr__(&self) -> String {

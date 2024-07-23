@@ -3,7 +3,7 @@
 mod array;
 mod chunked;
 pub mod error;
-mod ffi;
+pub mod ffi;
 mod field;
 pub mod input;
 mod interop;

@@ -19,6 +19,7 @@ impl<R: ArrayReader + ?Sized> ArrayReader for Box<R> {
     }
 }
 
+/// An iterator of [`ArrayRef`] with an attached [`FieldRef`]
 pub struct ArrayIterator<I>
 where
     I: IntoIterator<Item = Result<ArrayRef, ArrowError>>,

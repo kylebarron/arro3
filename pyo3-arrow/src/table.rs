@@ -1,18 +1,19 @@
-use std::ffi::CString;
 use std::fmt::Display;
+use std::sync::Arc;
 
 use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
-use arrow::ffi_stream::FFI_ArrowArrayStream;
-use arrow_array::RecordBatchReader;
-use arrow_array::{RecordBatch, RecordBatchIterator};
-use arrow_schema::SchemaRef;
+use arrow_array::RecordBatch;
+use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
+use arrow_schema::{Field, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::ffi::from_python::utils::import_stream_pycapsule;
+use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
+use crate::ffi::to_python::to_stream_pycapsule;
 use crate::schema::display_schema;
 use crate::PySchema;
 
@@ -87,18 +88,18 @@ impl PyTable {
     fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<PyObject>,
+        requested_schema: Option<Bound<PyCapsule>>,
     ) -> PyResult<Bound<'py, PyCapsule>> {
-        let batches = self.batches.clone();
-
-        let record_batch_reader = Box::new(RecordBatchIterator::new(
-            batches.into_iter().map(Ok),
-            self.schema.clone(),
+        let field = self.schema.fields().clone();
+        let array_reader = self.batches.clone().into_iter().map(|batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(batch));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", field, false).into(),
         ));
-        let ffi_stream = FFI_ArrowArrayStream::new(record_batch_reader);
-
-        let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-        PyCapsule::new_bound(py, ffi_stream, Some(stream_capsule_name))
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
     pub fn __eq__(&self, other: &PyTable) -> bool {
