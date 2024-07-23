@@ -32,7 +32,7 @@ impl PyRecordBatch {
     }
 
     /// Export this to a Python `arro3.core.RecordBatch`.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatch"))?
@@ -51,7 +51,7 @@ impl PyRecordBatch {
     /// Export to a pyarrow.RecordBatch
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "record_batch"))?

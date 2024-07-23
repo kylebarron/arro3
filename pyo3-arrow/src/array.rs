@@ -57,7 +57,7 @@ impl PyArray {
     /// Export to an arro3.core.Array.
     ///
     /// This requires that you depend on arro3-core from your Python package.
-    pub fn to_arro3(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -74,7 +74,7 @@ impl PyArray {
     /// Export to a pyarrow.Array
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
         let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "array"))?
