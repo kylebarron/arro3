@@ -10,12 +10,13 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::schema::display_schema;
-use crate::PySchema;
+use crate::{PyChunkedArray, PySchema};
 
 /// A Python-facing Arrow table.
 ///
@@ -149,6 +150,17 @@ impl PyTable {
         }
 
         Ok(Self::new(batches, schema))
+    }
+
+    /// Select single column from Table
+    fn column(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
+        let field = self.schema.field(i).clone();
+        let chunks = self
+            .batches
+            .iter()
+            .map(|batch| batch.column(i).clone())
+            .collect();
+        Ok(PyChunkedArray::new(chunks, field.into()).to_arro3(py)?)
     }
 
     /// Number of columns in this table.

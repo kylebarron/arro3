@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
+use crate::PyDataType;
 
 /// A Python-facing Arrow field.
 ///
@@ -122,5 +124,57 @@ impl PyField {
         let field =
             Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
         Ok(Self::new(Arc::new(field)))
+    }
+
+    /// Test if this field is equal to the other
+    // TODO: add option to check field metadata
+    fn equals(&self, other: PyField) -> bool {
+        self.0 == other.0
+    }
+
+    /// The schema's metadata.
+    #[getter]
+    fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
+        let mut new_metadata = HashMap::with_capacity(self.0.metadata().len());
+        self.0.metadata().iter().for_each(|(key, val)| {
+            new_metadata.insert(key.as_bytes().to_vec(), val.as_bytes().to_vec());
+        });
+        new_metadata
+    }
+
+    /// The schema's metadata where keys and values are `str`, not `bytes`.
+    #[getter]
+    fn metadata_str(&self) -> HashMap<String, String> {
+        self.0.metadata().clone()
+    }
+
+    /// The field name.
+    #[getter]
+    fn name(&self) -> String {
+        self.0.name().clone()
+    }
+
+    /// The field nullability.
+    #[getter]
+    fn nullable(&self) -> bool {
+        self.0.is_nullable()
+    }
+
+    /// Create new field without metadata, if any
+    fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_metadata(Default::default())
+                .into(),
+        )
+        .to_arro3(py)
+    }
+
+    /// Create new field without metadata, if any
+    #[getter]
+    fn r#type(&self, py: Python) -> PyResult<PyObject> {
+        PyDataType::new(self.0.data_type().clone()).to_arro3(py)
     }
 }

@@ -1,8 +1,9 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_schema::{Schema, SchemaRef};
-use pyo3::exceptions::PyTypeError;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -11,6 +12,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
+use crate::{PyDataType, PyField};
 
 /// A Python-facing Arrow schema.
 ///
@@ -100,6 +102,10 @@ impl PySchema {
         to_schema_pycapsule(py, self.0.as_ref())
     }
 
+    pub fn __eq__(&self, other: &PySchema) -> bool {
+        self.0 == other.0
+    }
+
     pub fn __repr__(&self) -> String {
         self.to_string()
     }
@@ -131,7 +137,72 @@ impl PySchema {
         Ok(Self::new(Arc::new(schema)))
     }
 
-    pub fn __eq__(&self, other: &PySchema) -> bool {
-        self.0 == other.0
+    /// Select a field by its column name or numeric index.
+    fn field(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
+        Ok(PyField::new(self.0.field(i).clone().into()).to_arro3(py)?)
+    }
+
+    /// Return sorted list of indices for the fields with the given name.
+    fn get_all_field_indices(&self, name: String) -> Vec<usize> {
+        let mut indices = self
+            .0
+            .fields()
+            .iter()
+            .enumerate()
+            .filter(|(_idx, field)| field.name() == name.as_str())
+            .map(|(idx, _field)| idx)
+            .collect::<Vec<_>>();
+        indices.sort();
+        indices
+    }
+
+    /// Return index of the unique field with the given name.
+    fn get_field_index(&self, name: String) -> PyArrowResult<usize> {
+        let indices = self
+            .0
+            .fields()
+            .iter()
+            .enumerate()
+            .filter(|(_idx, field)| field.name() == name.as_str())
+            .map(|(idx, _field)| idx)
+            .collect::<Vec<_>>();
+        if indices.len() == 1 {
+            Ok(indices[0])
+        } else {
+            Err(PyValueError::new_err("Multiple fields with given name").into())
+        }
+    }
+
+    /// The schema's metadata.
+    #[getter]
+    fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
+        let mut new_metadata = HashMap::with_capacity(self.0.metadata.len());
+        self.0.metadata().iter().for_each(|(key, val)| {
+            new_metadata.insert(key.as_bytes().to_vec(), val.as_bytes().to_vec());
+        });
+        new_metadata
+    }
+
+    /// The schema's metadata where keys and values are `str`, not `bytes`.
+    #[getter]
+    fn metadata_str(&self) -> HashMap<String, String> {
+        self.0.metadata().clone()
+    }
+
+    /// The schema’s field names.
+    #[getter]
+    fn names(&self) -> Vec<String> {
+        self.0.fields().iter().map(|f| f.name().clone()).collect()
+    }
+
+    /// The schema’s field types.
+    #[getter]
+    fn types(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
+        Ok(self
+            .0
+            .fields()
+            .iter()
+            .map(|f| PyDataType::new(f.data_type().clone()).to_arro3(py))
+            .collect::<PyResult<_>>()?)
     }
 }
