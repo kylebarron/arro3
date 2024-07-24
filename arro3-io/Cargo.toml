@@ -20,6 +20,7 @@ crate-type = ["cdylib"]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
 arrow-csv = { workspace = true }
+arrow-ipc = { workspace = true }
 arrow-schema = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
 pyo3 = { workspace = true, features = ["abi3-py38"] }

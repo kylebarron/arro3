@@ -71,6 +71,7 @@ dependencies = [
  "arrow-array",
  "arrow-buffer",
  "arrow-csv",
+ "arrow-ipc",
  "arrow-schema",
  "pyo3",
  "pyo3-arrow",

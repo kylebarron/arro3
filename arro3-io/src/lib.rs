@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod csv;
+mod ipc;
 mod json;
 mod utils;
 
@@ -23,6 +24,11 @@ fn _rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(json::read_json))?;
     m.add_wrapped(wrap_pyfunction!(json::write_json))?;
     m.add_wrapped(wrap_pyfunction!(json::write_ndjson))?;
+
+    m.add_wrapped(wrap_pyfunction!(ipc::read_ipc))?;
+    m.add_wrapped(wrap_pyfunction!(ipc::read_ipc_stream))?;
+    m.add_wrapped(wrap_pyfunction!(ipc::write_ipc))?;
+    m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
 
     Ok(())
 }
