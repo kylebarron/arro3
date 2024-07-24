@@ -8,7 +8,7 @@ use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
 use crate::utils::{FileReader, FileWriter};
 
-/// Read a CSV file to an Arrow RecordBatchReader
+/// Infer a CSV file's schema
 #[pyfunction]
 #[pyo3(signature = (
     file,
