@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 mod csv;
 mod ipc;
 mod json;
+mod parquet;
 mod utils;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -29,6 +30,9 @@ fn _rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(ipc::read_ipc_stream))?;
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc))?;
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
+
+    m.add_wrapped(wrap_pyfunction!(parquet::read_parquet))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::write_parquet))?;
 
     Ok(())
 }
