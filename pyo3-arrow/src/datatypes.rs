@@ -80,6 +80,12 @@ impl From<DataType> for PyDataType {
     }
 }
 
+impl From<&DataType> for PyDataType {
+    fn from(value: &DataType) -> Self {
+        Self(value.clone())
+    }
+}
+
 impl AsRef<DataType> for PyDataType {
     fn as_ref(&self) -> &DataType {
         &self.0
@@ -135,6 +141,10 @@ impl PyDataType {
         let data_type =
             DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
         Ok(Self::new(data_type))
+    }
+
+    fn bit_width(&self) -> Option<usize> {
+        self.0.primitive_width()
     }
 
     // TODO: decide whether to make this public
