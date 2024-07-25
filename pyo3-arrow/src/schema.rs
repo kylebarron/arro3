@@ -26,6 +26,10 @@ impl PySchema {
         Self(schema)
     }
 
+    pub fn into_inner(self) -> SchemaRef {
+        self.0
+    }
+
     /// Export this to a Python `arro3.core.Schema`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
         let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;

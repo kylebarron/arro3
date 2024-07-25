@@ -1,9 +1,9 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
+use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
 use arrow_schema::{Field, SchemaRef};
-use pyo3::exceptions::{PyIOError, PyValueError};
+use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -14,7 +14,7 @@ use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::schema::display_schema;
-use crate::{PySchema, PyTable};
+use crate::{PyRecordBatch, PySchema, PyTable};
 
 /// A Python-facing Arrow record batch reader.
 ///
@@ -34,7 +34,7 @@ impl PyRecordBatchReader {
         let stream = self
             .0
             .take()
-            .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         Ok(stream)
     }
 
@@ -43,7 +43,7 @@ impl PyRecordBatchReader {
         let stream = self
             .0
             .take()
-            .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         let schema = stream.schema();
         let mut batches = vec![];
         for batch in stream {
@@ -148,11 +148,6 @@ impl PyRecordBatchReader {
         self.to_string()
     }
 
-    /// Returns `true` if this reader has already been consumed.
-    pub fn closed(&self) -> bool {
-        self.0.is_none()
-    }
-
     /// Construct this from an existing Arrow object.
     ///
     /// It can be called on anything that exports the Arrow stream interface
@@ -173,6 +168,59 @@ impl PyRecordBatchReader {
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
         Ok(Self(Some(Box::new(stream_reader))))
+    }
+
+    #[classmethod]
+    pub fn from_batches(
+        _cls: &Bound<PyType>,
+        schema: PySchema,
+        batches: Vec<PyRecordBatch>,
+    ) -> Self {
+        let batches = batches
+            .into_iter()
+            .map(|batch| batch.into_inner())
+            .collect::<Vec<_>>();
+        Self::new(Box::new(RecordBatchIterator::new(
+            batches.into_iter().map(Ok),
+            schema.into_inner(),
+        )))
+    }
+
+    #[classmethod]
+    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+        data.extract()
+    }
+
+    /// Returns `true` if this reader has already been consumed.
+    #[getter]
+    pub fn closed(&self) -> bool {
+        self.0.is_none()
+    }
+
+    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        let stream = self
+            .0
+            .take()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+        let schema = stream.schema();
+        let mut batches = vec![];
+        for batch in stream {
+            batches.push(batch?);
+        }
+        Ok(PyTable::new(batches, schema).to_arro3(py)?)
+    }
+
+    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        let stream = self
+            .0
+            .as_mut()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+
+        if let Some(next_batch) = stream.next() {
+            Ok(PyRecordBatch::new(next_batch?).to_arro3(py)?)
+        } else {
+            Err(PyStopIteration::new_err("").into())
+        }
     }
 
     /// Access the schema of this table
