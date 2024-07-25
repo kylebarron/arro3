@@ -80,13 +80,6 @@ impl Display for PyTable {
 
 #[pymethods]
 impl PyTable {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
-    /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_stream__<'py>(
         &'py self,
@@ -117,24 +110,11 @@ impl PyTable {
         self.to_string()
     }
 
-    /// Construct this object from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`) and yields a StructArray for each item. This Table will materialize
-    /// all items from the iterator in memory at once. Use RecordBatchReader if you don't wish to
-    /// materialize all batches in memory at once.
-    ///
-    /// Args:
-    ///     input: Arrow array to use for constructing this object
-    ///
-    /// Returns:
-    ///     Self
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -242,7 +222,6 @@ impl PyTable {
         self.batches.iter().map(|batch| batch.num_rows()).collect()
     }
 
-    /// Select single column from Table
     pub fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
         let field = self.schema.field(i).clone();
         let chunks = self
@@ -253,7 +232,6 @@ impl PyTable {
         PyChunkedArray::new(chunks, field.into()).to_arro3(py)
     }
 
-    /// Names of the Table or RecordBatch columns.
     #[getter]
     pub fn column_names(&self) -> Vec<String> {
         self.schema
@@ -263,7 +241,6 @@ impl PyTable {
             .collect()
     }
 
-    /// List of all columns in numerical order.
     #[getter]
     pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
         (0..self.num_columns())
@@ -285,13 +262,11 @@ impl PyTable {
         Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
 
-    /// Number of columns in this table.
     #[getter]
     pub fn num_columns(&self) -> usize {
         self.schema.fields().len()
     }
 
-    /// Number of columns in this table.
     #[getter]
     pub fn num_rows(&self) -> usize {
         self.batches()
@@ -343,13 +318,11 @@ impl PyTable {
         Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
     }
 
-    /// Access the schema of this table
     #[getter]
     pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema.clone()).to_arro3(py)
     }
 
-    /// Dimensions of the table or record batch: (#rows, #columns).
     #[getter]
     pub fn shape(&self) -> (usize, usize) {
         (self.num_rows(), self.num_columns())

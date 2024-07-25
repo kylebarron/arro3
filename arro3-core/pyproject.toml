@@ -27,14 +27,6 @@ packages = [{ include = "python/arro3/core" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-# We use ruff format ourselves, but mkdocstrings requires black to be installed
-# to format signatures in the docs
-black = "^23.10.1"
-griffe-inherited-docstrings = "^1.0.0"
-mkdocs = "^1.4.3"
-mkdocs-material = { version = "^9.5", extras = ["imaging"] }
-mkdocstrings = { version = "^0.25.1", extras = ["python"] }
-mike = "^2"
 
 [tool.poetry.group.dev.dependencies]
 maturin = "^1.6.0"

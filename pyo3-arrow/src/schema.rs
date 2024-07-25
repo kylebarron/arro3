@@ -116,13 +116,6 @@ impl PySchema {
         Ok(schema)
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.schema()`][pyarrow.schema] to convert this array
-    /// into a pyarrow schema, without copying memory.
     pub fn __arrow_c_schema__<'py>(
         &'py self,
         py: Python<'py>,
@@ -142,22 +135,11 @@ impl PySchema {
         self.to_string()
     }
 
-    /// Construct this object from an existing Arrow object
-    ///
-    /// It can be called on anything that exports the Arrow data interface
-    /// (`__arrow_c_array__`) and returns a struct field.
-    ///
-    /// Args:
-    ///     input: Arrow array to use for constructing this object
-    ///
-    /// Returns:
-    ///     Self
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -184,7 +166,6 @@ impl PySchema {
         self.0 == other.0
     }
 
-    /// Select a field by its column name or numeric index.
     pub fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
         let field = match i {
             FieldIndexInput::String(name) => self.0.field_with_name(&name)?,
@@ -193,7 +174,6 @@ impl PySchema {
         Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
 
-    /// Return sorted list of indices for the fields with the given name.
     pub fn get_all_field_indices(&self, name: String) -> Vec<usize> {
         let mut indices = self
             .0
@@ -207,7 +187,6 @@ impl PySchema {
         indices
     }
 
-    /// Return index of the unique field with the given name.
     pub fn get_field_index(&self, name: String) -> PyArrowResult<usize> {
         let indices = self
             .0
@@ -231,7 +210,6 @@ impl PySchema {
         PySchema::new(schema.into()).to_arro3(py)
     }
 
-    /// The schema's metadata.
     #[getter]
     pub fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
         let mut new_metadata = HashMap::with_capacity(self.0.metadata.len());
@@ -241,13 +219,11 @@ impl PySchema {
         new_metadata
     }
 
-    /// The schema's metadata where keys and values are `str`, not `bytes`.
     #[getter]
     pub fn metadata_str(&self) -> HashMap<String, String> {
         self.0.metadata().clone()
     }
 
-    /// The schema’s field names.
     #[getter]
     pub fn names(&self) -> Vec<String> {
         self.0.fields().iter().map(|f| f.name().clone()).collect()
@@ -278,7 +254,6 @@ impl PySchema {
         PySchema::new(schema.into()).to_arro3(py)
     }
 
-    /// The schema’s field types.
     #[getter]
     pub fn types(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
         Ok(self

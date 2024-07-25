@@ -141,16 +141,6 @@ impl PyArray {
         self.to_string()
     }
 
-    /// Construct this object from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow data interface
-    /// (`__arrow_c_array__`).
-    ///
-    /// Args:
-    ///     input: Arrow array to use for constructing this object
-    ///
-    /// Returns:
-    ///     Self
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
         input.extract()
