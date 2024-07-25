@@ -22,7 +22,6 @@ use crate::{PyArray, PyDataType};
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
-#[derive(Clone)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,
@@ -97,7 +96,7 @@ impl PyChunkedArray {
             .zip(self.chunks())
             .all(|(length, arr)| *length == arr.len());
         if matches_existing_chunking {
-            return Ok(self.clone());
+            return Ok(Self::new(self.chunks.clone(), self.field.clone()));
         }
 
         let mut offset = 0;
