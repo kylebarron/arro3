@@ -22,6 +22,7 @@ use crate::{PyArray, PyDataType};
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
+#[derive(Clone)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,
@@ -71,6 +72,84 @@ impl PyChunkedArray {
 
     pub fn into_inner(self) -> (Vec<ArrayRef>, FieldRef) {
         (self.chunks, self.field)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.chunks.iter().fold(0, |acc, arr| acc + arr.len())
+    }
+
+    pub fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
+        let total_chunk_length = chunk_lengths.iter().sum::<usize>();
+        if total_chunk_length != self.length() {
+            return Err(PyValueError::new_err(
+                "Chunk lengths do not add up to chunked array length",
+            )
+            .into());
+        }
+
+        // If the desired rechunking is the existing chunking, return early
+        let matches_existing_chunking = chunk_lengths
+            .iter()
+            .zip(self.chunks())
+            .all(|(length, arr)| *length == arr.len());
+        if matches_existing_chunking {
+            return Ok(self.clone());
+        }
+
+        let mut offset = 0;
+        let chunks = chunk_lengths
+            .iter()
+            .map(|chunk_length| {
+                let sliced_chunks = self.slice(offset, *chunk_length)?;
+                let arr_refs = sliced_chunks.iter().map(|a| a.as_ref()).collect::<Vec<_>>();
+                let sliced_concatted = concat(&arr_refs)?;
+                offset += chunk_length;
+                Ok(sliced_concatted)
+            })
+            .collect::<PyArrowResult<Vec<_>>>()?;
+
+        Ok(PyChunkedArray::new(chunks, self.field.clone()))
+    }
+
+    pub fn slice(&self, mut offset: usize, mut length: usize) -> PyArrowResult<Vec<ArrayRef>> {
+        if offset + length > self.length() {
+            return Err(
+                PyValueError::new_err("offset + length may not exceed length of array").into(),
+            );
+        }
+
+        let mut sliced_chunks: Vec<ArrayRef> = vec![];
+        for chunk in self.chunks() {
+            if chunk.is_empty() {
+                continue;
+            }
+
+            // If the offset is greater than the len of this chunk, don't include any rows from
+            // this chunk
+            if offset >= chunk.len() {
+                offset -= chunk.len();
+                continue;
+            }
+
+            let take_count = length.min(chunk.len());
+            let sliced_chunk = chunk.slice(offset, take_count);
+            sliced_chunks.push(sliced_chunk);
+
+            length -= take_count;
+
+            // If we've selected all rows, exit
+            if length == 0 {
+                break;
+            } else {
+                offset = 0;
+            }
+        }
+
+        Ok(sliced_chunks)
     }
 
     /// Export this to a Python `arro3.core.ChunkedArray`.
@@ -128,7 +207,7 @@ impl Display for PyChunkedArray {
 #[pymethods]
 impl PyChunkedArray {
     #[new]
-    fn init(arrays: Vec<PyArray>, r#type: Option<PyDataType>) -> PyResult<Self> {
+    pub fn init(arrays: Vec<PyArray>, r#type: Option<PyDataType>) -> PyResult<Self> {
         let (chunks, fields): (Vec<_>, Vec<_>) =
             arrays.into_iter().map(|arr| arr.into_inner()).unzip();
         if !fields
@@ -170,7 +249,7 @@ impl PyChunkedArray {
     /// [`pyarrow.chunked_array()`][pyarrow.chunked_array] to convert this array into a
     /// pyarrow array, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__<'py>(
+    pub fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -182,11 +261,11 @@ impl PyChunkedArray {
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
-    pub fn __eq__(&self, other: &PyChunkedArray) -> bool {
+    fn __eq__(&self, other: &PyChunkedArray) -> bool {
         self.field == other.field && self.chunks == other.chunks
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __len__(&self) -> usize {
         self.chunks.iter().fold(0, |acc, x| acc + x.len())
     }
 
@@ -225,7 +304,7 @@ impl PyChunkedArray {
         Ok(PyChunkedArray::new(chunks, field))
     }
 
-    fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    pub fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
         let field = self.field().clone();
         let array = self
             .chunks
@@ -237,7 +316,7 @@ impl PyChunkedArray {
 
     #[getter]
     #[pyo3(name = "chunks")]
-    fn chunks_py(&self, py: Python) -> PyResult<Vec<PyObject>> {
+    pub fn chunks_py(&self, py: Python) -> PyResult<Vec<PyObject>> {
         let field = self.field().clone();
         self.chunks
             .iter()
@@ -245,44 +324,51 @@ impl PyChunkedArray {
             .collect()
     }
 
-    fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
         let field = self.field().clone();
         let arrays: Vec<&dyn Array> = self.chunks.iter().map(|arr| arr.as_ref()).collect();
         Ok(PyArray::new(concat(&arrays)?, field).to_arro3(py)?)
     }
 
-    fn equals(&self, other: PyChunkedArray) -> bool {
+    pub fn equals(&self, other: PyChunkedArray) -> bool {
         self.field == other.field && self.chunks == other.chunks
     }
 
     fn length(&self) -> usize {
-        self.chunks.iter().fold(0, |acc, arr| acc + arr.len())
+        self.len()
     }
 
     #[getter]
-    fn null_count(&self) -> usize {
+    pub fn null_count(&self) -> usize {
         self.chunks
             .iter()
             .fold(0, |acc, arr| acc + arr.null_count())
     }
 
     #[getter]
-    fn num_chunks(&self) -> usize {
+    pub fn num_chunks(&self) -> usize {
         self.chunks.len()
     }
 
-    // #[pyo3(signature = (offset=0, length=None))]
-    // fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
-    //     // let length = length.unwrap_or_else(|| self.num_rows() - offset);
-    //     // PyRecordBatch::new(self.0.slice(offset, length)).to_arro3(py)
-    // }
+    #[pyo3(signature = (offset=0, length=None))]
+    #[pyo3(name = "slice")]
+    pub fn slice_py(
+        &self,
+        py: Python,
+        offset: usize,
+        length: Option<usize>,
+    ) -> PyArrowResult<PyObject> {
+        let length = length.unwrap_or_else(|| self.len() - offset);
+        let sliced_chunks = self.slice(offset, length)?;
+        Ok(PyChunkedArray::new(sliced_chunks, self.field.clone()).to_arro3(py)?)
+    }
 
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py)
     }
 
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }

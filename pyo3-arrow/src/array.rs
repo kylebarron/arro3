@@ -168,7 +168,7 @@ impl PyArray {
     }
 
     #[pyo3(signature = (offset=0, length=None))]
-    fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+    pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
         let new_array = self.array.slice(offset, length);
         PyArray::new(new_array, self.field().clone()).to_arro3(py)
@@ -180,7 +180,7 @@ impl PyArray {
     }
 
     #[getter]
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }

@@ -93,7 +93,7 @@ impl Display for PyRecordBatch {
 impl PyRecordBatch {
     #[new]
     #[pyo3(signature = (data, *, metadata=None))]
-    fn init(
+    pub fn init(
         py: Python,
         data: &Bound<PyAny>,
         metadata: Option<MetadataInput>,
@@ -171,7 +171,7 @@ impl PyRecordBatch {
 
     #[classmethod]
     #[pyo3(signature = (mapping, *, metadata=None))]
-    fn from_pydict(
+    pub fn from_pydict(
         _cls: &Bound<PyType>,
         mapping: HashMap<String, PyArray>,
         metadata: Option<MetadataInput>,
@@ -254,7 +254,7 @@ impl PyRecordBatch {
         }
     }
 
-    fn add_column(
+    pub fn add_column(
         &self,
         py: Python,
         i: usize,
@@ -272,7 +272,7 @@ impl PyRecordBatch {
         Ok(PyRecordBatch::new(new_rb).to_arro3(py)?)
     }
 
-    fn append_column(
+    pub fn append_column(
         &self,
         py: Python,
         field: PyField,
@@ -290,7 +290,7 @@ impl PyRecordBatch {
     }
 
     /// Select single column from RecordBatch
-    fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    pub fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
         let field = self.0.schema().field(i).clone();
         let array = self.0.column(i).clone();
         PyArray::new(array, field.into()).to_arro3(py)
@@ -298,7 +298,7 @@ impl PyRecordBatch {
 
     /// Names of the Table or RecordBatch columns.
     #[getter]
-    fn column_names(&self) -> Vec<String> {
+    pub fn column_names(&self) -> Vec<String> {
         self.0
             .schema()
             .fields()
@@ -309,38 +309,34 @@ impl PyRecordBatch {
 
     /// List of all columns in numerical order.
     #[getter]
-    fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
-        self.0
-            .schema()
-            .fields()
-            .iter()
-            .zip(self.0.columns())
-            .map(|(field, array)| PyArray::new(array.clone(), field.clone()).to_arro3(py))
+    pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
+        (0..self.num_columns())
+            .map(|i| self.column(py, i))
             .collect()
     }
 
-    fn equals(&self, other: PyRecordBatch) -> bool {
+    pub fn equals(&self, other: PyRecordBatch) -> bool {
         self.0 == other.0
     }
 
     /// Select a schema field by its numeric index.
-    fn field(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    pub fn field(&self, py: Python, i: usize) -> PyResult<PyObject> {
         PyField::new(self.0.schema().field(i).clone().into()).to_arro3(py)
     }
 
     /// Number of columns in this RecordBatch.
     #[getter]
-    fn num_columns(&self) -> usize {
+    pub fn num_columns(&self) -> usize {
         self.0.num_columns()
     }
 
     /// Number of rows in this RecordBatch.
     #[getter]
-    fn num_rows(&self) -> usize {
+    pub fn num_rows(&self) -> usize {
         self.0.num_rows()
     }
 
-    fn remove_column(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    pub fn remove_column(&self, py: Python, i: usize) -> PyResult<PyObject> {
         let mut rb = self.0.clone();
         rb.remove_column(i);
         PyRecordBatch::new(rb).to_arro3(py)
@@ -348,16 +344,16 @@ impl PyRecordBatch {
 
     /// Access the schema of this RecordBatch
     #[getter]
-    fn schema(&self, py: Python) -> PyResult<PyObject> {
+    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.0.schema()).to_arro3(py)
     }
 
-    fn select(&self, py: Python, columns: Vec<usize>) -> PyArrowResult<PyObject> {
+    pub fn select(&self, py: Python, columns: Vec<usize>) -> PyArrowResult<PyObject> {
         let new_rb = self.0.project(&columns)?;
         Ok(PyRecordBatch::new(new_rb).to_arro3(py)?)
     }
 
-    fn set_column(
+    pub fn set_column(
         &self,
         py: Python,
         i: usize,
@@ -377,19 +373,26 @@ impl PyRecordBatch {
 
     /// Dimensions of the table or record batch: (#rows, #columns).
     #[getter]
-    fn shape(&self) -> (usize, usize) {
+    pub fn shape(&self) -> (usize, usize) {
         (self.num_rows(), self.num_columns())
     }
 
     #[pyo3(signature = (offset=0, length=None))]
-    fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+    pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.num_rows() - offset);
         PyRecordBatch::new(self.0.slice(offset, length)).to_arro3(py)
     }
 
-    fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
         let struct_array: StructArray = self.0.clone().into();
-        let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false);
+        let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false)
+            .with_metadata(self.0.schema_ref().metadata.clone());
         Ok(PyArray::new(Arc::new(struct_array), field.into()).to_arro3(py)?)
+    }
+
+    pub fn with_schema(&self, py: Python, schema: PySchema) -> PyArrowResult<PyObject> {
+        let new_schema = schema.into_inner();
+        let new_batch = RecordBatch::try_new(new_schema.clone(), self.0.columns().to_vec())?;
+        Ok(PyRecordBatch::new(new_batch).to_arro3(py)?)
     }
 }

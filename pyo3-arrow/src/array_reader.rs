@@ -109,7 +109,7 @@ impl PyArrayReader {
     /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
     /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__<'py>(
+    pub fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -153,7 +153,7 @@ impl PyArrayReader {
 
     /// Access the field of this reader
     #[getter]
-    fn field(&self, py: Python) -> PyResult<PyObject> {
+    pub fn field(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(self.field_ref()?).to_arro3(py)
     }
 }

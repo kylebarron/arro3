@@ -122,7 +122,7 @@ impl PyRecordBatchReader {
     /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
     /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__<'py>(
+    pub fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -197,7 +197,7 @@ impl PyRecordBatchReader {
         self.0.is_none()
     }
 
-    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .take()
@@ -210,7 +210,7 @@ impl PyRecordBatchReader {
         Ok(PyTable::new(batches, schema).to_arro3(py)?)
     }
 
-    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    pub fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .as_mut()
@@ -225,7 +225,7 @@ impl PyRecordBatchReader {
 
     /// Access the schema of this table
     #[getter]
-    fn schema(&self, py: Python) -> PyResult<PyObject> {
+    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
     }
 }

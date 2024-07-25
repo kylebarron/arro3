@@ -26,7 +26,7 @@ pub enum AnyArray {
 }
 
 #[derive(FromPyObject)]
-pub(crate) enum MetadataInput {
+pub enum MetadataInput {
     String(HashMap<String, String>),
     Bytes(HashMap<Vec<u8>, Vec<u8>>),
 }
@@ -54,7 +54,7 @@ impl Default for MetadataInput {
 }
 
 #[derive(FromPyObject)]
-pub(crate) enum FieldIndexInput {
+pub enum FieldIndexInput {
     String(String),
     Int(usize),
 }
