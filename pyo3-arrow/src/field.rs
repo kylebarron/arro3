@@ -12,6 +12,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
+use crate::input::MetadataInput;
 use crate::PyDataType;
 
 /// A Python-facing Arrow field.
@@ -90,6 +91,19 @@ impl Display for PyField {
 
 #[pymethods]
 impl PyField {
+    #[new]
+    #[pyo3(signature = (name, r#type, nullable=true, *, metadata=None))]
+    fn init(
+        name: String,
+        r#type: PyDataType,
+        nullable: bool,
+        metadata: Option<MetadataInput>,
+    ) -> PyResult<Self> {
+        let field = Field::new(name, r#type.into_inner(), nullable)
+            .with_metadata(metadata.unwrap_or_default().into_string_hashmap()?);
+        Ok(PyField::new(field.into()))
+    }
+
     /// An implementation of the [Arrow PyCapsule
     /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
     /// This dunder method should not be called directly, but enables zero-copy
@@ -180,5 +194,35 @@ impl PyField {
     #[getter]
     fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.0.data_type().clone()).to_arro3(py)
+    }
+
+    fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_metadata(metadata.into_string_hashmap()?)
+                .into(),
+        )
+        .to_arro3(py)
+    }
+
+    fn with_name(&self, py: Python, name: String) -> PyResult<PyObject> {
+        PyField::new(self.0.as_ref().clone().with_name(name).into()).to_arro3(py)
+    }
+
+    fn with_nullable(&self, py: Python, nullable: bool) -> PyResult<PyObject> {
+        PyField::new(self.0.as_ref().clone().with_nullable(nullable).into()).to_arro3(py)
+    }
+
+    fn with_type(&self, py: Python, new_type: PyDataType) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_data_type(new_type.into_inner())
+                .into(),
+        )
+        .to_arro3(py)
     }
 }
