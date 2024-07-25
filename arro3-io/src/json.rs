@@ -4,6 +4,7 @@ use arrow::json::writer::{JsonArray, LineDelimited};
 use arrow::json::{ReaderBuilder, WriterBuilder};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
 use crate::utils::{FileReader, FileWriter};
@@ -15,7 +16,6 @@ use crate::utils::{FileReader, FileWriter};
     *,
     max_records=None,
 ))]
-#[allow(clippy::too_many_arguments)]
 pub fn infer_json_schema(
     py: Python,
     file: FileReader,
@@ -34,7 +34,6 @@ pub fn infer_json_schema(
     *,
     batch_size=None,
 ))]
-#[allow(clippy::too_many_arguments)]
 pub fn read_json(
     py: Python,
     file: FileReader,
@@ -62,7 +61,7 @@ pub fn read_json(
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn write_json(
-    data: PyRecordBatchReader,
+    data: AnyRecordBatch,
     file: FileWriter,
     explicit_nulls: Option<bool>,
 ) -> PyArrowResult<()> {
@@ -89,7 +88,7 @@ pub fn write_json(
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn write_ndjson(
-    data: PyRecordBatchReader,
+    data: AnyRecordBatch,
     file: FileWriter,
     explicit_nulls: Option<bool>,
 ) -> PyArrowResult<()> {
