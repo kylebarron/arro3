@@ -12,7 +12,8 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
-use crate::{PyDataType, PyField};
+use crate::input::{FieldIndexInput, MetadataInput};
+use crate::{PyDataType, PyField, PyTable};
 
 /// A Python-facing Arrow schema.
 ///
@@ -58,6 +59,12 @@ impl From<PySchema> for SchemaRef {
     }
 }
 
+impl From<&PySchema> for SchemaRef {
+    fn from(value: &PySchema) -> Self {
+        value.0.as_ref().clone().into()
+    }
+}
+
 impl From<SchemaRef> for PySchema {
     fn from(value: SchemaRef) -> Self {
         Self(value)
@@ -91,6 +98,20 @@ pub(crate) fn display_schema(schema: &Schema, f: &mut std::fmt::Formatter<'_>) -
 
 #[pymethods]
 impl PySchema {
+    #[new]
+    #[pyo3(signature = (fields, *, metadata=None))]
+    fn init(fields: Vec<PyField>, metadata: Option<MetadataInput>) -> PyResult<Self> {
+        let fields = fields
+            .into_iter()
+            .map(|field| field.into_inner())
+            .collect::<Vec<_>>();
+        let schema = PySchema::new(
+            Schema::new_with_metadata(fields, metadata.unwrap_or_default().into_string_hashmap()?)
+                .into(),
+        );
+        Ok(schema)
+    }
+
     /// An implementation of the [Arrow PyCapsule
     /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
     /// This dunder method should not be called directly, but enables zero-copy
@@ -137,9 +158,28 @@ impl PySchema {
         Ok(Self::new(Arc::new(schema)))
     }
 
+    fn append(&self, py: Python, field: PyField) -> PyResult<PyObject> {
+        let mut fields = self.0.fields().to_vec();
+        fields.push(field.into_inner());
+        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
+        PySchema::new(schema.into()).to_arro3(py)
+    }
+
+    fn empty_table(&self, py: Python) -> PyResult<PyObject> {
+        PyTable::new(vec![], self.into()).to_arro3(py)
+    }
+
+    fn equals(&self, other: PySchema) -> bool {
+        self.0 == other.0
+    }
+
     /// Select a field by its column name or numeric index.
-    fn field(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
-        Ok(PyField::new(self.0.field(i).clone().into()).to_arro3(py)?)
+    fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+        let field = match i {
+            FieldIndexInput::String(name) => self.0.field_with_name(&name)?,
+            FieldIndexInput::Int(i) => self.0.field(i),
+        };
+        Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
 
     /// Return sorted list of indices for the fields with the given name.
@@ -173,6 +213,13 @@ impl PySchema {
         }
     }
 
+    fn insert(&self, py: Python, i: usize, field: PyField) -> PyResult<PyObject> {
+        let mut fields = self.0.fields().to_vec();
+        fields.insert(i, field.into_inner());
+        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
+        PySchema::new(schema.into()).to_arro3(py)
+    }
+
     /// The schema's metadata.
     #[getter]
     fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
@@ -195,6 +242,31 @@ impl PySchema {
         self.0.fields().iter().map(|f| f.name().clone()).collect()
     }
 
+    fn remove(&self, py: Python, i: usize) -> PyResult<PyObject> {
+        let mut fields = self.0.fields().to_vec();
+        fields.remove(i);
+        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
+        PySchema::new(schema.into()).to_arro3(py)
+    }
+
+    fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
+        PySchema::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_metadata(Default::default())
+                .into(),
+        )
+        .to_arro3(py)
+    }
+
+    fn set(&self, py: Python, i: usize, field: PyField) -> PyResult<PyObject> {
+        let mut fields = self.0.fields().to_vec();
+        fields[i] = field.into_inner();
+        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
+        PySchema::new(schema.into()).to_arro3(py)
+    }
+
     /// The schema’s field types.
     #[getter]
     fn types(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
@@ -204,5 +276,14 @@ impl PySchema {
             .iter()
             .map(|f| PyDataType::new(f.data_type().clone()).to_arro3(py))
             .collect::<PyResult<_>>()?)
+    }
+
+    fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
+        let schema = self
+            .0
+            .as_ref()
+            .clone()
+            .with_metadata(metadata.into_string_hashmap()?);
+        PySchema::new(schema.into()).to_arro3(py)
     }
 }
