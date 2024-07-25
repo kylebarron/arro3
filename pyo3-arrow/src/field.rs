@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -11,6 +12,8 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
+use crate::input::MetadataInput;
+use crate::PyDataType;
 
 /// A Python-facing Arrow field.
 ///
@@ -21,6 +24,10 @@ pub struct PyField(FieldRef);
 impl PyField {
     pub fn new(field: FieldRef) -> Self {
         Self(field)
+    }
+
+    pub fn into_inner(self) -> FieldRef {
+        self.0
     }
 
     /// Export this to a Python `arro3.core.Field`.
@@ -84,6 +91,19 @@ impl Display for PyField {
 
 #[pymethods]
 impl PyField {
+    #[new]
+    #[pyo3(signature = (name, r#type, nullable=true, *, metadata=None))]
+    pub fn init(
+        name: String,
+        r#type: PyDataType,
+        nullable: bool,
+        metadata: Option<MetadataInput>,
+    ) -> PyResult<Self> {
+        let field = Field::new(name, r#type.into_inner(), nullable)
+            .with_metadata(metadata.unwrap_or_default().into_string_hashmap()?);
+        Ok(PyField::new(field.into()))
+    }
+
     /// An implementation of the [Arrow PyCapsule
     /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
     /// This dunder method should not be called directly, but enables zero-copy
@@ -91,7 +111,10 @@ impl PyField {
     ///
     /// For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this array
     /// into a pyarrow field, without copying memory.
-    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+    pub fn __arrow_c_schema__<'py>(
+        &'py self,
+        py: Python<'py>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, self.0.as_ref())
     }
 
@@ -122,5 +145,87 @@ impl PyField {
         let field =
             Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
         Ok(Self::new(Arc::new(field)))
+    }
+
+    /// Test if this field is equal to the other
+    // TODO: add option to check field metadata
+    pub fn equals(&self, other: PyField) -> bool {
+        self.0 == other.0
+    }
+
+    /// The schema's metadata.
+    #[getter]
+    pub fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
+        let mut new_metadata = HashMap::with_capacity(self.0.metadata().len());
+        self.0.metadata().iter().for_each(|(key, val)| {
+            new_metadata.insert(key.as_bytes().to_vec(), val.as_bytes().to_vec());
+        });
+        new_metadata
+    }
+
+    /// The schema's metadata where keys and values are `str`, not `bytes`.
+    #[getter]
+    pub fn metadata_str(&self) -> HashMap<String, String> {
+        self.0.metadata().clone()
+    }
+
+    /// The field name.
+    #[getter]
+    pub fn name(&self) -> String {
+        self.0.name().clone()
+    }
+
+    /// The field nullability.
+    #[getter]
+    pub fn nullable(&self) -> bool {
+        self.0.is_nullable()
+    }
+
+    /// Create new field without metadata, if any
+    pub fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_metadata(Default::default())
+                .into(),
+        )
+        .to_arro3(py)
+    }
+
+    /// Create new field without metadata, if any
+    #[getter]
+    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+        PyDataType::new(self.0.data_type().clone()).to_arro3(py)
+    }
+
+    pub fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_metadata(metadata.into_string_hashmap()?)
+                .into(),
+        )
+        .to_arro3(py)
+    }
+
+    pub fn with_name(&self, py: Python, name: String) -> PyResult<PyObject> {
+        PyField::new(self.0.as_ref().clone().with_name(name).into()).to_arro3(py)
+    }
+
+    pub fn with_nullable(&self, py: Python, nullable: bool) -> PyResult<PyObject> {
+        PyField::new(self.0.as_ref().clone().with_nullable(nullable).into()).to_arro3(py)
+    }
+
+    pub fn with_type(&self, py: Python, new_type: PyDataType) -> PyResult<PyObject> {
+        PyField::new(
+            self.0
+                .as_ref()
+                .clone()
+                .with_data_type(new_type.into_inner())
+                .into(),
+        )
+        .to_arro3(py)
     }
 }

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use arrow_schema::FieldRef;
-use pyo3::exceptions::{PyIOError, PyValueError};
+use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -11,8 +11,8 @@ use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::ArrayReader;
-use crate::{PyChunkedArray, PyField};
+use crate::ffi::{ArrayIterator, ArrayReader};
+use crate::{PyArray, PyChunkedArray, PyField};
 
 /// A Python-facing Arrow array reader.
 ///
@@ -109,7 +109,7 @@ impl PyArrayReader {
     /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
     /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__<'py>(
+    pub fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -126,6 +126,7 @@ impl PyArrayReader {
     }
 
     /// Returns `true` if this reader has already been consumed.
+    #[getter]
     pub fn closed(&self) -> bool {
         self.0.is_none()
     }
@@ -151,9 +152,55 @@ impl PyArrayReader {
         Ok(Self(Some(Box::new(stream_reader))))
     }
 
+    #[classmethod]
+    pub fn from_arrays(_cls: &Bound<PyType>, field: PyField, arrays: Vec<PyArray>) -> Self {
+        let arrays = arrays
+            .into_iter()
+            .map(|array| {
+                let (arr, _field) = array.into_inner();
+                arr
+            })
+            .collect::<Vec<_>>();
+        Self::new(Box::new(ArrayIterator::new(
+            arrays.into_iter().map(Ok),
+            field.into_inner(),
+        )))
+    }
+
+    #[classmethod]
+    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+        data.extract()
+    }
+
     /// Access the field of this reader
     #[getter]
-    fn field(&self, py: Python) -> PyResult<PyObject> {
+    pub fn field(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(self.field_ref()?).to_arro3(py)
+    }
+
+    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        let stream = self
+            .0
+            .take()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+        let field = stream.field();
+        let mut arrays = vec![];
+        for array in stream {
+            arrays.push(array?);
+        }
+        Ok(PyChunkedArray::new(arrays, field).to_arro3(py)?)
+    }
+
+    pub fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        let stream = self
+            .0
+            .as_mut()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+
+        if let Some(next_batch) = stream.next() {
+            Ok(PyArray::new(next_batch?, stream.field()).to_arro3(py)?)
+        } else {
+            Err(PyStopIteration::new_err("").into())
+        }
     }
 }

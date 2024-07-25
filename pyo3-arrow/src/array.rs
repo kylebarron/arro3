@@ -12,6 +12,7 @@ use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::interop::numpy::to_numpy::to_numpy;
+use crate::PyDataType;
 
 /// A Python-facing Arrow array.
 ///
@@ -166,8 +167,20 @@ impl PyArray {
         Ok(Self::new(array, Arc::new(field)))
     }
 
+    #[pyo3(signature = (offset=0, length=None))]
+    pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+        let length = length.unwrap_or_else(|| self.array.len() - offset);
+        let new_array = self.array.slice(offset, length);
+        PyArray::new(new_array, self.field().clone()).to_arro3(py)
+    }
+
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py)
+    }
+
+    #[getter]
+    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+        PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }

@@ -1,21 +1,24 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::compute::concat_batches;
 use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
-use arrow_array::RecordBatch;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
-use arrow_schema::{Field, SchemaRef};
+use arrow_array::{RecordBatch, RecordBatchIterator};
+use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+use crate::error::{PyArrowError, PyArrowResult};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
+use crate::input::FieldIndexInput;
 use crate::schema::display_schema;
-use crate::PySchema;
+use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
 /// A Python-facing Arrow table.
 ///
@@ -85,7 +88,7 @@ impl PyTable {
     /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
     /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
-    fn __arrow_c_stream__<'py>(
+    pub fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -151,15 +154,243 @@ impl PyTable {
         Ok(Self::new(batches, schema))
     }
 
+    pub fn add_column(
+        &self,
+        py: Python,
+        i: usize,
+        field: PyField,
+        column: PyChunkedArray,
+    ) -> PyArrowResult<PyObject> {
+        if self.num_rows() != column.len() {
+            return Err(
+                PyValueError::new_err("Number of rows in column does not match table.").into(),
+            );
+        }
+
+        let column = column.rechunk(self.chunk_lengths())?;
+
+        let mut fields = self.schema.fields().to_vec();
+        fields.insert(i, field.into_inner());
+        let new_schema = Arc::new(Schema::new_with_metadata(
+            fields,
+            self.schema.metadata().clone(),
+        ));
+
+        let new_batches = self
+            .batches
+            .iter()
+            .zip(column.chunks())
+            .map(|(batch, array)| {
+                debug_assert_eq!(
+                    array.len(),
+                    batch.num_rows(),
+                    "Array and batch should have same number of rows."
+                );
+
+                let mut columns = batch.columns().to_vec();
+                columns.insert(i, array.clone());
+                Ok(RecordBatch::try_new(new_schema.clone(), columns)?)
+            })
+            .collect::<Result<Vec<_>, PyArrowError>>()?;
+
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+    }
+
+    pub fn append_column(
+        &self,
+        py: Python,
+        field: PyField,
+        column: PyChunkedArray,
+    ) -> PyArrowResult<PyObject> {
+        if self.num_rows() != column.len() {
+            return Err(
+                PyValueError::new_err("Number of rows in column does not match table.").into(),
+            );
+        }
+
+        let column = column.rechunk(self.chunk_lengths())?;
+
+        let mut fields = self.schema.fields().to_vec();
+        fields.push(field.into_inner());
+        let new_schema = Arc::new(Schema::new_with_metadata(
+            fields,
+            self.schema.metadata().clone(),
+        ));
+
+        let new_batches = self
+            .batches
+            .iter()
+            .zip(column.chunks())
+            .map(|(batch, array)| {
+                debug_assert_eq!(
+                    array.len(),
+                    batch.num_rows(),
+                    "Array and batch should have same number of rows."
+                );
+
+                let mut columns = batch.columns().to_vec();
+                columns.push(array.clone());
+                Ok(RecordBatch::try_new(new_schema.clone(), columns)?)
+            })
+            .collect::<Result<Vec<_>, PyArrowError>>()?;
+
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+    }
+
+    #[getter]
+    pub fn chunk_lengths(&self) -> Vec<usize> {
+        self.batches.iter().map(|batch| batch.num_rows()).collect()
+    }
+
+    /// Select single column from Table
+    pub fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
+        let field = self.schema.field(i).clone();
+        let chunks = self
+            .batches
+            .iter()
+            .map(|batch| batch.column(i).clone())
+            .collect();
+        PyChunkedArray::new(chunks, field.into()).to_arro3(py)
+    }
+
+    /// Names of the Table or RecordBatch columns.
+    #[getter]
+    pub fn column_names(&self) -> Vec<String> {
+        self.schema
+            .fields()
+            .iter()
+            .map(|f| f.name().clone())
+            .collect()
+    }
+
+    /// List of all columns in numerical order.
+    #[getter]
+    pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
+        (0..self.num_columns())
+            .map(|i| self.column(py, i))
+            .collect()
+    }
+
+    pub fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
+        let batch = concat_batches(&self.schema, &self.batches)?;
+        Ok(PyTable::new(vec![batch], self.schema.clone()).to_arro3(py)?)
+    }
+
+    pub fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+        let schema = &self.schema;
+        let field = match i {
+            FieldIndexInput::String(name) => schema.field_with_name(&name)?,
+            FieldIndexInput::Int(i) => schema.field(i),
+        };
+        Ok(PyField::new(field.clone().into()).to_arro3(py)?)
+    }
+
     /// Number of columns in this table.
     #[getter]
-    fn num_columns(&self) -> usize {
+    pub fn num_columns(&self) -> usize {
         self.schema.fields().len()
+    }
+
+    /// Number of columns in this table.
+    #[getter]
+    pub fn num_rows(&self) -> usize {
+        self.batches()
+            .iter()
+            .fold(0, |acc, batch| acc + batch.num_rows())
+    }
+
+    // pub fn rechunk(&self, py: Python, max_chunksize: usize) {}
+
+    pub fn set_column(
+        &self,
+        py: Python,
+        i: usize,
+        field: PyField,
+        column: PyChunkedArray,
+    ) -> PyArrowResult<PyObject> {
+        if self.num_rows() != column.len() {
+            return Err(
+                PyValueError::new_err("Number of rows in column does not match table.").into(),
+            );
+        }
+
+        let column = column.rechunk(self.chunk_lengths())?;
+
+        let mut fields = self.schema.fields().to_vec();
+        fields[i] = field.into_inner();
+        let new_schema = Arc::new(Schema::new_with_metadata(
+            fields,
+            self.schema.metadata().clone(),
+        ));
+
+        let new_batches = self
+            .batches
+            .iter()
+            .zip(column.chunks())
+            .map(|(batch, array)| {
+                debug_assert_eq!(
+                    array.len(),
+                    batch.num_rows(),
+                    "Array and batch should have same number of rows."
+                );
+
+                let mut columns = batch.columns().to_vec();
+                columns[i] = array.clone();
+                Ok(RecordBatch::try_new(new_schema.clone(), columns)?)
+            })
+            .collect::<Result<Vec<_>, PyArrowError>>()?;
+
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
     }
 
     /// Access the schema of this table
     #[getter]
-    fn schema(&self, py: Python) -> PyResult<PyObject> {
+    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema.clone()).to_arro3(py)
+    }
+
+    /// Dimensions of the table or record batch: (#rows, #columns).
+    #[getter]
+    pub fn shape(&self) -> (usize, usize) {
+        (self.num_rows(), self.num_columns())
+    }
+
+    pub fn to_batches(&self, py: Python) -> PyResult<Vec<PyObject>> {
+        self.batches
+            .iter()
+            .map(|batch| PyRecordBatch::new(batch.clone()).to_arro3(py))
+            .collect()
+    }
+
+    pub fn to_reader(&self, py: Python) -> PyResult<PyObject> {
+        let reader = Box::new(RecordBatchIterator::new(
+            self.batches.clone().into_iter().map(Ok),
+            self.schema.clone(),
+        ));
+        PyRecordBatchReader::new(reader).to_arro3(py)
+    }
+
+    pub fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
+        let chunks = self
+            .batches
+            .iter()
+            .map(|batch| {
+                let struct_array: StructArray = batch.clone().into();
+                Arc::new(struct_array) as ArrayRef
+            })
+            .collect::<Vec<_>>();
+        let field = Field::new_struct("", self.schema.fields().clone(), false)
+            .with_metadata(self.schema.metadata.clone());
+        Ok(PyChunkedArray::new(chunks, field.into()).to_arro3(py)?)
+    }
+
+    pub fn with_schema(&self, py: Python, schema: PySchema) -> PyArrowResult<PyObject> {
+        let new_schema = schema.into_inner();
+        let new_batches = self
+            .batches
+            .iter()
+            .map(|batch| RecordBatch::try_new(new_schema.clone(), batch.columns().to_vec()))
+            .collect::<Result<Vec<_>, ArrowError>>()?;
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
     }
 }
