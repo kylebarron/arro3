@@ -4,6 +4,7 @@ use arrow_csv::reader::Format;
 use arrow_csv::{ReaderBuilder, WriterBuilder};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
 use crate::utils::{FileReader, FileWriter};
@@ -133,7 +134,7 @@ pub fn read_csv(
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn write_csv(
-    data: PyRecordBatchReader,
+    data: AnyRecordBatch,
     file: FileWriter,
     header: Option<bool>,
     delimiter: Option<char>,

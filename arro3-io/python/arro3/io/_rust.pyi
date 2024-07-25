@@ -40,7 +40,7 @@ def read_csv(
     comment: str | None = None,
 ) -> RecordBatchReader: ...
 def write_csv(
-    data: ArrowStreamExportable,
+    data: ArrowStreamExportable | ArrowArrayExportable,
     file: IO[bytes] | Path | str,
     *,
     header: bool | None = None,
@@ -69,13 +69,13 @@ def read_json(
     batch_size: int | None = None,
 ) -> RecordBatchReader: ...
 def write_json(
-    data: ArrowStreamExportable,
+    data: ArrowStreamExportable | ArrowArrayExportable,
     file: IO[bytes] | Path | str,
     *,
     explicit_nulls: bool | None = None,
 ) -> None: ...
 def write_ndjson(
-    data: ArrowStreamExportable,
+    data: ArrowStreamExportable | ArrowArrayExportable,
     file: IO[bytes] | Path | str,
     *,
     explicit_nulls: bool | None = None,
@@ -85,14 +85,16 @@ def write_ndjson(
 
 def read_ipc(file: IO[bytes] | Path | str) -> RecordBatchReader: ...
 def read_ipc_stream(file: IO[bytes] | Path | str) -> RecordBatchReader: ...
-def write_ipc(data: ArrowStreamExportable, file: IO[bytes] | Path | str) -> None: ...
+def write_ipc(
+    data: ArrowStreamExportable | ArrowArrayExportable, file: IO[bytes] | Path | str
+) -> None: ...
 def write_ipc_stream(
-    data: ArrowStreamExportable, file: IO[bytes] | Path | str
+    data: ArrowStreamExportable | ArrowArrayExportable, file: IO[bytes] | Path | str
 ) -> None: ...
 
 #### Parquet
 
 def read_parquet(file: Path | str) -> RecordBatchReader: ...
 def write_parquet(
-    data: ArrowStreamExportable, file: IO[bytes] | Path | str
+    data: ArrowStreamExportable | ArrowArrayExportable, file: IO[bytes] | Path | str
 ) -> None: ...
