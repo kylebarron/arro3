@@ -80,6 +80,9 @@ dependencies = [
 name = "arro3-core"
 version = "0.1.0"
 dependencies = [
+ "arrow-array",
+ "arrow-buffer",
+ "arrow-schema",
  "pyo3",
  "pyo3-arrow",
 ]
