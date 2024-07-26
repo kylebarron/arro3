@@ -591,3 +591,52 @@ class Table:
         Returns:
             _description_
         """
+
+def fixed_size_list_array(
+    values: ArrowArrayExportable,
+    list_size: int,
+    *,
+    type: ArrowSchemaExportable | None = None,
+) -> Array:
+    """_summary_
+
+    Args:
+        values: _description_
+        list_size: _description_
+        type: _description_. Defaults to None.
+
+    Returns:
+        _description_
+    """
+
+def list_array(
+    offsets: ArrowArrayExportable,
+    values: ArrowArrayExportable,
+    *,
+    type: ArrowSchemaExportable | None = None,
+) -> Array:
+    """_summary_
+
+    Args:
+        offsets: _description_
+        values: _description_
+        type: _description_. Defaults to None.
+
+    Returns:
+        _description_
+    """
+
+def struct_array(
+    arrays: Sequence[ArrowArrayExportable],
+    *,
+    fields: Sequence[ArrowSchemaExportable],
+) -> Array:
+    """_summary_
+
+    Args:
+        arrays: _description_
+        fields: _description_
+
+    Returns:
+        _description_
+    """
