@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_array::{make_array, Array, ArrayRef};
-use arrow_schema::{Field, FieldRef};
+use arrow_schema::{ArrowError, Field, FieldRef};
 use numpy::PyUntypedArray;
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -28,7 +28,18 @@ pub struct PyArray {
 impl PyArray {
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
+        assert_eq!(array.data_type(), field.data_type());
         Self { array, field }
+    }
+
+    /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
+    pub fn try_new(array: ArrayRef, field: FieldRef) -> Result<Self, ArrowError> {
+        if array.data_type() != field.data_type() {
+            return Err(ArrowError::SchemaError(
+                "Array DataType must match Field DataType".to_string(),
+            ));
+        }
+        Ok(Self { array, field })
     }
 
     pub fn from_array<A: Array>(array: A) -> Self {

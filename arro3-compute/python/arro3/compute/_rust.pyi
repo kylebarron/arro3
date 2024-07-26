@@ -1,4 +1,4 @@
-from typing import Protocol, Tuple, overload
+from typing import Protocol, Sequence, Tuple, overload
 
 from arro3.core import Array, ArrayReader
 
@@ -27,3 +27,39 @@ def cast(
     input: ArrowArrayExportable | ArrowStreamExportable,
     to_type: ArrowSchemaExportable,
 ) -> Array | ArrayReader: ...
+@overload
+def list_flatten(input: ArrowArrayExportable) -> Array: ...
+@overload
+def list_flatten(input: ArrowStreamExportable) -> ArrayReader: ...
+def list_flatten(
+    input: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """Unnest this ListArray, LargeListArray or FixedSizeListArray.
+
+    Args:
+        input: _description_
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        _description_
+    """
+
+def struct_field(
+    values: ArrowArrayExportable,
+    /,
+    indices: int | Sequence[int],
+) -> Array:
+    """Access a column within a StructArray by index
+
+    Args:
+        values: Argument to compute function.
+        indices: List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.
+
+    Raises:
+        Exception if not a struct-typed array.
+
+    Returns:
+        _description_
+    """
