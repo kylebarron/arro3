@@ -172,19 +172,16 @@ impl PyArray {
     #[classmethod]
     pub fn from_numpy(
         _cls: &Bound<PyType>,
-        mut array: Bound<'_, PyAny>,
+        array: Bound<'_, PyAny>,
         r#type: PyDataType,
     ) -> PyArrowResult<Self> {
-        if array.hasattr("__array__")? {
-            array = array.call_method0("__array__")?;
+        let mut numpy_array = array;
+        if numpy_array.hasattr("__array__")? {
+            numpy_array = numpy_array.call_method0("__array__")?;
         };
-        let array: &PyUntypedArray = FromPyObject::extract_bound(&array)?;
-        // let x = array.extract::<PyUntypedArray>();
-
-        // if array.hasattr
-        let x = from_numpy(array, r#type.into_inner())?;
-        let field = Field::new("", x.data_type().clone(), true);
-        Ok(Self::new(x, field.into()))
+        let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
+        let arrow_array = from_numpy(numpy_array, r#type.into_inner())?;
+        Ok(Self::from_array_ref(arrow_array))
     }
 
     #[pyo3(signature = (offset=0, length=None))]
