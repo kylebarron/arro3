@@ -1,6 +1,7 @@
 mod array;
 mod array_reader;
 mod chunked;
+mod datatypes;
 pub(crate) mod ffi_stream;
 mod field;
 mod input;

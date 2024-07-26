@@ -1,4 +1,5 @@
 from typing import Sequence
+import numpy as np
 from numpy.typing import NDArray
 
 from .types import (
@@ -33,6 +34,10 @@ class Array:
     @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Array:
         """Construct this object from bare Arrow PyCapsules"""
+
+    @classmethod
+    def from_numpy(cls, array: np.ndarray, type: ArrowSchemaExportable) -> Array:
+        """Construct an Array from a numpy ndarray"""
 
     def to_numpy(self) -> NDArray:
         """Return a numpy copy of this array."""
