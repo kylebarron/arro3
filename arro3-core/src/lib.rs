@@ -22,5 +22,9 @@ fn _rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<pyo3_arrow::PySchema>()?;
     m.add_class::<pyo3_arrow::PyTable>()?;
 
+    m.add_wrapped(wrap_pyfunction!(constructors::fixed_size_list_array))?;
+    m.add_wrapped(wrap_pyfunction!(constructors::list_array))?;
+    m.add_wrapped(wrap_pyfunction!(constructors::struct_array))?;
+
     Ok(())
 }

@@ -8,6 +8,9 @@ from ._rust import (
     RecordBatchReader,
     Schema,
     Table,
+    fixed_size_list_array,
+    list_array,
+    struct_array,
     ___version,  # noqa,
 )
 
@@ -23,4 +26,7 @@ __all__ = (
     "RecordBatchReader",
     "Schema",
     "Table",
+    "fixed_size_list_array",
+    "list_array",
+    "struct_array",
 )
