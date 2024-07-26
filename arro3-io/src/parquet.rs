@@ -65,7 +65,7 @@ impl<'py> FromPyObject<'py> for PyEncoding {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub(crate) struct PyColumnPath(ColumnPath);
 
@@ -91,6 +91,10 @@ impl<'py> FromPyObject<'py> for PyColumnPath {
     bloom_filter_enabled = None,
     bloom_filter_fpp = None,
     bloom_filter_ndv = None,
+    column_compression = None,
+    column_dictionary_enabled = None,
+    column_encoding = None,
+    column_max_statistics_size = None,
     compression = None,
     created_by = None,
     data_page_row_count_limit = None,
@@ -111,6 +115,10 @@ pub(crate) fn write_parquet(
     bloom_filter_enabled: Option<bool>,
     bloom_filter_fpp: Option<f64>,
     bloom_filter_ndv: Option<u64>,
+    column_compression: Option<HashMap<PyColumnPath, PyCompression>>,
+    column_dictionary_enabled: Option<HashMap<PyColumnPath, bool>>,
+    column_encoding: Option<HashMap<PyColumnPath, PyEncoding>>,
+    column_max_statistics_size: Option<HashMap<PyColumnPath, usize>>,
     compression: Option<PyCompression>,
     created_by: Option<String>,
     data_page_row_count_limit: Option<usize>,
@@ -175,6 +183,26 @@ pub(crate) fn write_parquet(
     }
     if let Some(encoding) = encoding {
         props = props.set_encoding(encoding.0);
+    }
+    if let Some(column_encoding) = column_encoding {
+        for (column_path, encoding) in column_encoding.into_iter() {
+            props = props.set_column_encoding(column_path.0, encoding.0);
+        }
+    }
+    if let Some(column_compression) = column_compression {
+        for (column_path, compression) in column_compression.into_iter() {
+            props = props.set_column_compression(column_path.0, compression.0);
+        }
+    }
+    if let Some(column_dictionary_enabled) = column_dictionary_enabled {
+        for (column_path, dictionary_enabled) in column_dictionary_enabled.into_iter() {
+            props = props.set_column_dictionary_enabled(column_path.0, dictionary_enabled);
+        }
+    }
+    if let Some(column_max_statistics_size) = column_max_statistics_size {
+        for (column_path, max_statistics_size) in column_max_statistics_size.into_iter() {
+            props = props.set_column_max_statistics_size(column_path.0, max_statistics_size);
+        }
     }
 
     let reader = data.into_reader()?;
