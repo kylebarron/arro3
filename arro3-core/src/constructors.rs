@@ -13,7 +13,8 @@ use pyo3_arrow::{PyArray, PyField};
 
 #[pyfunction]
 #[pyo3(signature=(values, list_size, *, r#type=None))]
-pub fn fixed_size_list_array(
+#[allow(dead_code)]
+fn fixed_size_list_array(
     py: Python,
     values: PyArray,
     list_size: i32,
@@ -35,7 +36,8 @@ pub fn fixed_size_list_array(
 
 #[pyfunction]
 #[pyo3(signature=(offsets, values, *, r#type=None))]
-pub fn list_array(
+#[allow(dead_code)]
+fn list_array(
     py: Python,
     offsets: PyArray,
     values: PyArray,
@@ -80,11 +82,8 @@ pub fn list_array(
 
 #[pyfunction]
 #[pyo3(signature=(arrays, *, fields))]
-pub fn struct_array(
-    py: Python,
-    arrays: Vec<PyArray>,
-    fields: Vec<PyField>,
-) -> PyArrowResult<PyObject> {
+#[allow(dead_code)]
+fn struct_array(py: Python, arrays: Vec<PyArray>, fields: Vec<PyField>) -> PyArrowResult<PyObject> {
     let arrays = arrays
         .into_iter()
         .map(|arr| {
