@@ -1,5 +1,7 @@
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::ArrowWriter;
+use parquet::basic::Compression;
+use parquet::file::properties::{WriterProperties, WriterPropertiesBuilder};
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
@@ -21,6 +23,22 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
         FileReader::FileLike(_) => {
             Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())
         }
+    }
+}
+
+#[pyclass(module = "arro3.core._rust", subclass)]
+pub struct ParquetWriterProperties(Option<WriterPropertiesBuilder>);
+
+#[pymethods]
+impl ParquetWriterProperties {
+    #[new]
+    fn new() -> Self {
+        Self(Some(WriterProperties::builder()))
+    }
+
+    fn set_compression(&mut self) {
+        let builder = self.0.take().unwrap();
+        self.0 = Some(builder.set_compression(Compression::LZ4));
     }
 }
 
