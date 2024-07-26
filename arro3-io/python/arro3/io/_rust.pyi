@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import IO, Literal
+from typing import IO, Literal, Sequence
 
 from arro3.core import RecordBatchReader, Schema
 from arro3.core.types import (
@@ -88,6 +88,28 @@ def write_ipc_stream(
 
 #### Parquet
 
+ParquetColumnPath = str | Sequence[str]
+"""Allowed types to refer to a Parquet Column."""
+
+ParquetCompression = (
+    Literal["uncompressed", "snappy", "gzip", "lzo", "brotli", "lz4", "zstd", "lz4_raw"]
+    | str
+)
+"""Allowed compression schemes for Parquet."""
+
+ParquetEncoding = Literal[
+    "plain",
+    "plain_dictionary",
+    "rle",
+    "bit_packed",
+    "delta_binary_packed",
+    "delta_length_byte_array",
+    "delta_byte_array",
+    "rle_dictionary",
+    "byte_stream_split",
+]
+"""Allowed Parquet encodings."""
+
 def read_parquet(file: Path | str) -> RecordBatchReader:
     """Read a Parquet file to an Arrow RecordBatchReader
 
@@ -105,28 +127,17 @@ def write_parquet(
     bloom_filter_enabled: bool | None = None,
     bloom_filter_fpp: float | None = None,
     bloom_filter_ndv: int | None = None,
-    compression: Literal[
-        "uncompressed", "snappy", "gzip", "lzo", "brotli", "lz4", "zstd", "lz4_raw"
-    ]
-    | str
-    | None = None,
+    column_compression: dict[ParquetColumnPath, ParquetCompression] | None = None,
+    column_dictionary_enabled: dict[ParquetColumnPath, bool] | None = None,
+    column_encoding: dict[ParquetColumnPath, ParquetEncoding] | None = None,
+    column_max_statistics_size: dict[ParquetColumnPath, int] | None = None,
+    compression: ParquetCompression | None = None,
     created_by: str | None = None,
     data_page_row_count_limit: int | None = None,
     data_page_size_limit: int | None = None,
     dictionary_enabled: bool | None = None,
     dictionary_page_size_limit: int | None = None,
-    encoding: Literal[
-        "plain",
-        "plain_dictionary",
-        "rle",
-        "bit_packed",
-        "delta_binary_packed",
-        "delta_length_byte_array",
-        "delta_byte_array",
-        "rle_dictionary",
-        "byte_stream_split",
-    ]
-    | None = None,
+    encoding: ParquetEncoding | None = None,
     key_value_metadata: dict[str, str] | None = None,
     max_row_group_size: int | None = None,
     max_statistics_size: int | None = None,
@@ -143,6 +154,10 @@ def write_parquet(
         bloom_filter_enabled: Sets if bloom filter is enabled by default for all columns (defaults to `false`).
         bloom_filter_fpp: Sets the default target bloom filter false positive probability (fpp) for all columns (defaults to `0.05`).
         bloom_filter_ndv: Sets default number of distinct values (ndv) for bloom filter for all columns (defaults to `1_000_000`).
+        column_compression: Sets compression codec for a specific column. Takes precedence over `compression`.
+        column_dictionary_enabled: Sets flag to enable/disable dictionary encoding for a specific column. Takes precedence over `dictionary_enabled`.
+        column_encoding: Sets encoding for a specific column. Takes precedence over `encoding`.
+        column_max_statistics_size: Sets max size for statistics for a specific column. Takes precedence over `max_statistics_size`.
         compression:
             Sets default compression codec for all columns (default to `uncompressed`).
             Note that you can pass in a custom compression level with a string like
