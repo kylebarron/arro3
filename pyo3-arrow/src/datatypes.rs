@@ -28,7 +28,7 @@ impl<'a> FromPyObject<'a> for PyTimeUnit {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 #[pyclass(module = "arro3.core._rust", name = "DataType", subclass)]
 pub struct PyDataType(DataType);
 

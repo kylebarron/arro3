@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use arrow_array::{make_array, Array, ArrayRef};
 use arrow_schema::{Field, FieldRef};
+use numpy::PyUntypedArray;
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -11,6 +12,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::PyDataType;
 
@@ -146,7 +148,6 @@ impl PyArray {
         input.extract()
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -155,6 +156,24 @@ impl PyArray {
     ) -> PyResult<Self> {
         let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
         Ok(Self::new(array, Arc::new(field)))
+    }
+
+    #[classmethod]
+    pub fn from_numpy(
+        _cls: &Bound<PyType>,
+        mut array: Bound<'_, PyAny>,
+        r#type: PyDataType,
+    ) -> PyArrowResult<Self> {
+        if array.hasattr("__array__")? {
+            array = array.call_method0("__array__")?;
+        };
+        let array: &PyUntypedArray = FromPyObject::extract_bound(&array)?;
+        // let x = array.extract::<PyUntypedArray>();
+
+        // if array.hasattr
+        let x = from_numpy(array, r#type.into_inner())?;
+        let field = Field::new("", x.data_type().clone(), true);
+        Ok(Self::new(x, field.into()))
     }
 
     #[pyo3(signature = (offset=0, length=None))]
