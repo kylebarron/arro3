@@ -1,8 +1,14 @@
+use std::collections::HashMap;
+use std::str::FromStr;
+
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
-use parquet::basic::Compression;
-use parquet::file::properties::{WriterProperties, WriterPropertiesBuilder};
-use pyo3::exceptions::PyTypeError;
+use parquet::basic::{Compression, Encoding};
+use parquet::file::properties::{WriterProperties, WriterVersion};
+use parquet::format::KeyValue;
+use parquet::schema::types::ColumnPath;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
@@ -10,7 +16,6 @@ use pyo3_arrow::PyRecordBatchReader;
 
 use crate::utils::{FileReader, FileWriter};
 
-/// Read a Parquet file to an Arrow RecordBatchReader
 #[pyfunction]
 pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
     match file {
@@ -26,27 +31,157 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
     }
 }
 
-#[pyclass(module = "arro3.core._rust", subclass)]
-pub struct ParquetWriterProperties(Option<WriterPropertiesBuilder>);
+pub(crate) struct PyWriterVersion(WriterVersion);
 
-#[pymethods]
-impl ParquetWriterProperties {
-    #[new]
-    fn new() -> Self {
-        Self(Some(WriterProperties::builder()))
-    }
-
-    fn set_compression(&mut self) {
-        let builder = self.0.take().unwrap();
-        self.0 = Some(builder.set_compression(Compression::LZ4));
+impl<'py> FromPyObject<'py> for PyWriterVersion {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let s: String = ob.extract()?;
+        Ok(Self(
+            WriterVersion::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
+        ))
     }
 }
 
-/// Write an Arrow Table or stream to a Parquet file
+pub(crate) struct PyCompression(Compression);
+
+impl<'py> FromPyObject<'py> for PyCompression {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let s: String = ob.extract()?;
+        Ok(Self(
+            Compression::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
+        ))
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct PyEncoding(Encoding);
+
+impl<'py> FromPyObject<'py> for PyEncoding {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let s: String = ob.extract()?;
+        Ok(Self(
+            Encoding::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
+        ))
+    }
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+pub(crate) struct PyColumnPath(ColumnPath);
+
+impl<'py> FromPyObject<'py> for PyColumnPath {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        if let Ok(path) = ob.extract::<String>() {
+            Ok(Self(path.into()))
+        } else if let Ok(path) = ob.extract::<Vec<String>>() {
+            Ok(Self(path.into()))
+        } else {
+            Err(PyTypeError::new_err(
+                "Expected string or list of string input for column path.",
+            ))
+        }
+    }
+}
+
 #[pyfunction]
-pub fn write_parquet(data: AnyRecordBatch, file: FileWriter) -> PyArrowResult<()> {
+#[pyo3(signature=(
+    data,
+    file,
+    *,
+    bloom_filter_enabled = None,
+    bloom_filter_fpp = None,
+    bloom_filter_ndv = None,
+    compression = None,
+    created_by = None,
+    data_page_row_count_limit = None,
+    data_page_size_limit = None,
+    dictionary_enabled = None,
+    dictionary_page_size_limit = None,
+    encoding = None,
+    key_value_metadata = None,
+    max_row_group_size = None,
+    max_statistics_size = None,
+    write_batch_size = None,
+    writer_version = None,
+))]
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn write_parquet(
+    data: AnyRecordBatch,
+    file: FileWriter,
+    bloom_filter_enabled: Option<bool>,
+    bloom_filter_fpp: Option<f64>,
+    bloom_filter_ndv: Option<u64>,
+    compression: Option<PyCompression>,
+    created_by: Option<String>,
+    data_page_row_count_limit: Option<usize>,
+    data_page_size_limit: Option<usize>,
+    dictionary_enabled: Option<bool>,
+    dictionary_page_size_limit: Option<usize>,
+    encoding: Option<PyEncoding>,
+    key_value_metadata: Option<HashMap<String, String>>,
+    max_row_group_size: Option<usize>,
+    max_statistics_size: Option<usize>,
+    write_batch_size: Option<usize>,
+    writer_version: Option<PyWriterVersion>,
+) -> PyArrowResult<()> {
+    let mut props = WriterProperties::builder();
+
+    if let Some(writer_version) = writer_version {
+        props = props.set_writer_version(writer_version.0);
+    }
+    if let Some(data_page_size_limit) = data_page_size_limit {
+        props = props.set_data_page_size_limit(data_page_size_limit);
+    }
+    if let Some(data_page_row_count_limit) = data_page_row_count_limit {
+        props = props.set_data_page_row_count_limit(data_page_row_count_limit);
+    }
+    if let Some(dictionary_page_size_limit) = dictionary_page_size_limit {
+        props = props.set_dictionary_page_size_limit(dictionary_page_size_limit);
+    }
+    if let Some(write_batch_size) = write_batch_size {
+        props = props.set_write_batch_size(write_batch_size);
+    }
+    if let Some(max_row_group_size) = max_row_group_size {
+        props = props.set_max_row_group_size(max_row_group_size);
+    }
+    if let Some(created_by) = created_by {
+        props = props.set_created_by(created_by);
+    }
+    if let Some(key_value_metadata) = key_value_metadata {
+        props = props.set_key_value_metadata(Some(
+            key_value_metadata
+                .into_iter()
+                .map(|(k, v)| KeyValue::new(k, v))
+                .collect(),
+        ));
+    }
+    if let Some(compression) = compression {
+        props = props.set_compression(compression.0);
+    }
+    if let Some(dictionary_enabled) = dictionary_enabled {
+        props = props.set_dictionary_enabled(dictionary_enabled);
+    }
+    if let Some(max_statistics_size) = max_statistics_size {
+        props = props.set_max_statistics_size(max_statistics_size);
+    }
+    if let Some(bloom_filter_enabled) = bloom_filter_enabled {
+        props = props.set_bloom_filter_enabled(bloom_filter_enabled);
+    }
+    if let Some(bloom_filter_fpp) = bloom_filter_fpp {
+        props = props.set_bloom_filter_fpp(bloom_filter_fpp);
+    }
+    if let Some(bloom_filter_ndv) = bloom_filter_ndv {
+        props = props.set_bloom_filter_ndv(bloom_filter_ndv);
+    }
+    if let Some(encoding) = encoding {
+        props = props.set_encoding(encoding.0);
+    }
+
     let reader = data.into_reader()?;
-    let mut writer = ArrowWriter::try_new(file, reader.schema(), None).unwrap();
+
+    let writer_options = ArrowWriterOptions::new().with_properties(props.build());
+    let mut writer =
+        ArrowWriter::try_new_with_options(file, reader.schema(), writer_options).unwrap();
     for batch in reader {
         writer.write(&batch?).unwrap();
     }
