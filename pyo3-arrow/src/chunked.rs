@@ -29,6 +29,12 @@ pub struct PyChunkedArray {
 
 impl PyChunkedArray {
     pub fn new(chunks: Vec<ArrayRef>, field: FieldRef) -> Self {
+        assert!(
+            chunks
+                .iter()
+                .all(|chunk| chunk.data_type() == field.data_type()),
+            "All chunks must have same data type"
+        );
         Self { chunks, field }
     }
 

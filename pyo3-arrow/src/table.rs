@@ -32,6 +32,11 @@ pub struct PyTable {
 
 impl PyTable {
     pub fn new(batches: Vec<RecordBatch>, schema: SchemaRef) -> Self {
+        // TODO: allow batches to have different schema metadata?
+        assert!(
+            batches.iter().all(|rb| rb.schema_ref() == &schema),
+            "All batches must have same schema"
+        );
         Self { schema, batches }
     }
 
