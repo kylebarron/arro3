@@ -14,8 +14,6 @@ mkdocstrings = { version = "^0.25.1", extras = ["python"] }
 # https://github.com/squidfunk/mkdocs-material/issues/6983
 mkdocs-material = { version = "^9.5.17", extras = ["imaging"] }
 mike = "^2"
-pyarrow = "^15.0.0"
-
 
 [tool.poetry.group.dev.dependencies]
 maturin = "^1.4.0"
