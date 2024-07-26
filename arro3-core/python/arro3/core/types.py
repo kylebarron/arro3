@@ -21,7 +21,3 @@ class ArrowStreamExportable(Protocol):
     """A C-level reference to an Arrow RecordBatchReader, Table, or ChunkedArray."""
 
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
-
-
-FieldIndexInput = int | str
-MetadataInput = dict[str, str] | dict[bytes, bytes]

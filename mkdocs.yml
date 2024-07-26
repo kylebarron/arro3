@@ -1,11 +1,11 @@
-site_name: arro3-core
+site_name: arro3
 repo_name: kylebarron/arro3
 repo_url: https://github.com/kylebarron/arro3
 site_description: A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation.
 site_author: Kyle Barron
 # Note: trailing slash recommended with mike:
 # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/#publishing-a-new-version
-site_url: https://kylebarron.dev/arro3/core/
+site_url: https://kylebarron.dev/arro3/
 docs_dir: docs
 
 extra:
@@ -20,18 +20,22 @@ extra:
 nav:
   - "index.md"
   - API Reference:
-      - api/index.md
-      - api/array.md
-      - api/chunked-array.md
-      - api/field.md
-      - api/record-batch-reader.md
-      - api/record-batch.md
-      - api/schema.md
-      - api/table.md
-      - api/types.md
+      - arro3.core:
+          - api/core/array.md
+          - api/core/chunked-array.md
+          - api/core/field.md
+          - api/core/record-batch-reader.md
+          - api/core/record-batch.md
+          - api/core/schema.md
+          - api/core/table.md
+          - api/core/types.md
+      - api/compute.md
+      - api/io.md
 
 watch:
-  - python
+  - arro3-compute/python
+  - arro3-core/python
+  - arro3-io/python
   - docs
 
 theme:
@@ -85,7 +89,7 @@ plugins:
       enable_inventory: true
       handlers:
         python:
-          paths: [python]
+          paths: [arro3-compute/python, arro3-core/python, arro3-io/python]
           options:
             docstring_section_style: list
             docstring_style: google
