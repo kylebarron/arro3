@@ -169,16 +169,44 @@ class RecordBatch:
     @classmethod
     def from_arrays(
         cls, arrays: Sequence[ArrowArrayExportable], *, schema: ArrowSchemaExportable
-    ) -> RecordBatch: ...
+    ) -> RecordBatch:
+        """Construct a RecordBatch from multiple pyarrow.Arrays
+
+        Args:
+            arrays: One for each field in RecordBatch
+            schema: Schema for the created batch. If not passed, names must be passed
+
+        Returns:
+            _description_
+        """
     @classmethod
     def from_pydict(
         cls,
         mapping: dict[str, ArrowArrayExportable],
         *,
         metadata: ArrowSchemaExportable | None = None,
-    ) -> RecordBatch: ...
+    ) -> RecordBatch:
+        """Construct a Table or RecordBatch from Arrow arrays or columns.
+
+        Args:
+            mapping: A mapping of strings to Arrays.
+            metadata: Optional metadata for the schema (if inferred). Defaults to None.
+
+        Returns:
+            _description_
+        """
     @classmethod
-    def from_struct_array(cls, struct_array: ArrowArrayExportable) -> RecordBatch: ...
+    def from_struct_array(cls, struct_array: ArrowArrayExportable) -> RecordBatch:
+        """Construct a RecordBatch from a StructArray.
+
+        Each field in the StructArray will become a column in the resulting RecordBatch.
+
+        Args:
+            struct_array: Array to construct the record batch from.
+
+        Returns:
+            New RecordBatch
+        """
     @classmethod
     def from_arrow(cls, input: ArrowArrayExportable) -> RecordBatch: ...
     @classmethod
@@ -189,22 +217,74 @@ class RecordBatch:
     ) -> RecordBatch: ...
     def append_column(
         self, field: ArrowSchemaExportable, column: ArrowArrayExportable
-    ) -> RecordBatch: ...
-    def column(self, i: int) -> ChunkedArray: ...
+    ) -> RecordBatch:
+        """Append column at end of columns.
+
+        Args:
+            field: If a string is passed then the type is deduced from the column data.
+            column: Column data
+
+        Returns:
+            _description_
+        """
+
+    def column(self, i: int | str) -> ChunkedArray:
+        """Select single column from Table or RecordBatch.
+
+        Args:
+            i: The index or name of the column to retrieve.
+
+        Returns:
+            _description_
+        """
     @property
-    def column_names(self) -> list[str]: ...
+    def column_names(self) -> list[str]:
+        """Names of the RecordBatch columns."""
     @property
-    def columns(self) -> list[Array]: ...
-    def equals(self, other: ArrowArrayExportable) -> bool: ...
-    def field(self, i: int) -> Field: ...
+    def columns(self) -> list[Array]:
+        """List of all columns in numerical order."""
+    def equals(self, other: ArrowArrayExportable) -> bool:
+        """Check if contents of two record batches are equal.
+
+        Args:
+            other: RecordBatch to compare against.
+
+        Returns:
+            _description_
+        """
+
+    def field(self, i: int | str) -> Field:
+        """Select a schema field by its column name or numeric index.
+
+        Args:
+            i: The index or name of the field to retrieve.
+
+        Returns:
+            _description_
+        """
     @property
-    def num_columns(self) -> int: ...
+    def num_columns(self) -> int:
+        """Number of columns."""
     @property
-    def num_rows(self) -> int: ...
-    def remove_column(self, i: int) -> RecordBatch: ...
+    def num_rows(self) -> int:
+        """Number of rows
+
+        Due to the definition of a RecordBatch, all columns have the same number of
+        rows.
+        """
+    def remove_column(self, i: int) -> RecordBatch:
+        """Create new RecordBatch with the indicated column removed.
+
+        Args:
+            i: Index of column to remove.
+
+        Returns:
+            New record batch without the column.
+        """
     @property
-    def schema(self) -> Schema: ...
-    def select(self, columns: list[int]) -> RecordBatch: ...
+    def schema(self) -> Schema:
+        """Access the schema of this RecordBatch"""
+    def select(self, columns: list[int] | list[str]) -> RecordBatch: ...
     def set_column(
         self, i: int, field: ArrowSchemaExportable, column: ArrowArrayExportable
     ) -> RecordBatch: ...
@@ -448,7 +528,7 @@ class Table:
             _description_
         """
     def add_column(
-        self, i: int, field: ArrowSchemaExportable, column: ArrowStreamExportable
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
     ) -> RecordBatch:
         """Add column to Table at position.
 
@@ -463,7 +543,7 @@ class Table:
             New table with the passed column added.
         """
     def append_column(
-        self, field: ArrowSchemaExportable, column: ArrowStreamExportable
+        self, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
     ) -> RecordBatch:
         """Append column at end of columns.
 
@@ -477,7 +557,7 @@ class Table:
     @property
     def chunk_lengths(self) -> list[int]:
         """The number of rows in each internal chunk."""
-    def column(self, i: int) -> ChunkedArray:
+    def column(self, i: int | str) -> ChunkedArray:
         """Select single column from Table or RecordBatch.
 
         Args:
@@ -527,15 +607,20 @@ class Table:
 
         Due to the definition of a table, all columns have the same number of rows.
         """
-    def set_column(
-        self, i: int, field: ArrowSchemaExportable, column: ArrowStreamExportable
-    ) -> Table:
-        """Replace column in Table at position.
+    def remove_column(self, i: int) -> Table:
+        """Create new Table with the indicated column removed.
 
         Args:
-            i: Index to place the column at.
-            field: _description_
-            column: Column data.
+            i: Index of column to remove.
+
+        Returns:
+            New table without the column.
+        """
+    def rename_columns(self, names: Sequence[str]) -> Table:
+        """Create new table with columns renamed to provided names.
+
+        Args:
+            names: List of new column names.
 
         Returns:
             _description_
@@ -543,6 +628,30 @@ class Table:
     @property
     def schema(self) -> Schema:
         """Schema of the table and its columns.
+
+        Returns:
+            _description_
+        """
+    def select(self, columns: Sequence[int] | Sequence[str]) -> Table:
+        """Select columns of the Table.
+
+        Returns a new Table with the specified columns, and metadata preserved.
+
+        Args:
+            columns: The column names or integer indices to select.
+
+        Returns:
+            _description_
+        """
+    def set_column(
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
+    ) -> Table:
+        """Replace column in Table at position.
+
+        Args:
+            i: Index to place the column at.
+            field: _description_
+            column: Column data.
 
         Returns:
             _description_

@@ -14,7 +14,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
-use crate::input::MetadataInput;
+use crate::input::{FieldIndexInput, MetadataInput, SelectIndices};
 use crate::schema::display_schema;
 use crate::{PyArray, PyField, PySchema};
 
@@ -290,9 +290,10 @@ impl PyRecordBatch {
     }
 
     /// Select single column from RecordBatch
-    pub fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
-        let field = self.0.schema().field(i).clone();
-        let array = self.0.column(i).clone();
+    pub fn column(&self, py: Python, i: FieldIndexInput) -> PyResult<PyObject> {
+        let column_index = i.into_position(self.0.schema_ref())?;
+        let field = self.0.schema().field(column_index).clone();
+        let array = self.0.column(column_index).clone();
         PyArray::new(array, field.into()).to_arro3(py)
     }
 
@@ -311,7 +312,7 @@ impl PyRecordBatch {
     #[getter]
     pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
         (0..self.num_columns())
-            .map(|i| self.column(py, i))
+            .map(|i| self.column(py, FieldIndexInput::Position(i)))
             .collect()
     }
 
@@ -320,8 +321,10 @@ impl PyRecordBatch {
     }
 
     /// Select a schema field by its numeric index.
-    pub fn field(&self, py: Python, i: usize) -> PyResult<PyObject> {
-        PyField::new(self.0.schema().field(i).clone().into()).to_arro3(py)
+    pub fn field(&self, py: Python, i: FieldIndexInput) -> PyResult<PyObject> {
+        let schema_ref = self.0.schema_ref();
+        let field = schema_ref.field(i.into_position(schema_ref)?);
+        PyField::new(field.clone().into()).to_arro3(py)
     }
 
     /// Number of columns in this RecordBatch.
@@ -342,14 +345,14 @@ impl PyRecordBatch {
         PyRecordBatch::new(rb).to_arro3(py)
     }
 
-    /// Access the schema of this RecordBatch
     #[getter]
     pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.0.schema()).to_arro3(py)
     }
 
-    pub fn select(&self, py: Python, columns: Vec<usize>) -> PyArrowResult<PyObject> {
-        let new_rb = self.0.project(&columns)?;
+    pub fn select(&self, py: Python, columns: SelectIndices) -> PyArrowResult<PyObject> {
+        let positions = columns.into_positions(self.0.schema_ref().fields())?;
+        let new_rb = self.0.project(&positions)?;
         Ok(PyRecordBatch::new(new_rb).to_arro3(py)?)
     }
 
