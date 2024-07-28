@@ -213,10 +213,10 @@ class RecordBatch:
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> RecordBatch:
         """Construct this object from bare Arrow PyCapsules"""
     def add_column(
-        self, i: int, field: ArrowSchemaExportable, column: ArrowArrayExportable
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
     ) -> RecordBatch: ...
     def append_column(
-        self, field: ArrowSchemaExportable, column: ArrowArrayExportable
+        self, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
     ) -> RecordBatch:
         """Append column at end of columns.
 
@@ -286,7 +286,7 @@ class RecordBatch:
         """Access the schema of this RecordBatch"""
     def select(self, columns: list[int] | list[str]) -> RecordBatch: ...
     def set_column(
-        self, i: int, field: ArrowSchemaExportable, column: ArrowArrayExportable
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
     ) -> RecordBatch: ...
     @property
     def shape(self) -> tuple[int, int]: ...

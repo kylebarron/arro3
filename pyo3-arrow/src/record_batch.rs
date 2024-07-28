@@ -14,7 +14,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
-use crate::input::{FieldIndexInput, MetadataInput, SelectIndices};
+use crate::input::{FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
 use crate::schema::display_schema;
 use crate::{PyArray, PyField, PySchema};
 
@@ -258,11 +258,11 @@ impl PyRecordBatch {
         &self,
         py: Python,
         i: usize,
-        field: PyField,
+        field: NameOrField,
         column: PyArray,
     ) -> PyArrowResult<PyObject> {
         let mut fields = self.0.schema_ref().fields().to_vec();
-        fields.insert(i, field.into_inner());
+        fields.insert(i, field.into_field(column.field()));
         let schema = Schema::new_with_metadata(fields, self.0.schema_ref().metadata().clone());
 
         let mut arrays = self.0.columns().to_vec();
@@ -275,11 +275,11 @@ impl PyRecordBatch {
     pub fn append_column(
         &self,
         py: Python,
-        field: PyField,
+        field: NameOrField,
         column: PyArray,
     ) -> PyArrowResult<PyObject> {
         let mut fields = self.0.schema_ref().fields().to_vec();
-        fields.push(field.into_inner());
+        fields.push(field.into_field(column.field()));
         let schema = Schema::new_with_metadata(fields, self.0.schema_ref().metadata().clone());
 
         let mut arrays = self.0.columns().to_vec();
@@ -360,11 +360,11 @@ impl PyRecordBatch {
         &self,
         py: Python,
         i: usize,
-        field: PyField,
+        field: NameOrField,
         column: PyArray,
     ) -> PyArrowResult<PyObject> {
         let mut fields = self.0.schema_ref().fields().to_vec();
-        fields[i] = field.into_inner();
+        fields[i] = field.into_field(column.field());
         let schema = Schema::new_with_metadata(fields, self.0.schema_ref().metadata().clone());
 
         let mut arrays = self.0.columns().to_vec();
