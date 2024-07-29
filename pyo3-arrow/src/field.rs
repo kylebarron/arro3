@@ -18,7 +18,7 @@ use crate::PyDataType;
 /// A Python-facing Arrow field.
 ///
 /// This is a wrapper around a [FieldRef].
-#[pyclass(module = "arro3.core._rust", name = "Field", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Field", subclass)]
 pub struct PyField(FieldRef);
 
 impl PyField {
