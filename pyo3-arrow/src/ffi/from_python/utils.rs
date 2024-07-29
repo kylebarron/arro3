@@ -81,8 +81,11 @@ pub(crate) fn import_array_pycapsules(
 
     let array_data = unsafe { arrow::ffi::from_ffi(array, schema_ptr) }
         .map_err(|err| PyTypeError::new_err(err.to_string()))?;
+    dbg!(array_data.offset());
     let field = Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-    Ok((make_array(array_data), field))
+    let array = make_array(array_data);
+    dbg!(array.offset());
+    Ok((array, field))
 }
 
 /// Import `__arrow_c_stream__` across Python boundary.

@@ -27,16 +27,23 @@ pub(crate) fn struct_field(
     values: PyArray,
     indices: StructIndex,
 ) -> PyArrowResult<PyObject> {
-    let (array, field) = values.into_inner();
+    let (orig_array, field) = values.into_inner();
     let indices = indices.into_list();
 
-    let mut array_ref = &array;
+    dbg!(orig_array.offset());
+    dbg!(orig_array.len());
+
+    let mut array_ref = &orig_array;
     let mut field_ref = &field;
     for i in indices {
-        (array_ref, field_ref) = get_child(&array, i)?;
+        (array_ref, field_ref) = get_child(array_ref, i)?;
     }
 
-    Ok(PyArray::new(array_ref.clone(), field_ref.clone()).to_arro3(py)?)
+    Ok(PyArray::new(
+        array_ref.slice(orig_array.offset(), orig_array.len()),
+        field_ref.clone(),
+    )
+    .to_arro3(py)?)
 }
 
 fn get_child(array: &ArrayRef, i: usize) -> Result<(&ArrayRef, &FieldRef), ArrowError> {
