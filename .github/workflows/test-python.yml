@@ -7,19 +7,6 @@ on:
   pull_request:
 
 jobs:
-  lint-test:
-    name: Lint and Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-
   # lint-python:
   #   name: Lint Python code
   #   runs-on: ubuntu-latest
