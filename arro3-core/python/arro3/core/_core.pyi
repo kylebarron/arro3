@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
@@ -125,6 +125,263 @@ class DataType:
     def from_arrow_pycapsule(cls, capsule) -> DataType:
         """Construct this object from a bare Arrow PyCapsule"""
     def bit_width(self) -> int | None: ...
+    #### Constructors
+    @classmethod
+    def null(cls) -> DataType:
+        """Create instance of null type."""
+    @classmethod
+    def bool(cls) -> DataType:
+        """Create instance of boolean type."""
+    @classmethod
+    def int8(cls) -> DataType:
+        """Create instance of signed int8 type."""
+    @classmethod
+    def int16(cls) -> DataType:
+        """Create instance of signed int16 type."""
+    @classmethod
+    def int32(cls) -> DataType:
+        """Create instance of signed int32 type."""
+    @classmethod
+    def int64(cls) -> DataType:
+        """Create instance of signed int64 type."""
+    @classmethod
+    def uint8(cls) -> DataType:
+        """Create instance of unsigned int8 type."""
+    @classmethod
+    def uint16(cls) -> DataType:
+        """Create instance of unsigned int16 type."""
+    @classmethod
+    def uint32(cls) -> DataType:
+        """Create instance of unsigned int32 type."""
+    @classmethod
+    def uint64(cls) -> DataType:
+        """Create instance of unsigned int64 type."""
+    @classmethod
+    def float16(cls) -> DataType:
+        """Create half-precision floating point type."""
+    @classmethod
+    def float32(cls) -> DataType:
+        """Create single-precision floating point type."""
+    @classmethod
+    def float64(cls) -> DataType:
+        """Create double-precision floating point type."""
+    @classmethod
+    def time32(cls, unit: Literal["s", "ms"]) -> DataType:
+        """Create instance of 32-bit time (time of day) type with unit resolution.
+
+        Args:
+            unit: one of `'s'` [second], or `'ms'` [millisecond]
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def time64(cls, unit: Literal["us", "ns"]) -> DataType:
+        """Create instance of 64-bit time (time of day) type with unit resolution.
+
+        Args:
+            unit: One of `'us'` [microsecond], or `'ns'` [nanosecond].
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def timestamp(
+        cls, unit: Literal["s", "ms", "us", "ns"], *, tz: str | None = None
+    ) -> DataType:
+        """Create instance of timestamp type with resolution and optional time zone.
+
+        Args:
+            unit: one of `'s'` [second], `'ms'` [millisecond], `'us'` [microsecond], or `'ns'` [nanosecond]
+            tz: Time zone name. None indicates time zone naive. Defaults to None.
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def date32(cls) -> DataType:
+        """Create instance of 32-bit date (days since UNIX epoch 1970-01-01)."""
+    @classmethod
+    def date64(cls) -> DataType:
+        """Create instance of 64-bit date (milliseconds since UNIX epoch 1970-01-01)."""
+    @classmethod
+    def duration(cls, unit: Literal["s", "ms", "us", "ns"]) -> DataType:
+        """Create instance of a duration type with unit resolution.
+
+        Args:
+            unit: one of `'s'` [second], `'ms'` [millisecond], `'us'` [microsecond], or `'ns'` [nanosecond]
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def month_day_nano_interval(cls) -> DataType:
+        """
+        Create instance of an interval type representing months, days and nanoseconds
+        between two dates.
+        """
+    @classmethod
+    def binary(cls, length: int | None = None) -> DataType:
+        """Create variable-length or fixed size binary type.
+
+        Args:
+            length: If length is `None` then return a variable length binary type. If length is provided, then return a fixed size binary type of width `length`. Defaults to None.
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def string(cls) -> DataType:
+        """Create UTF8 variable-length string type."""
+    @classmethod
+    def utf8(cls) -> DataType:
+        """Alias for string()."""
+    @classmethod
+    def large_binary(cls) -> DataType:
+        """Create large variable-length binary type."""
+    @classmethod
+    def large_string(cls) -> DataType:
+        """Create large UTF8 variable-length string type."""
+    @classmethod
+    def large_utf8(cls) -> DataType:
+        """Alias for large_string()."""
+    @classmethod
+    def binary_view(cls) -> DataType:
+        """Create a variable-length binary view type."""
+    @classmethod
+    def string_view(cls) -> DataType:
+        """Create UTF8 variable-length string view type."""
+    @classmethod
+    def decimal128(cls, precision: int, scale: int) -> DataType:
+        """Create decimal type with precision and scale and 128-bit width.
+
+        Arrow decimals are fixed-point decimal numbers encoded as a scaled integer. The
+        precision is the number of significant digits that the decimal type can
+        represent; the scale is the number of digits after the decimal point (note the
+        scale can be negative).
+
+        As an example, `decimal128(7, 3)` can exactly represent the numbers 1234.567 and
+        -1234.567 (encoded internally as the 128-bit integers 1234567 and -1234567,
+        respectively), but neither 12345.67 nor 123.4567.
+
+        `decimal128(5, -3)` can exactly represent the number 12345000 (encoded
+        internally as the 128-bit integer 12345), but neither 123450000 nor 1234500.
+
+        If you need a precision higher than 38 significant digits, consider using
+        `decimal256`.
+
+        Args:
+            precision: Must be between 1 and 38 scale: _description_
+        """
+    @classmethod
+    def decimal256(cls, precision: int, scale: int) -> DataType:
+        """Create decimal type with precision and scale and 256-bit width."""
+    @classmethod
+    def list(cls, value_type: ArrowSchemaExportable, list_size: int | None) -> DataType:
+        """Create ListType instance from child data type or field.
+
+        Args:
+            value_type: _description_
+            list_size: If length is `None` then return a variable length list type. If length is provided then return a fixed size list type.
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def large_list(cls, value_type: ArrowSchemaExportable) -> DataType:
+        """Create LargeListType instance from child data type or field.
+
+        This data type may not be supported by all Arrow implementations. Unless you
+        need to represent data larger than 2**31 elements, you should prefer `list()`.
+
+        Args:
+            value_type: _description_
+
+        Returns:
+            _description_
+        """
+    @classmethod
+    def list_view(cls, value_type: ArrowSchemaExportable) -> DataType:
+        """
+        Create ListViewType instance from child data type or field.
+
+        This data type may not be supported by all Arrow implementations because it is
+        an alternative to the ListType.
+
+        """
+    @classmethod
+    def large_list_view(cls, value_type: ArrowSchemaExportable) -> DataType:
+        """Create LargeListViewType instance from child data type or field.
+
+        This data type may not be supported by all Arrow implementations because it is
+        an alternative to the ListType.
+
+        Args:
+            value_type: _description_
+
+        Returns:
+            _description_
+        """
+
+    @classmethod
+    def map(
+        cls,
+        key_type: ArrowSchemaExportable,
+        item_type: ArrowSchemaExportable,
+        keys_sorted: bool,
+    ) -> DataType:
+        """Create MapType instance from key and item data types or fields.
+
+        Args:
+            key_type: _description_
+            item_type: _description_
+            keys_sorted: _description_
+
+        Returns:
+            _description_
+        """
+
+    @classmethod
+    def struct(cls, fields: Sequence[ArrowSchemaExportable]) -> DataType:
+        """Create StructType instance from fields.
+
+        A struct is a nested type parameterized by an ordered sequence of types (which
+        can all be distinct), called its fields.
+
+        Args:
+            fields: Each field must have a UTF8-encoded name, and these field names are part of the type metadata.
+
+        Returns:
+            _description_
+        """
+
+    @classmethod
+    def dictionary(
+        cls, index_type: ArrowSchemaExportable, value_type: ArrowSchemaExportable
+    ) -> DataType:
+        """Dictionary (categorical, or simply encoded) type.
+
+        Args:
+            index_type: _description_
+            value_type: _description_
+
+        Returns:
+            _description_
+        """
+
+    @classmethod
+    def run_end_encoded(
+        cls, run_end_type: ArrowSchemaExportable, value_type: ArrowSchemaExportable
+    ) -> DataType:
+        """Create RunEndEncodedType from run-end and value types.
+
+        Args:
+            run_end_type: The integer type of the run_ends array. Must be `'int16'`, `'int32'`, or `'int64'`.
+            value_type: The type of the values array.
+
+        Returns:
+            _description_
+        """
 
 class Field:
     def __init__(
