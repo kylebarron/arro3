@@ -1,9 +1,17 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_array::{make_array, Array, ArrayRef};
-use arrow_schema::{ArrowError, Field, FieldRef};
+use arrow::datatypes::{
+    Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
+    UInt64Type, UInt8Type,
+};
+use arrow_array::{
+    make_array, Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
+    LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
+};
+use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
+use pyo3::exceptions::PyNotImplementedError;
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -123,6 +131,68 @@ impl Display for PyArray {
 
 #[pymethods]
 impl PyArray {
+    #[new]
+    #[pyo3(signature = (obj, /, r#type, *))]
+    pub fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
+        macro_rules! impl_primitive {
+            ($rust_type:ty, $arrow_type:ty) => {{
+                let values: Vec<$rust_type> = obj.extract(py)?;
+                Arc::new(PrimitiveArray::<$arrow_type>::from(values))
+            }};
+        }
+
+        let data_type = r#type.into_inner();
+        let array: ArrayRef = match data_type {
+            DataType::Float32 => impl_primitive!(f32, Float32Type),
+            DataType::Float64 => impl_primitive!(f64, Float64Type),
+            DataType::UInt8 => impl_primitive!(u8, UInt8Type),
+            DataType::UInt16 => impl_primitive!(u16, UInt16Type),
+            DataType::UInt32 => impl_primitive!(u32, UInt32Type),
+            DataType::UInt64 => impl_primitive!(u64, UInt64Type),
+            DataType::Int8 => impl_primitive!(i8, Int8Type),
+            DataType::Int16 => impl_primitive!(i16, Int16Type),
+            DataType::Int32 => impl_primitive!(i32, Int32Type),
+            DataType::Int64 => impl_primitive!(i64, Int64Type),
+            DataType::Boolean => {
+                let values: Vec<bool> = obj.extract(py)?;
+                Arc::new(BooleanArray::from(values))
+            }
+            DataType::Binary => {
+                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                Arc::new(BinaryArray::from(slices))
+            }
+            DataType::LargeBinary => {
+                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                Arc::new(LargeBinaryArray::from(slices))
+            }
+            DataType::BinaryView => {
+                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                Arc::new(BinaryViewArray::from(slices))
+            }
+            DataType::Utf8 => {
+                let values: Vec<String> = obj.extract(py)?;
+                Arc::new(StringArray::from(values))
+            }
+            DataType::LargeUtf8 => {
+                let values: Vec<String> = obj.extract(py)?;
+                Arc::new(LargeStringArray::from(values))
+            }
+            DataType::Utf8View => {
+                let values: Vec<String> = obj.extract(py)?;
+                Arc::new(StringViewArray::from(values))
+            }
+            dt => {
+                return Err(PyNotImplementedError::new_err(format!(
+                    "Array constructor for {dt} not yet implemented."
+                )))
+            }
+        };
+        Ok(Self::new(array, Field::new("", data_type, true).into()))
+    }
+
     /// An implementation of the Array interface, for interoperability with numpy and other
     /// array libraries.
     pub fn __array__(&self, py: Python) -> PyResult<PyObject> {
