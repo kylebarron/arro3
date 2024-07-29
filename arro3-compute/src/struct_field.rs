@@ -30,14 +30,10 @@ pub(crate) fn struct_field(
     let (orig_array, field) = values.into_inner();
     let indices = indices.into_list();
 
-    dbg!(orig_array.offset());
-    dbg!(orig_array.len());
-
     let mut array_ref = &orig_array;
     let mut field_ref = &field;
     for i in indices {
         (array_ref, field_ref) = get_child(array_ref, i)?;
-        dbg!(array_ref.offset());
     }
 
     Ok(PyArray::new(

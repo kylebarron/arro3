@@ -169,7 +169,6 @@ impl PyArray {
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
         let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        dbg!(array.offset());
         Ok(Self::new(array, Arc::new(field)))
     }
 
