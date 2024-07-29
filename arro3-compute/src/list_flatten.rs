@@ -33,18 +33,33 @@ pub fn list_flatten(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
 }
 
 fn flatten_array(array: ArrayRef) -> Result<ArrayRef, ArrowError> {
+    let offset = array.offset();
+    let length = array.len();
     match array.data_type() {
         DataType::List(_) => {
             let arr = array.as_list::<i32>();
-            Ok(arr.values().clone())
+            let start = arr.offsets().get(offset).unwrap();
+            let end = arr.offsets().get(offset + length).unwrap();
+            Ok(arr
+                .values()
+                .slice(*start as usize, (*end - *start) as usize)
+                .clone())
         }
         DataType::LargeList(_) => {
             let arr = array.as_list::<i64>();
-            Ok(arr.values().clone())
+            let start = arr.offsets().get(offset).unwrap();
+            let end = arr.offsets().get(offset + length).unwrap();
+            Ok(arr
+                .values()
+                .slice(*start as usize, (*end - *start) as usize)
+                .clone())
         }
-        DataType::FixedSizeList(_, _) => {
+        DataType::FixedSizeList(_, list_size) => {
             let arr = array.as_fixed_size_list();
-            Ok(arr.values().clone())
+            Ok(arr.values().clone().slice(
+                offset * (*list_size as usize),
+                (offset + length) * (*list_size as usize),
+            ))
         }
         _ => Err(ArrowError::SchemaError(
             "Expected list-typed Array".to_string(),
