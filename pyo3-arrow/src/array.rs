@@ -131,10 +131,6 @@ impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type, *))]
     pub fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
-        if obj.bind(py).hasattr("__arrow_c_array__")? {
-            return Self::from_arrow(&py.get_type_bound::<PyArray>(), obj.bind(py));
-        }
-
         macro_rules! impl_primitive {
             ($rust_type:ty, $arrow_type:ty) => {{
                 let values: Vec<$rust_type> = obj.extract(py)?;

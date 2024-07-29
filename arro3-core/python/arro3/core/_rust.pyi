@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Any, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
@@ -9,6 +9,13 @@ from .types import (
 )
 
 class Array:
+    def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None:
+        """Create arro3.core.Array instance from a sequence of Python objects.
+
+        Args:
+            obj: A sequence of input objects.
+            type: Explicit type to attempt to coerce to.
+        """
     def __array__(self) -> NDArray: ...
     def __arrow_c_array__(
         self, requested_schema: object | None = None
