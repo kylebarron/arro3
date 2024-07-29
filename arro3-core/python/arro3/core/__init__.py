@@ -1,4 +1,4 @@
-from ._rust import (
+from ._core import (
     Array,
     ArrayReader,
     ChunkedArray,

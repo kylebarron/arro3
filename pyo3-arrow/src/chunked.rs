@@ -21,7 +21,7 @@ use crate::{PyArray, PyDataType};
 /// A Python-facing Arrow chunked array.
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
-#[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,

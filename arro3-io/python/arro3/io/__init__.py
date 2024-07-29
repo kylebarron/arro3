@@ -1,4 +1,4 @@
-from ._rust import *
-from ._rust import ___version
+from ._io import *
+from ._io import ___version
 
 __version__: str = ___version()

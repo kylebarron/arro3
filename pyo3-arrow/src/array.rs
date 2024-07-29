@@ -19,7 +19,7 @@ use crate::PyDataType;
 /// A Python-facing Arrow array.
 ///
 /// This is a wrapper around an [ArrayRef] and a [FieldRef].
-#[pyclass(module = "arro3.core._rust", name = "Array", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
     field: FieldRef,
