@@ -58,17 +58,3 @@ fn get_child(array: &ArrayRef, i: usize) -> Result<(&ArrayRef, &FieldRef), Arrow
         )),
     }
 }
-
-#[cfg(test)]
-mod test {
-    use arrow::datatypes::Int64Type;
-    use arrow_array::{Array, PrimitiveArray};
-
-    #[test]
-    fn test_offset() {
-        let arr: PrimitiveArray<Int64Type> = PrimitiveArray::from(vec![1, 2, 3, 4]);
-        let offset = 2;
-        let sliced = arr.slice(offset, 2);
-        assert_eq!(sliced.offset(), offset);
-    }
-}
