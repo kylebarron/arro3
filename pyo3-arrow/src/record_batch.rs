@@ -21,7 +21,7 @@ use crate::{PyArray, PyField, PySchema};
 /// A Python-facing Arrow record batch.
 ///
 /// This is a wrapper around a [RecordBatch].
-#[pyclass(module = "arro3.core._rust", name = "RecordBatch", subclass)]
+#[pyclass(module = "arro3.core._core", name = "RecordBatch", subclass)]
 #[derive(Debug)]
 pub struct PyRecordBatch(RecordBatch);
 

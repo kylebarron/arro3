@@ -27,7 +27,7 @@ use crate::PyDataType;
 /// A Python-facing Arrow array.
 ///
 /// This is a wrapper around an [ArrayRef] and a [FieldRef].
-#[pyclass(module = "arro3.core._rust", name = "Array", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
     field: FieldRef,
@@ -42,6 +42,9 @@ impl PyArray {
 
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
     pub fn try_new(array: ArrayRef, field: FieldRef) -> Result<Self, ArrowError> {
+        // Note: if the array and field data types don't match, you'll get an obscure FFI
+        // exception, because you might be describing a different array than you're actually
+        // providing.
         if array.data_type() != field.data_type() {
             return Err(ArrowError::SchemaError(
                 "Array DataType must match Field DataType".to_string(),
