@@ -5,7 +5,6 @@ use arrow::datatypes::{
     UInt64Type, UInt8Type,
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
-use arrow_buffer::BooleanBuffer;
 use arrow_schema::DataType;
 use numpy::{PyArray1, PyUntypedArray};
 use pyo3::exceptions::PyValueError;
@@ -14,8 +13,8 @@ use crate::error::PyArrowResult;
 
 pub fn from_numpy(array: &PyUntypedArray, arrow_data_type: DataType) -> PyArrowResult<ArrayRef> {
     macro_rules! numpy_to_arrow {
-        ($dtype:ty, $arrow_type:ty) => {{
-            let arr = array.downcast::<PyArray1<$dtype>>()?;
+        ($rust_type:ty, $arrow_type:ty) => {{
+            let arr = array.downcast::<PyArray1<$rust_type>>()?;
             Ok(Arc::new(PrimitiveArray::<$arrow_type>::from(
                 arr.to_owned_array().to_vec(),
             )))
@@ -36,8 +35,7 @@ pub fn from_numpy(array: &PyUntypedArray, arrow_data_type: DataType) -> PyArrowR
         DataType::Int64 => numpy_to_arrow!(i64, Int64Type),
         DataType::Boolean => {
             let arr = array.downcast::<PyArray1<bool>>()?;
-            let buffer = BooleanBuffer::from(arr.to_owned_array().to_vec());
-            Ok(Arc::new(BooleanArray::new(buffer, None)))
+            Ok(Arc::new(BooleanArray::from(arr.to_owned_array().to_vec())))
         }
         _ => {
             Err(PyValueError::new_err(format!("Unsupported data type {}", arrow_data_type)).into())
