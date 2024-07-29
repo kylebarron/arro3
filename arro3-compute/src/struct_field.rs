@@ -37,6 +37,7 @@ pub(crate) fn struct_field(
     let mut field_ref = &field;
     for i in indices {
         (array_ref, field_ref) = get_child(array_ref, i)?;
+        dbg!(array_ref.offset());
     }
 
     Ok(PyArray::new(
@@ -59,5 +60,19 @@ fn get_child(array: &ArrayRef, i: usize) -> Result<(&ArrayRef, &FieldRef), Arrow
         _ => Err(ArrowError::SchemaError(
             "DataType must be struct.".to_string(),
         )),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use arrow::datatypes::Int64Type;
+    use arrow_array::{Array, PrimitiveArray};
+
+    #[test]
+    fn test_offset() {
+        let arr: PrimitiveArray<Int64Type> = PrimitiveArray::from(vec![1, 2, 3, 4]);
+        let offset = 2;
+        let sliced = arr.slice(offset, 2);
+        assert_eq!(sliced.offset(), offset);
     }
 }
