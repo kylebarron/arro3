@@ -118,8 +118,8 @@ impl PyDataType {
         to_schema_pycapsule(py, &self.0)
     }
 
-    pub fn __eq__(&self, other: &PyDataType) -> bool {
-        self.0 == other.0
+    pub fn __eq__(&self, other: PyDataType) -> bool {
+        self.equals(other, false)
     }
 
     pub fn __repr__(&self) -> String {
@@ -147,9 +147,74 @@ impl PyDataType {
         Ok(Self::new(data_type))
     }
 
+    #[getter]
     pub fn bit_width(&self) -> Option<usize> {
         self.0.primitive_width()
     }
+
+    #[pyo3(signature=(other, *, check_metadata=false))]
+    fn equals(&self, other: PyDataType, check_metadata: bool) -> bool {
+        let other = other.into_inner();
+        if check_metadata {
+            self.0 == other
+        } else {
+            self.0.equals_datatype(&other)
+        }
+    }
+
+    #[getter]
+    fn list_size(&self) -> Option<i32> {
+        match &self.0 {
+            DataType::FixedSizeList(_, list_size) => Some(*list_size),
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn num_fields(&self) -> usize {
+        match &self.0 {
+            DataType::Null
+            | DataType::Boolean
+            | DataType::Int8
+            | DataType::Int16
+            | DataType::Int32
+            | DataType::Int64
+            | DataType::UInt8
+            | DataType::UInt16
+            | DataType::UInt32
+            | DataType::UInt64
+            | DataType::Float16
+            | DataType::Float32
+            | DataType::Float64
+            | DataType::Timestamp(_, _)
+            | DataType::Date32
+            | DataType::Date64
+            | DataType::Time32(_)
+            | DataType::Time64(_)
+            | DataType::Duration(_)
+            | DataType::Interval(_)
+            | DataType::Binary
+            | DataType::FixedSizeBinary(_)
+            | DataType::LargeBinary
+            | DataType::BinaryView
+            | DataType::Utf8
+            | DataType::LargeUtf8
+            | DataType::Utf8View
+            | DataType::Decimal128(_, _)
+            | DataType::Decimal256(_, _) => 0,
+            DataType::List(_)
+            | DataType::ListView(_)
+            | DataType::FixedSizeList(_, _)
+            | DataType::LargeList(_)
+            | DataType::LargeListView(_) => 1,
+            DataType::Struct(fields) => fields.len(),
+            DataType::Union(fields, _) => fields.len(),
+            // Is this accurate?
+            DataType::Dictionary(_, _) | DataType::Map(_, _) | DataType::RunEndEncoded(_, _) => 2,
+        }
+    }
+
+    ///////////////////// Constructors
 
     #[classmethod]
     fn null(_: &Bound<PyType>) -> Self {
@@ -361,10 +426,10 @@ impl PyDataType {
     }
 
     #[classmethod]
-    fn dictionary(_: &Bound<PyType>, index_type: PyField, value_type: PyField) -> Self {
+    fn dictionary(_: &Bound<PyType>, index_type: PyDataType, value_type: PyDataType) -> Self {
         Self(DataType::Dictionary(
-            Box::new(index_type.into_inner().data_type().clone()),
-            Box::new(value_type.into_inner().data_type().clone()),
+            Box::new(index_type.into_inner()),
+            Box::new(value_type.into_inner()),
         ))
     }
 
@@ -374,5 +439,225 @@ impl PyDataType {
             run_end_type.into_inner(),
             value_type.into_inner(),
         ))
+    }
+
+    ///////////////////// Type checking
+
+    #[staticmethod]
+    fn is_boolean(t: PyDataType) -> bool {
+        t.0 == DataType::Boolean
+    }
+
+    #[staticmethod]
+    fn is_integer(t: PyDataType) -> bool {
+        t.0.is_integer()
+    }
+
+    #[staticmethod]
+    fn is_signed_integer(t: PyDataType) -> bool {
+        t.0.is_signed_integer()
+    }
+
+    #[staticmethod]
+    fn is_unsigned_integer(t: PyDataType) -> bool {
+        t.0.is_unsigned_integer()
+    }
+
+    #[staticmethod]
+    fn is_int8(t: PyDataType) -> bool {
+        t.0 == DataType::Int8
+    }
+    #[staticmethod]
+    fn is_int16(t: PyDataType) -> bool {
+        t.0 == DataType::Int16
+    }
+    #[staticmethod]
+    fn is_int32(t: PyDataType) -> bool {
+        t.0 == DataType::Int32
+    }
+    #[staticmethod]
+    fn is_int64(t: PyDataType) -> bool {
+        t.0 == DataType::Int64
+    }
+    #[staticmethod]
+    fn is_uint8(t: PyDataType) -> bool {
+        t.0 == DataType::UInt8
+    }
+    #[staticmethod]
+    fn is_uint16(t: PyDataType) -> bool {
+        t.0 == DataType::UInt16
+    }
+    #[staticmethod]
+    fn is_uint32(t: PyDataType) -> bool {
+        t.0 == DataType::UInt32
+    }
+    #[staticmethod]
+    fn is_uint64(t: PyDataType) -> bool {
+        t.0 == DataType::UInt64
+    }
+    #[staticmethod]
+    fn is_floating(t: PyDataType) -> bool {
+        t.0.is_floating()
+    }
+    #[staticmethod]
+    fn is_float16(t: PyDataType) -> bool {
+        t.0 == DataType::Float16
+    }
+    #[staticmethod]
+    fn is_float32(t: PyDataType) -> bool {
+        t.0 == DataType::Float32
+    }
+    #[staticmethod]
+    fn is_float64(t: PyDataType) -> bool {
+        t.0 == DataType::Float64
+    }
+    #[staticmethod]
+    fn is_decimal(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Decimal128(_, _) | DataType::Decimal256(_, _))
+    }
+    #[staticmethod]
+    fn is_decimal128(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Decimal128(_, _))
+    }
+    #[staticmethod]
+    fn is_decimal256(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Decimal256(_, _))
+    }
+
+    #[staticmethod]
+    fn is_list(t: PyDataType) -> bool {
+        matches!(t.0, DataType::List(_))
+    }
+    #[staticmethod]
+    fn is_large_list(t: PyDataType) -> bool {
+        matches!(t.0, DataType::LargeList(_))
+    }
+    #[staticmethod]
+    fn is_fixed_size_list(t: PyDataType) -> bool {
+        matches!(t.0, DataType::FixedSizeList(_, _))
+    }
+    #[staticmethod]
+    fn is_list_view(t: PyDataType) -> bool {
+        matches!(t.0, DataType::ListView(_))
+    }
+    #[staticmethod]
+    fn is_large_list_view(t: PyDataType) -> bool {
+        matches!(t.0, DataType::LargeListView(_))
+    }
+    #[staticmethod]
+    fn is_struct(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Struct(_))
+    }
+    #[staticmethod]
+    fn is_union(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Union(_, _))
+    }
+    #[staticmethod]
+    fn is_nested(t: PyDataType) -> bool {
+        t.0.is_nested()
+    }
+    #[staticmethod]
+    fn is_run_end_encoded(t: PyDataType) -> bool {
+        t.0.is_run_ends_type()
+    }
+    #[staticmethod]
+    fn is_temporal(t: PyDataType) -> bool {
+        t.0.is_temporal()
+    }
+    #[staticmethod]
+    fn is_timestamp(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Timestamp(_, _))
+    }
+    #[staticmethod]
+    fn is_date(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Date32 | DataType::Date64)
+    }
+    #[staticmethod]
+    fn is_date32(t: PyDataType) -> bool {
+        t.0 == DataType::Date32
+    }
+    #[staticmethod]
+    fn is_date64(t: PyDataType) -> bool {
+        t.0 == DataType::Date64
+    }
+    #[staticmethod]
+    fn is_time(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Time32(_) | DataType::Time64(_))
+    }
+    #[staticmethod]
+    fn is_time32(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Time32(_))
+    }
+    #[staticmethod]
+    fn is_time64(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Time64(_))
+    }
+    #[staticmethod]
+    fn is_duration(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Duration(_))
+    }
+    #[staticmethod]
+    fn is_interval(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Interval(_))
+    }
+    #[staticmethod]
+    fn is_null(t: PyDataType) -> bool {
+        t.0 == DataType::Null
+    }
+    #[staticmethod]
+    fn is_binary(t: PyDataType) -> bool {
+        t.0 == DataType::Binary
+    }
+    #[staticmethod]
+    fn is_unicode(t: PyDataType) -> bool {
+        t.0 == DataType::Utf8
+    }
+    #[staticmethod]
+    fn is_string(t: PyDataType) -> bool {
+        t.0 == DataType::Utf8
+    }
+    #[staticmethod]
+    fn is_large_binary(t: PyDataType) -> bool {
+        t.0 == DataType::LargeBinary
+    }
+    #[staticmethod]
+    fn is_large_unicode(t: PyDataType) -> bool {
+        t.0 == DataType::LargeUtf8
+    }
+    #[staticmethod]
+    fn is_large_string(t: PyDataType) -> bool {
+        t.0 == DataType::LargeUtf8
+    }
+    #[staticmethod]
+    fn is_binary_view(t: PyDataType) -> bool {
+        t.0 == DataType::BinaryView
+    }
+    #[staticmethod]
+    fn is_string_view(t: PyDataType) -> bool {
+        t.0 == DataType::Utf8View
+    }
+    #[staticmethod]
+    fn is_fixed_size_binary(t: PyDataType) -> bool {
+        matches!(t.0, DataType::FixedSizeBinary(_))
+    }
+    #[staticmethod]
+    fn is_map(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Map(_, _))
+    }
+    #[staticmethod]
+    fn is_dictionary(t: PyDataType) -> bool {
+        matches!(t.0, DataType::Dictionary(_, _))
+    }
+    #[staticmethod]
+    fn is_primitive(t: PyDataType) -> bool {
+        t.0.is_primitive()
+    }
+    #[staticmethod]
+    fn is_numeric(t: PyDataType) -> bool {
+        t.0.is_numeric()
+    }
+    #[staticmethod]
+    fn is_dictionary_key_type(t: PyDataType) -> bool {
+        t.0.is_dictionary_key_type()
     }
 }
