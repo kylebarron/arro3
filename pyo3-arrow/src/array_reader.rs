@@ -17,7 +17,7 @@ use crate::{PyArray, PyChunkedArray, PyField};
 /// A Python-facing Arrow array reader.
 ///
 /// This is a wrapper around a [ArrayReader].
-#[pyclass(module = "arro3.core._rust", name = "ArrayReader", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass)]
 pub struct PyArrayReader(pub(crate) Option<Box<dyn ArrayReader + Send>>);
 
 impl PyArrayReader {

@@ -14,7 +14,7 @@ classifiers = [
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "arro3.core._rust"
+module-name = "arro3.core._core"
 python-source = "python"
 
 [tool.poetry]

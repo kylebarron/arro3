@@ -14,7 +14,7 @@ fn ___version() -> &'static str {
 }
 
 #[pymodule]
-fn _rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
+fn _io(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(___version))?;
 
     m.add_wrapped(wrap_pyfunction!(csv::infer_csv_schema))?;

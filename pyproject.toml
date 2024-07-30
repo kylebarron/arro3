@@ -3,6 +3,10 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pytest = "^8.3.2"
+pyarrow = "^17.0.0"
+ipykernel = "^6.29.5"
+maturin = "^1.7.0"
 
 [tool.poetry.group.docs.dependencies]
 # We use ruff format ourselves, but mkdocstrings requires black to be installed
@@ -14,6 +18,3 @@ mkdocstrings = { version = "^0.25.1", extras = ["python"] }
 # https://github.com/squidfunk/mkdocs-material/issues/6983
 mkdocs-material = { version = "^9.5.17", extras = ["imaging"] }
 mike = "^2"
-
-[tool.poetry.group.dev.dependencies]
-maturin = "^1.4.0"

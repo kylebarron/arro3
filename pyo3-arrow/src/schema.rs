@@ -18,7 +18,7 @@ use crate::{PyDataType, PyField, PyTable};
 /// A Python-facing Arrow schema.
 ///
 /// This is a wrapper around a [SchemaRef].
-#[pyclass(module = "arro3.core._rust", name = "Schema", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Schema", subclass)]
 pub struct PySchema(SchemaRef);
 
 impl PySchema {

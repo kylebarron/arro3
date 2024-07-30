@@ -19,7 +19,7 @@ use crate::{PyRecordBatch, PySchema, PyTable};
 /// A Python-facing Arrow record batch reader.
 ///
 /// This is a wrapper around a [RecordBatchReader].
-#[pyclass(module = "arro3.core._rust", name = "RecordBatchReader", subclass)]
+#[pyclass(module = "arro3.core._core", name = "RecordBatchReader", subclass)]
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
 impl PyRecordBatchReader {

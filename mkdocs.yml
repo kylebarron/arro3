@@ -28,6 +28,7 @@ nav:
           - api/core/record-batch.md
           - api/core/schema.md
           - api/core/table.md
+          - api/core/datatype.md
           - api/core/types.md
       - api/compute.md
       - api/io.md

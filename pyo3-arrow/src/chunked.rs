@@ -21,7 +21,7 @@ use crate::{PyArray, PyDataType};
 /// A Python-facing Arrow chunked array.
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
-#[pyclass(module = "arro3.core._rust", name = "ChunkedArray", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,
@@ -311,6 +311,17 @@ impl PyChunkedArray {
         }
 
         Ok(PyChunkedArray::new(chunks, field))
+    }
+
+    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
+        let target_type = target_type.into_inner();
+        let new_chunks = self
+            .chunks
+            .iter()
+            .map(|chunk| arrow::compute::cast(&chunk, &target_type))
+            .collect::<Result<Vec<_>, ArrowError>>()?;
+        let new_field = self.field.as_ref().clone().with_data_type(target_type);
+        Ok(PyChunkedArray::new(new_chunks, new_field.into()).to_arro3(py)?)
     }
 
     pub fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
