@@ -257,6 +257,13 @@ impl PyArray {
         Ok(Self::from_array_ref(arrow_array))
     }
 
+    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
+        let target_type = target_type.into_inner();
+        let new_array = arrow::compute::cast(self.as_ref(), &target_type)?;
+        let new_field = self.field.as_ref().clone().with_data_type(target_type);
+        Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
+    }
+
     #[pyo3(signature = (offset=0, length=None))]
     pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
