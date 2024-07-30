@@ -49,6 +49,13 @@ class Array:
     def to_numpy(self) -> NDArray:
         """Return a numpy copy of this array."""
 
+    def cast(self, target_type: ArrowSchemaExportable) -> Array:
+        """Cast array values to another data type
+
+        Args:
+            target_type: Type to cast array to.
+        """
+
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.
 
@@ -100,6 +107,12 @@ class ChunkedArray:
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> ChunkedArray:
         """Construct this object from a bare Arrow PyCapsule"""
+    def cast(self, target_type: ArrowSchemaExportable) -> ChunkedArray:
+        """Cast array values to another data type
+
+        Args:
+            target_type: Type to cast array to.
+        """
     def chunk(self, i: int) -> Array: ...
     @property
     def chunks(self) -> list[Array]: ...
