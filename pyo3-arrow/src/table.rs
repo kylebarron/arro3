@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -7,6 +6,7 @@ use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
 use arrow_array::{RecordBatch, RecordBatchIterator};
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
+use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -144,7 +144,7 @@ impl PyTable {
     #[pyo3(signature = (mapping, *, schema=None, metadata=None))]
     pub fn from_pydict(
         cls: &Bound<PyType>,
-        mapping: HashMap<String, AnyArray>,
+        mapping: IndexMap<String, AnyArray>,
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
