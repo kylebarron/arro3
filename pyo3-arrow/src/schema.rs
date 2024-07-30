@@ -167,10 +167,8 @@ impl PySchema {
     }
 
     pub fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
-        let field = match i {
-            FieldIndexInput::String(name) => self.0.field_with_name(&name)?,
-            FieldIndexInput::Int(i) => self.0.field(i),
-        };
+        let index = i.into_position(&self.0)?;
+        let field = self.0.field(index);
         Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
 

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -16,7 +17,7 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::input::FieldIndexInput;
+use crate::input::{AnyArray, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
 use crate::schema::display_schema;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
@@ -139,11 +140,92 @@ impl PyTable {
         Ok(Self::new(batches, schema))
     }
 
+    #[classmethod]
+    #[pyo3(signature = (mapping, *, schema=None, metadata=None))]
+    pub fn from_pydict(
+        cls: &Bound<PyType>,
+        mapping: HashMap<String, AnyArray>,
+        schema: Option<PySchema>,
+        metadata: Option<MetadataInput>,
+    ) -> PyArrowResult<Self> {
+        let (names, arrays): (Vec<_>, Vec<_>) = mapping.into_iter().unzip();
+        Self::from_arrays(cls, arrays, Some(names), schema, metadata)
+    }
+
+    #[classmethod]
+    #[pyo3(signature = (arrays, *, names=None, schema=None, metadata=None))]
+    pub fn from_arrays(
+        _cls: &Bound<PyType>,
+        arrays: Vec<AnyArray>,
+        names: Option<Vec<String>>,
+        schema: Option<PySchema>,
+        metadata: Option<MetadataInput>,
+    ) -> PyArrowResult<Self> {
+        let columns = arrays
+            .into_iter()
+            .map(|array| array.into_chunked_array())
+            .collect::<PyArrowResult<Vec<_>>>()?;
+
+        let schema: SchemaRef = if let Some(schema) = schema {
+            schema.into_inner()
+        } else {
+            let names = names.ok_or(PyValueError::new_err(
+                "names must be passed if schema is not passed.",
+            ))?;
+
+            let fields = columns
+                .iter()
+                .zip(names.iter())
+                .map(|(array, name)| Field::new(name.clone(), array.data_type().clone(), true))
+                .collect::<Vec<_>>();
+            Arc::new(
+                Schema::new(fields)
+                    .with_metadata(metadata.unwrap_or_default().into_string_hashmap().unwrap()),
+            )
+        };
+
+        if columns.is_empty() {
+            return Ok(Self::new(vec![], schema));
+        }
+
+        let column_chunk_lengths = columns
+            .iter()
+            .map(|column| {
+                let chunk_lengths = column
+                    .chunks()
+                    .iter()
+                    .map(|chunk| chunk.len())
+                    .collect::<Vec<_>>();
+                chunk_lengths
+            })
+            .collect::<Vec<_>>();
+        if !column_chunk_lengths.windows(2).all(|w| w[0] == w[1]) {
+            return Err(
+                PyValueError::new_err("All columns must have the same chunk lengths").into(),
+            );
+        }
+        let num_batches = column_chunk_lengths[0].len();
+
+        let mut batches = vec![];
+        for batch_idx in 0..num_batches {
+            let batch = RecordBatch::try_new(
+                schema.clone(),
+                columns
+                    .iter()
+                    .map(|column| column.chunks()[batch_idx].clone())
+                    .collect(),
+            )?;
+            batches.push(batch);
+        }
+
+        Ok(Self::new(batches, schema))
+    }
+
     pub fn add_column(
         &self,
         py: Python,
         i: usize,
-        field: PyField,
+        field: NameOrField,
         column: PyChunkedArray,
     ) -> PyArrowResult<PyObject> {
         if self.num_rows() != column.len() {
@@ -155,7 +237,7 @@ impl PyTable {
         let column = column.rechunk(self.chunk_lengths())?;
 
         let mut fields = self.schema.fields().to_vec();
-        fields.insert(i, field.into_inner());
+        fields.insert(i, field.into_field(column.field()));
         let new_schema = Arc::new(Schema::new_with_metadata(
             fields,
             self.schema.metadata().clone(),
@@ -184,7 +266,7 @@ impl PyTable {
     pub fn append_column(
         &self,
         py: Python,
-        field: PyField,
+        field: NameOrField,
         column: PyChunkedArray,
     ) -> PyArrowResult<PyObject> {
         if self.num_rows() != column.len() {
@@ -196,7 +278,7 @@ impl PyTable {
         let column = column.rechunk(self.chunk_lengths())?;
 
         let mut fields = self.schema.fields().to_vec();
-        fields.push(field.into_inner());
+        fields.push(field.into_field(column.field()));
         let new_schema = Arc::new(Schema::new_with_metadata(
             fields,
             self.schema.metadata().clone(),
@@ -227,14 +309,15 @@ impl PyTable {
         self.batches.iter().map(|batch| batch.num_rows()).collect()
     }
 
-    pub fn column(&self, py: Python, i: usize) -> PyResult<PyObject> {
-        let field = self.schema.field(i).clone();
+    pub fn column(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+        let column_index = i.into_position(&self.schema)?;
+        let field = self.schema.field(column_index).clone();
         let chunks = self
             .batches
             .iter()
-            .map(|batch| batch.column(i).clone())
+            .map(|batch| batch.column(column_index).clone())
             .collect();
-        PyChunkedArray::new(chunks, field.into()).to_arro3(py)
+        Ok(PyChunkedArray::new(chunks, field.into()).to_arro3(py)?)
     }
 
     #[getter]
@@ -247,9 +330,9 @@ impl PyTable {
     }
 
     #[getter]
-    pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
+    pub fn columns(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
         (0..self.num_columns())
-            .map(|i| self.column(py, i))
+            .map(|i| self.column(py, FieldIndexInput::Position(i)))
             .collect()
     }
 
@@ -259,11 +342,7 @@ impl PyTable {
     }
 
     pub fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
-        let schema = &self.schema;
-        let field = match i {
-            FieldIndexInput::String(name) => schema.field_with_name(&name)?,
-            FieldIndexInput::Int(i) => schema.field(i),
-        };
+        let field = self.schema.field(i.into_position(&self.schema)?);
         Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
 
@@ -281,11 +360,68 @@ impl PyTable {
 
     // pub fn rechunk(&self, py: Python, max_chunksize: usize) {}
 
+    pub fn remove_column(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
+        let mut fields = self.schema.fields().to_vec();
+        fields.remove(i);
+        let new_schema = Arc::new(Schema::new_with_metadata(
+            fields,
+            self.schema.metadata().clone(),
+        ));
+
+        let new_batches = self
+            .batches
+            .iter()
+            .map(|batch| {
+                let mut columns = batch.columns().to_vec();
+                columns.remove(i);
+                Ok(RecordBatch::try_new(new_schema.clone(), columns)?)
+            })
+            .collect::<Result<Vec<_>, PyArrowError>>()?;
+
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+    }
+
+    pub fn rename_columns(&self, py: Python, names: Vec<String>) -> PyArrowResult<PyObject> {
+        if names.len() != self.num_columns() {
+            return Err(PyValueError::new_err("When names is a list[str], must pass the same number of names as there are columns.").into());
+        }
+
+        let new_fields = self
+            .schema
+            .fields()
+            .iter()
+            .zip(names)
+            .map(|(field, name)| field.as_ref().clone().with_name(name))
+            .collect::<Vec<_>>();
+        let new_schema = Arc::new(Schema::new_with_metadata(
+            new_fields,
+            self.schema.metadata().clone(),
+        ));
+        Ok(PyTable::new(self.batches.clone(), new_schema).to_arro3(py)?)
+    }
+
+    #[getter]
+    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
+        PySchema::new(self.schema.clone()).to_arro3(py)
+    }
+
+    pub fn select(&self, py: Python, columns: SelectIndices) -> PyArrowResult<PyObject> {
+        let positions = columns.into_positions(self.schema.fields())?;
+
+        let new_schema = Arc::new(self.schema.project(&positions)?);
+        let new_batches = self
+            .batches
+            .iter()
+            .map(|batch| batch.project(&positions))
+            .collect::<Result<Vec<_>, ArrowError>>()?;
+        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+    }
+
     pub fn set_column(
         &self,
         py: Python,
         i: usize,
-        field: PyField,
+        field: NameOrField,
         column: PyChunkedArray,
     ) -> PyArrowResult<PyObject> {
         if self.num_rows() != column.len() {
@@ -297,7 +433,7 @@ impl PyTable {
         let column = column.rechunk(self.chunk_lengths())?;
 
         let mut fields = self.schema.fields().to_vec();
-        fields[i] = field.into_inner();
+        fields[i] = field.into_field(column.field());
         let new_schema = Arc::new(Schema::new_with_metadata(
             fields,
             self.schema.metadata().clone(),
@@ -321,11 +457,6 @@ impl PyTable {
             .collect::<Result<Vec<_>, PyArrowError>>()?;
 
         Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
-    }
-
-    #[getter]
-    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
-        PySchema::new(self.schema.clone()).to_arro3(py)
     }
 
     #[getter]

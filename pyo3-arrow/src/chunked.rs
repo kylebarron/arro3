@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use arrow::compute::concat;
 use arrow_array::{make_array, Array, ArrayRef};
-use arrow_schema::{ArrowError, Field, FieldRef};
+use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -36,6 +36,10 @@ impl PyChunkedArray {
             "All chunks must have same data type"
         );
         Self { chunks, field }
+    }
+
+    pub fn data_type(&self) -> &DataType {
+        self.field.data_type()
     }
 
     pub fn from_arrays<A: Array>(chunks: &[A]) -> PyArrowResult<Self> {
