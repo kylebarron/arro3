@@ -1,4 +1,4 @@
-# arro3.core.RecordBatch
+# RecordBatch
 
 ::: arro3.core.RecordBatch
     options:

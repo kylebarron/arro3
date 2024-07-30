@@ -1,4 +1,4 @@
-# arro3.core.types
+# types
 
 ::: arro3.core.types
     options:

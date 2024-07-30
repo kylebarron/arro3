@@ -23,12 +23,12 @@ nav:
       - arro3.core:
           - api/core/array.md
           - api/core/chunked-array.md
+          - api/core/datatype.md
           - api/core/field.md
           - api/core/record-batch-reader.md
           - api/core/record-batch.md
           - api/core/schema.md
           - api/core/table.md
-          - api/core/datatype.md
           - api/core/types.md
       - api/compute.md
       - api/io.md
