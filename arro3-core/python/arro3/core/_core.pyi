@@ -1,4 +1,4 @@
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Sequence, overload
 import numpy as np
 from numpy.typing import NDArray
 
@@ -922,6 +922,46 @@ class Table:
     def __eq__(self, other) -> bool: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
+    @overload
+    @classmethod
+    def from_arrays(
+        cls,
+        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str],
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> Table: ...
+    @overload
+    @classmethod
+    def from_arrays(
+        cls,
+        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> Table: ...
+    @classmethod
+    def from_arrays(
+        cls,
+        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str] | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> Table:
+        """Construct a Table from Arrow arrays.
+
+        Args:
+            arrays: Equal-length arrays that should form the table.
+            names: Names for the table columns. If not passed, `schema` must be passed. Defaults to None.
+            schema: Schema for the created table. If not passed, `names` must be passed. Defaults to None.
+            metadata: Optional metadata for the schema (if inferred). Defaults to None.
+
+        Returns:
+            new table
+        """
     @classmethod
     def from_arrow(cls, input: ArrowStreamExportable) -> Table:
         """
@@ -948,6 +988,42 @@ class Table:
 
         Returns:
             _description_
+        """
+    @overload
+    @classmethod
+    def from_pydict(
+        cls,
+        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> Table: ...
+    @overload
+    @classmethod
+    def from_pydict(
+        cls,
+        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> Table: ...
+    @classmethod
+    def from_pydict(
+        cls,
+        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> Table:
+        """Construct a Table or RecordBatch from Arrow arrays or columns.
+
+        Args:
+            mapping: A mapping of strings to Arrays.
+            schema: If not passed, will be inferred from the Mapping values. Defaults to None.
+            metadata: Optional metadata for the schema (if inferred). Defaults to None.
+
+        Returns:
+            new table
         """
     def add_column(
         self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable

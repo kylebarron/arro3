@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
+use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -103,7 +103,7 @@ impl PyRecordBatch {
                 &py.get_type_bound::<PyRecordBatch>(),
                 data,
             )?)
-        } else if let Ok(mapping) = data.extract::<HashMap<String, PyArray>>() {
+        } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type_bound::<PyRecordBatch>(), mapping, metadata)
         } else {
             Err(PyTypeError::new_err("unsupported input").into())
@@ -173,7 +173,7 @@ impl PyRecordBatch {
     #[pyo3(signature = (mapping, *, metadata=None))]
     pub fn from_pydict(
         _cls: &Bound<PyType>,
-        mapping: HashMap<String, PyArray>,
+        mapping: IndexMap<String, PyArray>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
         let mut fields = vec![];
