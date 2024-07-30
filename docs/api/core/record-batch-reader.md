@@ -1,4 +1,4 @@
-# arro3.core.RecordBatchReader
+# RecordBatchReader
 
 ::: arro3.core.RecordBatchReader
     options:

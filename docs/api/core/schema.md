@@ -1,4 +1,4 @@
-# arro3.core.Schema
+# Schema
 
 ::: arro3.core.Schema
     options:

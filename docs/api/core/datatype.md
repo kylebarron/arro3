@@ -1,4 +1,4 @@
-# arro3.core.DataType
+# DataType
 
 ::: arro3.core.DataType
     options:

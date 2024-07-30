@@ -1,4 +1,4 @@
-# arro3.core.Array
+# Array
 
 ::: arro3.core.Array
     options:

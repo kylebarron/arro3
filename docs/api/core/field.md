@@ -1,4 +1,4 @@
-# arro3.core.Field
+# Field
 
 ::: arro3.core.Field
     options:

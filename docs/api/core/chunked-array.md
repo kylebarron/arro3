@@ -1,4 +1,4 @@
-# arro3.core.ChunkedArray
+# ChunkedArray
 
 ::: arro3.core.ChunkedArray
     options:
