@@ -241,7 +241,14 @@ impl PyChunkedArray {
 
     /// An implementation of the Array interface, for interoperability with numpy and other
     /// array libraries.
-    pub fn __array__(&self, py: Python) -> PyResult<PyObject> {
+    #[pyo3(signature = (dtype=None, copy=None))]
+    #[allow(unused_variables)]
+    pub fn __array__(
+        &self,
+        py: Python,
+        dtype: Option<PyObject>,
+        copy: Option<PyObject>,
+    ) -> PyResult<PyObject> {
         let chunk_refs = self
             .chunks
             .iter()
@@ -386,7 +393,7 @@ impl PyChunkedArray {
 
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
-        self.__array__(py)
+        self.__array__(py, None, None)
     }
 
     pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
