@@ -85,3 +85,5 @@ def struct_field(
     Returns:
         _description_
     """
+
+def take(values: ArrowArrayExportable, indices: ArrowArrayExportable) -> Array: ...

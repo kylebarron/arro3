@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
-use arrow::compute::concat_batches;
+use arrow::compute::{concat_batches, take_record_batch};
 use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use indexmap::IndexMap;
@@ -384,6 +384,11 @@ impl PyRecordBatch {
     pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.num_rows() - offset);
         PyRecordBatch::new(self.0.slice(offset, length)).to_arro3(py)
+    }
+
+    fn take(&self, py: Python, indices: PyArray) -> PyArrowResult<PyObject> {
+        let new_batch = take_record_batch(self.as_ref(), indices.as_ref())?;
+        Ok(PyRecordBatch::new(new_batch).to_arro3(py)?)
     }
 
     pub fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
