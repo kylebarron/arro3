@@ -110,6 +110,10 @@ impl PyTable {
         self.batches == other.batches && self.schema == other.schema
     }
 
+    fn __getitem__(&self, py: Python, key: FieldIndexInput) -> PyArrowResult<PyObject> {
+        self.column(py, key)
+    }
+
     pub fn __len__(&self) -> usize {
         self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
     }
