@@ -181,6 +181,8 @@ class DataType:
     @property
     def num_fields(self) -> int:
         """The number of child fields."""
+    @property
+    def value_type(self) -> DataType | None: ...
     #################
     #### Constructors
     #################

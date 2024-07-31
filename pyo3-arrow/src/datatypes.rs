@@ -214,6 +214,23 @@ impl PyDataType {
         }
     }
 
+    #[getter]
+    fn value_type(&self, py: Python) -> PyResult<Option<PyObject>> {
+        match &self.0 {
+            DataType::List(value_field)
+            | DataType::LargeList(value_field)
+            | DataType::ListView(value_field)
+            | DataType::LargeListView(value_field)
+            | DataType::RunEndEncoded(_, value_field) => Ok(Some(
+                PyDataType::new(value_field.data_type().clone()).to_arro3(py)?,
+            )),
+            DataType::Dictionary(_key_type, value_type) => {
+                Ok(Some(PyDataType::new(*value_type.clone()).to_arro3(py)?))
+            }
+            _ => Ok(None),
+        }
+    }
+
     ///////////////////// Constructors
 
     #[classmethod]
