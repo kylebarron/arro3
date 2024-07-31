@@ -33,6 +33,7 @@ pub fn write_ipc(data: AnyRecordBatch, file: FileWriter) -> PyArrowResult<()> {
     for batch in reader {
         writer.write(&batch?)?;
     }
+    writer.finish()?;
     Ok(())
 }
 
@@ -45,5 +46,6 @@ pub fn write_ipc_stream(data: AnyRecordBatch, file: FileWriter) -> PyArrowResult
     for batch in reader {
         writer.write(&batch?)?;
     }
+    writer.finish()?;
     Ok(())
 }

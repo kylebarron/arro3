@@ -213,5 +213,6 @@ pub(crate) fn write_parquet(
     for batch in reader {
         writer.write(&batch?).unwrap();
     }
+    writer.close().unwrap();
     Ok(())
 }
