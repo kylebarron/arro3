@@ -147,6 +147,30 @@ impl PyTable {
     }
 
     #[classmethod]
+    #[pyo3(signature = (batches, *, schema=None))]
+    pub fn from_batches(
+        _cls: &Bound<PyType>,
+        batches: Vec<PyRecordBatch>,
+        schema: Option<PySchema>,
+    ) -> PyArrowResult<Self> {
+        if batches.is_empty() {
+            let schema = schema.ok_or(PyValueError::new_err(
+                "schema must be passed for an empty list of batches",
+            ))?;
+            return Ok(Self::new(vec![], schema.into_inner()));
+        }
+
+        let batches = batches
+            .into_iter()
+            .map(|batch| batch.into_inner())
+            .collect::<Vec<_>>();
+        let schema = schema
+            .map(|s| s.into_inner())
+            .unwrap_or(batches.first().unwrap().schema());
+        Ok(Self::new(batches, schema))
+    }
+
+    #[classmethod]
     #[pyo3(signature = (mapping, *, schema=None, metadata=None))]
     pub fn from_pydict(
         cls: &Bound<PyType>,

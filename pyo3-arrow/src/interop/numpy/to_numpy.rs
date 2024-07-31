@@ -3,8 +3,8 @@ use arrow::datatypes::*;
 use arrow_array::Array;
 use arrow_schema::DataType;
 use numpy::ToPyArray;
-use pyo3::exceptions::PyValueError;
-use pyo3::types::PyAnyMethods;
+use pyo3::exceptions::{PyNotImplementedError, PyValueError};
+use pyo3::types::{PyAnyMethods, PyBytes, PyDict, PyList, PyString, PyTuple};
 use pyo3::{intern, PyObject, PyResult, Python, ToPyObject};
 
 pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
@@ -39,7 +39,77 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
             let bools = arr.as_boolean().values().iter().collect::<Vec<_>>();
             bools.to_pyarray_bound(py).to_object(py)
         }
-        _ => todo!(),
+        // For other data types we create Python objects and then create an object-typed numpy
+        // array
+        DataType::Binary => {
+            let mut py_bytes = Vec::with_capacity(arr.len());
+            arr.as_binary::<i32>()
+                .iter()
+                .for_each(|x| py_bytes.push(PyBytes::new_bound(py, x.unwrap())));
+            let py_list = PyList::new_bound(py, py_bytes);
+            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new_bound(py);
+            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+            let np_arr = numpy_mod.call_method(
+                intern!(py, "array"),
+                PyTuple::new_bound(py, vec![py_list]),
+                Some(&kwargs),
+            )?;
+            np_arr.into()
+        }
+        DataType::LargeBinary => {
+            let mut py_bytes = Vec::with_capacity(arr.len());
+            arr.as_binary::<i64>()
+                .iter()
+                .for_each(|x| py_bytes.push(PyBytes::new_bound(py, x.unwrap())));
+            let py_list = PyList::new_bound(py, py_bytes);
+            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new_bound(py);
+            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+            let np_arr = numpy_mod.call_method(
+                intern!(py, "array"),
+                PyTuple::new_bound(py, vec![py_list]),
+                Some(&kwargs),
+            )?;
+            np_arr.into()
+        }
+        DataType::Utf8 => {
+            let mut py_bytes = Vec::with_capacity(arr.len());
+            arr.as_string::<i32>()
+                .iter()
+                .for_each(|x| py_bytes.push(PyString::new_bound(py, x.unwrap())));
+            let py_list = PyList::new_bound(py, py_bytes);
+            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new_bound(py);
+            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+            let np_arr = numpy_mod.call_method(
+                intern!(py, "array"),
+                PyTuple::new_bound(py, vec![py_list]),
+                Some(&kwargs),
+            )?;
+            np_arr.into()
+        }
+        DataType::LargeUtf8 => {
+            let mut py_bytes = Vec::with_capacity(arr.len());
+            arr.as_string::<i64>()
+                .iter()
+                .for_each(|x| py_bytes.push(PyString::new_bound(py, x.unwrap())));
+            let py_list = PyList::new_bound(py, py_bytes);
+            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new_bound(py);
+            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+            let np_arr = numpy_mod.call_method(
+                intern!(py, "array"),
+                PyTuple::new_bound(py, vec![py_list]),
+                Some(&kwargs),
+            )?;
+            np_arr.into()
+        }
+        dt => {
+            return Err(PyNotImplementedError::new_err(format!(
+                "Unsupported type in to_numpy {dt}"
+            )))
+        }
     };
     Ok(result)
 }
