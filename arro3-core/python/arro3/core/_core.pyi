@@ -331,7 +331,9 @@ class DataType:
     def decimal256(cls, precision: int, scale: int) -> DataType:
         """Create decimal type with precision and scale and 256-bit width."""
     @classmethod
-    def list(cls, value_type: ArrowSchemaExportable, list_size: int | None) -> DataType:
+    def list(
+        cls, value_type: ArrowSchemaExportable, list_size: int | None = None
+    ) -> DataType:
         """Create ListType instance from child data type or field.
 
         Args:
@@ -1042,7 +1044,7 @@ class Table:
         """
     def add_column(
         self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
-    ) -> RecordBatch:
+    ) -> Table:
         """Add column to Table at position.
 
         A new table is returned with the column added, the original table object is left unchanged.
@@ -1057,7 +1059,7 @@ class Table:
         """
     def append_column(
         self, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
-    ) -> RecordBatch:
+    ) -> Table:
         """Append column at end of columns.
 
         Args:

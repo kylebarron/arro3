@@ -326,6 +326,7 @@ impl PyDataType {
     }
 
     #[classmethod]
+    #[pyo3(signature = (length=None))]
     fn binary(_: &Bound<PyType>, length: Option<i32>) -> Self {
         if let Some(length) = length {
             Self(DataType::FixedSizeBinary(length))
@@ -380,6 +381,7 @@ impl PyDataType {
     }
 
     #[classmethod]
+    #[pyo3(signature = (value_type, list_size=None))]
     fn list(_: &Bound<PyType>, value_type: PyField, list_size: Option<i32>) -> Self {
         if let Some(list_size) = list_size {
             Self(DataType::FixedSizeList(value_type.into(), list_size))
