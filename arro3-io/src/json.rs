@@ -102,5 +102,6 @@ pub fn write_ndjson(
     for batch in data.into_reader()? {
         writer.write(&batch?)?;
     }
+    writer.finish()?;
     Ok(())
 }
