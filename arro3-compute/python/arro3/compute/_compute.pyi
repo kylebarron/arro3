@@ -47,19 +47,19 @@ def list_flatten(
     """
 
 @overload
-def list_offsets(input: ArrowArrayExportable, *, physical: bool = True) -> Array: ...
+def list_offsets(input: ArrowArrayExportable, *, logical: bool = True) -> Array: ...
 @overload
 def list_offsets(
-    input: ArrowStreamExportable, *, physical: bool = True
+    input: ArrowStreamExportable, *, logical: bool = True
 ) -> ArrayReader: ...
 def list_offsets(
-    input: ArrowArrayExportable | ArrowStreamExportable, *, physical: bool = True
+    input: ArrowArrayExportable | ArrowStreamExportable, *, logical: bool = True
 ) -> Array | ArrayReader:
     """Access the offsets of this ListArray or LargeListArray
 
     Args:
         input: _description_
-        physical: If True, return the physical (unsliced) offsets of the provided list array. Slicing offsets (False) is not yet implemented.
+        physical: If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to `True`.
 
     Raises:
         Exception if not a list-typed array.
