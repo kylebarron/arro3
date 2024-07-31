@@ -56,6 +56,8 @@ class Array:
             target_type: Type to cast array to.
         """
 
+    @property
+    def nbytes(self) -> int: ...
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.
 
@@ -125,6 +127,8 @@ class ChunkedArray:
     def combine_chunks(self) -> Array: ...
     def equals(self, other: ArrowStreamExportable) -> bool: ...
     def length(self) -> int: ...
+    @property
+    def nbytes(self) -> int: ...
     @property
     def null_count(self) -> int: ...
     @property
@@ -696,6 +700,8 @@ class RecordBatch:
             _description_
         """
     @property
+    def nbytes(self) -> int: ...
+    @property
     def num_columns(self) -> int:
         """Number of columns."""
     @property
@@ -1121,6 +1127,8 @@ class Table:
         Returns:
             _description_
         """
+    @property
+    def nbytes(self) -> int: ...
     @property
     def num_columns(self) -> int:
         """Number of columns in this table."""

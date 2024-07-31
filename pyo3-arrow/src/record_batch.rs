@@ -327,6 +327,11 @@ impl PyRecordBatch {
         PyField::new(field.clone().into()).to_arro3(py)
     }
 
+    #[getter]
+    fn nbytes(&self) -> usize {
+        self.0.get_array_memory_size()
+    }
+
     /// Number of columns in this RecordBatch.
     #[getter]
     pub fn num_columns(&self) -> usize {

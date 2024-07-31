@@ -377,6 +377,13 @@ impl PyTable {
     }
 
     #[getter]
+    fn nbytes(&self) -> usize {
+        self.batches
+            .iter()
+            .fold(0, |acc, batch| acc + batch.get_array_memory_size())
+    }
+
+    #[getter]
     pub fn num_columns(&self) -> usize {
         self.schema.fields().len()
     }

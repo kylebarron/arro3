@@ -282,6 +282,11 @@ impl PyArray {
         Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
     }
 
+    #[getter]
+    fn nbytes(&self) -> usize {
+        self.array.get_array_memory_size()
+    }
+
     #[pyo3(signature = (offset=0, length=None))]
     pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
