@@ -122,6 +122,16 @@ impl PyArrayReader {
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
+    // Return self
+    // https://stackoverflow.com/a/52056290
+    fn __iter__(&mut self, py: Python) -> PyResult<PyObject> {
+        self.to_arro3(py)
+    }
+
+    fn __next__(&mut self, py: Python) -> PyArrowResult<PyObject> {
+        self.read_next_array(py)
+    }
+
     pub fn __repr__(&self) -> String {
         self.to_string()
     }
