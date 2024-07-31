@@ -367,6 +367,13 @@ impl PyChunkedArray {
     }
 
     #[getter]
+    fn nbytes(&self) -> usize {
+        self.chunks
+            .iter()
+            .fold(0, |acc, batch| acc + batch.get_array_memory_size())
+    }
+
+    #[getter]
     pub fn null_count(&self) -> usize {
         self.chunks
             .iter()
