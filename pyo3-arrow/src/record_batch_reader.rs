@@ -13,6 +13,7 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
+use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
@@ -153,8 +154,9 @@ impl PyRecordBatchReader {
     /// It can be called on anything that exports the Arrow stream interface
     /// (`__arrow_c_stream__`), such as a `Table` or `RecordBatchReader`.
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
-        input.extract()
+    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+        let reader = input.into_reader()?;
+        Ok(Self::new(reader))
     }
 
     /// Construct this object from a bare Arrow PyCapsule.

@@ -136,8 +136,8 @@ impl PySchema {
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
-        input.extract()
+    pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
+        input
     }
 
     #[classmethod]

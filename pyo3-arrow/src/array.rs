@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::compute::concat;
 use arrow::datatypes::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
     UInt64Type, UInt8Type,
@@ -20,6 +21,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::PyDataType;
@@ -228,8 +230,17 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
-        input.extract()
+    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+        match input {
+            AnyArray::Array(array) => Ok(array),
+            AnyArray::Stream(stream) => {
+                let chunked_array = stream.into_chunked_array()?;
+                let (chunks, field) = chunked_array.into_inner();
+                let chunk_refs = chunks.iter().map(|arr| arr.as_ref()).collect::<Vec<_>>();
+                let concatted = concat(chunk_refs.as_slice())?;
+                Ok(Self::new(concatted, field))
+            }
+        }
     }
 
     #[classmethod]
