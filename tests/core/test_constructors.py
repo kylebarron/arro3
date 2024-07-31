@@ -1,6 +1,13 @@
 import numpy as np
 import pyarrow as pa
-from arro3.core import Array, DataType, fixed_size_list_array, Field, list_array
+from arro3.core import (
+    Array,
+    DataType,
+    fixed_size_list_array,
+    Field,
+    list_array,
+    struct_array,
+)
 from arro3.compute import list_offsets
 
 
@@ -45,3 +52,14 @@ def test_list_array_with_type():
     assert pa.types.is_list(pa_array.type)
     assert list_offsets(array) == offsets_array
     assert pa_array.type.field(0).name == "inner"
+
+
+def test_struct_array():
+    a = pa.array([1, 2, 3, 4])
+    b = pa.array(["a", "b", "c", "d"])
+
+    arr = struct_array([a, b], fields=[Field("a", a.type), Field("b", b.type)])
+    pa_type = pa.array(arr).type
+    assert pa.types.is_struct(pa_type)
+    assert pa_type.field(0).name == "a"
+    assert pa_type.field(1).name == "b"
