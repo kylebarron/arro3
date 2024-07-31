@@ -6,7 +6,7 @@ use arrow_schema::{Schema, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
@@ -212,13 +212,18 @@ impl PySchema {
         PySchema::new(schema.into()).to_arro3(py)
     }
 
+    // Note: we can't return HashMap<Vec<u8>, Vec<u8>> because that will coerce keys and values to
+    // a list, not bytes
     #[getter]
-    pub fn metadata(&self) -> HashMap<Vec<u8>, Vec<u8>> {
-        let mut new_metadata = HashMap::with_capacity(self.0.metadata.len());
-        self.0.metadata().iter().for_each(|(key, val)| {
-            new_metadata.insert(key.as_bytes().to_vec(), val.as_bytes().to_vec());
-        });
-        new_metadata
+    pub fn metadata<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
+        let d = PyDict::new_bound(py);
+        self.0.metadata().iter().try_for_each(|(key, val)| {
+            d.set_item(
+                PyBytes::new_bound(py, key.as_bytes()),
+                PyBytes::new_bound(py, val.as_bytes()),
+            )
+        })?;
+        Ok(d)
     }
 
     #[getter]
