@@ -17,7 +17,9 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::input::{AnyArray, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
+use crate::input::{
+    AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
+};
 use crate::schema::display_schema;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
@@ -117,8 +119,8 @@ impl PyTable {
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
-        input.extract()
+    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+        input.into_table()
     }
 
     #[classmethod]

@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use crate::array_reader::PyArrayReader;
 use crate::error::PyArrowResult;
 use crate::ffi::{ArrayIterator, ArrayReader};
-use crate::{PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader};
+use crate::{PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyTable};
 
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.
@@ -36,6 +36,13 @@ impl AnyRecordBatch {
         }
     }
 
+    pub fn into_table(self) -> PyArrowResult<PyTable> {
+        let reader = self.into_reader()?;
+        let schema = reader.schema();
+        let batches = reader.collect::<Result<_, ArrowError>>()?;
+        Ok(PyTable::new(batches, schema))
+    }
+
     pub fn schema(&self) -> PyResult<SchemaRef> {
         match self {
             Self::RecordBatch(batch) => Ok(batch.as_ref().schema()),
@@ -53,19 +60,10 @@ pub enum AnyArray {
 
 impl AnyArray {
     pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
-        match self {
-            Self::Array(array) => {
-                let (array, field) = array.into_inner();
-                Ok(PyChunkedArray::new(vec![array], field))
-            }
-            Self::Stream(stream) => {
-                let field = stream.field_ref()?;
-                let chunks = stream
-                    .into_reader()?
-                    .collect::<Result<Vec<_>, ArrowError>>()?;
-                Ok(PyChunkedArray::new(chunks, field))
-            }
-        }
+        let reader = self.into_reader()?;
+        let field = reader.field();
+        let chunks = reader.collect::<Result<_, ArrowError>>()?;
+        Ok(PyChunkedArray::new(chunks, field))
     }
 
     pub fn into_reader(self) -> PyResult<Box<dyn ArrayReader + Send>> {

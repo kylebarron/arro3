@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
+use arrow::compute::concat_batches;
 use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use indexmap::IndexMap;
@@ -14,7 +15,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
-use crate::input::{FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
+use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
 use crate::schema::display_schema;
 use crate::{PyArray, PyField, PySchema};
 
@@ -101,7 +102,7 @@ impl PyRecordBatch {
         if data.hasattr("__arrow_c_array__")? {
             Ok(Self::from_arrow(
                 &py.get_type_bound::<PyRecordBatch>(),
-                data,
+                data.extract()?,
             )?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type_bound::<PyRecordBatch>(), mapping, metadata)
@@ -218,8 +219,15 @@ impl PyRecordBatch {
     /// Returns:
     ///     Self
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: &Bound<PyAny>) -> PyResult<Self> {
-        input.extract()
+    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+        match input {
+            AnyRecordBatch::RecordBatch(rb) => Ok(rb),
+            AnyRecordBatch::Stream(stream) => {
+                let (batches, schema) = stream.into_table()?.into_inner();
+                let single_batch = concat_batches(&schema, batches.iter())?;
+                Ok(Self::new(single_batch))
+            }
+        }
     }
 
     /// Construct this object from a bare Arrow PyCapsule

@@ -24,7 +24,7 @@ class Array:
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowArrayExportable) -> Array:
+    def from_arrow(cls, input: ArrowArrayExportable | ArrowStreamExportable) -> Array:
         """
         Construct this object from an existing Arrow object.
 
@@ -75,7 +75,9 @@ class ArrayReader:
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowStreamExportable) -> ArrayReader: ...
+    def from_arrow(
+        cls, input: ArrowArrayExportable | ArrowStreamExportable
+    ) -> ArrayReader: ...
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> ArrayReader:
         """Construct this object from a bare Arrow PyCapsule"""
@@ -103,7 +105,9 @@ class ChunkedArray:
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowStreamExportable) -> ChunkedArray: ...
+    def from_arrow(
+        cls, input: ArrowArrayExportable | ArrowStreamExportable
+    ) -> ChunkedArray: ...
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> ChunkedArray:
         """Construct this object from a bare Arrow PyCapsule"""
@@ -630,7 +634,9 @@ class RecordBatch:
             New RecordBatch
         """
     @classmethod
-    def from_arrow(cls, input: ArrowArrayExportable) -> RecordBatch: ...
+    def from_arrow(
+        cls, input: ArrowArrayExportable | ArrowStreamExportable
+    ) -> RecordBatch: ...
     @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> RecordBatch:
         """Construct this object from bare Arrow PyCapsules"""
@@ -720,7 +726,9 @@ class RecordBatchReader:
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowStreamExportable) -> RecordBatchReader: ...
+    def from_arrow(
+        cls, input: ArrowArrayExportable | ArrowStreamExportable
+    ) -> RecordBatchReader: ...
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> RecordBatchReader:
         """Construct this object from a bare Arrow PyCapsule"""
@@ -963,7 +971,7 @@ class Table:
             new table
         """
     @classmethod
-    def from_arrow(cls, input: ArrowStreamExportable) -> Table:
+    def from_arrow(cls, input: ArrowArrayExportable | ArrowStreamExportable) -> Table:
         """
         Construct this object from an existing Arrow object.
 
