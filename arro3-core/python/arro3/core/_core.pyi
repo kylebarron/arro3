@@ -43,7 +43,7 @@ class Array:
         """Construct this object from bare Arrow PyCapsules"""
 
     @classmethod
-    def from_numpy(cls, array: np.ndarray, type: ArrowSchemaExportable) -> Array:
+    def from_numpy(cls, array: np.ndarray) -> Array:
         """Construct an Array from a numpy ndarray"""
 
     def to_numpy(self) -> NDArray:
