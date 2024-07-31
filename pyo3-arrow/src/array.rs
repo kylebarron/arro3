@@ -282,6 +282,11 @@ impl PyArray {
         PyArray::new(new_array, self.field().clone()).to_arro3(py)
     }
 
+    fn take(&self, py: Python, indices: PyArray) -> PyArrowResult<PyObject> {
+        let new_array = arrow::compute::take(self.as_ref(), indices.as_ref(), None)?;
+        Ok(PyArray::new(new_array, self.field.clone()).to_arro3(py)?)
+    }
+
     /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py)
