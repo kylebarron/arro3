@@ -5,13 +5,13 @@ use arrow::datatypes::{
     UInt64Type, UInt8Type,
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
-use arrow_schema::DataType;
-use numpy::{PyArray1, PyUntypedArray};
+use numpy::{dtype_bound, PyArray1, PyArrayDescr, PyUntypedArray};
 use pyo3::exceptions::PyValueError;
+use pyo3::Python;
 
 use crate::error::PyArrowResult;
 
-pub fn from_numpy(array: &PyUntypedArray, arrow_data_type: DataType) -> PyArrowResult<ArrayRef> {
+pub fn from_numpy(py: Python, array: &PyUntypedArray) -> PyArrowResult<ArrayRef> {
     macro_rules! numpy_to_arrow {
         ($rust_type:ty, $arrow_type:ty) => {{
             let arr = array.downcast::<PyArray1<$rust_type>>()?;
@@ -20,25 +20,35 @@ pub fn from_numpy(array: &PyUntypedArray, arrow_data_type: DataType) -> PyArrowR
             )))
         }};
     }
-
-    match arrow_data_type {
-        // DataType::Float16 => numpy_to_arrow!(f16, Float16Type),
-        DataType::Float32 => numpy_to_arrow!(f32, Float32Type),
-        DataType::Float64 => numpy_to_arrow!(f64, Float64Type),
-        DataType::UInt8 => numpy_to_arrow!(u8, UInt8Type),
-        DataType::UInt16 => numpy_to_arrow!(u16, UInt16Type),
-        DataType::UInt32 => numpy_to_arrow!(u32, UInt32Type),
-        DataType::UInt64 => numpy_to_arrow!(u64, UInt64Type),
-        DataType::Int8 => numpy_to_arrow!(i8, Int8Type),
-        DataType::Int16 => numpy_to_arrow!(i16, Int16Type),
-        DataType::Int32 => numpy_to_arrow!(i32, Int32Type),
-        DataType::Int64 => numpy_to_arrow!(i64, Int64Type),
-        DataType::Boolean => {
-            let arr = array.downcast::<PyArray1<bool>>()?;
-            Ok(Arc::new(BooleanArray::from(arr.to_owned_array().to_vec())))
-        }
-        _ => {
-            Err(PyValueError::new_err(format!("Unsupported data type {}", arrow_data_type)).into())
-        }
+    let dtype = array.dtype();
+    if is_type::<f32>(py, dtype) {
+        numpy_to_arrow!(f32, Float32Type)
+    } else if is_type::<f64>(py, dtype) {
+        numpy_to_arrow!(f64, Float64Type)
+    } else if is_type::<u8>(py, dtype) {
+        numpy_to_arrow!(u8, UInt8Type)
+    } else if is_type::<u16>(py, dtype) {
+        numpy_to_arrow!(u16, UInt16Type)
+    } else if is_type::<u32>(py, dtype) {
+        numpy_to_arrow!(u32, UInt32Type)
+    } else if is_type::<u64>(py, dtype) {
+        numpy_to_arrow!(u64, UInt64Type)
+    } else if is_type::<i8>(py, dtype) {
+        numpy_to_arrow!(i8, Int8Type)
+    } else if is_type::<i16>(py, dtype) {
+        numpy_to_arrow!(i16, Int16Type)
+    } else if is_type::<i32>(py, dtype) {
+        numpy_to_arrow!(i32, Int32Type)
+    } else if is_type::<i64>(py, dtype) {
+        numpy_to_arrow!(i64, Int64Type)
+    } else if is_type::<bool>(py, dtype) {
+        let arr = array.downcast::<PyArray1<bool>>()?;
+        Ok(Arc::new(BooleanArray::from(arr.to_owned_array().to_vec())))
+    } else {
+        Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
     }
+}
+
+fn is_type<T: numpy::Element>(py: Python, dtype: &PyArrayDescr) -> bool {
+    dtype.is_equiv_to(dtype_bound::<T>(py).as_gil_ref())
 }
