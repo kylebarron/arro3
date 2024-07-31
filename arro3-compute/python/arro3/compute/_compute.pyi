@@ -46,6 +46,28 @@ def list_flatten(
         _description_
     """
 
+@overload
+def list_offsets(input: ArrowArrayExportable, *, physical: bool = True) -> Array: ...
+@overload
+def list_offsets(
+    input: ArrowStreamExportable, *, physical: bool = True
+) -> ArrayReader: ...
+def list_offsets(
+    input: ArrowArrayExportable | ArrowStreamExportable, *, physical: bool = True
+) -> Array | ArrayReader:
+    """Access the offsets of this ListArray or LargeListArray
+
+    Args:
+        input: _description_
+        physical: If True, return the physical (unsliced) offsets of the provided list array. Slicing offsets (False) is not yet implemented.
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        _description_
+    """
+
 def struct_field(
     values: ArrowArrayExportable,
     /,
