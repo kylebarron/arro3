@@ -9,7 +9,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use pyo3_arrow::error::PyArrowResult;
-use pyo3_arrow::{PyArray, PyField};
+use pyo3_arrow::{PyArray, PyDataType, PyField};
 
 #[pyfunction]
 #[pyo3(signature=(values, list_size, *, r#type=None))]
@@ -17,20 +17,22 @@ pub(crate) fn fixed_size_list_array(
     py: Python,
     values: PyArray,
     list_size: i32,
-    r#type: Option<PyField>,
+    r#type: Option<PyDataType>,
 ) -> PyArrowResult<PyObject> {
     let (values_array, values_field) = values.into_inner();
-    let field = r#type.map(|f| f.into_inner()).unwrap_or_else(|| {
-        Arc::new(Field::new_fixed_size_list(
-            "",
-            values_field,
-            list_size,
-            true,
-        ))
-    });
-
-    let array = FixedSizeListArray::try_new(field.clone(), list_size, values_array, None)?;
-    Ok(PyArray::new(Arc::new(array), field).to_arro3(py)?)
+    let list_data_type = r#type
+        .map(|t| t.into_inner())
+        .unwrap_or_else(|| DataType::FixedSizeList(values_field.clone(), list_size));
+    let inner_field = match &list_data_type {
+        DataType::FixedSizeList(inner_field, _) => inner_field,
+        _ => {
+            return Err(
+                PyValueError::new_err("Expected fixed size list as the outer data type").into(),
+            )
+        }
+    };
+    let array = FixedSizeListArray::try_new(inner_field.clone(), list_size, values_array, None)?;
+    Ok(PyArray::new(Arc::new(array), Field::new("", list_data_type, true).into()).to_arro3(py)?)
 }
 
 #[pyfunction]
@@ -39,7 +41,7 @@ pub(crate) fn list_array(
     py: Python,
     offsets: PyArray,
     values: PyArray,
-    r#type: Option<PyField>,
+    r#type: Option<PyDataType>,
 ) -> PyArrowResult<PyObject> {
     let (values_array, values_field) = values.into_inner();
     let (offsets_array, _) = offsets.into_inner();
@@ -52,30 +54,42 @@ pub(crate) fn list_array(
             )
         }
     };
-    let field = r#type.map(|f| f.into_inner()).unwrap_or_else(|| {
+    let list_data_type = r#type.map(|t| t.into_inner()).unwrap_or_else(|| {
         if large_offsets {
-            Arc::new(Field::new_large_list("item", values_field, true))
+            DataType::LargeList(values_field.clone())
         } else {
-            Arc::new(Field::new_list("item", values_field, true))
+            DataType::List(values_field.clone())
         }
     });
+    let inner_field = match &list_data_type {
+        DataType::List(inner_field) | DataType::LargeList(inner_field) => inner_field,
+        _ => {
+            return Err(
+                PyValueError::new_err("Expected fixed size list as the outer data type").into(),
+            )
+        }
+    };
 
     let list_array: ArrayRef = if large_offsets {
         Arc::new(LargeListArray::try_new(
-            field.clone(),
+            inner_field.clone(),
             OffsetBuffer::new(offsets_array.as_primitive::<Int64Type>().values().clone()),
             values_array,
             None,
         )?)
     } else {
         Arc::new(ListArray::try_new(
-            field.clone(),
+            inner_field.clone(),
             OffsetBuffer::new(offsets_array.as_primitive::<Int32Type>().values().clone()),
             values_array,
             None,
         )?)
     };
-    Ok(PyArray::new(Arc::new(list_array), field).to_arro3(py)?)
+    Ok(PyArray::new(
+        Arc::new(list_array),
+        Field::new("", list_data_type, true).into(),
+    )
+    .to_arro3(py)?)
 }
 
 #[pyfunction]
