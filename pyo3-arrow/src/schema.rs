@@ -127,6 +127,10 @@ impl PySchema {
         self.0 == other.0
     }
 
+    fn __getitem__(&self, py: Python, key: FieldIndexInput) -> PyArrowResult<PyObject> {
+        self.field(py, key)
+    }
+
     pub fn __len__(&self) -> usize {
         self.0.fields().len()
     }

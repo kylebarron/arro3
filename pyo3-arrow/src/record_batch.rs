@@ -127,22 +127,14 @@ impl PyRecordBatch {
         let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false);
         let array: ArrayRef = Arc::new(StructArray::from(self.0.clone()));
         to_array_pycapsules(py, field.into(), &array, requested_schema)
-
-        // let schema = self.0.schema();
-        // let array = StructArray::from(self.0.clone());
-
-        // let ffi_schema = FFI_ArrowSchema::try_from(schema.as_ref())?;
-        // let ffi_array = FFI_ArrowArray::new(&array.to_data());
-
-        // let schema_capsule_name = CString::new("arrow_schema").unwrap();
-        // let array_capsule_name = CString::new("arrow_array").unwrap();
-        // let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
-        // let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
-        // Ok(PyTuple::new_bound(py, vec![schema_capsule, array_capsule]))
     }
 
     pub fn __eq__(&self, other: &PyRecordBatch) -> bool {
         self.0 == other.0
+    }
+
+    fn __getitem__(&self, py: Python, key: FieldIndexInput) -> PyResult<PyObject> {
+        self.column(py, key)
     }
 
     pub fn __repr__(&self) -> String {

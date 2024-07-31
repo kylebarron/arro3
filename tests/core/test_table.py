@@ -2,6 +2,16 @@ import pyarrow as pa
 from arro3.core import Table
 
 
+def test_table_getitem():
+    a = pa.chunked_array([[1, 2, 3, 4]])
+    b = pa.chunked_array([["a", "b", "c", "d"]])
+    table = Table.from_pydict({"a": a, "b": b})
+    assert a == pa.chunked_array(table["a"])
+    assert b == pa.chunked_array(table["b"])
+    assert a == pa.chunked_array(table[0])
+    assert b == pa.chunked_array(table[1])
+
+
 def test_table_from_arrays():
     a = pa.array([1, 2, 3, 4])
     b = pa.array(["a", "b", "c", "d"])
