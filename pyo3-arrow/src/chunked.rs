@@ -403,6 +403,7 @@ impl PyChunkedArray {
         self.__array__(py, None, None)
     }
 
+    #[getter]
     pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
