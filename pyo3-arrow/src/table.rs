@@ -21,6 +21,7 @@ use crate::input::{
     AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
 };
 use crate::schema::display_schema;
+use crate::utils::schema_equals;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
 /// A Python-facing Arrow table.
@@ -35,9 +36,10 @@ pub struct PyTable {
 
 impl PyTable {
     pub fn new(batches: Vec<RecordBatch>, schema: SchemaRef) -> Self {
-        // TODO: allow batches to have different schema metadata?
         assert!(
-            batches.iter().all(|rb| rb.schema_ref() == &schema),
+            batches
+                .iter()
+                .all(|rb| schema_equals(rb.schema_ref(), &schema)),
             "All batches must have same schema"
         );
         Self { schema, batches }

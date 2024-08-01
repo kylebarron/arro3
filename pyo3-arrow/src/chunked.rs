@@ -33,7 +33,7 @@ impl PyChunkedArray {
         assert!(
             chunks
                 .iter()
-                .all(|chunk| chunk.data_type() == field.data_type()),
+                .all(|chunk| chunk.data_type().equals_datatype(field.data_type())),
             "All chunks must have same data type"
         );
         Self { chunks, field }
