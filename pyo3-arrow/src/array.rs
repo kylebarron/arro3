@@ -24,7 +24,7 @@ use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
-use crate::PyDataType;
+use crate::{PyDataType, PyField};
 
 /// A Python-facing Arrow array.
 ///
@@ -280,6 +280,12 @@ impl PyArray {
         let new_array = arrow::compute::cast(self.as_ref(), &target_type)?;
         let new_field = self.field.as_ref().clone().with_data_type(target_type);
         Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
+    }
+
+    #[getter]
+    #[pyo3(name = "field")]
+    fn py_field(&self, py: Python) -> PyResult<PyObject> {
+        PyField::new(self.field.clone()).to_arro3(py)
     }
 
     #[getter]
