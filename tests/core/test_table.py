@@ -1,5 +1,7 @@
+import geoarrow.types as gt
+import numpy as np
 import pyarrow as pa
-from arro3.core import Table
+from arro3.core import ChunkedArray, Table
 
 
 def test_table_getitem():
@@ -25,3 +27,20 @@ def test_table_from_pydict():
     arro3_table = Table.from_pydict(mapping)
     pa_table = pa.Table.from_pydict(mapping)
     assert pa.table(arro3_table) == pa_table
+
+
+def test_table_append_array_extension_type():
+    """
+    Test that extension metadata gets propagated from an array to a column on a table.
+    """
+    # Test that extension
+    extension_type = gt.point(dimensions="xy", coord_type="interleaved").to_pyarrow()
+    coords = np.array([1, 2, 3, 4], dtype=np.float64)
+    ext_array = pa.FixedSizeListArray.from_arrays(coords, 2).cast(extension_type)
+
+    table = Table.from_arrays([pa.array(["a", "b"])], names=["a"])
+    geo_table = table.append_column("geometry", ChunkedArray([ext_array]))
+
+    meta = geo_table.schema["geometry"].metadata
+    assert b"ARROW:extension:name" in meta.keys()
+    assert meta[b"ARROW:extension:name"] == b"geoarrow.point"

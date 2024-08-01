@@ -17,7 +17,7 @@ use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
-use crate::{PyArray, PyDataType};
+use crate::{PyArray, PyDataType, PyField};
 
 /// A Python-facing Arrow chunked array.
 ///
@@ -217,25 +217,27 @@ impl Display for PyChunkedArray {
 #[pymethods]
 impl PyChunkedArray {
     #[new]
-    pub fn init(arrays: Vec<PyArray>, r#type: Option<PyDataType>) -> PyResult<Self> {
+    pub fn init(arrays: Vec<PyArray>, r#type: Option<PyField>) -> PyResult<Self> {
         let (chunks, fields): (Vec<_>, Vec<_>) =
             arrays.into_iter().map(|arr| arr.into_inner()).unzip();
         if !fields
             .windows(2)
-            .all(|w| w[0].data_type() == w[1].data_type())
+            .all(|w| w[0].data_type().equals_datatype(w[1].data_type()))
         {
             return Err(PyTypeError::new_err(
                 "Cannot create a ChunkedArray with differing data types.",
             ));
         }
 
-        let data_type = r#type
+        let field = r#type
             .map(|py_data_type| py_data_type.into_inner())
-            .unwrap_or_else(|| fields[0].data_type().clone());
+            .unwrap_or_else(|| fields[0].clone());
 
         Ok(PyChunkedArray::new(
             chunks,
-            Field::new("", data_type, true).into(),
+            Field::new("", field.data_type().clone(), true)
+                .with_metadata(field.metadata().clone())
+                .into(),
         ))
     }
 

@@ -57,6 +57,14 @@ class Array:
         """
 
     @property
+    def field(self) -> Field:
+        """Access the field stored on this Array.
+
+        Note that this field usually will not have a name associated, but it may have
+        metadata that signifies that this array is an extension (user-defined typed)
+        array.
+        """
+    @property
     def nbytes(self) -> int: ...
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.

@@ -458,6 +458,20 @@ files = [
 tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
 
 [[package]]
+name = "geoarrow-types"
+version = "0.2.0"
+description = ""
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "geoarrow_types-0.2.0-py3-none-any.whl", hash = "sha256:b83bd7e4cee92356df1904bc681cd86938ae808778aef8f836d2dce8f234cb7e"},
+    {file = "geoarrow_types-0.2.0.tar.gz", hash = "sha256:2dcb3db9c80b2079a7a61c3e74aa46904f1c899136735f1cacc015757707e924"},
+]
+
+[package.extras]
+test = ["pyarrow", "pytest"]
+
+[[package]]
 name = "ghp-import"
 version = "2.1.0"
 description = "Copy your docs directly to the gh-pages branch."
@@ -2029,4 +2043,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "0a7c4cda2ddb498115d5ab9b347f5dd98245af9a2d8e32bf962672826ec734f5"
+content-hash = "bd425817a0b550314a3b2d86f2b86d775f1c2fadc09b9ade59460070c00e39ef"
