@@ -48,7 +48,8 @@ def test_table_append_array_extension_type():
     assert meta[b"ARROW:extension:name"] == b"geoarrow.point"
 
 
-@pytest.mark.xfail("from_batches fails on empty column with positive length")
+@pytest.mark.xfail
+# from_batches fails on empty column with positive length
 def test_table_from_batches_empty_columns_with_len():
     df = pd.DataFrame({"a": [1, 2, 3]})
     no_columns = df[[]]
