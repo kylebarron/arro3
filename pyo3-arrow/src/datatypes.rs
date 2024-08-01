@@ -217,7 +217,8 @@ impl PyDataType {
     #[getter]
     fn value_type(&self, py: Python) -> PyResult<Option<PyObject>> {
         match &self.0 {
-            DataType::List(value_field)
+            DataType::FixedSizeList(value_field, _)
+            | DataType::List(value_field)
             | DataType::LargeList(value_field)
             | DataType::ListView(value_field)
             | DataType::LargeListView(value_field)
