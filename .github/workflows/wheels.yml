@@ -10,7 +10,7 @@ on:
     branches:
       - main
     tags:
-      - "py-core-v*"
+      - "py-v*"
   workflow_dispatch:
 
 permissions:
