@@ -36,7 +36,8 @@ jobs:
             target: ppc64le
         module:
           - arro3-core
-          # - arro3-compute
+          - arro3-compute
+          - arro3-io
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
