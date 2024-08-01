@@ -13,6 +13,7 @@ mod record_batch;
 mod record_batch_reader;
 mod schema;
 mod table;
+mod utils;
 
 pub use array::PyArray;
 pub use array_reader::PyArrayReader;
