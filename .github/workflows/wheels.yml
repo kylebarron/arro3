@@ -158,7 +158,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: wheels-*
+          pattern: wheels-*-${{ matrix.module }}
           merge-multiple: true
           path: dist
       - uses: actions/setup-python@v4
