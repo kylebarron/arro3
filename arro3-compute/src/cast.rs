@@ -45,3 +45,8 @@ pub fn cast(py: Python, input: AnyArray, to_type: PyDataType) -> PyArrowResult<P
         }
     }
 }
+
+#[pyfunction]
+pub fn can_cast_types(from_type: PyDataType, to_type: PyDataType) -> bool {
+    arrow_cast::can_cast_types(from_type.as_ref(), to_type.as_ref())
+}
