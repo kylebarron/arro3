@@ -15,9 +15,6 @@ use crate::ffi::to_python::to_schema_pycapsule;
 use crate::input::MetadataInput;
 use crate::PyDataType;
 
-/// A Python-facing Arrow field.
-///
-/// This is a wrapper around a [FieldRef].
 #[pyclass(module = "arro3.core._core", name = "Field", subclass)]
 pub struct PyField(FieldRef);
 
@@ -104,13 +101,6 @@ impl PyField {
         Ok(PyField::new(field.into()))
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this array
-    /// into a pyarrow field, without copying memory.
     pub fn __arrow_c_schema__<'py>(
         &'py self,
         py: Python<'py>,
@@ -126,16 +116,11 @@ impl PyField {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow schema interface
-    /// (`__arrow_c_schema__`).
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
         input
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -147,13 +132,10 @@ impl PyField {
         Ok(Self::new(Arc::new(field)))
     }
 
-    /// Test if this field is equal to the other
-    // TODO: add option to check field metadata
     pub fn equals(&self, other: PyField) -> bool {
         self.0 == other.0
     }
 
-    /// The schema's metadata.
     // Note: we can't return HashMap<Vec<u8>, Vec<u8>> because that will coerce keys and values to
     // a list, not bytes
     #[getter]
@@ -168,25 +150,21 @@ impl PyField {
         Ok(d)
     }
 
-    /// The schema's metadata where keys and values are `str`, not `bytes`.
     #[getter]
     pub fn metadata_str(&self) -> HashMap<String, String> {
         self.0.metadata().clone()
     }
 
-    /// The field name.
     #[getter]
     pub fn name(&self) -> String {
         self.0.name().clone()
     }
 
-    /// The field nullability.
     #[getter]
     pub fn nullable(&self) -> bool {
         self.0.is_nullable()
     }
 
-    /// Create new field without metadata, if any
     pub fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(
             self.0
@@ -198,7 +176,6 @@ impl PyField {
         .to_arro3(py)
     }
 
-    /// Create new field without metadata, if any
     #[getter]
     pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.0.data_type().clone()).to_arro3(py)

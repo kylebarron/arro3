@@ -19,9 +19,6 @@ use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, 
 use crate::schema::display_schema;
 use crate::{PyArray, PyField, PySchema};
 
-/// A Python-facing Arrow record batch.
-///
-/// This is a wrapper around a [RecordBatch].
 #[pyclass(module = "arro3.core._core", name = "RecordBatch", subclass)]
 #[derive(Debug)]
 pub struct PyRecordBatch(RecordBatch);
@@ -111,13 +108,6 @@ impl PyRecordBatch {
         }
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this array
-    /// into a pyarrow array, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_array__<'py>(
         &'py self,
@@ -141,7 +131,6 @@ impl PyRecordBatch {
         self.to_string()
     }
 
-    /// Construct a RecordBatch from multiple Arrays
     #[classmethod]
     #[pyo3(signature = (arrays, *, schema))]
     pub fn from_arrays(
@@ -182,9 +171,6 @@ impl PyRecordBatch {
         Ok(Self::new(rb))
     }
 
-    /// Construct a RecordBatch from a StructArray.
-    ///
-    /// Each field in the StructArray will become a column in the resulting RecordBatch.
     #[classmethod]
     pub fn from_struct_array(_cls: &Bound<PyType>, struct_array: PyArray) -> PyArrowResult<Self> {
         let (array, field) = struct_array.into_inner();
@@ -200,16 +186,6 @@ impl PyRecordBatch {
         }
     }
 
-    /// Construct this from an existing Arrow RecordBatch.
-    ///
-    /// It can be called on anything that exports the Arrow data interface
-    /// (`__arrow_c_array__`) and returns a StructArray..
-    ///
-    /// Args:
-    ///     input: Arrow array to use for constructing this object
-    ///
-    /// Returns:
-    ///     Self
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
         match input {
@@ -222,7 +198,6 @@ impl PyRecordBatch {
         }
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -289,7 +264,6 @@ impl PyRecordBatch {
         Ok(PyRecordBatch::new(new_rb).to_arro3(py)?)
     }
 
-    /// Select single column from RecordBatch
     pub fn column(&self, py: Python, i: FieldIndexInput) -> PyResult<PyObject> {
         let column_index = i.into_position(self.0.schema_ref())?;
         let field = self.0.schema().field(column_index).clone();
@@ -297,7 +271,6 @@ impl PyRecordBatch {
         PyArray::new(array, field.into()).to_arro3(py)
     }
 
-    /// Names of the Table or RecordBatch columns.
     #[getter]
     pub fn column_names(&self) -> Vec<String> {
         self.0
@@ -308,7 +281,6 @@ impl PyRecordBatch {
             .collect()
     }
 
-    /// List of all columns in numerical order.
     #[getter]
     pub fn columns(&self, py: Python) -> PyResult<Vec<PyObject>> {
         (0..self.num_columns())
@@ -320,7 +292,6 @@ impl PyRecordBatch {
         self.0 == other.0
     }
 
-    /// Select a schema field by its numeric index.
     pub fn field(&self, py: Python, i: FieldIndexInput) -> PyResult<PyObject> {
         let schema_ref = self.0.schema_ref();
         let field = schema_ref.field(i.into_position(schema_ref)?);
@@ -332,13 +303,11 @@ impl PyRecordBatch {
         self.0.get_array_memory_size()
     }
 
-    /// Number of columns in this RecordBatch.
     #[getter]
     pub fn num_columns(&self) -> usize {
         self.0.num_columns()
     }
 
-    /// Number of rows in this RecordBatch.
     #[getter]
     pub fn num_rows(&self) -> usize {
         self.0.num_rows()
@@ -379,7 +348,6 @@ impl PyRecordBatch {
         Ok(PyRecordBatch::new(new_rb).to_arro3(py)?)
     }
 
-    /// Dimensions of the table or record batch: (#rows, #columns).
     #[getter]
     pub fn shape(&self) -> (usize, usize) {
         (self.num_rows(), self.num_columns())

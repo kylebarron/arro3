@@ -15,9 +15,6 @@ use crate::ffi::to_python::to_schema_pycapsule;
 use crate::input::{FieldIndexInput, MetadataInput};
 use crate::{PyDataType, PyField, PyTable};
 
-/// A Python-facing Arrow schema.
-///
-/// This is a wrapper around a [SchemaRef].
 #[pyclass(module = "arro3.core._core", name = "Schema", subclass)]
 pub struct PySchema(SchemaRef);
 
