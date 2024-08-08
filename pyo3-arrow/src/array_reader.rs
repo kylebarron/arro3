@@ -15,9 +15,6 @@ use crate::ffi::{ArrayIterator, ArrayReader};
 use crate::input::AnyArray;
 use crate::{PyArray, PyChunkedArray, PyField};
 
-/// A Python-facing Arrow array reader.
-///
-/// This is a wrapper around a [ArrayReader].
 #[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass)]
 pub struct PyArrayReader(pub(crate) Option<Box<dyn ArrayReader + Send>>);
 
@@ -102,13 +99,6 @@ impl Display for PyArrayReader {
 
 #[pymethods]
 impl PyArrayReader {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
-    /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_stream__<'py>(
         &'py mut self,
@@ -136,23 +126,17 @@ impl PyArrayReader {
         self.to_string()
     }
 
-    /// Returns `true` if this reader has already been consumed.
     #[getter]
     pub fn closed(&self) -> bool {
         self.0.is_none()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`), such as a `Table` or `ArrayReader`.
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
-    /// Construct this object from a bare Arrow PyCapsule.
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -184,7 +168,6 @@ impl PyArrayReader {
         data.extract()
     }
 
-    /// Access the field of this reader
     #[getter]
     pub fn field(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(self.field_ref()?).to_arro3(py)

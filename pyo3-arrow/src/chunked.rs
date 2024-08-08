@@ -19,9 +19,6 @@ use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::{PyArray, PyDataType, PyField};
 
-/// A Python-facing Arrow chunked array.
-///
-/// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
@@ -241,8 +238,6 @@ impl PyChunkedArray {
         ))
     }
 
-    /// An implementation of the Array interface, for interoperability with numpy and other
-    /// array libraries.
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
     pub fn __array__(
@@ -259,14 +254,6 @@ impl PyChunkedArray {
         chunked_to_numpy(py, chunk_refs.as_slice())
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example (as of the upcoming pyarrow v16), you can call
-    /// [`pyarrow.chunked_array()`][pyarrow.chunked_array] to convert this array into a
-    /// pyarrow array, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_stream__<'py>(
         &'py self,
@@ -292,16 +279,11 @@ impl PyChunkedArray {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`). All batches will be materialized in memory.
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         input.into_chunked_array()
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -400,7 +382,6 @@ impl PyChunkedArray {
         Ok(PyChunkedArray::new(sliced_chunks, self.field.clone()).to_arro3(py)?)
     }
 
-    /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
     }

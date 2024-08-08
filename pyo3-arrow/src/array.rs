@@ -26,9 +26,6 @@ use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::{PyDataType, PyField};
 
-/// A Python-facing Arrow array.
-///
-/// This is a wrapper around an [ArrayRef] and a [FieldRef].
 #[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -195,8 +192,6 @@ impl PyArray {
         Ok(Self::new(array, Field::new("", data_type, true).into()))
     }
 
-    /// An implementation of the Array interface, for interoperability with numpy and other
-    /// array libraries.
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
     pub fn __array__(
@@ -208,13 +203,6 @@ impl PyArray {
         to_numpy(py, &self.array)
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this array
-    /// into a pyarrow array, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_array__<'py>(
         &'py self,
@@ -305,7 +293,6 @@ impl PyArray {
         Ok(PyArray::new(new_array, self.field.clone()).to_arro3(py)?)
     }
 
-    /// Copy this array to a `numpy` NDArray
     pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
     }

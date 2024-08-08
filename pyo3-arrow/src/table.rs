@@ -24,9 +24,6 @@ use crate::schema::display_schema;
 use crate::utils::schema_equals;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
-/// A Python-facing Arrow table.
-///
-/// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
 #[pyclass(module = "arro3.core._core", name = "Table", subclass)]
 #[derive(Debug)]
 pub struct PyTable {

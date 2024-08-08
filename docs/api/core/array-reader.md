@@ -1,8 +1,8 @@
-# types
+# ArrayReader
 
-::: arro3.core.types
+::: arro3.core.ArrayReader
     options:
       filters:
         - "!^_"
         - "^__arrow"
-      show_if_no_docstring: true
+      members:

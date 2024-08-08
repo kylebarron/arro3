@@ -104,13 +104,6 @@ impl Display for PyDataType {
 
 #[pymethods]
 impl PyDataType {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this array
-    /// into a pyarrow field, without copying memory.
     pub fn __arrow_c_schema__<'py>(
         &'py self,
         py: Python<'py>,
@@ -126,16 +119,11 @@ impl PyDataType {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow schema interface
-    /// (`__arrow_c_schema__`).
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
         input
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,

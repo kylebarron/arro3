@@ -17,9 +17,6 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
-/// A Python-facing Arrow record batch reader.
-///
-/// This is a wrapper around a [RecordBatchReader].
 #[pyclass(module = "arro3.core._core", name = "RecordBatchReader", subclass)]
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
@@ -115,13 +112,6 @@ impl Display for PyRecordBatchReader {
 
 #[pymethods]
 impl PyRecordBatchReader {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
-    /// into a pyarrow table, without copying memory.
     #[allow(unused_variables)]
     pub fn __arrow_c_stream__<'py>(
         &'py mut self,
@@ -159,17 +149,12 @@ impl PyRecordBatchReader {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`), such as a `Table` or `RecordBatchReader`.
     #[classmethod]
     pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
-    /// Construct this object from a bare Arrow PyCapsule.
     #[classmethod]
     pub fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
@@ -203,7 +188,6 @@ impl PyRecordBatchReader {
         data.extract()
     }
 
-    /// Returns `true` if this reader has already been consumed.
     #[getter]
     pub fn closed(&self) -> bool {
         self.0.is_none()
@@ -235,7 +219,6 @@ impl PyRecordBatchReader {
         }
     }
 
-    /// Access the schema of this table
     #[getter]
     pub fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
