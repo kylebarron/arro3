@@ -7,8 +7,6 @@ name: Build wheels
 
 on:
   push:
-    branches:
-      - main
     tags:
       - "py-v*"
   workflow_dispatch:
