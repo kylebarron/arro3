@@ -1,0 +1,54 @@
+name: Build pyodide wheels
+
+on:
+  push:
+    tags:
+      - "py-core-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - arro3-core
+          - arro3-compute
+          - arro3-io
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-emscripten
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python build dependencies
+        run: pip install maturin pyodide-build
+
+      - name: Install emsdk & build wheels
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+          ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+          ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+          source emsdk_env.sh
+          cd ..
+
+          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide-${{ matrix.module }}
+          path: dist
