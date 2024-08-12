@@ -47,12 +47,11 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Install Python build dependencies
-        run: pip install maturin pyodide-build==${{ inputs.pyodide }}
+        run: pip install maturin pyodide-build==${{ inputs.pyodide }} wheel-filename
 
       - name: Get emscripten version
         run: |
-          PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
-          echo "PYODIDE_EMSCRIPTEN_VERSION=$PYODIDE_EMSCRIPTEN_VERSION" >> $GITHUB_ENV
+          echo PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version) >> $GITHUB_ENV
 
       - name: Install emsdk ${{env.PYODIDE_EMSCRIPTEN_VERSION}}
         uses: mymindstorm/setup-emsdk@v14
@@ -64,6 +63,15 @@ jobs:
         run: |
           RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
 
+      - name: Get info from built wheel file
+        run: |
+          # get arrow version and wheel name and make metafile
+          ARRO3_WHEEL=$(basename pyarrow/dist/*.whl)
+          ARRO3_VERSION=$(wheel-filename ${ARRO3_WHEEL} | jq -r '.version')
+          ARROW_SHA256=$(sha256sum pyarrow/dist/*.whl | cut -d ' ' -f 1)
+          echo ARRO3_WHEEL=${ARRO3_WHEEL}>>$GITHUB_ENV
+          echo ARRO3_VERSION=${ARRO3_VERSION}>>$GITHUB_ENV
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -73,8 +81,8 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          tag: pyodide-v${{ inputs.pyodide }}
-          name: Build of arro3 for pyodide v${{ inputs.pyodide}}
+          tag: pyodide-v${{ inputs.pyodide }}-arro3-v${{ env.ARRO3_VERSION }}
+          name: Build of arro3 for pyodide v${{ inputs.pyodide}} and arro3 v${{ env.ARRO3_VERSION }}
           artifacts: dist/*
           replacesArtifacts: true
           allowUpdates: true
