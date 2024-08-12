@@ -1,6 +1,13 @@
 use pyo3::prelude::*;
 
+mod array;
+mod array_reader;
 mod constructors;
+mod field;
+mod input;
+mod record_batch_reader;
+mod schema;
+mod table;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -22,7 +29,7 @@ fn _core(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<pyo3_arrow::PyRecordBatch>()?;
     m.add_class::<pyo3_arrow::PyRecordBatchReader>()?;
     m.add_class::<pyo3_arrow::PySchema>()?;
-    m.add_class::<pyo3_arrow::PyTable>()?;
+    m.add_class::<table::Arro3Table>()?;
 
     m.add_wrapped(wrap_pyfunction!(constructors::fixed_size_list_array))?;
     m.add_wrapped(wrap_pyfunction!(constructors::list_array))?;
