@@ -54,8 +54,17 @@ impl From<&Arro3Table> for PyTable {
     }
 }
 
+impl Display for Arro3Table {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "arro3.core.Table")?;
+        writeln!(f, "----------------")?;
+        display_schema(&self.schema, f)
+    }
+}
+
 #[pymethods]
 impl Arro3Table {
+    // TODO: deduplicate this with pyo3-arrow Table
     #[allow(unused_variables)]
     pub fn __arrow_c_stream__<'py>(
         &'py self,

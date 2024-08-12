@@ -17,7 +17,10 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::schema::display_schema;
 use crate::utils::schema_equals;
 
-// TODO: remove;
+/// A Python-facing Table, a collection of [`RecordBatch`] with a common [`SchemaRef`].
+
+// Note: this _must_ be a pyclass and this must have a Python-facing __arrow_c_stream__ to be able
+// to export data to pyarrow.
 #[pyclass]
 #[derive(Debug)]
 pub struct PyTable {
@@ -42,25 +45,6 @@ impl PyTable {
 
     pub fn into_inner(self) -> (Vec<RecordBatch>, SchemaRef) {
         (self.batches, self.schema)
-    }
-
-    /// Construct an Arrow C Stream PyCapsule
-    #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
-        &'py self,
-        py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
-        let field = self.schema.fields().clone();
-        let array_reader = self.batches.clone().into_iter().map(|batch| {
-            let arr: ArrayRef = Arc::new(StructArray::from(batch));
-            Ok(arr)
-        });
-        let array_reader = Box::new(ArrayIterator::new(
-            array_reader,
-            Field::new_struct("", field, false).into(),
-        ));
-        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
     /// Construct this from a bare Arrow C Stream PyCapsule
@@ -106,10 +90,24 @@ impl PyTable {
     }
 }
 
-impl Display for PyTable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "arro3.core.Table")?;
-        writeln!(f, "-----------")?;
-        display_schema(&self.schema, f)
+#[pymethods]
+impl PyTable {
+    /// Construct an Arrow C Stream PyCapsule
+    #[allow(unused_variables)]
+    pub fn __arrow_c_stream__<'py>(
+        &'py self,
+        py: Python<'py>,
+        requested_schema: Option<Bound<PyCapsule>>,
+    ) -> PyResult<Bound<'py, PyCapsule>> {
+        let field = self.schema.fields().clone();
+        let array_reader = self.batches.clone().into_iter().map(|batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(batch));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", field, false).into(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 }
