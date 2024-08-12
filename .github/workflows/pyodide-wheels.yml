@@ -1,16 +1,31 @@
 name: Build pyodide wheels
 
 on:
-  push:
-    tags:
-      - "py-core-v*"
+  # push:
+  #   tags:
+  #     - "py-core-v*"
   workflow_dispatch:
+    inputs:
+      python:
+        description: "Python version"
+        required: true
+        default: "3.12"
+        type: choice
+        options:
+          - 3.12
+          - 3.13
+          - 3.14
+          - 3.15
+      pyodide:
+        description: "New Pyodide version to build for"
+        required: true
+        type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  linux:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,6 +35,9 @@ jobs:
           - arro3-io
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -28,27 +46,37 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Install Python build dependencies
-        run: pip install maturin pyodide-build
+        run: pip install maturin pyodide-build==${{ inputs.pyodide }}
 
-      - name: Install emsdk & build wheels
+      - name: Get emscripten version
         run: |
-          git clone https://github.com/emscripten-core/emsdk.git
-          cd emsdk
           PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
-          ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
-          ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
-          source emsdk_env.sh
-          cd ..
+          echo "PYODIDE_EMSCRIPTEN_VERSION=$PYODIDE_EMSCRIPTEN_VERSION" >> $GITHUB_ENV
 
-          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+      - name: Install emsdk ${{env.PYODIDE_EMSCRIPTEN_VERSION}}
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{env.PYODIDE_EMSCRIPTEN_VERSION}}
+          actions-cache-folder: "emsdk-cache"
+
+      - name: Build wheels
+        run: |
+          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-pyodide-${{ matrix.module }}
           path: dist
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: pyodide-v${{ inputs.pyodide }}
+          name: Build of arro3 for pyodide v${{ inputs.pyodide}}
+          artifacts: dist/*
+          replacesArtifacts: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          prerelease: true
