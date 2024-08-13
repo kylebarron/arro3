@@ -223,6 +223,15 @@ class ChunkedArray:
     @property
     def num_chunks(self) -> int:
         """Number of underlying chunks."""
+    def rechunk(self, *, max_chunksize: int | None = None) -> ChunkedArray:
+        """Rechunk a ChunkedArray with a maximum number of rows per chunk.
+
+        Args:
+            max_chunksize: The maximum number of rows per internal array. Defaults to None, which rechunks into a single array.
+
+        Returns:
+            The rechunked ChunkedArray.
+        """
     def slice(self, offset: int = 0, length: int | None = None) -> ChunkedArray:
         """Compute zero-copy slice of this ChunkedArray
 
@@ -1394,6 +1403,15 @@ class Table:
 
         Due to the definition of a table, all columns have the same number of rows.
         """
+    def rechunk(self, *, max_chunksize: int | None = None) -> Table:
+        """Rechunk a table with a maximum number of rows per chunk.
+
+        Args:
+            max_chunksize: The maximum number of rows per internal RecordBatch. Defaults to None, which rechunks into a single batch.
+
+        Returns:
+            The rechunked table.
+        """
     def remove_column(self, i: int) -> Table:
         """Create new Table with the indicated column removed.
 
@@ -1449,6 +1467,16 @@ class Table:
 
         Returns:
             (number of rows, number of columns)
+        """
+    def slice(self, offset: int = 0, length: int | None = None) -> Table:
+        """Compute zero-copy slice of this table.
+
+        Args:
+            offset: Defaults to 0.
+            length: Defaults to None.
+
+        Returns:
+            The sliced table
         """
     def to_batches(self) -> list[RecordBatch]:
         """Convert Table to a list of RecordBatch objects.
