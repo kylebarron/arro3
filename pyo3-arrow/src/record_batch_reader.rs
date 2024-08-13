@@ -17,10 +17,14 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
+/// A Python-facing Arrow record batch reader.
+///
+/// This is a wrapper around a [RecordBatchReader].
 #[pyclass(module = "arro3.core._core", name = "RecordBatchReader", subclass)]
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
 impl PyRecordBatchReader {
+    /// Construct a new PyRecordBatchReader from an existing [RecordBatchReader].
     pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
         Self(Some(reader))
     }
@@ -47,7 +51,7 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::new(batches, schema))
+        Ok(PyTable::try_new(batches, schema)?)
     }
 
     /// Access the [SchemaRef] of this RecordBatchReader.
@@ -113,7 +117,7 @@ impl Display for PyRecordBatchReader {
 #[pymethods]
 impl PyRecordBatchReader {
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -145,18 +149,18 @@ impl PyRecordBatchReader {
         self.read_next_batch(py)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -168,11 +172,7 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    pub fn from_batches(
-        _cls: &Bound<PyType>,
-        schema: PySchema,
-        batches: Vec<PyRecordBatch>,
-    ) -> Self {
+    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: Vec<PyRecordBatch>) -> Self {
         let batches = batches
             .into_iter()
             .map(|batch| batch.into_inner())
@@ -184,16 +184,16 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+    fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
         data.extract()
     }
 
     #[getter]
-    pub fn closed(&self) -> bool {
+    fn closed(&self) -> bool {
         self.0.is_none()
     }
 
-    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .take()
@@ -203,10 +203,10 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::new(batches, schema).to_arro3(py)?)
+        Ok(PyTable::try_new(batches, schema)?.to_arro3(py)?)
     }
 
-    pub fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .as_mut()
@@ -220,7 +220,7 @@ impl PyRecordBatchReader {
     }
 
     #[getter]
-    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
+    fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
     }
 }

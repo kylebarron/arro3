@@ -10,6 +10,7 @@ from .types import (
 
 class Array:
     """An Arrow Array."""
+
     def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None:
         """Create arro3.core.Array instance from a sequence of Python objects.
 
@@ -109,8 +110,8 @@ class ArrayReader:
         This dunder method should not be called directly, but enables zero-copy data
         transfer to other Python libraries that understand Arrow memory.
 
-        For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this
-        ArrayReader to a pyarrow table, without copying memory.
+        For example, you can call [`pyarrow.chunked_array()`][pyarrow.chunked_array] to
+        convert this ArrayReader to a pyarrow ChunkedArray, without copying memory.
         """
     def __iter__(self) -> ArrayReader: ...
     def __next__(self) -> Array: ...

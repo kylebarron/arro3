@@ -7,7 +7,7 @@ use arrow::datatypes::{
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    make_array, Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
@@ -26,6 +26,9 @@ use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::{PyDataType, PyField};
 
+/// A Python-facing Arrow array.
+///
+/// This is a wrapper around an [ArrayRef] and a [FieldRef].
 #[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -50,11 +53,6 @@ impl PyArray {
             ));
         }
         Ok(Self { array, field })
-    }
-
-    pub fn from_array<A: Array>(array: A) -> Self {
-        let array = make_array(array.into_data());
-        Self::from_array_ref(array)
     }
 
     /// Create a new PyArray from an [ArrayRef], inferring its data type automatically.
@@ -132,7 +130,7 @@ impl Display for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type, *))]
-    pub fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
+    fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
         macro_rules! impl_primitive {
             ($rust_type:ty, $arrow_type:ty) => {{
                 let values: Vec<$rust_type> = obj.extract(py)?;
@@ -194,7 +192,7 @@ impl PyArray {
 
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    pub fn __array__(
+    fn __array__(
         &self,
         py: Python,
         dtype: Option<PyObject>,
@@ -204,7 +202,7 @@ impl PyArray {
     }
 
     #[allow(unused_variables)]
-    pub fn __arrow_c_array__<'py>(
+    fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -212,20 +210,20 @@ impl PyArray {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
-    pub fn __eq__(&self, other: &PyArray) -> bool {
+    fn __eq__(&self, other: &PyArray) -> bool {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __len__(&self) -> usize {
         self.array.len()
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         match input {
             AnyArray::Array(array) => Ok(array),
             AnyArray::Stream(stream) => {
@@ -239,7 +237,7 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
@@ -249,7 +247,7 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub fn from_numpy(
+    fn from_numpy(
         _cls: &Bound<PyType>,
         py: Python,
         array: Bound<'_, PyAny>,
@@ -282,7 +280,7 @@ impl PyArray {
     }
 
     #[pyo3(signature = (offset=0, length=None))]
-    pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+    fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
         let new_array = self.array.slice(offset, length);
         PyArray::new(new_array, self.field().clone()).to_arro3(py)
@@ -293,12 +291,12 @@ impl PyArray {
         Ok(PyArray::new(new_array, self.field.clone()).to_arro3(py)?)
     }
 
-    pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+    fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
     }
 
     #[getter]
-    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }
