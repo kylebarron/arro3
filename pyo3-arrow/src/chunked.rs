@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow::compute::concat;
-use arrow_array::{make_array, Array, ArrayRef};
+use arrow_array::{Array, ArrayRef};
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
@@ -19,6 +19,9 @@ use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::{PyArray, PyDataType, PyField};
 
+/// A Python-facing Arrow chunked array.
+///
+/// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
@@ -26,26 +29,21 @@ pub struct PyChunkedArray {
 }
 
 impl PyChunkedArray {
-    pub fn new(chunks: Vec<ArrayRef>, field: FieldRef) -> Self {
-        assert!(
-            chunks
-                .iter()
-                .all(|chunk| chunk.data_type().equals_datatype(field.data_type())),
-            "All chunks must have same data type"
-        );
-        Self { chunks, field }
+    /// Construct a new [PyChunkedArray] from existing chunks and a field.
+    pub fn try_new(chunks: Vec<ArrayRef>, field: FieldRef) -> PyResult<Self> {
+        if !chunks
+            .iter()
+            .all(|chunk| chunk.data_type().equals_datatype(field.data_type()))
+        {
+            return Err(PyTypeError::new_err("All chunks must have same data type"));
+        }
+
+        Ok(Self { chunks, field })
     }
 
+    /// Access the [DataType] of this ChunkedArray
     pub fn data_type(&self) -> &DataType {
         self.field.data_type()
-    }
-
-    pub fn from_arrays<A: Array>(chunks: &[A]) -> PyArrowResult<Self> {
-        let arrays = chunks
-            .iter()
-            .map(|chunk| make_array(chunk.to_data()))
-            .collect::<Vec<_>>();
-        Self::from_array_refs(arrays)
     }
 
     /// Create a new PyChunkedArray from a vec of [ArrayRef]s, inferring their data type
@@ -66,30 +64,34 @@ impl PyChunkedArray {
         }
 
         let field = Field::new("", chunks.first().unwrap().data_type().clone(), true);
-        Ok(Self::new(chunks, Arc::new(field)))
+        Ok(Self::try_new(chunks, Arc::new(field))?)
     }
 
+    /// Access the underlying chunks.
     pub fn chunks(&self) -> &[ArrayRef] {
         &self.chunks
     }
 
+    /// Access the underlying field.
     pub fn field(&self) -> &FieldRef {
         &self.field
     }
 
+    /// Consume this and return its inner parts.
     pub fn into_inner(self) -> (Vec<ArrayRef>, FieldRef) {
         (self.chunks, self.field)
     }
 
-    pub fn is_empty(&self) -> bool {
+    #[allow(dead_code)]
+    pub(crate) fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
-    pub fn len(&self) -> usize {
+    pub(crate) fn len(&self) -> usize {
         self.chunks.iter().fold(0, |acc, arr| acc + arr.len())
     }
 
-    pub fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
+    pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
         if total_chunk_length != self.length() {
             return Err(PyValueError::new_err(
@@ -104,7 +106,7 @@ impl PyChunkedArray {
             .zip(self.chunks())
             .all(|(length, arr)| *length == arr.len());
         if matches_existing_chunking {
-            return Ok(Self::new(self.chunks.clone(), self.field.clone()));
+            return Ok(Self::try_new(self.chunks.clone(), self.field.clone())?);
         }
 
         let mut offset = 0;
@@ -119,10 +121,14 @@ impl PyChunkedArray {
             })
             .collect::<PyArrowResult<Vec<_>>>()?;
 
-        Ok(PyChunkedArray::new(chunks, self.field.clone()))
+        Ok(PyChunkedArray::try_new(chunks, self.field.clone())?)
     }
 
-    pub fn slice(&self, mut offset: usize, mut length: usize) -> PyArrowResult<Vec<ArrayRef>> {
+    pub(crate) fn slice(
+        &self,
+        mut offset: usize,
+        mut length: usize,
+    ) -> PyArrowResult<Vec<ArrayRef>> {
         if offset + length > self.length() {
             return Err(
                 PyValueError::new_err("offset + length may not exceed length of array").into(),
@@ -214,7 +220,7 @@ impl Display for PyChunkedArray {
 #[pymethods]
 impl PyChunkedArray {
     #[new]
-    pub fn init(arrays: Vec<PyArray>, r#type: Option<PyField>) -> PyResult<Self> {
+    fn init(arrays: Vec<PyArray>, r#type: Option<PyField>) -> PyArrowResult<Self> {
         let (chunks, fields): (Vec<_>, Vec<_>) =
             arrays.into_iter().map(|arr| arr.into_inner()).unzip();
         if !fields
@@ -223,24 +229,25 @@ impl PyChunkedArray {
         {
             return Err(PyTypeError::new_err(
                 "Cannot create a ChunkedArray with differing data types.",
-            ));
+            )
+            .into());
         }
 
         let field = r#type
             .map(|py_data_type| py_data_type.into_inner())
             .unwrap_or_else(|| fields[0].clone());
 
-        Ok(PyChunkedArray::new(
+        Ok(PyChunkedArray::try_new(
             chunks,
             Field::new("", field.data_type().clone(), true)
                 .with_metadata(field.metadata().clone())
                 .into(),
-        ))
+        )?)
     }
 
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    pub fn __array__(
+    fn __array__(
         &self,
         py: Python,
         dtype: Option<PyObject>,
@@ -255,7 +262,7 @@ impl PyChunkedArray {
     }
 
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -275,17 +282,17 @@ impl PyChunkedArray {
         self.chunks.iter().fold(0, |acc, x| acc + x.len())
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         input.into_chunked_array()
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -302,7 +309,7 @@ impl PyChunkedArray {
             chunks.push(array);
         }
 
-        Ok(PyChunkedArray::new(chunks, field))
+        PyChunkedArray::try_new(chunks, field)
     }
 
     fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
@@ -313,10 +320,10 @@ impl PyChunkedArray {
             .map(|chunk| arrow::compute::cast(&chunk, &target_type))
             .collect::<Result<Vec<_>, ArrowError>>()?;
         let new_field = self.field.as_ref().clone().with_data_type(target_type);
-        Ok(PyChunkedArray::new(new_chunks, new_field.into()).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(new_chunks, new_field.into())?.to_arro3(py)?)
     }
 
-    pub fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
         let field = self.field().clone();
         let array = self
             .chunks
@@ -328,7 +335,7 @@ impl PyChunkedArray {
 
     #[getter]
     #[pyo3(name = "chunks")]
-    pub fn chunks_py(&self, py: Python) -> PyResult<Vec<PyObject>> {
+    fn chunks_py(&self, py: Python) -> PyResult<Vec<PyObject>> {
         let field = self.field().clone();
         self.chunks
             .iter()
@@ -336,13 +343,13 @@ impl PyChunkedArray {
             .collect()
     }
 
-    pub fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
+    fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
         let field = self.field().clone();
         let arrays: Vec<&dyn Array> = self.chunks.iter().map(|arr| arr.as_ref()).collect();
         Ok(PyArray::new(concat(&arrays)?, field).to_arro3(py)?)
     }
 
-    pub fn equals(&self, other: PyChunkedArray) -> bool {
+    fn equals(&self, other: PyChunkedArray) -> bool {
         self.field == other.field && self.chunks == other.chunks
     }
 
@@ -358,20 +365,20 @@ impl PyChunkedArray {
     }
 
     #[getter]
-    pub fn null_count(&self) -> usize {
+    fn null_count(&self) -> usize {
         self.chunks
             .iter()
             .fold(0, |acc, arr| acc + arr.null_count())
     }
 
     #[getter]
-    pub fn num_chunks(&self) -> usize {
+    fn num_chunks(&self) -> usize {
         self.chunks.len()
     }
 
     #[pyo3(signature = (offset=0, length=None))]
     #[pyo3(name = "slice")]
-    pub fn slice_py(
+    fn slice_py(
         &self,
         py: Python,
         offset: usize,
@@ -379,15 +386,15 @@ impl PyChunkedArray {
     ) -> PyArrowResult<PyObject> {
         let length = length.unwrap_or_else(|| self.len() - offset);
         let sliced_chunks = self.slice(offset, length)?;
-        Ok(PyChunkedArray::new(sliced_chunks, self.field.clone()).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(sliced_chunks, self.field.clone())?.to_arro3(py)?)
     }
 
-    pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+    fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
     }
 
     #[getter]
-    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }

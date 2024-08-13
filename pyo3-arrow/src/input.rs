@@ -20,11 +20,14 @@ use crate::{PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.
 pub enum AnyRecordBatch {
+    /// A single RecordBatch, held in a [PyRecordBatch].
     RecordBatch(PyRecordBatch),
+    /// A stream of possibly multiple RecordBatches, held in a [PyRecordBatchReader].
     Stream(PyRecordBatchReader),
 }
 
 impl AnyRecordBatch {
+    /// Consume this and convert it into a [RecordBatchReader].
     pub fn into_reader(self) -> PyResult<Box<dyn RecordBatchReader + Send>> {
         match self {
             Self::RecordBatch(batch) => {
@@ -36,13 +39,17 @@ impl AnyRecordBatch {
         }
     }
 
+    /// Consume this and convert it into a [PyTable].
+    ///
+    /// All record batches from the stream will be materialized in memory.
     pub fn into_table(self) -> PyArrowResult<PyTable> {
         let reader = self.into_reader()?;
         let schema = reader.schema();
         let batches = reader.collect::<Result<_, ArrowError>>()?;
-        Ok(PyTable::new(batches, schema))
+        Ok(PyTable::try_new(batches, schema)?)
     }
 
+    /// Access the underlying [SchemaRef] of this object.
     pub fn schema(&self) -> PyResult<SchemaRef> {
         match self {
             Self::RecordBatch(batch) => Ok(batch.as_ref().schema()),
@@ -54,18 +61,24 @@ impl AnyRecordBatch {
 /// An enum over [PyArray] and [PyArrayReader], used when a function accepts either
 /// Arrow object as input.
 pub enum AnyArray {
+    /// A single Array, held in a [PyArray].
     Array(PyArray),
+    /// A stream of possibly multiple Arrays, held in a [PyArrayReader].
     Stream(PyArrayReader),
 }
 
 impl AnyArray {
+    /// Consume this and convert it into a [PyChunkedArray].
+    ///
+    /// All arrays from the stream will be materialized in memory.
     pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
         let reader = self.into_reader()?;
         let field = reader.field();
         let chunks = reader.collect::<Result<_, ArrowError>>()?;
-        Ok(PyChunkedArray::new(chunks, field))
+        Ok(PyChunkedArray::try_new(chunks, field)?)
     }
 
+    /// Consume this and convert it into a [ArrayReader].
     pub fn into_reader(self) -> PyResult<Box<dyn ArrayReader + Send>> {
         match self {
             Self::Array(array) => {
@@ -76,6 +89,7 @@ impl AnyArray {
         }
     }
 
+    /// Access the underlying [FieldRef] of this object.
     pub fn field(&self) -> PyResult<FieldRef> {
         match self {
             Self::Array(array) => Ok(array.field().clone()),
@@ -85,7 +99,7 @@ impl AnyArray {
 }
 
 #[derive(FromPyObject)]
-pub enum MetadataInput {
+pub(crate) enum MetadataInput {
     String(HashMap<String, String>),
     Bytes(HashMap<Vec<u8>, Vec<u8>>),
 }
@@ -113,7 +127,7 @@ impl Default for MetadataInput {
 }
 
 #[derive(FromPyObject)]
-pub enum FieldIndexInput {
+pub(crate) enum FieldIndexInput {
     Name(String),
     Position(usize),
 }
@@ -128,7 +142,7 @@ impl FieldIndexInput {
 }
 
 #[derive(FromPyObject)]
-pub enum NameOrField {
+pub(crate) enum NameOrField {
     Name(String),
     Field(PyField),
 }
@@ -150,7 +164,7 @@ impl NameOrField {
 }
 
 #[derive(FromPyObject)]
-pub enum SelectIndices {
+pub(crate) enum SelectIndices {
     Names(Vec<String>),
     Positions(Vec<usize>),
 }

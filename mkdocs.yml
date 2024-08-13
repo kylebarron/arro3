@@ -93,6 +93,9 @@ plugins:
         python:
           paths: [arro3-compute/python, arro3-core/python, arro3-io/python]
           options:
+            # We set allow_inspection: false to ensure that all docstrings come
+            # from the pyi files, not the Rust-facing doc comments.
+            allow_inspection: false
             docstring_section_style: list
             docstring_style: google
             line_length: 80

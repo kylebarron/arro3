@@ -1,9 +1,14 @@
+//! Contains the [`PyArrowError`], the Error returned by most fallible functions in this crate.
+
 use pyo3::exceptions::{PyException, PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::PyDowncastError;
 
+/// The Error variants returned by this crate.
 pub enum PyArrowError {
+    /// A wrapped [arrow::error::ArrowError]
     ArrowError(arrow::error::ArrowError),
+    /// A wrapped [PyErr]
     PyErr(PyErr),
 }
 
@@ -49,4 +54,5 @@ impl From<PyErr> for PyArrowError {
     }
 }
 
+/// A type wrapper around `Result<T, PyArrowError>`.
 pub type PyArrowResult<T> = Result<T, PyArrowError>;

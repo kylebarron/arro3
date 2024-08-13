@@ -29,15 +29,18 @@ impl<'a> FromPyObject<'a> for PyTimeUnit {
     }
 }
 
+/// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
 #[pyclass(module = "arro3.core._core", name = "DataType", subclass)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {
+    /// Construct a new PyDataType around a [DataType].
     pub fn new(data_type: DataType) -> Self {
         Self(data_type)
     }
 
+    /// Consume this and return its inner part.
     pub fn into_inner(self) -> DataType {
         self.0
     }
@@ -104,28 +107,25 @@ impl Display for PyDataType {
 
 #[pymethods]
 impl PyDataType {
-    pub fn __arrow_c_schema__<'py>(
-        &'py self,
-        py: Python<'py>,
-    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, &self.0)
     }
 
-    pub fn __eq__(&self, other: PyDataType) -> bool {
+    fn __eq__(&self, other: PyDataType) -> bool {
         self.equals(other, false)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
+    fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
         input
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -136,7 +136,7 @@ impl PyDataType {
     }
 
     #[getter]
-    pub fn bit_width(&self) -> Option<usize> {
+    fn bit_width(&self) -> Option<usize> {
         self.0.primitive_width()
     }
 

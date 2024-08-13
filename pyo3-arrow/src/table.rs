@@ -24,6 +24,9 @@ use crate::schema::display_schema;
 use crate::utils::schema_equals;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
+/// A Python-facing Arrow table.
+///
+/// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
 #[pyclass(module = "arro3.core._core", name = "Table", subclass)]
 #[derive(Debug)]
 pub struct PyTable {
@@ -32,20 +35,24 @@ pub struct PyTable {
 }
 
 impl PyTable {
-    pub fn new(batches: Vec<RecordBatch>, schema: SchemaRef) -> Self {
-        assert!(
-            batches
-                .iter()
-                .all(|rb| schema_equals(rb.schema_ref(), &schema)),
-            "All batches must have same schema"
-        );
-        Self { schema, batches }
+    /// Create a new table from batches and a schema.
+    pub fn try_new(batches: Vec<RecordBatch>, schema: SchemaRef) -> PyResult<Self> {
+        if !batches
+            .iter()
+            .all(|rb| schema_equals(rb.schema_ref(), &schema))
+        {
+            return Err(PyTypeError::new_err("All batches must have same schema"));
+        }
+
+        Ok(Self { schema, batches })
     }
 
+    /// Access the underlying batches
     pub fn batches(&self) -> &[RecordBatch] {
         &self.batches
     }
 
+    /// Consume this and return its internal batches and schema.
     pub fn into_inner(self) -> (Vec<RecordBatch>, SchemaRef) {
         (self.batches, self.schema)
     }
@@ -88,7 +95,7 @@ impl Display for PyTable {
 #[pymethods]
 impl PyTable {
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -105,7 +112,7 @@ impl PyTable {
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
 
-    pub fn __eq__(&self, other: &PyTable) -> bool {
+    fn __eq__(&self, other: &PyTable) -> bool {
         self.batches == other.batches && self.schema == other.schema
     }
 
@@ -113,21 +120,21 @@ impl PyTable {
         self.column(py, key)
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __len__(&self) -> usize {
         self.batches.iter().fold(0, |acc, x| acc + x.num_rows())
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
         input.into_table()
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -142,12 +149,12 @@ impl PyTable {
             batches.push(batch);
         }
 
-        Ok(Self::new(batches, schema))
+        Self::try_new(batches, schema)
     }
 
     #[classmethod]
     #[pyo3(signature = (batches, *, schema=None))]
-    pub fn from_batches(
+    fn from_batches(
         _cls: &Bound<PyType>,
         batches: Vec<PyRecordBatch>,
         schema: Option<PySchema>,
@@ -156,7 +163,7 @@ impl PyTable {
             let schema = schema.ok_or(PyValueError::new_err(
                 "schema must be passed for an empty list of batches",
             ))?;
-            return Ok(Self::new(vec![], schema.into_inner()));
+            return Ok(Self::try_new(vec![], schema.into_inner())?);
         }
 
         let batches = batches
@@ -166,12 +173,12 @@ impl PyTable {
         let schema = schema
             .map(|s| s.into_inner())
             .unwrap_or(batches.first().unwrap().schema());
-        Ok(Self::new(batches, schema))
+        Ok(Self::try_new(batches, schema)?)
     }
 
     #[classmethod]
     #[pyo3(signature = (mapping, *, schema=None, metadata=None))]
-    pub fn from_pydict(
+    fn from_pydict(
         cls: &Bound<PyType>,
         mapping: IndexMap<String, AnyArray>,
         schema: Option<PySchema>,
@@ -183,7 +190,7 @@ impl PyTable {
 
     #[classmethod]
     #[pyo3(signature = (arrays, *, names=None, schema=None, metadata=None))]
-    pub fn from_arrays(
+    fn from_arrays(
         _cls: &Bound<PyType>,
         arrays: Vec<AnyArray>,
         names: Option<Vec<String>>,
@@ -214,7 +221,7 @@ impl PyTable {
         };
 
         if columns.is_empty() {
-            return Ok(Self::new(vec![], schema));
+            return Ok(Self::try_new(vec![], schema)?);
         }
 
         let column_chunk_lengths = columns
@@ -247,10 +254,10 @@ impl PyTable {
             batches.push(batch);
         }
 
-        Ok(Self::new(batches, schema))
+        Ok(Self::try_new(batches, schema)?)
     }
 
-    pub fn add_column(
+    fn add_column(
         &self,
         py: Python,
         i: usize,
@@ -289,10 +296,10 @@ impl PyTable {
             })
             .collect::<Result<Vec<_>, PyArrowError>>()?;
 
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 
-    pub fn append_column(
+    fn append_column(
         &self,
         py: Python,
         field: NameOrField,
@@ -330,15 +337,15 @@ impl PyTable {
             })
             .collect::<Result<Vec<_>, PyArrowError>>()?;
 
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 
     #[getter]
-    pub fn chunk_lengths(&self) -> Vec<usize> {
+    fn chunk_lengths(&self) -> Vec<usize> {
         self.batches.iter().map(|batch| batch.num_rows()).collect()
     }
 
-    pub fn column(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+    fn column(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
         let column_index = i.into_position(&self.schema)?;
         let field = self.schema.field(column_index).clone();
         let chunks = self
@@ -346,11 +353,11 @@ impl PyTable {
             .iter()
             .map(|batch| batch.column(column_index).clone())
             .collect();
-        Ok(PyChunkedArray::new(chunks, field.into()).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(chunks, field.into())?.to_arro3(py)?)
     }
 
     #[getter]
-    pub fn column_names(&self) -> Vec<String> {
+    fn column_names(&self) -> Vec<String> {
         self.schema
             .fields()
             .iter()
@@ -359,18 +366,18 @@ impl PyTable {
     }
 
     #[getter]
-    pub fn columns(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
+    fn columns(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
         (0..self.num_columns())
             .map(|i| self.column(py, FieldIndexInput::Position(i)))
             .collect()
     }
 
-    pub fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
+    fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
         let batch = concat_batches(&self.schema, &self.batches)?;
-        Ok(PyTable::new(vec![batch], self.schema.clone()).to_arro3(py)?)
+        Ok(PyTable::try_new(vec![batch], self.schema.clone())?.to_arro3(py)?)
     }
 
-    pub fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+    fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
         let field = self.schema.field(i.into_position(&self.schema)?);
         Ok(PyField::new(field.clone().into()).to_arro3(py)?)
     }
@@ -383,20 +390,20 @@ impl PyTable {
     }
 
     #[getter]
-    pub fn num_columns(&self) -> usize {
+    fn num_columns(&self) -> usize {
         self.schema.fields().len()
     }
 
     #[getter]
-    pub fn num_rows(&self) -> usize {
+    fn num_rows(&self) -> usize {
         self.batches()
             .iter()
             .fold(0, |acc, batch| acc + batch.num_rows())
     }
 
-    // pub fn rechunk(&self, py: Python, max_chunksize: usize) {}
+    //  fn rechunk(&self, py: Python, max_chunksize: usize) {}
 
-    pub fn remove_column(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
+    fn remove_column(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
         let mut fields = self.schema.fields().to_vec();
         fields.remove(i);
         let new_schema = Arc::new(Schema::new_with_metadata(
@@ -414,10 +421,10 @@ impl PyTable {
             })
             .collect::<Result<Vec<_>, PyArrowError>>()?;
 
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 
-    pub fn rename_columns(&self, py: Python, names: Vec<String>) -> PyArrowResult<PyObject> {
+    fn rename_columns(&self, py: Python, names: Vec<String>) -> PyArrowResult<PyObject> {
         if names.len() != self.num_columns() {
             return Err(PyValueError::new_err("When names is a list[str], must pass the same number of names as there are columns.").into());
         }
@@ -433,15 +440,15 @@ impl PyTable {
             new_fields,
             self.schema.metadata().clone(),
         ));
-        Ok(PyTable::new(self.batches.clone(), new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(self.batches.clone(), new_schema)?.to_arro3(py)?)
     }
 
     #[getter]
-    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
+    fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema.clone()).to_arro3(py)
     }
 
-    pub fn select(&self, py: Python, columns: SelectIndices) -> PyArrowResult<PyObject> {
+    fn select(&self, py: Python, columns: SelectIndices) -> PyArrowResult<PyObject> {
         let positions = columns.into_positions(self.schema.fields())?;
 
         let new_schema = Arc::new(self.schema.project(&positions)?);
@@ -450,10 +457,10 @@ impl PyTable {
             .iter()
             .map(|batch| batch.project(&positions))
             .collect::<Result<Vec<_>, ArrowError>>()?;
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 
-    pub fn set_column(
+    fn set_column(
         &self,
         py: Python,
         i: usize,
@@ -492,22 +499,22 @@ impl PyTable {
             })
             .collect::<Result<Vec<_>, PyArrowError>>()?;
 
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 
     #[getter]
-    pub fn shape(&self) -> (usize, usize) {
+    fn shape(&self) -> (usize, usize) {
         (self.num_rows(), self.num_columns())
     }
 
-    pub fn to_batches(&self, py: Python) -> PyResult<Vec<PyObject>> {
+    fn to_batches(&self, py: Python) -> PyResult<Vec<PyObject>> {
         self.batches
             .iter()
             .map(|batch| PyRecordBatch::new(batch.clone()).to_arro3(py))
             .collect()
     }
 
-    pub fn to_reader(&self, py: Python) -> PyResult<PyObject> {
+    fn to_reader(&self, py: Python) -> PyResult<PyObject> {
         let reader = Box::new(RecordBatchIterator::new(
             self.batches.clone().into_iter().map(Ok),
             self.schema.clone(),
@@ -515,7 +522,7 @@ impl PyTable {
         PyRecordBatchReader::new(reader).to_arro3(py)
     }
 
-    pub fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
+    fn to_struct_array(&self, py: Python) -> PyArrowResult<PyObject> {
         let chunks = self
             .batches
             .iter()
@@ -526,16 +533,16 @@ impl PyTable {
             .collect::<Vec<_>>();
         let field = Field::new_struct("", self.schema.fields().clone(), false)
             .with_metadata(self.schema.metadata.clone());
-        Ok(PyChunkedArray::new(chunks, field.into()).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(chunks, field.into())?.to_arro3(py)?)
     }
 
-    pub fn with_schema(&self, py: Python, schema: PySchema) -> PyArrowResult<PyObject> {
+    fn with_schema(&self, py: Python, schema: PySchema) -> PyArrowResult<PyObject> {
         let new_schema = schema.into_inner();
         let new_batches = self
             .batches
             .iter()
             .map(|batch| RecordBatch::try_new(new_schema.clone(), batch.columns().to_vec()))
             .collect::<Result<Vec<_>, ArrowError>>()?;
-        Ok(PyTable::new(new_batches, new_schema).to_arro3(py)?)
+        Ok(PyTable::try_new(new_batches, new_schema)?.to_arro3(py)?)
     }
 }
