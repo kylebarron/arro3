@@ -29,6 +29,12 @@ use crate::{PyDataType, PyField};
 /// A Python-facing Arrow array.
 ///
 /// This is a wrapper around an [ArrayRef] and a [FieldRef].
+///
+/// It's important for this to wrap both an array _and_ a field so that it can faithfully store all
+/// data transmitted via the `__arrow_c_array__` Python method, which [exports both an Array and a
+/// Field](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html#arrow_c_array__).
+/// In particular, storing a [FieldRef] is required to persist Arrow extension metadata through the
+/// C Data Interface.
 #[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -37,6 +43,8 @@ pub struct PyArray {
 
 impl PyArray {
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
+    ///
+    /// This will panic if the array's data type does not match the field's data type.
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
         assert_eq!(array.data_type(), field.data_type());
         Self { array, field }
