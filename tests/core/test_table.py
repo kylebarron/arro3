@@ -55,3 +55,30 @@ def test_table_from_batches_empty_columns_with_len():
     no_columns = df[[]]
     pa_table = pa.Table.from_pandas(no_columns)
     _table = Table.from_batches(pa_table.to_batches())
+
+
+def test_rechunk():
+    a = pa.chunked_array([[1, 2, 3, 4]])
+    b = pa.chunked_array([["a", "b", "c", "d"]])
+    table = Table.from_pydict({"a": a, "b": b})
+
+    rechunked1 = table.rechunk(max_chunksize=1)
+    assert rechunked1.chunk_lengths == [1, 1, 1, 1]
+
+    rechunked2 = rechunked1.rechunk(max_chunksize=2)
+    assert rechunked2.chunk_lengths == [2, 2]
+    assert rechunked2.rechunk().chunk_lengths == [4]
+
+
+def test_slice():
+    a = pa.chunked_array([[1, 2], [3, 4]])
+    b = pa.chunked_array([["a", "b"], ["c", "d"]])
+    table = Table.from_pydict({"a": a, "b": b})
+
+    sliced1 = table.slice(0, 1)
+    assert sliced1.num_rows == 1
+    assert sliced1.chunk_lengths == [1]
+
+    sliced2 = table.slice(1, 2)
+    assert sliced2.num_rows == 2
+    assert sliced2.chunk_lengths == [1, 1]

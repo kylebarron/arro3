@@ -82,6 +82,74 @@ impl PyTable {
             .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
         Ok(pyarrow_obj.to_object(py))
     }
+
+    pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
+        let total_chunk_length = chunk_lengths.iter().sum::<usize>();
+        if total_chunk_length != self.num_rows() {
+            return Err(
+                PyValueError::new_err("Chunk lengths do not add up to table length").into(),
+            );
+        }
+
+        // If the desired rechunking is the existing chunking, return early
+        let matches_existing_chunking = chunk_lengths
+            .iter()
+            .zip(self.batches())
+            .all(|(length, batch)| *length == batch.num_rows());
+        if matches_existing_chunking {
+            return Ok(Self::try_new(self.batches.clone(), self.schema.clone())?);
+        }
+
+        let mut offset = 0;
+        let batches = chunk_lengths
+            .iter()
+            .map(|chunk_length| {
+                let sliced_table = self.slice(offset, *chunk_length)?;
+                let sliced_concatted = concat_batches(&self.schema, sliced_table.batches.iter())?;
+                offset += chunk_length;
+                Ok(sliced_concatted)
+            })
+            .collect::<PyArrowResult<Vec<_>>>()?;
+
+        Ok(Self::try_new(batches, self.schema.clone())?)
+    }
+
+    pub(crate) fn slice(&self, mut offset: usize, mut length: usize) -> PyArrowResult<Self> {
+        if offset + length > self.num_rows() {
+            return Err(
+                PyValueError::new_err("offset + length may not exceed length of array").into(),
+            );
+        }
+
+        let mut sliced_batches: Vec<RecordBatch> = vec![];
+        for chunk in self.batches() {
+            if chunk.num_rows() == 0 {
+                continue;
+            }
+
+            // If the offset is greater than the len of this chunk, don't include any rows from
+            // this chunk
+            if offset >= chunk.num_rows() {
+                offset -= chunk.num_rows();
+                continue;
+            }
+
+            let take_count = length.min(chunk.num_rows() - offset);
+            let sliced_chunk = chunk.slice(offset, take_count);
+            sliced_batches.push(sliced_chunk);
+
+            length -= take_count;
+
+            // If we've selected all rows, exit
+            if length == 0 {
+                break;
+            } else {
+                offset = 0;
+            }
+        }
+
+        Ok(Self::try_new(sliced_batches, self.schema.clone())?)
+    }
 }
 
 impl Display for PyTable {
@@ -401,7 +469,19 @@ impl PyTable {
             .fold(0, |acc, batch| acc + batch.num_rows())
     }
 
-    //  fn rechunk(&self, py: Python, max_chunksize: usize) {}
+    #[pyo3(signature = (*, max_chunksize=None))]
+    #[pyo3(name = "rechunk")]
+    fn rechunk_py(&self, py: Python, max_chunksize: Option<usize>) -> PyArrowResult<PyObject> {
+        let max_chunksize = max_chunksize.unwrap_or(self.num_rows());
+        let mut chunk_lengths = vec![];
+        let mut offset = 0;
+        while offset < self.num_rows() {
+            let chunk_length = max_chunksize.min(self.num_rows() - offset);
+            offset += chunk_length;
+            chunk_lengths.push(chunk_length);
+        }
+        Ok(self.rechunk(chunk_lengths)?.to_arro3(py)?)
+    }
 
     fn remove_column(&self, py: Python, i: usize) -> PyArrowResult<PyObject> {
         let mut fields = self.schema.fields().to_vec();
@@ -505,6 +585,19 @@ impl PyTable {
     #[getter]
     fn shape(&self) -> (usize, usize) {
         (self.num_rows(), self.num_columns())
+    }
+
+    #[pyo3(signature = (offset=0, length=None))]
+    #[pyo3(name = "slice")]
+    fn slice_py(
+        &self,
+        py: Python,
+        offset: usize,
+        length: Option<usize>,
+    ) -> PyArrowResult<PyObject> {
+        let length = length.unwrap_or_else(|| self.num_rows() - offset);
+        let sliced_chunked_array = self.slice(offset, length)?;
+        Ok(sliced_chunked_array.to_arro3(py)?)
     }
 
     fn to_batches(&self, py: Python) -> PyResult<Vec<PyObject>> {
