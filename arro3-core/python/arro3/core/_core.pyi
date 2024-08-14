@@ -43,6 +43,17 @@ class Array:
         For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this
         array into a pyarrow array, without copying memory.
         """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this array. Then the
+        consumer can ask the producer (in `__arrow_c_array__`) to cast the exported data
+        to a supported data type.
+        """
     def __eq__(self, other) -> bool: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
@@ -111,6 +122,17 @@ class ArrayReader:
     item yielded from the stream is an [`Array`][arro3.core.Array], not a
     [`RecordBatch`][arro3.core.RecordBatch].
     """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this ArrayReader. Then
+        the consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
+        """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
         An implementation of the [Arrow PyCapsule
@@ -170,6 +192,17 @@ class ChunkedArray:
         """
         An implementation of the Array interface, for interoperability with numpy and
         other array libraries.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this ChunkedArray. Then
+        the consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
         """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
@@ -823,6 +856,17 @@ class RecordBatch:
         For example, you can call [`pyarrow.record_batch()`][pyarrow.record_batch] to
         convert this RecordBatch into a pyarrow RecordBatch, without copying memory.
         """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this RecordBatch. Then
+        the consumer can ask the producer (in `__arrow_c_array__`) to cast the exported
+        data to a supported data type.
+        """
     def __eq__(self, other) -> bool: ...
     def __getitem__(self, key: int | str) -> Array: ...
     def __repr__(self) -> str: ...
@@ -1029,6 +1073,17 @@ class RecordBatchReader:
 
     A RecordBatchReader holds a stream of [`RecordBatch`][arro3.core.RecordBatch].
     """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this RecordBatchReader.
+        Then the consumer can ask the producer (in `__arrow_c_stream__`) to cast the
+        exported data to a supported data type.
+        """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
         An implementation of the [Arrow PyCapsule
@@ -1303,6 +1358,17 @@ class Table:
             names: Column names if list of arrays passed as data. Mutually exclusive with 'schema' argument. Defaults to None.
             schema: The expected schema of the Arrow Table. If not passed, will be inferred from the data. Mutually exclusive with 'names' argument. Defaults to None.
             metadata: Optional metadata for the schema (if schema not passed). Defaults to None.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this Table. Then the
+        consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
         """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
