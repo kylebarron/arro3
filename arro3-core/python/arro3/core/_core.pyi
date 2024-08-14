@@ -10,8 +10,16 @@ from .types import (
 
 class Array:
     """An Arrow Array."""
-
-    def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None:
+    @overload
+    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
+    @overload
+    def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None: ...
+    def __init__(
+        self,
+        obj: ArrowArrayExportable | Sequence[Any],
+        /,
+        type: ArrowSchemaExportable | None = None,
+    ) -> None:
         """Create arro3.core.Array instance from a sequence of Python objects.
 
         Args:
@@ -752,11 +760,56 @@ class RecordBatch:
     Record batches are a convenient unit of work for various serialization and
     computation functions, possibly incremental.
     """
+    @overload
+    def __init__(
+        self,
+        data: ArrowArrayExportable,
+        *,
+        schema: None = None,
+        metadata: None = None,
+    ) -> None: ...
+    # @overload
+    # def __init__(
+    #     self,
+    #     data: Sequence[ArrowArrayExportable],
+    #     *,
+    #     names: Sequence[str],
+    #     schema: None = None,
+    #     metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    # ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
     def __init__(
         self,
         data: ArrowArrayExportable | dict[str, ArrowArrayExportable],
         *,
-        metadata: ArrowSchemaExportable | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> None: ...
     def __arrow_c_array__(
         self, requested_schema: object | None = None
@@ -791,7 +844,7 @@ class RecordBatch:
         cls,
         mapping: dict[str, ArrowArrayExportable],
         *,
-        metadata: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch:
         """Construct a Table or RecordBatch from Arrow arrays or columns.
 
@@ -1187,6 +1240,70 @@ class Schema:
 
 class Table:
     """A collection of top-level named, equal length Arrow arrays."""
+    @overload
+    def __init__(
+        self,
+        data: ArrowArrayExportable | ArrowStreamExportable,
+        *,
+        names: None = None,
+        schema: None = None,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str],
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        data: ArrowArrayExportable
+        | ArrowStreamExportable
+        | Sequence[ArrowArrayExportable | ArrowStreamExportable]
+        | dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str] | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None:
+        """Create a Table from a Python data structure or sequence of arrays.
+
+        Args:
+            data: A mapping of strings to Arrow Arrays, a list of arrays or chunked arrays, or any tabular object implementing the Arrow PyCapsule Protocol (has an __arrow_c_array__ or __arrow_c_stream__ method).
+            names: Column names if list of arrays passed as data. Mutually exclusive with 'schema' argument. Defaults to None.
+            schema: The expected schema of the Arrow Table. If not passed, will be inferred from the data. Mutually exclusive with 'names' argument. Defaults to None.
+            metadata: Optional metadata for the schema (if schema not passed). Defaults to None.
+        """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
         An implementation of the [Arrow PyCapsule

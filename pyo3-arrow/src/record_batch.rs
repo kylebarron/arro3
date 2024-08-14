@@ -95,21 +95,30 @@ impl Display for PyRecordBatch {
 #[pymethods]
 impl PyRecordBatch {
     #[new]
-    #[pyo3(signature = (data, *, metadata=None))]
+    #[pyo3(signature = (data, *,  schema=None, metadata=None))]
     fn init(
         py: Python,
         data: &Bound<PyAny>,
+        schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        if data.hasattr("__arrow_c_array__")? {
-            Ok(Self::from_arrow(
-                &py.get_type_bound::<PyRecordBatch>(),
-                data.extract()?,
-            )?)
+        if let Ok(data) = data.extract::<PyRecordBatch>() {
+            Ok(data)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type_bound::<PyRecordBatch>(), mapping, metadata)
+        } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
+            Self::from_arrays(
+                &py.get_type_bound::<PyRecordBatch>(),
+                arrays,
+                schema.ok_or(PyValueError::new_err(
+                    "Schema must be passed with list of arrays",
+                ))?,
+            )
         } else {
-            Err(PyTypeError::new_err("unsupported input").into())
+            Err(PyTypeError::new_err(
+                "Expected RecordBatch-like input or dict of arrays or list of arrays.",
+            )
+            .into())
         }
     }
 

@@ -12,7 +12,7 @@ use arrow_array::{
 };
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
-use pyo3::exceptions::PyNotImplementedError;
+use pyo3::exceptions::{PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -137,16 +137,24 @@ impl Display for PyArray {
 #[pymethods]
 impl PyArray {
     #[new]
-    #[pyo3(signature = (obj, /, r#type, *))]
-    fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
+    #[pyo3(signature = (obj, /, r#type = None, *))]
+    fn init(obj: &Bound<PyAny>, r#type: Option<PyDataType>) -> PyResult<Self> {
+        if let Ok(data) = obj.extract::<PyArray>() {
+            return Ok(data);
+        }
+
         macro_rules! impl_primitive {
             ($rust_type:ty, $arrow_type:ty) => {{
-                let values: Vec<$rust_type> = obj.extract(py)?;
+                let values: Vec<$rust_type> = obj.extract()?;
                 Arc::new(PrimitiveArray::<$arrow_type>::from(values))
             }};
         }
 
-        let data_type = r#type.into_inner();
+        let data_type = r#type
+            .ok_or(PyValueError::new_err(
+                "type must be passed for non-Arrow input",
+            ))?
+            .into_inner();
         let array: ArrayRef = match data_type {
             DataType::Float32 => impl_primitive!(f32, Float32Type),
             DataType::Float64 => impl_primitive!(f64, Float64Type),
@@ -159,34 +167,34 @@ impl PyArray {
             DataType::Int32 => impl_primitive!(i32, Int32Type),
             DataType::Int64 => impl_primitive!(i64, Int64Type),
             DataType::Boolean => {
-                let values: Vec<bool> = obj.extract(py)?;
+                let values: Vec<bool> = obj.extract()?;
                 Arc::new(BooleanArray::from(values))
             }
             DataType::Binary => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(BinaryArray::from(slices))
             }
             DataType::LargeBinary => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(LargeBinaryArray::from(slices))
             }
             DataType::BinaryView => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(BinaryViewArray::from(slices))
             }
             DataType::Utf8 => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(StringArray::from(values))
             }
             DataType::LargeUtf8 => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(LargeStringArray::from(values))
             }
             DataType::Utf8View => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(StringViewArray::from(values))
             }
             dt => {
