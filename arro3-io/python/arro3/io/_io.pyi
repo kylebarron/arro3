@@ -86,7 +86,7 @@ def write_csv(
     """Write an Arrow Table or stream to a CSV file.
 
     Args:
-        data: The input Arrow table or stream.
+        data: The Arrow Table, RecordBatchReader, or RecordBatch to write.
         file: The output buffer or file path for where to write the CSV.
         header: Set whether to write the CSV file with a header. Defaults to None.
         delimiter: Set the CSV file's column delimiter as a byte character. Defaults to None.
@@ -250,7 +250,7 @@ def read_parquet(file: Path | str) -> core.RecordBatchReader:
         file: The input Parquet file path or buffer.
 
     Returns:
-        The
+        The loaded Arrow data.
     """
 
 def write_parquet(
@@ -280,7 +280,7 @@ def write_parquet(
     """Write an Arrow Table or stream to a Parquet file.
 
     Args:
-        data: The Arrow Table, RecordBatchReader, or RecordBatch to write to Parquet.
+        data: The Arrow Table, RecordBatchReader, or RecordBatch to write.
         file: The output file.
 
     Keyword Args:
