@@ -12,28 +12,28 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/compute/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/array/">
       
       
-        <link rel="prev" href="../core/types/">
+        <link rel="prev" href="../../..">
       
       
-        <link rel="next" href="../io/">
+        <link rel="next" href="../array-reader/">
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.30">
     
     
       
-        <title>arro3.compute - arro3</title>
+        <title>Array - arro3</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.3cba04c6.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.3cba04c6.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,9 +52,9 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="arro3.compute - arro3" >
+        <meta  property="og:title"  content="Array - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/compute.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/compute/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/array/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="arro3.compute - arro3" >
+        <meta  name="twitter:title"  content="Array - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/compute.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#arro3compute" class="md-skip">
+        <a href="#array" class="md-skip">
           Skip to content
         </a>
       
@@ -126,7 +126,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="arro3" class="md-header__button md-logo" aria-label="arro3" data-md-component="logo">
+    <a href="../../.." title="arro3" class="md-header__button md-logo" aria-label="arro3" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              arro3.compute
+              Array
             
           </span>
         </div>
@@ -276,7 +276,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="arro3" class="md-nav__button md-logo" aria-label="arro3" data-md-component="logo">
+    <a href="../../.." title="arro3" class="md-nav__button md-logo" aria-label="arro3" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -306,7 +306,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -368,8 +368,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -396,11 +398,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
         
           
           <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
@@ -414,230 +416,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_1">
             <span class="md-nav__icon md-icon"></span>
             arro3.core
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/array/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Array
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/array-reader/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ArrayReader
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/chunked-array/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ChunkedArray
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/datatype/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DataType
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/field/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Field
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/record-batch/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    RecordBatch
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/record-batch-reader/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    RecordBatchReader
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/schema/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Schema
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/table/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Table
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/types/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    types
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
             
               
                 
@@ -659,7 +443,7 @@
           
   
   <span class="md-ellipsis">
-    arro3.compute
+    Array
   </span>
   
 
@@ -670,7 +454,7 @@
         
   
   <span class="md-ellipsis">
-    arro3.compute
+    Array
   </span>
   
 
@@ -692,55 +476,91 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.compute" class="md-nav__link">
+  <a href="#arro3.core.Array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;compute
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Array
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" compute">
+    <nav class="md-nav" aria-label=" Array">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.cast" class="md-nav__link">
+  <a href="#arro3.core.Array.field" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;cast
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.list_flatten" class="md-nav__link">
+  <a href="#arro3.core.Array.type" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_flatten
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;type
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.list_offsets" class="md-nav__link">
+  <a href="#arro3.core.Array.__arrow_c_array__" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_offsets
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.struct_field" class="md-nav__link">
+  <a href="#arro3.core.Array.cast" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_field
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;cast
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.take" class="md-nav__link">
+  <a href="#arro3.core.Array.from_arrow" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;take
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.from_numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_numpy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;slice
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.to_numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_numpy
     </span>
   </a>
   
@@ -767,7 +587,225 @@
   
   
     <li class="md-nav__item">
-      <a href="../io/" class="md-nav__link">
+      <a href="../array-reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ArrayReader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chunked-array/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ChunkedArray
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datatype/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DataType
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../field/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Field
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record-batch/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RecordBatch
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record-batch-reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RecordBatchReader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Schema
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../table/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    arro3.compute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -815,55 +853,91 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.compute" class="md-nav__link">
+  <a href="#arro3.core.Array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;compute
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Array
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" compute">
+    <nav class="md-nav" aria-label=" Array">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.cast" class="md-nav__link">
+  <a href="#arro3.core.Array.field" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;cast
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.list_flatten" class="md-nav__link">
+  <a href="#arro3.core.Array.type" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_flatten
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;type
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.list_offsets" class="md-nav__link">
+  <a href="#arro3.core.Array.__arrow_c_array__" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_offsets
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.struct_field" class="md-nav__link">
+  <a href="#arro3.core.Array.cast" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_field
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;cast
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.compute.take" class="md-nav__link">
+  <a href="#arro3.core.Array.from_arrow" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;take
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.from_numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_numpy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;slice
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.Array.to_numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_numpy
     </span>
   </a>
   
@@ -892,20 +966,25 @@
   
 
 
-<h1 id="arro3compute">arro3.compute<a class="headerlink" href="#arro3compute" title="Permanent link">&para;</a></h1>
+<h1 id="array">Array<a class="headerlink" href="#array" title="Permanent link">&para;</a></h1>
 
 
-<div class="doc doc-object doc-module">
+<div class="doc doc-object doc-class">
 
 
 
-<h2 id="arro3.compute" class="doc doc-heading">
-            <span class="doc doc-object-name doc-module-name">arro3.compute</span>
+<h2 id="arro3.core.Array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">arro3.core.Array</span>
 
 
-<a href="#arro3.compute" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#arro3.core.Array" class="headerlink" title="Permanent link">&para;</a></h2>
+
 
     <div class="doc doc-contents first">
+
+
+      <p>An Arrow Array.</p>
+
 
 
 
@@ -917,44 +996,145 @@
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="arro3.core.Array.field" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">field</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#arro3.core.Array.field" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">field</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Field" href="../field/#arro3.core.Field">Field</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Access the field stored on this Array.</p>
+<p>Note that this field usually will not have a name associated, but it may have
+metadata that signifies that this array is an extension (user-defined typed)
+array.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="arro3.core.Array.type" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">type</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#arro3.core.Array.type" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.DataType" href="../datatype/#arro3.core.DataType">DataType</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>The data type of this array.</p>
+    </div>
+
+</div>
+
 
 
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.compute.cast" class="doc doc-heading">
+<h3 id="arro3.core.Array.__arrow_c_array__" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">__arrow_c_array__</span>
+
+
+<a href="#arro3.core.Array.__arrow_c_array__" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_array__</span><span class="p">(</span>
+    <span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>An implementation of the <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
+Interface</a>.
+This dunder method should not be called directly, but enables zero-copy data
+transfer to other Python libraries that understand Arrow memory.</p>
+<p>For example, you can call <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.array.html#pyarrow.array"><code>pyarrow.array()</code></a> to convert this
+array into a pyarrow array, without copying memory.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.Array.cast" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">cast</span>
 
 
-<a href="#arro3.compute.cast" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">cast</span><span class="p">(</span>
-    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
-    <span class="n">to_type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../core/types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+<a href="#arro3.core.Array.cast" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">cast</span><span class="p">(</span><span class="n">target_type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Cast <code>input</code> to the provided data type and return a new Array with type <code>to_type</code>, if possible.</p>
-<p>If <code>input</code> is an Array, an <code>Array</code> will be returned. If <code>input</code> is a <code>ChunkedArray</code> or <code>ArrayReader</code>, an <code>ArrayReader</code> will be returned.</p>
+      <p>Cast array values to another data type</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>target_type</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>Type to cast array to.</p>
+          </div>
+        </li>
+    </ul>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.Array.from_arrow" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.Array.from_arrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Construct this object from an existing Arrow object.</p>
+<p>It can be called on anything that exports the Arrow data interface
+(<code>__arrow_c_array__</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
           <b><code>input</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
           –
           <div class="doc-md-description">
-            <p>Input data to cast.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>to_type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../core/types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>The target data type to cast to.</p>
+            <p>Arrow array to use for constructing this object</p>
           </div>
         </li>
     </ul>
@@ -963,10 +1143,10 @@
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
+              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></code>
           –
           <div class="doc-md-description">
-            <p>The casted Arrow data.</p>
+            <p>Self</p>
           </div>
         </li>
     </ul>
@@ -978,29 +1158,85 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.compute.list_flatten" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">list_flatten</span>
+<h3 id="arro3.core.Array.from_arrow_pycapsule" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow_pycapsule</span>
 
 
-<a href="#arro3.compute.list_flatten" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_flatten</span><span class="p">(</span>
-    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.Array.from_arrow_pycapsule" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow_pycapsule</span><span class="p">(</span><span class="n">schema_capsule</span><span class="p">,</span> <span class="n">array_capsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Unnest this ListArray, LargeListArray or FixedSizeListArray.</p>
+      <p>Construct this object from bare Arrow PyCapsules</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.Array.from_numpy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_numpy</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.Array.from_numpy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_numpy</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="numpy.ndarray" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Construct an Array from a numpy ndarray</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.Array.slice" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">slice</span>
+
+
+<a href="#arro3.core.Array.slice" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nb">slice</span><span class="p">(</span><span class="nf">offset</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Compute zero-copy slice of this array.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-          <b><code>input</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
+          <b><code>offset</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>, default:
+                  <code>0</code>
+)
           –
           <div class="doc-md-description">
-            <p>Input data.</p>
+            <p>Defaults to 0.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>length</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Defaults to None.</p>
           </div>
         </li>
     </ul>
@@ -1009,10 +1245,10 @@
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
+              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="#arro3.core.Array">Array</a></code>
           –
           <div class="doc-md-description">
-            <p>The flattened Arrow data.</p>
+            <p>The sliced array</p>
           </div>
         </li>
     </ul>
@@ -1024,170 +1260,17 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.compute.list_offsets" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">list_offsets</span>
+<h3 id="arro3.core.Array.to_numpy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">to_numpy</span>
 
 
-<a href="#arro3.compute.list_offsets" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_offsets</span><span class="p">(</span>
-    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">logical</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+<a href="#arro3.core.Array.to_numpy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">to_numpy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" title="numpy.typing.NDArray" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray">NDArray</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Access the offsets of this ListArray or LargeListArray</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>input</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../core/types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p><em>description</em></p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>physical</code></b>
-          –
-          <div class="doc-md-description">
-            <p>If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to <code>True</code>.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader" href="../core/array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
-          –
-          <div class="doc-md-description">
-            <p><em>description</em></p>
-          </div>
-        </li>
-    </ul>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.compute.struct_field" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">struct_field</span>
-
-
-<a href="#arro3.compute.struct_field" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">struct_field</span><span class="p">(</span>
-    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Access a column within a StructArray by index</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>Argument to compute function.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>indices</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a> | <a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>]</code>)
-          –
-          <div class="doc-md-description">
-            <p>List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p><em>description</em></p>
-          </div>
-        </li>
-    </ul>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.compute.take" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">take</span>
-
-
-<a href="#arro3.compute.take" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">take</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Take elements by index from Array, creating a new Array from those indexes.</p>
-<div class="highlight"><pre><span></span><code>┌─────────────────┐      ┌─────────┐                              ┌─────────────────┐
-│        A        │      │    0    │                              │        A        │
-├─────────────────┤      ├─────────┤                              ├─────────────────┤
-│        D        │      │    2    │                              │        B        │
-├─────────────────┤      ├─────────┤   take(values, indices)      ├─────────────────┤
-│        B        │      │    3    │ ─────────────────────────▶   │        C        │
-├─────────────────┤      ├─────────┤                              ├─────────────────┤
-│        C        │      │    1    │                              │        D        │
-├─────────────────┤      └─────────┘                              └─────────────────┘
-│        E        │
-└─────────────────┘
-values array             indices array                            result
-</code></pre></div>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>The input Arrow data to select from.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>indices</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../core/types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>The indices within <code>values</code> to take. This must be a numeric array.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array" href="../core/array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p>The selected arrow data.</p>
-          </div>
-        </li>
-    </ul>
+      <p>Return a numpy copy of this array.</p>
 
     </div>
 
@@ -1275,10 +1358,10 @@ values array             indices array                            result
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant", "navigation.tracking", "search.suggest", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant", "navigation.tracking", "search.suggest", "search.share"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
       
     
   </body>
