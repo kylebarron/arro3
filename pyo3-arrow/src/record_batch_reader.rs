@@ -120,8 +120,8 @@ impl PyRecordBatchReader {
     fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let reader = self
             .0
             .take()

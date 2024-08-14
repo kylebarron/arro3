@@ -195,8 +195,8 @@ impl PyTable {
     fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let field = self.schema.fields().clone();
         let array_reader = self.batches.clone().into_iter().map(|batch| {
             let arr: ArrayRef = Arc::new(StructArray::from(batch));
@@ -502,6 +502,10 @@ impl PyTable {
     #[pyo3(name = "rechunk")]
     fn rechunk_py(&self, py: Python, max_chunksize: Option<usize>) -> PyArrowResult<PyObject> {
         let max_chunksize = max_chunksize.unwrap_or(self.num_rows());
+        if max_chunksize == 0 {
+            return Err(PyValueError::new_err("max_chunksize must be > 0").into());
+        }
+
         let mut chunk_lengths = vec![];
         let mut offset = 0;
         while offset < self.num_rows() {

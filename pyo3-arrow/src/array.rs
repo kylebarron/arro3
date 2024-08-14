@@ -221,7 +221,7 @@ impl PyArray {
     fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<PyTuple>> {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
