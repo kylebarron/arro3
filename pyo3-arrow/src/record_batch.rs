@@ -15,6 +15,7 @@ use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
+use crate::ffi::to_schema_pycapsule;
 use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
 use crate::schema::display_schema;
 use crate::{PyArray, PyField, PySchema};
@@ -131,6 +132,10 @@ impl PyRecordBatch {
         let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false);
         let array: ArrayRef = Arc::new(StructArray::from(self.0.clone()));
         to_array_pycapsules(py, field.into(), &array, requested_schema)
+    }
+
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.0.schema_ref().as_ref())
     }
 
     fn __eq__(&self, other: &PyRecordBatch) -> bool {

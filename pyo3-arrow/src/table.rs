@@ -17,6 +17,7 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
+use crate::ffi::to_schema_pycapsule;
 use crate::input::{
     AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
 };
@@ -189,6 +190,10 @@ impl PyTable {
             )
             .into())
         }
+    }
+
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.schema.as_ref())
     }
 
     #[allow(unused_variables)]

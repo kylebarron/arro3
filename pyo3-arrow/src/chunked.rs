@@ -15,6 +15,7 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
+use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::{PyArray, PyDataType, PyField};
@@ -259,6 +260,10 @@ impl PyChunkedArray {
             .map(|arr| arr.as_ref())
             .collect::<Vec<_>>();
         chunked_to_numpy(py, chunk_refs.as_slice())
+    }
+
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.field.as_ref())
     }
 
     #[allow(unused_variables)]

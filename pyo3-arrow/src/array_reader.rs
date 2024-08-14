@@ -11,7 +11,7 @@ use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::{ArrayIterator, ArrayReader};
+use crate::ffi::{to_schema_pycapsule, ArrayIterator, ArrayReader};
 use crate::input::AnyArray;
 use crate::{PyArray, PyChunkedArray, PyField};
 
@@ -103,6 +103,10 @@ impl Display for PyArrayReader {
 
 #[pymethods]
 impl PyArrayReader {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.field_ref()?.as_ref())
+    }
+
     #[allow(unused_variables)]
     fn __arrow_c_stream__<'py>(
         &'py mut self,

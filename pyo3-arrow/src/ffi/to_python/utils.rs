@@ -40,7 +40,8 @@ pub fn to_array_pycapsules<'py>(
         // Note: we don't import a Field directly because the name might not be set.
         // https://github.com/apache/arrow-rs/issues/6251
         let data_type = DataType::try_from(schema_ptr)?;
-        let field = Arc::new(Field::new("", data_type, true));
+        let field =
+            Arc::new(Field::new("", data_type, true).with_metadata(field.metadata().clone()));
 
         let casted_array = cast(array, field.data_type())?;
         (casted_array.to_data(), field)
@@ -72,10 +73,14 @@ pub fn to_stream_pycapsule<'py>(
     if let Some(capsule) = requested_schema {
         let schema_ptr = import_schema_pycapsule(&capsule)?;
 
+        let existing_field = array_reader.field();
+
         // Note: we don't import a Field directly because the name might not be set.
         // https://github.com/apache/arrow-rs/issues/6251
         let data_type = DataType::try_from(schema_ptr)?;
-        let field = Arc::new(Field::new("", data_type, true));
+        let field = Arc::new(
+            Field::new("", data_type, true).with_metadata(existing_field.metadata().clone()),
+        );
 
         let output_field = field.clone();
         let array_iter = array_reader.map(move |array| {

@@ -19,8 +19,8 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
-use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
@@ -224,6 +224,10 @@ impl PyArray {
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<PyTuple>> {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
+    }
+
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.field.as_ref())
     }
 
     fn __eq__(&self, other: &PyArray) -> bool {
