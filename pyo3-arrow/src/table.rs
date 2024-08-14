@@ -162,6 +162,35 @@ impl Display for PyTable {
 
 #[pymethods]
 impl PyTable {
+    #[new]
+    #[pyo3(signature = (data, *, names=None, schema=None, metadata=None))]
+    fn new(
+        py: Python,
+        data: &Bound<PyAny>,
+        names: Option<Vec<String>>,
+        schema: Option<PySchema>,
+        metadata: Option<MetadataInput>,
+    ) -> PyArrowResult<Self> {
+        if let Ok(data) = data.extract::<AnyRecordBatch>() {
+            Ok(data.into_table()?)
+        } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
+            Self::from_pydict(&py.get_type_bound::<PyTable>(), mapping, schema, metadata)
+        } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {
+            Self::from_arrays(
+                &py.get_type_bound::<PyTable>(),
+                arrays,
+                names,
+                schema,
+                metadata,
+            )
+        } else {
+            Err(PyTypeError::new_err(
+                "Expected Table-like input or dict of arrays or list of arrays.",
+            )
+            .into())
+        }
+    }
+
     #[allow(unused_variables)]
     fn __arrow_c_stream__<'py>(
         &'py self,
