@@ -1,60 +1,70 @@
-from typing import Protocol, Sequence, Tuple, overload
+from typing import Sequence, overload
 
-from arro3.core import Array, ArrayReader
-
-class ArrowSchemaExportable(Protocol):
-    def __arrow_c_schema__(self) -> object: ...
-
-class ArrowArrayExportable(Protocol):
-    def __arrow_c_array__(
-        self, requested_schema: object | None = None
-    ) -> Tuple[object, object]: ...
-
-class ArrowStreamExportable(Protocol):
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+# Note: importing with
+# `from arro3.core import Array`
+# will cause Array to be included in the generated docs in this module.
+import arro3.core as core
+import arro3.core.types as types
 
 @overload
 def cast(
-    input: ArrowArrayExportable,
-    to_type: ArrowSchemaExportable,
-) -> Array: ...
+    input: types.ArrowArrayExportable,
+    to_type: types.ArrowSchemaExportable,
+) -> core.Array: ...
 @overload
 def cast(
-    input: ArrowStreamExportable,
-    to_type: ArrowSchemaExportable,
-) -> ArrayReader: ...
+    input: types.ArrowStreamExportable,
+    to_type: types.ArrowSchemaExportable,
+) -> core.ArrayReader: ...
 def cast(
-    input: ArrowArrayExportable | ArrowStreamExportable,
-    to_type: ArrowSchemaExportable,
-) -> Array | ArrayReader: ...
+    input: types.ArrowArrayExportable | types.ArrowStreamExportable,
+    to_type: types.ArrowSchemaExportable,
+) -> core.Array | core.ArrayReader:
+    """
+    Cast `input` to the provided data type and return a new Array with type `to_type`, if possible.
+
+    If `input` is an Array, an `Array` will be returned. If `input` is a `ChunkedArray` or `ArrayReader`, an `ArrayReader` will be returned.
+
+    Args:
+        input: Input data to cast.
+        to_type: The target data type to cast to.
+
+    Returns:
+        The casted Arrow data.
+    """
+
 @overload
-def list_flatten(input: ArrowArrayExportable) -> Array: ...
+def list_flatten(input: types.ArrowArrayExportable) -> core.Array: ...
 @overload
-def list_flatten(input: ArrowStreamExportable) -> ArrayReader: ...
+def list_flatten(input: types.ArrowStreamExportable) -> core.ArrayReader: ...
 def list_flatten(
-    input: ArrowArrayExportable | ArrowStreamExportable,
-) -> Array | ArrayReader:
+    input: types.ArrowArrayExportable | types.ArrowStreamExportable,
+) -> core.Array | core.ArrayReader:
     """Unnest this ListArray, LargeListArray or FixedSizeListArray.
 
     Args:
-        input: _description_
+        input: Input data.
 
     Raises:
         Exception if not a list-typed array.
 
     Returns:
-        _description_
+        The flattened Arrow data.
     """
 
 @overload
-def list_offsets(input: ArrowArrayExportable, *, logical: bool = True) -> Array: ...
+def list_offsets(
+    input: types.ArrowArrayExportable, *, logical: bool = True
+) -> core.Array: ...
 @overload
 def list_offsets(
-    input: ArrowStreamExportable, *, logical: bool = True
-) -> ArrayReader: ...
+    input: types.ArrowStreamExportable, *, logical: bool = True
+) -> core.ArrayReader: ...
 def list_offsets(
-    input: ArrowArrayExportable | ArrowStreamExportable, *, logical: bool = True
-) -> Array | ArrayReader:
+    input: types.ArrowArrayExportable | types.ArrowStreamExportable,
+    *,
+    logical: bool = True,
+) -> core.Array | core.ArrayReader:
     """Access the offsets of this ListArray or LargeListArray
 
     Args:
@@ -69,10 +79,10 @@ def list_offsets(
     """
 
 def struct_field(
-    values: ArrowArrayExportable,
+    values: types.ArrowArrayExportable,
     /,
     indices: int | Sequence[int],
-) -> Array:
+) -> core.Array:
     """Access a column within a StructArray by index
 
     Args:
@@ -86,4 +96,30 @@ def struct_field(
         _description_
     """
 
-def take(values: ArrowArrayExportable, indices: ArrowArrayExportable) -> Array: ...
+def take(
+    values: types.ArrowArrayExportable, indices: types.ArrowArrayExportable
+) -> core.Array:
+    """Take elements by index from Array, creating a new Array from those indexes.
+
+    ```
+    ┌─────────────────┐      ┌─────────┐                              ┌─────────────────┐
+    │        A        │      │    0    │                              │        A        │
+    ├─────────────────┤      ├─────────┤                              ├─────────────────┤
+    │        D        │      │    2    │                              │        B        │
+    ├─────────────────┤      ├─────────┤   take(values, indices)      ├─────────────────┤
+    │        B        │      │    3    │ ─────────────────────────▶   │        C        │
+    ├─────────────────┤      ├─────────┤                              ├─────────────────┤
+    │        C        │      │    1    │                              │        D        │
+    ├─────────────────┤      └─────────┘                              └─────────────────┘
+    │        E        │
+    └─────────────────┘
+    values array             indices array                            result
+    ```
+
+    Args:
+        values: The input Arrow data to select from.
+        indices: The indices within `values` to take. This must be a numeric array.
+
+    Returns:
+        The selected arrow data.
+    """
