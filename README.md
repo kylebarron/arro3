@@ -15,10 +15,10 @@ arro3 features:
 - **Lightweight**. on MacOS, pyarrow is 100MB on disk, plus 35MB for its required numpy dependency. `arro3-core` is around 7MB on disk with no required dependencies.
 - **Minimal**. The core library (`arro3-core`) has a smaller scope than pyarrow. It includes classes to manage and operate on Arrow data, including `Table`, `RecordBatch`, `Array`, `ChunkedArray`, `RecordBatchReader`, `Schema`, `Field`, `DataType`. But, for example, it has a single `Array` class, while pyarrow has an `Int8Array`, `Int16Array`, and so on.
 
-  `arro3-core` will likely not grow much over time. Other functionality, such as file format readers and writers and compute kernels, will be distributed in other namespace packages, such as `arro3-io` and `arro3-compute`.
+    `arro3-core` will likely not grow much over time. Other functionality, such as file format readers and writers and compute kernels, will be distributed in other namespace packages, such as `arro3-io` and `arro3-compute`.
 - **Modular**. The [Arrow PyCapsule Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html) makes it easy to create small Arrow libraries that communicate via zero-copy data transfer. arro3's Python functions accept Arrow data from _any Python library that implements the Arrow PyCapsule Interface_, including `pyarrow`, `polars` (v1.2+), `pandas` (v2.2+), `nanoarrow`, [and more](https://github.com/apache/arrow/issues/39195#issuecomment-2245718008).
 
-  Every functional API in arro3 accepts Arrow data from _any_ Python library. So you can pass a `pyarrow.Table` directly into `arro3.io.write_parquet`, and it'll _just work_.
+    Every functional API in arro3 accepts Arrow data from _any_ Python library. So you can pass a `pyarrow.Table` directly into `arro3.io.write_parquet`, and it'll _just work_.
 
 - **Extensible**. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more [compute kernels](https://docs.rs/arrow/latest/arrow/compute/index.html) provided by the Rust Arrow implementation as well as .
 - **Compliant**. Full support for the Arrow specification, including extension types. (Arrow's new view types will be supported from the next Rust `arrow` release).
