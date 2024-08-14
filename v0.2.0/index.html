@@ -834,13 +834,15 @@
 <p><a href="https://arrow.apache.org/docs/python/index.html">pyarrow</a> is the reference Arrow implementation in Python, and is generally great, but there are a few reasons for <code>arro3</code> to exist:</p>
 <ul>
 <li><strong>Lightweight</strong>. on MacOS, pyarrow is 100MB on disk, plus 35MB for its required numpy dependency. <code>arro3-core</code> is around 7MB on disk with no required dependencies.</li>
-<li><strong>Minimal</strong>. The core library (<code>arro3-core</code>) has a smaller scope than pyarrow. It includes classes to manage and operate on Arrow data, including <code>Table</code>, <code>RecordBatch</code>, <code>Array</code>, <code>ChunkedArray</code>, <code>RecordBatchReader</code>, <code>Schema</code>, <code>Field</code>, <code>DataType</code>. But, for example, it has a single <code>Array</code> class, while pyarrow has an <code>Int8Array</code>, <code>Int16Array</code>, and so on.</li>
-</ul>
+<li>
+<p><strong>Minimal</strong>. The core library (<code>arro3-core</code>) has a smaller scope than pyarrow. It includes classes to manage and operate on Arrow data, including <code>Table</code>, <code>RecordBatch</code>, <code>Array</code>, <code>ChunkedArray</code>, <code>RecordBatchReader</code>, <code>Schema</code>, <code>Field</code>, <code>DataType</code>. But, for example, it has a single <code>Array</code> class, while pyarrow has an <code>Int8Array</code>, <code>Int16Array</code>, and so on.</p>
 <p><code>arro3-core</code> will likely not grow much over time. Other functionality, such as file format readers and writers and compute kernels, will be distributed in other namespace packages, such as <code>arro3-io</code> and <code>arro3-compute</code>.
 - <strong>Modular</strong>. The <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule Interface</a> makes it easy to create small Arrow libraries that communicate via zero-copy data transfer. arro3's Python functions accept Arrow data from <em>any Python library that implements the Arrow PyCapsule Interface</em>, including <code>pyarrow</code>, <code>polars</code> (v1.2+), <code>pandas</code> (v2.2+), <code>nanoarrow</code>, <a href="https://github.com/apache/arrow/issues/39195#issuecomment-2245718008">and more</a>.</p>
 <p>Every functional API in arro3 accepts Arrow data from <em>any</em> Python library. So you can pass a <code>pyarrow.Table</code> directly into <code>arro3.io.write_parquet</code>, and it'll <em>just work</em>.</p>
-<ul>
-<li><strong>Extensible</strong>. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more <a href="https://docs.rs/arrow/latest/arrow/compute/index.html">compute kernels</a> provided by the Rust Arrow implementation as well as .</li>
+</li>
+<li>
+<p><strong>Extensible</strong>. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more <a href="https://docs.rs/arrow/latest/arrow/compute/index.html">compute kernels</a> provided by the Rust Arrow implementation as well as .</p>
+</li>
 <li><strong>Compliant</strong>. Full support for the Arrow specification, including extension types. (Arrow's new view types will be supported from the next Rust <code>arrow</code> release).</li>
 <li>
 <p><strong>Streaming-first</strong>. All compute and IO functionality is streaming-based with lazy iterators, so you can work with larger-than-memory data.</p>
