@@ -265,8 +265,8 @@ impl PyChunkedArray {
     fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let array_reader = Box::new(ArrayIterator::new(
             self.chunks.clone().into_iter().map(Ok),
             self.field.clone(),
