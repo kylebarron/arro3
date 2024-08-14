@@ -4,6 +4,12 @@ This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
 ## [0.2.0] - 2024-08-13
 
+### Bug fixes :bug:
+
+- Fix API docs (#131)
+
+## [0.2.0] - 2024-08-13
+
 ### Enhancements :magic_wand:
 
 - In general, high parity with pyarrow for most data access and management. Most of the `Table`, `ChunkedArray`, `Array`, `RecordBatchReader`, `Schema`, and `Field` methods and behavior should be similar to pyarrow.
