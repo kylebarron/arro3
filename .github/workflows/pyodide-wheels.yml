@@ -53,22 +53,23 @@ jobs:
         run: |
           echo PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version) >> $GITHUB_ENV
 
-      - name: Install emsdk ${{env.PYODIDE_EMSCRIPTEN_VERSION}}
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: ${{env.PYODIDE_EMSCRIPTEN_VERSION}}
-          actions-cache-folder: "emsdk-cache"
-
-      - name: Build wheels
+      - name: Install emsdk & build wheels
         run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+          ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+          ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+          source emsdk_env.sh
+          cd ..
           RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
 
       - name: Get info from built wheel file
         run: |
           # get arrow version and wheel name and make metafile
-          ARRO3_WHEEL=$(basename pyarrow/dist/*.whl)
+          ARRO3_WHEEL=$(basename dist/*.whl)
           ARRO3_VERSION=$(wheel-filename ${ARRO3_WHEEL} | jq -r '.version')
-          ARROW_SHA256=$(sha256sum pyarrow/dist/*.whl | cut -d ' ' -f 1)
+          ARROW_SHA256=$(sha256sum dist/*.whl | cut -d ' ' -f 1)
           echo ARRO3_WHEEL=${ARRO3_WHEEL}>>$GITHUB_ENV
           echo ARRO3_VERSION=${ARRO3_VERSION}>>$GITHUB_ENV
 
