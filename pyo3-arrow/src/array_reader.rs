@@ -15,10 +15,14 @@ use crate::ffi::{ArrayIterator, ArrayReader};
 use crate::input::AnyArray;
 use crate::{PyArray, PyChunkedArray, PyField};
 
+/// A Python-facing Arrow array reader.
+///
+/// This is a wrapper around a [ArrayReader].
 #[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass)]
 pub struct PyArrayReader(pub(crate) Option<Box<dyn ArrayReader + Send>>);
 
 impl PyArrayReader {
+    /// Construct a new [PyArrayReader] from an existing [ArrayReader].
     pub fn new(reader: Box<dyn ArrayReader + Send>) -> Self {
         Self(Some(reader))
     }
@@ -45,7 +49,7 @@ impl PyArrayReader {
         for array in stream {
             arrays.push(array?);
         }
-        Ok(PyChunkedArray::new(arrays, field))
+        Ok(PyChunkedArray::try_new(arrays, field)?)
     }
 
     /// Access the [FieldRef] of this ArrayReader.
@@ -100,7 +104,7 @@ impl Display for PyArrayReader {
 #[pymethods]
 impl PyArrayReader {
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
         requested_schema: Option<Bound<PyCapsule>>,
@@ -122,23 +126,23 @@ impl PyArrayReader {
         self.read_next_array(py)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[getter]
-    pub fn closed(&self) -> bool {
+    fn closed(&self) -> bool {
         self.0.is_none()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -149,7 +153,7 @@ impl PyArrayReader {
     }
 
     #[classmethod]
-    pub fn from_arrays(_cls: &Bound<PyType>, field: PyField, arrays: Vec<PyArray>) -> Self {
+    fn from_arrays(_cls: &Bound<PyType>, field: PyField, arrays: Vec<PyArray>) -> Self {
         let arrays = arrays
             .into_iter()
             .map(|array| {
@@ -164,16 +168,16 @@ impl PyArrayReader {
     }
 
     #[classmethod]
-    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+    fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
         data.extract()
     }
 
     #[getter]
-    pub fn field(&self, py: Python) -> PyResult<PyObject> {
+    fn field(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(self.field_ref()?).to_arro3(py)
     }
 
-    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .take()
@@ -183,10 +187,10 @@ impl PyArrayReader {
         for array in stream {
             arrays.push(array?);
         }
-        Ok(PyChunkedArray::new(arrays, field).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(arrays, field)?.to_arro3(py)?)
     }
 
-    pub fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .as_mut()

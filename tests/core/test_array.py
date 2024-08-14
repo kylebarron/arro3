@@ -3,12 +3,35 @@ import pyarrow as pa
 from arro3.core import Array, DataType, Table
 
 
+def test_constructor():
+    arr = Array([1, 2, 3], DataType.int16())
+    assert pa.array(arr) == pa.array([1, 2, 3], pa.int16())
+
+    arr = Array((1, 2, 3), DataType.int16())
+    assert pa.array(arr) == pa.array([1, 2, 3], pa.int16())
+
+    arr = Array([1, 2, 3], DataType.float64())
+    assert pa.array(arr) == pa.array([1, 2, 3], pa.float64())
+
+    arr = Array(["1", "2", "3"], DataType.string())
+    assert pa.array(arr) == pa.array(["1", "2", "3"], pa.string())
+
+    arr = Array([b"1", b"2", b"3"], DataType.binary())
+    assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary())
+
+    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
+    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+
+
 def test_from_numpy():
     arr = np.array([1, 2, 3, 4], dtype=np.uint8)
     assert Array.from_numpy(arr).type == DataType.uint8()
 
     arr = np.array([1, 2, 3, 4], dtype=np.float64)
     assert Array.from_numpy(arr).type == DataType.float64()
+
+    # arr = np.array([b"1", b"2", b"3"], np.object_)
+    # Array.from_numpy(arr)
 
 
 def test_extension_array_meta_persists():

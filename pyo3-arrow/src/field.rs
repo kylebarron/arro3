@@ -15,14 +15,19 @@ use crate::ffi::to_python::to_schema_pycapsule;
 use crate::input::MetadataInput;
 use crate::PyDataType;
 
+/// A Python-facing Arrow field.
+///
+/// This is a wrapper around a [FieldRef].
 #[pyclass(module = "arro3.core._core", name = "Field", subclass)]
 pub struct PyField(FieldRef);
 
 impl PyField {
+    /// Construct a new PyField around a [FieldRef]
     pub fn new(field: FieldRef) -> Self {
         Self(field)
     }
 
+    /// Consume this and return its internal [FieldRef]
     pub fn into_inner(self) -> FieldRef {
         self.0
     }
@@ -90,7 +95,7 @@ impl Display for PyField {
 impl PyField {
     #[new]
     #[pyo3(signature = (name, r#type, nullable=true, *, metadata=None))]
-    pub fn init(
+    fn init(
         name: String,
         r#type: PyDataType,
         nullable: bool,
@@ -101,28 +106,25 @@ impl PyField {
         Ok(PyField::new(field.into()))
     }
 
-    pub fn __arrow_c_schema__<'py>(
-        &'py self,
-        py: Python<'py>,
-    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, self.0.as_ref())
     }
 
-    pub fn __eq__(&self, other: &PyField) -> bool {
+    fn __eq__(&self, other: &PyField) -> bool {
         self.0 == other.0
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
+    fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
         input
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    pub(crate) fn from_arrow_pycapsule(
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
@@ -132,14 +134,14 @@ impl PyField {
         Ok(Self::new(Arc::new(field)))
     }
 
-    pub fn equals(&self, other: PyField) -> bool {
+    fn equals(&self, other: PyField) -> bool {
         self.0 == other.0
     }
 
     // Note: we can't return HashMap<Vec<u8>, Vec<u8>> because that will coerce keys and values to
     // a list, not bytes
     #[getter]
-    pub fn metadata<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
+    fn metadata<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
         let d = PyDict::new_bound(py);
         self.0.metadata().iter().try_for_each(|(key, val)| {
             d.set_item(
@@ -151,21 +153,21 @@ impl PyField {
     }
 
     #[getter]
-    pub fn metadata_str(&self) -> HashMap<String, String> {
+    fn metadata_str(&self) -> HashMap<String, String> {
         self.0.metadata().clone()
     }
 
     #[getter]
-    pub fn name(&self) -> String {
+    fn name(&self) -> String {
         self.0.name().clone()
     }
 
     #[getter]
-    pub fn nullable(&self) -> bool {
+    fn nullable(&self) -> bool {
         self.0.is_nullable()
     }
 
-    pub fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
+    fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(
             self.0
                 .as_ref()
@@ -177,11 +179,11 @@ impl PyField {
     }
 
     #[getter]
-    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.0.data_type().clone()).to_arro3(py)
     }
 
-    pub fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
+    fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
         PyField::new(
             self.0
                 .as_ref()
@@ -192,15 +194,15 @@ impl PyField {
         .to_arro3(py)
     }
 
-    pub fn with_name(&self, py: Python, name: String) -> PyResult<PyObject> {
+    fn with_name(&self, py: Python, name: String) -> PyResult<PyObject> {
         PyField::new(self.0.as_ref().clone().with_name(name).into()).to_arro3(py)
     }
 
-    pub fn with_nullable(&self, py: Python, nullable: bool) -> PyResult<PyObject> {
+    fn with_nullable(&self, py: Python, nullable: bool) -> PyResult<PyObject> {
         PyField::new(self.0.as_ref().clone().with_nullable(nullable).into()).to_arro3(py)
     }
 
-    pub fn with_type(&self, py: Python, new_type: PyDataType) -> PyResult<PyObject> {
+    fn with_type(&self, py: Python, new_type: PyDataType) -> PyResult<PyObject> {
         PyField::new(
             self.0
                 .as_ref()
