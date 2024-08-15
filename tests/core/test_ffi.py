@@ -47,3 +47,28 @@ def test_array_export_schema_request():
 
     retour = Array.from_arrow_pycapsule(*capsules)
     assert retour.type == DataType.large_utf8()
+
+
+def test_table_metadata_preserved():
+    metadata = {b"hello": b"world"}
+    pa_table = pa.table({"a": [1, 2, 3]})
+    pa_table = pa_table.replace_schema_metadata(metadata)
+
+    arro3_table = Table(pa_table)
+    assert arro3_table.schema.metadata == metadata
+
+    pa_table_retour = pa.table(arro3_table)
+    assert pa_table_retour.schema.metadata == metadata
+
+
+def test_record_batch_reader_metadata_preserved():
+    metadata = {b"hello": b"world"}
+    pa_table = pa.table({"a": [1, 2, 3]})
+    pa_table = pa_table.replace_schema_metadata(metadata)
+    pa_reader = pa.RecordBatchReader.from_stream(pa_table)
+
+    arro3_reader = RecordBatchReader.from_stream(pa_reader)
+    assert arro3_reader.schema.metadata == metadata
+
+    pa_reader_retour = pa.RecordBatchReader.from_stream(arro3_reader)
+    assert pa_reader_retour.schema.metadata == metadata
