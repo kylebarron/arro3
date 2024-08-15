@@ -183,9 +183,21 @@ class ArrayReader:
 
 class ChunkedArray:
     """An Arrow ChunkedArray."""
+    @overload
+    def __init__(
+        self, arrays: ArrowArrayExportable | ArrowStreamExportable, type: None = None
+    ) -> None: ...
+    @overload
     def __init__(
         self,
         arrays: Sequence[ArrowArrayExportable],
+        type: ArrowSchemaExportable | None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        arrays: ArrowArrayExportable
+        | ArrowStreamExportable
+        | Sequence[ArrowArrayExportable],
         type: ArrowSchemaExportable | None = None,
     ) -> None: ...
     def __array__(self, dtype=None, copy=None) -> NDArray:

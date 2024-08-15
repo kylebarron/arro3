@@ -24,5 +24,5 @@ arrow-schema = { workspace = true }
 arrow-select = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
 pyo3 = { workspace = true, features = ["abi3-py38"] }
-thiserror = { workspace = true }
 pyo3-arrow = { path = "../pyo3-arrow" }
+thiserror = { workspace = true }

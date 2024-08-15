@@ -34,6 +34,25 @@ def cast(
     """
 
 @overload
+def dictionary_encode(array: types.ArrowArrayExportable) -> core.Array: ...
+@overload
+def dictionary_encode(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
+def dictionary_encode(
+    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
+) -> core.Array | core.ArrayReader:
+    """
+    Dictionary-encode array.
+
+    Return a dictionary-encoded version of the input array. This function does nothing if the input is already a dictionary array.
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The dictionary-encoded array.
+    """
+
+@overload
 def list_flatten(input: types.ArrowArrayExportable) -> core.Array: ...
 @overload
 def list_flatten(input: types.ArrowStreamExportable) -> core.ArrayReader: ...

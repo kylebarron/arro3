@@ -221,29 +221,39 @@ impl Display for PyChunkedArray {
 #[pymethods]
 impl PyChunkedArray {
     #[new]
-    fn init(arrays: Vec<PyArray>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        let (chunks, fields): (Vec<_>, Vec<_>) =
-            arrays.into_iter().map(|arr| arr.into_inner()).unzip();
-        if !fields
-            .windows(2)
-            .all(|w| w[0].data_type().equals_datatype(w[1].data_type()))
-        {
-            return Err(PyTypeError::new_err(
-                "Cannot create a ChunkedArray with differing data types.",
+    fn init(arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        if let Ok(data) = arrays.extract::<AnyArray>() {
+            Ok(data.into_chunked_array()?)
+        } else if let Ok(arrays) = arrays.extract::<Vec<PyArray>>() {
+            // TODO: move this into from_arrays?
+            let (chunks, fields): (Vec<_>, Vec<_>) =
+                arrays.into_iter().map(|arr| arr.into_inner()).unzip();
+            if !fields
+                .windows(2)
+                .all(|w| w[0].data_type().equals_datatype(w[1].data_type()))
+            {
+                return Err(PyTypeError::new_err(
+                    "Cannot create a ChunkedArray with differing data types.",
+                )
+                .into());
+            }
+
+            let field = r#type
+                .map(|py_data_type| py_data_type.into_inner())
+                .unwrap_or_else(|| fields[0].clone());
+
+            Ok(PyChunkedArray::try_new(
+                chunks,
+                Field::new("", field.data_type().clone(), true)
+                    .with_metadata(field.metadata().clone())
+                    .into(),
+            )?)
+        } else {
+            Err(
+                PyTypeError::new_err("Expected ChunkedArray-like input or sequence of arrays.")
+                    .into(),
             )
-            .into());
         }
-
-        let field = r#type
-            .map(|py_data_type| py_data_type.into_inner())
-            .unwrap_or_else(|| fields[0].clone());
-
-        Ok(PyChunkedArray::try_new(
-            chunks,
-            Field::new("", field.data_type().clone(), true)
-                .with_metadata(field.metadata().clone())
-                .into(),
-        )?)
     }
 
     #[pyo3(signature = (dtype=None, copy=None))]
