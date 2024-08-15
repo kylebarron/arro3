@@ -172,7 +172,6 @@ impl PyRecordBatchReader {
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
-
         let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
