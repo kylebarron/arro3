@@ -255,7 +255,7 @@ def read_parquet(file: Path | str) -> core.RecordBatchReader:
 
 def write_parquet(
     data: types.ArrowStreamExportable | types.ArrowArrayExportable,
-    file: str,
+    file: IO[bytes] | Path | str,
     *,
     bloom_filter_enabled: bool | None = None,
     bloom_filter_fpp: float | None = None,
