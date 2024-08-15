@@ -27,6 +27,7 @@ pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Sen
 impl PyRecordBatchReader {
     /// Construct a new PyRecordBatchReader from an existing [RecordBatchReader].
     pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
+        dbg!(reader.schema());
         Self(Some(reader))
     }
 
@@ -75,6 +76,7 @@ impl PyRecordBatchReader {
                 intern!(py, "from_arrow_pycapsule"),
                 PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
             )?;
+        dbg!("to_arro3");
         Ok(core_obj.to_object(py))
     }
 
@@ -169,9 +171,15 @@ impl PyRecordBatchReader {
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
+        dbg!("from_arrow_pycapsule");
         let stream = import_stream_pycapsule(capsule)?;
+        dbg!("&stream");
+        dbg!(&stream);
+
         let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
+        dbg!("stream reader schema");
+        dbg!(stream_reader.schema());
 
         Ok(Self(Some(Box::new(stream_reader))))
     }

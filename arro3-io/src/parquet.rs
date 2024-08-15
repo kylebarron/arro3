@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 
+use arrow_array::RecordBatchIterator;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
@@ -22,8 +24,34 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
         FileReader::File(f) => {
             let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
 
+            // TODO: only assign metadata when there's no ARROW:Schema key, for parity with pyarrow
+
+            // builder.
+            dbg!("hi");
+            // Assign metadata from Parquet key-value metadata to Arrow schema metadata
+            // Don't overwrite a key in the Arrow metadata.
+            // TODO: refactor this out of this one match block.
+            let existing_schema = builder.schema();
+            let mut metadata = existing_schema.metadata().clone();
+
+            if let Some(kv_meta) = builder.metadata().file_metadata().key_value_metadata() {
+                dbg!(kv_meta);
+                for kv in kv_meta {
+                    if !metadata.contains_key(&kv.key) && kv.value.is_some() {
+                        metadata.insert(kv.key.clone(), kv.value.clone().unwrap());
+                    }
+                }
+            }
+            dbg!(&metadata);
+
+            let new_schema = Arc::new(existing_schema.as_ref().clone().with_metadata(metadata));
+
+            dbg!(&new_schema);
+
             let reader = builder.build().unwrap();
-            Ok(PyRecordBatchReader::new(Box::new(reader)).to_arro3(py)?)
+            // Create a new iterator with the new schema
+            let iter = Box::new(RecordBatchIterator::new(reader, new_schema));
+            Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
         }
         FileReader::FileLike(_) => {
             Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())

@@ -77,29 +77,29 @@ pub fn to_stream_pycapsule<'py>(
     requested_schema: Option<Bound<'py, PyCapsule>>,
 ) -> PyArrowResult<Bound<'py, PyCapsule>> {
     // Cast array if requested
-    if let Some(capsule) = requested_schema {
-        let schema_ptr = import_schema_pycapsule(&capsule)?;
+    // if let Some(capsule) = requested_schema {
+    //     let schema_ptr = import_schema_pycapsule(&capsule)?;
 
-        let existing_field = array_reader.field();
+    //     let existing_field = array_reader.field();
 
-        // Note: we don't import a Field directly because the name might not be set.
-        // https://github.com/apache/arrow-rs/issues/6251
-        let data_type = DataType::try_from(schema_ptr)?;
+    //     // Note: we don't import a Field directly because the name might not be set.
+    //     // https://github.com/apache/arrow-rs/issues/6251
+    //     let data_type = DataType::try_from(schema_ptr)?;
 
-        // Only cast the reader if we can cast the types.
-        if can_cast_types(existing_field.data_type(), &data_type) {
-            let field = Arc::new(
-                Field::new("", data_type, true).with_metadata(existing_field.metadata().clone()),
-            );
+    //     // Only cast the reader if we can cast the types.
+    //     if can_cast_types(existing_field.data_type(), &data_type) {
+    //         let field = Arc::new(
+    //             Field::new("", data_type, true).with_metadata(existing_field.metadata().clone()),
+    //         );
 
-            let output_field = field.clone();
-            let array_iter = array_reader.map(move |array| {
-                let out = cast(array?.as_ref(), field.data_type())?;
-                Ok(out)
-            });
-            array_reader = Box::new(ArrayIterator::new(array_iter, output_field));
-        }
-    }
+    //         let output_field = field.clone();
+    //         let array_iter = array_reader.map(move |array| {
+    //             let out = cast(array?.as_ref(), field.data_type())?;
+    //             Ok(out)
+    //         });
+    //         array_reader = Box::new(ArrayIterator::new(array_iter, output_field));
+    //     }
+    // }
 
     let ffi_stream = new_stream(array_reader);
     let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
