@@ -1,14 +1,12 @@
 use std::collections::HashMap;
+use std::fs::File;
 use std::str::FromStr;
-use std::sync::Arc;
 
 use arrow_array::RecordBatchIterator;
-use arrow_schema::SchemaRef;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
 use parquet::basic::{Compression, Encoding};
-use parquet::file::metadata::ParquetMetaData;
 use parquet::file::properties::{WriterProperties, WriterVersion};
 use parquet::format::KeyValue;
 use parquet::schema::types::ColumnPath;
@@ -18,7 +16,7 @@ use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::PyRecordBatchReader;
 
-use crate::utils::{FileReader, FileWriter};
+use crate::utils::FileReader;
 
 #[pyfunction]
 pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
@@ -26,44 +24,18 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
         FileReader::File(f) => {
             let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
 
-            let arrow_schema = update_arrow_schema(builder.schema(), builder.metadata());
-
+            let arrow_schema = builder.schema().clone();
             let reader = builder.build().unwrap();
-            // Create a new iterator with the new schema
+
+            // Create a new iterator with the arrow schema specifically
+            // Not sure why but passing ParquetRecordBatchReader directly to
+            // PyRecordBatchReader::new seems to lose schema metadata
             let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
             Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
         }
         FileReader::FileLike(_) => {
             Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())
         }
-    }
-}
-
-/// Update Arrow schema with Parquet key-value metadata
-///
-/// For (believed) parity with pyarrow, we only copy key-value metadata to the Arrow schema when no
-/// Arrow schema is stored in the Parquet metadata (i.e. when the file wasn't written by an Arrow
-/// writer).
-fn update_arrow_schema(existing_schema: &SchemaRef, parquet_meta: &ParquetMetaData) -> SchemaRef {
-    if let Some(kv_meta) = parquet_meta.file_metadata().key_value_metadata() {
-        let has_arrow_schema_kv = kv_meta.iter().any(|kv| kv.key.as_str() == "ARROW:schema");
-        // If the ARROW:schema key exists already, we do nothing
-        if has_arrow_schema_kv {
-            existing_schema.clone()
-        } else {
-            let mut metadata = existing_schema.metadata().clone();
-
-            assert!(metadata.is_empty(), "If an Arrow schema is inferred from a Parquet schema, it should always have empty metadata, right?");
-            for kv in kv_meta {
-                if let Some(kv_value) = &kv.value {
-                    metadata.insert(kv.key.clone(), kv_value.clone());
-                }
-            }
-
-            Arc::new(existing_schema.as_ref().clone().with_metadata(metadata))
-        }
-    } else {
-        existing_schema.clone()
     }
 }
 
@@ -141,13 +113,14 @@ impl<'py> FromPyObject<'py> for PyColumnPath {
     key_value_metadata = None,
     max_row_group_size = None,
     max_statistics_size = None,
+    skip_arrow_metadata = false,
     write_batch_size = None,
     writer_version = None,
 ))]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn write_parquet(
     data: AnyRecordBatch,
-    file: FileWriter,
+    file: String,
     bloom_filter_enabled: Option<bool>,
     bloom_filter_fpp: Option<f64>,
     bloom_filter_ndv: Option<u64>,
@@ -165,9 +138,12 @@ pub(crate) fn write_parquet(
     key_value_metadata: Option<HashMap<String, String>>,
     max_row_group_size: Option<usize>,
     max_statistics_size: Option<usize>,
+    skip_arrow_metadata: bool,
     write_batch_size: Option<usize>,
     writer_version: Option<PyWriterVersion>,
 ) -> PyArrowResult<()> {
+    let file = File::create(file).map_err(|err| PyValueError::new_err(err.to_string()))?;
+
     let mut props = WriterProperties::builder();
 
     if let Some(writer_version) = writer_version {
@@ -243,7 +219,9 @@ pub(crate) fn write_parquet(
 
     let reader = data.into_reader()?;
 
-    let writer_options = ArrowWriterOptions::new().with_properties(props.build());
+    let writer_options = ArrowWriterOptions::new()
+        .with_properties(props.build())
+        .with_skip_arrow_metadata(skip_arrow_metadata);
     let mut writer =
         ArrowWriter::try_new_with_options(file, reader.schema(), writer_options).unwrap();
     for batch in reader {
