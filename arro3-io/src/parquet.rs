@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fs::File;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -17,7 +16,7 @@ use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::PyRecordBatchReader;
 
-use crate::utils::FileReader;
+use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
 pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
@@ -129,7 +128,7 @@ impl<'py> FromPyObject<'py> for PyColumnPath {
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn write_parquet(
     data: AnyRecordBatch,
-    file: String,
+    file: FileWriter,
     bloom_filter_enabled: Option<bool>,
     bloom_filter_fpp: Option<f64>,
     bloom_filter_ndv: Option<u64>,
@@ -151,8 +150,6 @@ pub(crate) fn write_parquet(
     write_batch_size: Option<usize>,
     writer_version: Option<PyWriterVersion>,
 ) -> PyArrowResult<()> {
-    let file = File::create(file).map_err(|err| PyValueError::new_err(err.to_string()))?;
-
     let mut props = WriterProperties::builder();
 
     if let Some(writer_version) = writer_version {
