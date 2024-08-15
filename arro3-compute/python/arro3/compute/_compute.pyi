@@ -33,7 +33,13 @@ def cast(
         The casted Arrow data.
     """
 
-def dictionary_encode(array: types.ArrowArrayExportable) -> core.Array:
+@overload
+def dictionary_encode(array: types.ArrowArrayExportable) -> core.Array: ...
+@overload
+def dictionary_encode(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
+def dictionary_encode(
+    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
+) -> core.Array | core.ArrayReader:
     """
     Dictionary-encode array.
 

@@ -6,17 +6,47 @@ use arrow::datatypes::{
 };
 use arrow::downcast_primitive_array;
 use arrow_array::{ArrayRef, ArrowPrimitiveType, GenericByteArray, PrimitiveArray};
-use arrow_schema::{ArrowError, DataType};
+use arrow_schema::{ArrowError, DataType, Field};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
-use pyo3_arrow::PyArray;
+use pyo3_arrow::ffi::ArrayIterator;
+use pyo3_arrow::input::AnyArray;
+use pyo3_arrow::{PyArray, PyArrayReader};
 
+// Note: for chunked array input, each output chunk will not necessarily have the same dictionary
 #[pyfunction]
-pub(crate) fn dictionary_encode(py: Python, array: PyArray) -> PyArrowResult<PyObject> {
-    let (array, _field) = array.into_inner();
-    let array_ref = array.as_ref();
+pub(crate) fn dictionary_encode(py: Python, array: AnyArray) -> PyArrowResult<PyObject> {
+    match array {
+        AnyArray::Array(array) => {
+            let (array, _field) = array.into_inner();
+            let output_array = dictionary_encode_array(array)?;
+            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?)
+        }
+        AnyArray::Stream(stream) => {
+            let reader = stream.into_reader()?;
 
-    let output_array: ArrayRef = downcast_primitive_array!(
+            let existing_field = reader.field();
+            let output_data_type = DataType::Dictionary(
+                Box::new(DataType::Int32),
+                Box::new(existing_field.data_type().clone()),
+            );
+            let output_field = Field::new("", output_data_type, true);
+
+            let iter = reader.into_iter().map(move |array| {
+                let output_array = dictionary_encode_array(array?)?;
+                Ok(output_array)
+            });
+            Ok(
+                PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
+                    .to_arro3(py)?,
+            )
+        }
+    }
+}
+
+fn dictionary_encode_array(array: ArrayRef) -> Result<ArrayRef, ArrowError> {
+    let array_ref = array.as_ref();
+    let array = downcast_primitive_array!(
         array_ref => {
             primitive_dictionary_encode(array_ref)
         }
@@ -25,10 +55,9 @@ pub(crate) fn dictionary_encode(py: Python, array: PyArray) -> PyArrowResult<PyO
         DataType::Binary => bytes_dictionary_encode(array.as_bytes::<BinaryType>()),
         DataType::LargeBinary => bytes_dictionary_encode(array.as_bytes::<LargeBinaryType>()),
         DataType::Dictionary(_, _) => array,
-        d => return Err(ArrowError::ComputeError(format!("{d:?} not supported in rank")).into())
+        d => return Err(ArrowError::ComputeError(format!("{d:?} not supported in rank")))
     );
-
-    Ok(PyArray::from_array_ref(output_array).to_arro3(py)?)
+    Ok(array)
 }
 
 #[inline(never)]
