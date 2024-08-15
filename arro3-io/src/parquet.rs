@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::str::FromStr;
+use std::sync::Arc;
 
-use arrow_array::RecordBatchIterator;
+use arrow_array::{RecordBatchIterator, RecordBatchReader};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
@@ -24,8 +25,12 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
         FileReader::File(f) => {
             let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
 
-            let arrow_schema = builder.schema().clone();
+            let metadata = builder.schema().metadata().clone();
             let reader = builder.build().unwrap();
+
+            // Add source schema metadata onto reader's schema. The original schema is not valid
+            // with a given column projection, but we want to persist the source's metadata.
+            let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
 
             // Create a new iterator with the arrow schema specifically
             //
