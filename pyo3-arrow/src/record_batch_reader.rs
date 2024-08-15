@@ -1,10 +1,8 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::ffi::FFI_ArrowSchema;
-use arrow::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
-use arrow_schema::{ArrowError, DataType, Field, Schema, SchemaRef};
+use arrow_schema::{Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -20,40 +18,6 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
-fn get_stream_schema(stream_ptr: *mut FFI_ArrowArrayStream) -> Result<SchemaRef, ArrowError> {
-    dbg!("get_stream_schema");
-    let mut schema = FFI_ArrowSchema::empty();
-
-    let ret_code = unsafe { (*stream_ptr).get_schema.unwrap()(stream_ptr, &mut schema) };
-
-    if ret_code == 0 {
-        let schema = schema_try_from(&schema)?;
-        dbg!("after try_from");
-        dbg!(&schema);
-        Ok(Arc::new(schema))
-    } else {
-        Err(ArrowError::CDataInterface(format!(
-            "Cannot get schema from input stream. Error code: {ret_code:?}"
-        )))
-    }
-}
-
-fn schema_try_from(c_schema: &FFI_ArrowSchema) -> Result<Schema, ArrowError> {
-    // interpret it as a struct type then extract its fields
-    let dtype = DataType::try_from(c_schema)?;
-    dbg!("hi");
-    dbg!(c_schema.metadata().unwrap());
-    if let DataType::Struct(fields) = dtype {
-        Ok(Schema::new(fields).with_metadata(c_schema.metadata()?))
-    } else {
-        Err(ArrowError::CDataInterface(
-            "Unable to interpret C data struct as a Schema".to_string(),
-        ))
-    }
-}
-
-fn check_c_schema_meta() {}
-
 /// A Python-facing Arrow record batch reader.
 ///
 /// This is a wrapper around a [RecordBatchReader].
@@ -63,7 +27,6 @@ pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Sen
 impl PyRecordBatchReader {
     /// Construct a new PyRecordBatchReader from an existing [RecordBatchReader].
     pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
-        dbg!(reader.schema());
         Self(Some(reader))
     }
 
@@ -112,7 +75,6 @@ impl PyRecordBatchReader {
                 intern!(py, "from_arrow_pycapsule"),
                 PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
             )?;
-        dbg!("to_arro3");
         Ok(core_obj.to_object(py))
     }
 
@@ -209,17 +171,10 @@ impl PyRecordBatchReader {
         _cls: &Bound<PyType>,
         capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        dbg!("from_arrow_pycapsule");
-        let mut stream = import_stream_pycapsule(capsule)?;
-        dbg!("&stream");
-        dbg!(&stream);
-
-        let schema = get_stream_schema(&mut stream).unwrap();
+        let stream = import_stream_pycapsule(capsule)?;
 
         let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
-        dbg!("stream reader schema");
-        dbg!(stream_reader.schema());
 
         Ok(Self(Some(Box::new(stream_reader))))
     }
