@@ -34,10 +34,9 @@ pub fn cast(py: Python, input: AnyArray, to_type: PyDataType) -> PyArrowResult<P
             }
 
             let out_field = field.as_ref().clone().with_data_type(to_type.clone());
-            let iter = reader.into_iter().map(move |array| {
-                let casted = arrow_cast::cast(&array?, &to_type)?;
-                Ok(casted)
-            });
+            let iter = reader
+                .into_iter()
+                .map(move |array| arrow_cast::cast(&array?, &to_type));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
                     .to_arro3(py)?,

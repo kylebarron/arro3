@@ -45,11 +45,53 @@ def dictionary_encode(
 
     Return a dictionary-encoded version of the input array. This function does nothing if the input is already a dictionary array.
 
+    Note: for stream input, each output array will not necessarily have the same dictionary.
+
     Args:
         array: Argument to compute function.
 
     Returns:
         The dictionary-encoded array.
+    """
+
+@overload
+def dictionary_dictionary(array: types.ArrowArrayExportable) -> core.Array: ...
+@overload
+def dictionary_dictionary(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
+def dictionary_dictionary(
+    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
+) -> core.Array | core.ArrayReader:
+    """
+    Access the `dictionary` of a dictionary array.
+
+    This is equivalent to the [`.dictionary`][pyarrow.DictionaryArray.dictionary]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The keys of a dictionary-encoded array.
+    """
+
+@overload
+def dictionary_indices(array: types.ArrowArrayExportable) -> core.Array: ...
+@overload
+def dictionary_indices(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
+def dictionary_indices(
+    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
+) -> core.Array | core.ArrayReader:
+    """
+    Access the indices of a dictionary array.
+
+    This is equivalent to the [`.indices`][pyarrow.DictionaryArray.indices]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The indices of a dictionary-encoded array.
     """
 
 @overload
