@@ -3,10 +3,12 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use arrow_array::RecordBatchIterator;
+use arrow_schema::SchemaRef;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
 use parquet::basic::{Compression, Encoding};
+use parquet::file::metadata::ParquetMetaData;
 use parquet::file::properties::{WriterProperties, WriterVersion};
 use parquet::format::KeyValue;
 use parquet::schema::types::ColumnPath;
@@ -24,38 +26,44 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
         FileReader::File(f) => {
             let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
 
-            // TODO: only assign metadata when there's no ARROW:Schema key, for parity with pyarrow
-
-            // builder.
-            dbg!("hi");
-            // Assign metadata from Parquet key-value metadata to Arrow schema metadata
-            // Don't overwrite a key in the Arrow metadata.
-            // TODO: refactor this out of this one match block.
-            let existing_schema = builder.schema();
-            let mut metadata = existing_schema.metadata().clone();
-
-            if let Some(kv_meta) = builder.metadata().file_metadata().key_value_metadata() {
-                dbg!(kv_meta);
-                for kv in kv_meta {
-                    if !metadata.contains_key(&kv.key) && kv.value.is_some() {
-                        metadata.insert(kv.key.clone(), kv.value.clone().unwrap());
-                    }
-                }
-            }
-            dbg!(&metadata);
-
-            let new_schema = Arc::new(existing_schema.as_ref().clone().with_metadata(metadata));
-
-            dbg!(&new_schema);
+            let arrow_schema = update_arrow_schema(builder.schema(), builder.metadata());
 
             let reader = builder.build().unwrap();
             // Create a new iterator with the new schema
-            let iter = Box::new(RecordBatchIterator::new(reader, new_schema));
+            let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
             Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
         }
         FileReader::FileLike(_) => {
             Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())
         }
+    }
+}
+
+/// Update Arrow schema with Parquet key-value metadata
+///
+/// For (believed) parity with pyarrow, we only copy key-value metadata to the Arrow schema when no
+/// Arrow schema is stored in the Parquet metadata (i.e. when the file wasn't written by an Arrow
+/// writer).
+fn update_arrow_schema(existing_schema: &SchemaRef, parquet_meta: &ParquetMetaData) -> SchemaRef {
+    if let Some(kv_meta) = parquet_meta.file_metadata().key_value_metadata() {
+        let has_arrow_schema_kv = kv_meta.iter().any(|kv| kv.key.as_str() == "ARROW:schema");
+        // If the ARROW:schema key exists already, we do nothing
+        if has_arrow_schema_kv {
+            existing_schema.clone()
+        } else {
+            let mut metadata = existing_schema.metadata().clone();
+
+            assert!(metadata.is_empty(), "If an Arrow schema is inferred from a Parquet schema, it should always have empty metadata, right?");
+            for kv in kv_meta {
+                if let Some(kv_value) = &kv.value {
+                    metadata.insert(kv.key.clone(), kv_value.clone());
+                }
+            }
+
+            Arc::new(existing_schema.as_ref().clone().with_metadata(metadata))
+        }
+    } else {
+        existing_schema.clone()
     }
 }
 
