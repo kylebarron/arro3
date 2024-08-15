@@ -3,6 +3,13 @@ import pyarrow.parquet as pq
 from arro3.io import read_parquet, write_parquet
 
 
+def test_parquet_round_trip():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    write_parquet(table, "test.parquet")
+    table_retour = pa.table(read_parquet("test.parquet"))
+    assert table == table_retour
+
+
 def test_copy_parquet_kv_metadata():
     metadata = {"hello": "world"}
     table = pa.table({"a": [1, 2, 3]})
