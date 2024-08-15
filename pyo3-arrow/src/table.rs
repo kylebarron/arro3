@@ -209,7 +209,9 @@ impl PyTable {
         });
         let array_reader = Box::new(ArrayIterator::new(
             array_reader,
-            Field::new_struct("", field, false).into(),
+            Field::new_struct("", field, false)
+                .with_metadata(self.schema.metadata.clone())
+                .into(),
         ));
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
