@@ -139,7 +139,9 @@ impl PyRecordBatchReader {
         });
         let array_reader = Box::new(ArrayIterator::new(
             array_reader,
-            Field::new_struct("", schema.fields().clone(), false).into(),
+            Field::new_struct("", schema.fields().clone(), false)
+                .with_metadata(schema.metadata.clone())
+                .into(),
         ));
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
