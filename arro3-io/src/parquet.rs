@@ -28,8 +28,12 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
             let reader = builder.build().unwrap();
 
             // Create a new iterator with the arrow schema specifically
-            // Not sure why but passing ParquetRecordBatchReader directly to
-            // PyRecordBatchReader::new seems to lose schema metadata
+            //
+            // Passing ParquetRecordBatchReader directly to PyRecordBatchReader::new loses schema
+            // metadata
+            //
+            // https://docs.rs/parquet/latest/parquet/arrow/arrow_reader/struct.ParquetRecordBatchReader.html#method.schema
+            // https://github.com/apache/arrow-rs/pull/5135
             let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
             Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
         }
