@@ -33,6 +33,19 @@ def cast(
         The casted Arrow data.
     """
 
+def dictionary_encode(array: types.ArrowArrayExportable) -> core.Array:
+    """
+    Dictionary-encode array.
+
+    Return a dictionary-encoded version of the input array. This function does nothing if the input is already a dictionary array.
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The dictionary-encoded array.
+    """
+
 @overload
 def list_flatten(input: types.ArrowArrayExportable) -> core.Array: ...
 @overload
