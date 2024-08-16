@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import IO, Literal, Sequence
 
@@ -6,6 +8,7 @@ from typing import IO, Literal, Sequence
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+import fsspec
 
 #### CSV
 
@@ -252,6 +255,11 @@ def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
     Returns:
         The loaded Arrow data.
     """
+
+async def read_parquet_async(
+    path: str, fs: fsspec.AbstractFileSystem, file_length: int
+) -> core.Table:
+    """Read a Parquet file to a Table"""
 
 def write_parquet(
     data: types.ArrowStreamExportable | types.ArrowArrayExportable,
