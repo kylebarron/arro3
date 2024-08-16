@@ -243,7 +243,7 @@ ParquetEncoding = Literal[
 ]
 """Allowed Parquet encodings."""
 
-def read_parquet(file: Path | str) -> core.RecordBatchReader:
+def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
     """Read a Parquet file to an Arrow RecordBatchReader
 
     Args:

@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import pyarrow as pa
 import pyarrow.parquet as pq
 from arro3.io import read_parquet, write_parquet
@@ -7,6 +9,15 @@ def test_parquet_round_trip():
     table = pa.table({"a": [1, 2, 3, 4]})
     write_parquet(table, "test.parquet")
     table_retour = pa.table(read_parquet("test.parquet"))
+    assert table == table_retour
+
+
+def test_parquet_round_trip_bytes_io():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    with BytesIO() as bio:
+        write_parquet(table, bio)
+        bio.seek(0)
+        table_retour = pa.table(read_parquet(bio))
     assert table == table_retour
 
 
