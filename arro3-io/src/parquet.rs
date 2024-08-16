@@ -20,31 +20,24 @@ use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
 pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
-    match file {
-        FileReader::File(f) => {
-            let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
 
-            let metadata = builder.schema().metadata().clone();
-            let reader = builder.build().unwrap();
+    let metadata = builder.schema().metadata().clone();
+    let reader = builder.build().unwrap();
 
-            // Add source schema metadata onto reader's schema. The original schema is not valid
-            // with a given column projection, but we want to persist the source's metadata.
-            let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
+    // Add source schema metadata onto reader's schema. The original schema is not valid
+    // with a given column projection, but we want to persist the source's metadata.
+    let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
 
-            // Create a new iterator with the arrow schema specifically
-            //
-            // Passing ParquetRecordBatchReader directly to PyRecordBatchReader::new loses schema
-            // metadata
-            //
-            // https://docs.rs/parquet/latest/parquet/arrow/arrow_reader/struct.ParquetRecordBatchReader.html#method.schema
-            // https://github.com/apache/arrow-rs/pull/5135
-            let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
-            Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
-        }
-        FileReader::FileLike(_) => {
-            Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())
-        }
-    }
+    // Create a new iterator with the arrow schema specifically
+    //
+    // Passing ParquetRecordBatchReader directly to PyRecordBatchReader::new loses schema
+    // metadata
+    //
+    // https://docs.rs/parquet/latest/parquet/arrow/arrow_reader/struct.ParquetRecordBatchReader.html#method.schema
+    // https://github.com/apache/arrow-rs/pull/5135
+    let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
+    Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
 }
 
 pub(crate) struct PyWriterVersion(WriterVersion);

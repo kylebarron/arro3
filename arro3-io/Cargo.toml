@@ -23,6 +23,7 @@ arrow-csv = { workspace = true }
 arrow-ipc = { workspace = true }
 arrow-schema = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
+bytes = "1.7.0"
 parquet = { workspace = true }
 pyo3 = { workspace = true, features = ["abi3-py38"] }
 pyo3-file = { workspace = true }
