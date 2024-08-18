@@ -368,6 +368,12 @@ impl PyChunkedArray {
         self.field == other.field && self.chunks == other.chunks
     }
 
+    #[getter]
+    #[pyo3(name = "field")]
+    fn py_field(&self, py: Python) -> PyResult<PyObject> {
+        PyField::new(self.field.clone()).to_arro3(py)
+    }
+
     fn length(&self) -> usize {
         self.len()
     }
