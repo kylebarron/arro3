@@ -265,6 +265,14 @@ class ChunkedArray:
         """Flatten this ChunkedArray into a single non-chunked array."""
     def equals(self, other: ArrowStreamExportable) -> bool:
         """Return whether the contents of two chunked arrays are equal."""
+    @property
+    def field(self) -> Field:
+        """Access the field stored on this ChunkedArray.
+
+        Note that this field usually will not have a name associated, but it may have
+        metadata that signifies that this array is an extension (user-defined typed)
+        array.
+        """
     def length(self) -> int:
         """Return length of a ChunkedArray."""
     @property

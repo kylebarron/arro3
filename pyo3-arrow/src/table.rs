@@ -186,7 +186,7 @@ impl PyTable {
             )
         } else {
             Err(PyTypeError::new_err(
-                "Expected Table-like input or dict of arrays or list of arrays.",
+                "Expected Table-like input or dict of arrays or sequence of arrays.",
             )
             .into())
         }
