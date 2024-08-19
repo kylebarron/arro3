@@ -1826,15 +1826,17 @@ def fixed_size_list_array(
     *,
     type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new fixed size list array
 
     Args:
-        values: _description_
-        list_size: _description_
-        type: _description_. Defaults to None.
+        values: the values of the new fixed size list array
+        list_size: the number of elements in each item of the list.
+
+    Keyword Args:
+        type: the type of output array. This must have fixed size list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
 
     Returns:
-        _description_
+        a new Array with fixed size list type
     """
 
 def list_array(
@@ -1843,28 +1845,35 @@ def list_array(
     *,
     type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new list array
 
     Args:
-        offsets: _description_
-        values: _description_
-        type: _description_. Defaults to None.
+        offsets: the offsets for the output list array. This array must have type int32 or int64, depending on whether you wish to create a list array or large list array.
+        values: the values for the output list array.
+
+    Keyword Args:
+        type: the type of output array. This must have list or large list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
 
     Returns:
-        _description_
+        a new Array with list or large list type
     """
 
 def struct_array(
     arrays: Sequence[ArrowArrayExportable],
     *,
     fields: Sequence[ArrowSchemaExportable],
+    type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new struct array
 
     Args:
-        arrays: _description_
-        fields: _description_
+        arrays: a sequence of arrays for the struct children
+
+    Keyword Args:
+        fields: a sequence of fields that represent each of the struct children
+        type: the type of output array. This must have struct type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .
+
 
     Returns:
-        _description_
+        a new Array with struct type
     """

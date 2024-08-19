@@ -9,7 +9,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use pyo3_arrow::error::PyArrowResult;
-use pyo3_arrow::{PyArray, PyDataType, PyField};
+use pyo3_arrow::{PyArray, PyField};
 
 #[pyfunction]
 #[pyo3(signature=(values, list_size, *, r#type=None))]
@@ -17,13 +17,17 @@ pub(crate) fn fixed_size_list_array(
     py: Python,
     values: PyArray,
     list_size: i32,
-    r#type: Option<PyDataType>,
+    r#type: Option<PyField>,
 ) -> PyArrowResult<PyObject> {
     let (values_array, values_field) = values.into_inner();
-    let list_data_type = r#type
-        .map(|t| t.into_inner())
-        .unwrap_or_else(|| DataType::FixedSizeList(values_field.clone(), list_size));
-    let inner_field = match &list_data_type {
+    let output_field = r#type.map(|t| t.into_inner()).unwrap_or_else(|| {
+        Arc::new(Field::new(
+            "",
+            DataType::FixedSizeList(values_field.clone(), list_size),
+            true,
+        ))
+    });
+    let inner_field = match output_field.data_type() {
         DataType::FixedSizeList(inner_field, _) => inner_field,
         _ => {
             return Err(
@@ -32,7 +36,7 @@ pub(crate) fn fixed_size_list_array(
         }
     };
     let array = FixedSizeListArray::try_new(inner_field.clone(), list_size, values_array, None)?;
-    Ok(PyArray::new(Arc::new(array), Field::new("", list_data_type, true).into()).to_arro3(py)?)
+    Ok(PyArray::new(Arc::new(array), output_field).to_arro3(py)?)
 }
 
 #[pyfunction]
@@ -41,7 +45,7 @@ pub(crate) fn list_array(
     py: Python,
     offsets: PyArray,
     values: PyArray,
-    r#type: Option<PyDataType>,
+    r#type: Option<PyField>,
 ) -> PyArrowResult<PyObject> {
     let (values_array, values_field) = values.into_inner();
     let (offsets_array, _) = offsets.into_inner();
@@ -54,14 +58,18 @@ pub(crate) fn list_array(
             )
         }
     };
-    let list_data_type = r#type.map(|t| t.into_inner()).unwrap_or_else(|| {
+    let output_field = r#type.map(|t| t.into_inner()).unwrap_or_else(|| {
         if large_offsets {
-            DataType::LargeList(values_field.clone())
+            Arc::new(Field::new(
+                "",
+                DataType::LargeList(values_field.clone()),
+                true,
+            ))
         } else {
-            DataType::List(values_field.clone())
+            Arc::new(Field::new("", DataType::List(values_field.clone()), true))
         }
     });
-    let inner_field = match &list_data_type {
+    let inner_field = match output_field.data_type() {
         DataType::List(inner_field) | DataType::LargeList(inner_field) => inner_field,
         _ => {
             return Err(
@@ -85,20 +93,29 @@ pub(crate) fn list_array(
             None,
         )?)
     };
-    Ok(PyArray::new(
-        Arc::new(list_array),
-        Field::new("", list_data_type, true).into(),
-    )
-    .to_arro3(py)?)
+    Ok(PyArray::new(Arc::new(list_array), output_field).to_arro3(py)?)
 }
 
 #[pyfunction]
-#[pyo3(signature=(arrays, *, fields))]
+#[pyo3(signature=(arrays, *, fields, r#type=None))]
 pub(crate) fn struct_array(
     py: Python,
     arrays: Vec<PyArray>,
     fields: Vec<PyField>,
+    r#type: Option<PyField>,
 ) -> PyArrowResult<PyObject> {
+    let output_field = r#type.map(|t| t.into_inner()).unwrap_or_else(|| {
+        let fields = fields
+            .into_iter()
+            .map(|field| field.into_inner())
+            .collect::<Vec<_>>();
+        Arc::new(Field::new_struct("", fields, true))
+    });
+    let inner_fields = match output_field.data_type() {
+        DataType::Struct(inner_fields) => inner_fields.clone(),
+        _ => return Err(PyValueError::new_err("Expected struct as the outer data type").into()),
+    };
+
     let arrays = arrays
         .into_iter()
         .map(|arr| {
@@ -106,12 +123,7 @@ pub(crate) fn struct_array(
             arr
         })
         .collect::<Vec<_>>();
-    let fields = fields
-        .into_iter()
-        .map(|field| field.into_inner())
-        .collect::<Vec<_>>();
 
-    let array = StructArray::try_new(fields.clone().into(), arrays, None)?;
-    let field = Field::new_struct("", fields, true);
-    Ok(PyArray::new(Arc::new(array), field.into()).to_arro3(py)?)
+    let array = StructArray::try_new(inner_fields, arrays, None)?;
+    Ok(PyArray::new(Arc::new(array), output_field).to_arro3(py)?)
 }
