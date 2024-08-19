@@ -1,5 +1,10 @@
 # arro3
 
+[![PyPI][pypi_arro3_core]][pypi_link_arro3_core]
+
+[pypi_arro3_core]: https://badge.fury.io/py/arro3-core.svg
+[pypi_link_arro3_core]: https://pypi.org/project/arro3-core/
+
 A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs).
 
 arro3 features:
@@ -7,6 +12,10 @@ arro3 features:
 - Classes to manage and operate on Arrow data.
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
 - Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files
+
+## Using
+
+Consult the [documentation](https://kylebarron.dev/arro3/latest/).
 
 ## Why another Arrow library?
 
