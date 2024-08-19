@@ -1053,6 +1053,7 @@ dependencies = [
  "arrow-buffer",
  "arrow-schema",
  "arrow-select",
+ "half",
  "indexmap",
  "numpy",
  "pyo3",
