@@ -316,7 +316,7 @@ impl PyTable {
             let fields = columns
                 .iter()
                 .zip(names.iter())
-                .map(|(array, name)| Field::new(name.clone(), array.data_type().clone(), true))
+                .map(|(array, name)| Arc::new(array.field().as_ref().clone().with_name(name)))
                 .collect::<Vec<_>>();
             Arc::new(
                 Schema::new(fields)

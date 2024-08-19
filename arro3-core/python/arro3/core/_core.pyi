@@ -24,7 +24,7 @@ class Array:
 
         Args:
             obj: A sequence of input objects.
-            type: Explicit type to attempt to coerce to.
+            type: Explicit type to attempt to coerce to. You may pass in a `Field` to `type` in order to associate extension metadata with this array.
         """
     def __array__(self, dtype=None, copy=None) -> NDArray:
         """

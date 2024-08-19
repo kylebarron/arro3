@@ -138,7 +138,7 @@ impl Display for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    fn init(obj: &Bound<PyAny>, r#type: Option<PyDataType>) -> PyResult<Self> {
+    fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
         if let Ok(data) = obj.extract::<PyArray>() {
             return Ok(data);
         }
@@ -150,12 +150,12 @@ impl PyArray {
             }};
         }
 
-        let data_type = r#type
+        let field = r#type
             .ok_or(PyValueError::new_err(
                 "type must be passed for non-Arrow input",
             ))?
             .into_inner();
-        let array: ArrayRef = match data_type {
+        let array: ArrayRef = match field.data_type() {
             DataType::Float32 => impl_primitive!(f32, Float32Type),
             DataType::Float64 => impl_primitive!(f64, Float64Type),
             DataType::UInt8 => impl_primitive!(u8, UInt8Type),
@@ -203,7 +203,7 @@ impl PyArray {
                 )))
             }
         };
-        Ok(Self::new(array, Field::new("", data_type, true).into()))
+        Ok(Self::new(array, field))
     }
 
     #[pyo3(signature = (dtype=None, copy=None))]
@@ -281,11 +281,10 @@ impl PyArray {
         Ok(Self::from_array_ref(arrow_array))
     }
 
-    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
-        let target_type = target_type.into_inner();
-        let new_array = arrow::compute::cast(self.as_ref(), &target_type)?;
-        let new_field = self.field.as_ref().clone().with_data_type(target_type);
-        Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
+    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+        let new_field = target_type.into_inner();
+        let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
+        Ok(PyArray::new(new_array, new_field).to_arro3(py)?)
     }
 
     #[getter]
