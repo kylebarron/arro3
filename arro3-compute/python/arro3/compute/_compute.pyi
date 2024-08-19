@@ -1,4 +1,4 @@
-from typing import Sequence, overload
+from typing import overload
 
 # Note: importing with
 # `from arro3.core import Array`
@@ -52,109 +52,6 @@ def dictionary_encode(
 
     Returns:
         The dictionary-encoded array.
-    """
-
-@overload
-def dictionary_dictionary(array: types.ArrowArrayExportable) -> core.Array: ...
-@overload
-def dictionary_dictionary(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
-def dictionary_dictionary(
-    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
-) -> core.Array | core.ArrayReader:
-    """
-    Access the `dictionary` of a dictionary array.
-
-    This is equivalent to the [`.dictionary`][pyarrow.DictionaryArray.dictionary]
-    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
-
-    Args:
-        array: Argument to compute function.
-
-    Returns:
-        The keys of a dictionary-encoded array.
-    """
-
-@overload
-def dictionary_indices(array: types.ArrowArrayExportable) -> core.Array: ...
-@overload
-def dictionary_indices(array: types.ArrowStreamExportable) -> core.ArrayReader: ...
-def dictionary_indices(
-    array: types.ArrowArrayExportable | types.ArrowStreamExportable,
-) -> core.Array | core.ArrayReader:
-    """
-    Access the indices of a dictionary array.
-
-    This is equivalent to the [`.indices`][pyarrow.DictionaryArray.indices]
-    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
-
-    Args:
-        array: Argument to compute function.
-
-    Returns:
-        The indices of a dictionary-encoded array.
-    """
-
-@overload
-def list_flatten(input: types.ArrowArrayExportable) -> core.Array: ...
-@overload
-def list_flatten(input: types.ArrowStreamExportable) -> core.ArrayReader: ...
-def list_flatten(
-    input: types.ArrowArrayExportable | types.ArrowStreamExportable,
-) -> core.Array | core.ArrayReader:
-    """Unnest this ListArray, LargeListArray or FixedSizeListArray.
-
-    Args:
-        input: Input data.
-
-    Raises:
-        Exception if not a list-typed array.
-
-    Returns:
-        The flattened Arrow data.
-    """
-
-@overload
-def list_offsets(
-    input: types.ArrowArrayExportable, *, logical: bool = True
-) -> core.Array: ...
-@overload
-def list_offsets(
-    input: types.ArrowStreamExportable, *, logical: bool = True
-) -> core.ArrayReader: ...
-def list_offsets(
-    input: types.ArrowArrayExportable | types.ArrowStreamExportable,
-    *,
-    logical: bool = True,
-) -> core.Array | core.ArrayReader:
-    """Access the offsets of this ListArray or LargeListArray
-
-    Args:
-        input: _description_
-        physical: If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to `True`.
-
-    Raises:
-        Exception if not a list-typed array.
-
-    Returns:
-        _description_
-    """
-
-def struct_field(
-    values: types.ArrowArrayExportable,
-    /,
-    indices: int | Sequence[int],
-) -> core.Array:
-    """Access a column within a StructArray by index
-
-    Args:
-        values: Argument to compute function.
-        indices: List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.
-
-    Raises:
-        Exception if not a struct-typed array.
-
-    Returns:
-        _description_
     """
 
 def take(

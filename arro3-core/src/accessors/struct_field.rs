@@ -1,4 +1,4 @@
-use arrow::array::AsArray;
+use arrow_array::cast::AsArray;
 use arrow_array::ArrayRef;
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use pyo3::prelude::*;

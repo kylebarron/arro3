@@ -8,7 +8,7 @@ from arro3.core import (
     list_array,
     struct_array,
 )
-from arro3.compute import list_offsets
+from arro3.core import list_offsets
 
 
 def test_fixed_size_list_array():
