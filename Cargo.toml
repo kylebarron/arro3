@@ -14,6 +14,7 @@ arrow-csv = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625
 arrow-ipc = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
 arrow-schema = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
 arrow-select = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+half = "2"
 indexmap = "2"
 # numpy = "0.21"
 # TODO: Pin to released version once NumPy 2.0 support is merged

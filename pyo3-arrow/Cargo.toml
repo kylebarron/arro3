@@ -17,6 +17,7 @@ arrow-buffer = { workspace = true }
 arrow-schema = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
 pyo3 = { workspace = true, features = ["abi3-py38", "indexmap"] }
+half = { workspace = true }
 indexmap = { workspace = true }
 numpy = { workspace = true, features = ["half"] }
 thiserror = { workspace = true }
