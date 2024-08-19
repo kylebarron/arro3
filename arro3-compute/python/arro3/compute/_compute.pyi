@@ -27,7 +27,7 @@ def cast(
 
     Args:
         input: Input data to cast.
-        to_type: The target data type to cast to.
+        to_type: The target data type to cast to. You may pass in a `Field` here if you wish to include Arrow extension metadata on the output array.
 
     Returns:
         The casted Arrow data.

@@ -3,14 +3,17 @@ members = ["arro3-compute", "arro3-core", "arro3-io", "pyo3-arrow"]
 resolver = "2"
 
 [workspace.dependencies]
-arrow = { version = "52", features = ["ffi"] }
-arrow-array = "52"
-arrow-buffer = "52"
-arrow-cast = "52"
-arrow-csv = "52"
-arrow-ipc = "52"
-arrow-schema = "52"
-arrow-select = "52"
+# Arrow git tag includes this PR: https://github.com/apache/arrow-rs/pull/6273
+arrow = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122", features = [
+    "ffi",
+] }
+arrow-array = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-buffer = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-cast = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-csv = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-ipc = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-schema = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
+arrow-select = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
 indexmap = "2"
 # numpy = "0.21"
 # TODO: Pin to released version once NumPy 2.0 support is merged
@@ -18,7 +21,7 @@ indexmap = "2"
 # This is the fork used by polars
 # https://github.com/pola-rs/polars/blob/fac700d9670feb57f1df32beaeee38377725fccf/py-polars/Cargo.toml#L33-L35
 numpy = { git = "https://github.com/stinodego/rust-numpy.git", rev = "9ba9962ae57ba26e35babdce6f179edf5fe5b9c8", default-features = false }
-parquet = "52"
+parquet = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
 pyo3 = "0.21"
 pyo3-file = "0.8.1"
 thiserror = "1"

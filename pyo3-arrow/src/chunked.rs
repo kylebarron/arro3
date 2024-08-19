@@ -327,15 +327,14 @@ impl PyChunkedArray {
         PyChunkedArray::try_new(chunks, field)
     }
 
-    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
-        let target_type = target_type.into_inner();
+    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+        let new_field = target_type.into_inner();
         let new_chunks = self
             .chunks
             .iter()
-            .map(|chunk| arrow::compute::cast(&chunk, &target_type))
+            .map(|chunk| arrow::compute::cast(&chunk, new_field.data_type()))
             .collect::<Result<Vec<_>, ArrowError>>()?;
-        let new_field = self.field.as_ref().clone().with_data_type(target_type);
-        Ok(PyChunkedArray::try_new(new_chunks, new_field.into())?.to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(new_chunks, new_field)?.to_arro3(py)?)
     }
 
     fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
