@@ -20,7 +20,7 @@ class Array:
         /,
         type: ArrowSchemaExportable | None = None,
     ) -> None:
-        """Create arro3.core.Array instance from a sequence of Python objects.
+        """Create arro3.Array instance from a sequence of Python objects.
 
         Args:
             obj: A sequence of input objects.
@@ -119,7 +119,7 @@ class ArrayReader:
     """A stream of Arrow `Array`s.
 
     This is similar to the [`RecordBatchReader`][arro3.core.RecordBatchReader] but each
-    item yielded from the stream is an [`Array`][arro3.core.Array], not a
+    item yielded from the stream is an [`Array`][arro3.Array], not a
     [`RecordBatch`][arro3.core.RecordBatch].
     """
     def __arrow_c_schema__(self) -> object:
@@ -167,7 +167,7 @@ class ArrayReader:
         """Construct this from an existing Arrow object.
 
         This is an alias of and has the same behavior as
-        [`from_arrow`][arro3.core.ArrayReader.from_arrow], but is included for parity
+        [`from_arrow`][arro3.ArrayReader.from_arrow], but is included for parity
         with [`pyarrow.RecordBatchReader`][pyarrow.RecordBatchReader].
         """
     @property
@@ -1718,6 +1718,107 @@ class Table:
         Returns:
             _description_
         """
+
+@overload
+def dictionary_dictionary(array: ArrowArrayExportable) -> Array: ...
+@overload
+def dictionary_dictionary(array: ArrowStreamExportable) -> ArrayReader: ...
+def dictionary_dictionary(
+    array: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """
+    Access the `dictionary` of a dictionary array.
+
+    This is equivalent to the [`.dictionary`][pyarrow.DictionaryArray.dictionary]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The keys of a dictionary-encoded array.
+    """
+
+@overload
+def dictionary_indices(array: ArrowArrayExportable) -> Array: ...
+@overload
+def dictionary_indices(array: ArrowStreamExportable) -> ArrayReader: ...
+def dictionary_indices(
+    array: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """
+    Access the indices of a dictionary array.
+
+    This is equivalent to the [`.indices`][pyarrow.DictionaryArray.indices]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The indices of a dictionary-encoded array.
+    """
+
+@overload
+def list_flatten(input: ArrowArrayExportable) -> Array: ...
+@overload
+def list_flatten(input: ArrowStreamExportable) -> ArrayReader: ...
+def list_flatten(
+    input: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """Unnest this ListArray, LargeListArray or FixedSizeListArray.
+
+    Args:
+        input: Input data.
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        The flattened Arrow data.
+    """
+
+@overload
+def list_offsets(input: ArrowArrayExportable, *, logical: bool = True) -> Array: ...
+@overload
+def list_offsets(
+    input: ArrowStreamExportable, *, logical: bool = True
+) -> ArrayReader: ...
+def list_offsets(
+    input: ArrowArrayExportable | ArrowStreamExportable,
+    *,
+    logical: bool = True,
+) -> Array | ArrayReader:
+    """Access the offsets of this ListArray or LargeListArray
+
+    Args:
+        input: _description_
+        physical: If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to `True`.
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        _description_
+    """
+
+def struct_field(
+    values: ArrowArrayExportable,
+    /,
+    indices: int | Sequence[int],
+) -> Array:
+    """Access a column within a StructArray by index
+
+    Args:
+        values: Argument to compute function.
+        indices: List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.
+
+    Raises:
+        Exception if not a struct-typed array.
+
+    Returns:
+        _description_
+    """
 
 def fixed_size_list_array(
     values: ArrowArrayExportable,
