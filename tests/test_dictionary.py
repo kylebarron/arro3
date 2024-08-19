@@ -1,8 +1,9 @@
-import pyarrow as pa
 from datetime import datetime
+
+import pyarrow as pa
 import pyarrow.compute as pc
-from arro3.core import ChunkedArray
-from arro3.compute import dictionary_encode, dictionary_dictionary, dictionary_indices
+from arro3.compute import dictionary_encode
+from arro3.core import ChunkedArray, dictionary_dictionary, dictionary_indices
 
 
 def test_dictionary_encode():

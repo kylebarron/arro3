@@ -1,5 +1,5 @@
 import pyarrow as pa
-from arro3.compute import list_flatten
+from arro3.core import list_flatten
 
 
 def test_list_flatten():

@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pytest
-from arro3.compute import struct_field
+from arro3.core import struct_field
 
 
 def test_struct_field():
