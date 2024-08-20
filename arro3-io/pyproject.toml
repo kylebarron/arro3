@@ -16,6 +16,7 @@ classifiers = [
 features = ["pyo3/extension-module"]
 module-name = "arro3.io._io"
 python-source = "python"
+strip = true
 
 [tool.poetry]
 name = "arro3-io"
