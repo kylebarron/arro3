@@ -119,7 +119,7 @@ class ArrayReader:
     """A stream of Arrow `Array`s.
 
     This is similar to the [`RecordBatchReader`][arro3.core.RecordBatchReader] but each
-    item yielded from the stream is an [`Array`][arro3.Array], not a
+    item yielded from the stream is an [`Array`][arro3.core.Array], not a
     [`RecordBatch`][arro3.core.RecordBatch].
     """
     def __arrow_c_schema__(self) -> object:
