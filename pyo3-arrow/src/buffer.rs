@@ -1,6 +1,7 @@
 use std::os::raw::c_int;
 
 use arrow_buffer::Buffer;
+use pyo3::exceptions::PyValueError;
 use pyo3::ffi;
 use pyo3::prelude::*;
 
@@ -11,7 +12,7 @@ use pyo3::prelude::*;
 /// `numpy.frombuffer`.
 #[pyclass(module = "arro3.core._core", name = "Buffer", subclass)]
 pub struct PyBuffer {
-    pub(crate) inner: Buffer,
+    pub(crate) inner: Option<Buffer>,
 }
 
 #[pymethods]
@@ -21,7 +22,7 @@ impl PyBuffer {
     #[new]
     pub fn new(buf: Vec<u8>) -> Self {
         Self {
-            inner: Buffer::from_vec(buf),
+            inner: Some(Buffer::from_vec(buf)),
         }
     }
 
@@ -32,19 +33,27 @@ impl PyBuffer {
         view: *mut ffi::Py_buffer,
         flags: c_int,
     ) -> PyResult<()> {
-        let bytes = slf.inner.as_slice();
-        let ret = ffi::PyBuffer_FillInfo(
-            view,
-            slf.as_ptr() as *mut _,
-            bytes.as_ptr() as *mut _,
-            bytes.len().try_into().unwrap(),
-            1, // read only
-            flags,
-        );
-        if ret == -1 {
-            return Err(PyErr::fetch(slf.py()));
+        if let Some(buf) = &slf.inner {
+            let bytes = buf.as_slice();
+            let ret = ffi::PyBuffer_FillInfo(
+                view,
+                slf.as_ptr() as *mut _,
+                bytes.as_ptr() as *mut _,
+                bytes.len().try_into().unwrap(),
+                1, // read only
+                flags,
+            );
+            if ret == -1 {
+                return Err(PyErr::fetch(slf.py()));
+            }
+            Ok(())
+        } else {
+            Err(PyValueError::new_err("Buffer has already been disposed"))
         }
-        Ok(())
     }
-    unsafe fn __releasebuffer__(&self, _view: *mut ffi::Py_buffer) {}
+
+    unsafe fn __releasebuffer__(mut slf: PyRefMut<Self>, _view: *mut ffi::Py_buffer) {
+        dbg!("dropping");
+        slf.inner.take();
+    }
 }

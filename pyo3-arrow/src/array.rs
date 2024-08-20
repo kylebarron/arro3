@@ -213,7 +213,9 @@ impl PyArray {
                 let arr = self.array.as_primitive::<Int64Type>();
                 let values = arr.values();
                 let buffer = values.inner().clone();
-                PyBuffer { inner: buffer }
+                PyBuffer {
+                    inner: Some(buffer),
+                }
             }
             _ => todo!(),
         }
