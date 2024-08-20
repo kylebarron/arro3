@@ -53,7 +53,6 @@ impl PyBuffer {
     }
 
     unsafe fn __releasebuffer__(mut slf: PyRefMut<Self>, _view: *mut ffi::Py_buffer) {
-        dbg!("dropping");
         slf.inner.take();
     }
 }
