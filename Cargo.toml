@@ -23,6 +23,6 @@ indexmap = "2"
 # https://github.com/pola-rs/polars/blob/fac700d9670feb57f1df32beaeee38377725fccf/py-polars/Cargo.toml#L33-L35
 numpy = { git = "https://github.com/stinodego/rust-numpy.git", rev = "9ba9962ae57ba26e35babdce6f179edf5fe5b9c8", default-features = false }
 parquet = { git = "https://github.com/kylebarron/arrow-rs", rev = "9875740e625b78bfb0b6545eab63a17f47c6a122" }
-pyo3 = "0.21"
+pyo3 = { version = "0.21", features = ["indexmap"] }
 pyo3-file = "0.8.1"
 thiserror = "1"

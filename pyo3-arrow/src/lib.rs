@@ -3,6 +3,7 @@
 
 mod array;
 mod array_reader;
+mod buffer;
 mod chunked;
 mod datatypes;
 pub mod error;
@@ -18,6 +19,7 @@ mod utils;
 
 pub use array::PyArray;
 pub use array_reader::PyArrayReader;
+pub use buffer::PyBuffer;
 pub use chunked::PyChunkedArray;
 pub use datatypes::PyDataType;
 pub use field::PyField;

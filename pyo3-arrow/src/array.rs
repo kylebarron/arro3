@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::array::AsArray;
 use arrow::compute::concat;
 use arrow::datatypes::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
@@ -24,7 +25,7 @@ use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
-use crate::{PyDataType, PyField};
+use crate::{PyBuffer, PyDataType, PyField};
 
 /// A Python-facing Arrow array.
 ///
@@ -204,6 +205,18 @@ impl PyArray {
             }
         };
         Ok(Self::new(array, field))
+    }
+
+    fn buffer(&self) -> PyBuffer {
+        match self.array.data_type() {
+            DataType::Int64 => {
+                let arr = self.array.as_primitive::<Int64Type>();
+                let values = arr.values();
+                let buffer = values.inner().clone();
+                PyBuffer { inner: buffer }
+            }
+            _ => todo!(),
+        }
     }
 
     #[pyo3(signature = (dtype=None, copy=None))]
