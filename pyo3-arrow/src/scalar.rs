@@ -5,10 +5,11 @@ use std::sync::Arc;
 use arrow::array::AsArray;
 use arrow::datatypes::*;
 use arrow_array::timezone::Tz;
-use arrow_array::{ArrayRef, UnionArray};
+use arrow_array::{Array, ArrayRef, UnionArray};
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
+use pyo3::types::PyTuple;
 
 use crate::error::PyArrowResult;
 use crate::{PyArray, PyDataType};
@@ -269,9 +270,20 @@ impl PyScalar {
                 todo!()
             }
             DataType::Map(_, _) => {
-                let _array = arr.as_map();
-                // array.value(0)
-                todo!()
+                let array = arr.as_map();
+                let struct_arr = array.value(0);
+                let key_arr = struct_arr.column_by_name("key").unwrap();
+                let value_arr = struct_arr.column_by_name("value").unwrap();
+
+                let mut entries = Vec::with_capacity(struct_arr.len());
+                for i in 0..struct_arr.len() {
+                    let py_key = PyScalar::try_from_array_ref(key_arr.slice(i, 1))?.as_py(py)?;
+                    let py_value =
+                        PyScalar::try_from_array_ref(value_arr.slice(i, 1))?.as_py(py)?;
+                    entries.push(PyTuple::new_bound(py, vec![py_key, py_value]));
+                }
+
+                entries.into_py(py)
             }
             DataType::RunEndEncoded(_, _) => {
                 todo!()

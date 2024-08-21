@@ -122,3 +122,36 @@ def test_as_py_dictionary():
     arro3_arr = Array(pa_arr)
     for i in range(len(pa_arr)):
         assert arro3_arr[i].as_py() == pa_arr[i].as_py()
+
+
+def test_map_array():
+    # This comes from the MapArray docstring
+    # https://arrow.apache.org/docs/python/generated/pyarrow.MapArray.html#pyarrow.MapArray.from_arrays
+    offsets = [
+        0,  #  -- row 1 start
+        1,  #  -- row 2 start
+        4,  #  -- row 3 start
+        6,  #  -- row 4 start
+        6,  #  -- row 5 start
+        6,  #  -- row 5 end
+    ]
+    movies = [
+        "Dark Knight",  #  ---------------------------------- row 1
+        "Dark Knight",
+        "Meet the Parents",
+        "Superman",  #  -- row 2
+        "Meet the Parents",
+        "Superman",  #  ----------------- row 3
+    ]
+    likings = [
+        10,  #  -------- row 1
+        8,
+        4,
+        5,  #  --- row 2
+        10,
+        3,  #  ------ row 3
+    ]
+    pa_arr = pa.MapArray.from_arrays(offsets, movies, likings)
+    arro3_arr = Array(pa_arr)
+    for i in range(len(pa_arr)):
+        assert pa_arr[i].as_py() == arro3_arr[i].as_py()
