@@ -12,7 +12,7 @@ use arrow_array::{
 };
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
-use pyo3::exceptions::{PyNotImplementedError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -24,6 +24,7 @@ use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
+use crate::scalar::PyScalar;
 use crate::{PyDataType, PyField};
 
 /// A Python-facing Arrow array.
@@ -232,6 +233,13 @@ impl PyArray {
 
     fn __eq__(&self, other: &PyArray) -> bool {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
+    }
+
+    fn __getitem__(&self, i: usize) -> PyArrowResult<PyScalar> {
+        if i >= self.array.len() {
+            return Err(PyIndexError::new_err("Index out of range").into());
+        }
+        PyScalar::try_new(self.array.slice(i, 1), self.field.clone())
     }
 
     fn __len__(&self) -> usize {
