@@ -231,15 +231,41 @@ impl PyScalar {
                 scalar.as_py(py)?
             }
             DataType::Dictionary(_, _) => {
-                todo!()
-                // let array = arr.as_any_dictionary();
-                // array.
-                // todo!()
+                let array = arr.as_any_dictionary();
+                let keys = array.keys();
+                let key = match keys.data_type() {
+                    DataType::Int8 => keys.as_primitive::<Int8Type>().value(0) as usize,
+                    DataType::Int16 => keys.as_primitive::<Int16Type>().value(0) as usize,
+                    DataType::Int32 => keys.as_primitive::<Int32Type>().value(0) as usize,
+                    DataType::Int64 => keys.as_primitive::<Int64Type>().value(0) as usize,
+                    DataType::UInt8 => keys.as_primitive::<UInt8Type>().value(0) as usize,
+                    DataType::UInt16 => keys.as_primitive::<UInt16Type>().value(0) as usize,
+                    DataType::UInt32 => keys.as_primitive::<UInt32Type>().value(0) as usize,
+                    DataType::UInt64 => keys.as_primitive::<UInt64Type>().value(0) as usize,
+                    // Above are the valid dictionary key types
+                    // https://docs.rs/arrow/latest/arrow/datatypes/trait.ArrowDictionaryKeyType.html
+                    _ => unreachable!(),
+                };
+                let value = array.values().slice(key, 1);
+                PyScalar::try_from_array_ref(value)?.as_py(py)?
             }
+
+            // TODO: decimal support.
+            //
+            // We should implement this by constructing a tuple object to pass into the
+            // decimal.Decimal constructor.
+            //
+            // From the docs: https://docs.python.org/3/library/decimal.html#decimal.Decimal
+            //
+            // If value is a tuple, it should have three components, a sign (0 for positive or 1
+            // for negative), a tuple of digits, and an integer exponent. For example, Decimal((0,
+            // (1, 4, 1, 4), -3)) returns Decimal('1.414').
             DataType::Decimal128(_, _) => {
+                // let array = arr.as_primitive::<Decimal128Type>();
                 todo!()
             }
             DataType::Decimal256(_, _) => {
+                // let array = arr.as_primitive::<Decimal256Type>();
                 todo!()
             }
             DataType::Map(_, _) => {

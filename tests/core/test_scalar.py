@@ -1,9 +1,9 @@
 import itertools
+from datetime import date, datetime
 from time import sleep
-import pytest
-from datetime import datetime, date
 
 import pyarrow as pa
+import pytest
 from arro3.core import (
     Array,
     DataType,
@@ -115,3 +115,10 @@ def test_as_py_duration():
     pa_arr = pa.array([delta], type=pa.duration("ns"))
     arro3_arr = Array(pa_arr)
     assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+
+def test_as_py_dictionary():
+    pa_arr = pa.array([0, 0, 1, 1, 2, 1, 0]).dictionary_encode()
+    arro3_arr = Array(pa_arr)
+    for i in range(len(pa_arr)):
+        assert arro3_arr[i].as_py() == pa_arr[i].as_py()
