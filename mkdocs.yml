@@ -28,6 +28,7 @@ nav:
           - api/core/field.md
           - api/core/record-batch.md
           - api/core/record-batch-reader.md
+          - api/core/scalar.md
           - api/core/schema.md
           - api/core/table.md
           - api/core/constructors.md
