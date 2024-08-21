@@ -1,11 +1,13 @@
-use std::collections::HashMap;
 use std::fmt::Display;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use arrow::array::AsArray;
 use arrow::datatypes::*;
+use arrow_array::timezone::Tz;
 use arrow_array::{ArrayRef, UnionArray};
 use arrow_schema::{ArrowError, DataType, FieldRef};
+use indexmap::IndexMap;
 use pyo3::prelude::*;
 
 use crate::error::PyArrowResult;
@@ -73,59 +75,149 @@ impl PyScalar {
             return Ok(py.None());
         }
 
-        let dt = self.array.data_type();
-        let array_ref = self.array.as_ref();
-
-        let result = match dt {
+        let arr = self.array.as_ref();
+        let result = match self.array.data_type() {
             DataType::Null => py.None(),
-            DataType::Boolean => array_ref.as_boolean().value(0).into_py(py),
-            DataType::Int8 => array_ref.as_primitive::<Int8Type>().value(0).into_py(py),
-            DataType::Int16 => array_ref.as_primitive::<Int16Type>().value(0).into_py(py),
-            DataType::Int32 => array_ref.as_primitive::<Int32Type>().value(0).into_py(py),
-            DataType::Int64 => array_ref.as_primitive::<Int64Type>().value(0).into_py(py),
-            DataType::UInt8 => array_ref.as_primitive::<UInt8Type>().value(0).into_py(py),
-            DataType::UInt16 => array_ref.as_primitive::<UInt16Type>().value(0).into_py(py),
-            DataType::UInt32 => array_ref.as_primitive::<UInt32Type>().value(0).into_py(py),
-            DataType::UInt64 => array_ref.as_primitive::<UInt64Type>().value(0).into_py(py),
-            DataType::Float16 => {
-                f32::from(array_ref.as_primitive::<Float16Type>().value(0)).into_py(py)
+            DataType::Boolean => arr.as_boolean().value(0).into_py(py),
+            DataType::Int8 => arr.as_primitive::<Int8Type>().value(0).into_py(py),
+            DataType::Int16 => arr.as_primitive::<Int16Type>().value(0).into_py(py),
+            DataType::Int32 => arr.as_primitive::<Int32Type>().value(0).into_py(py),
+            DataType::Int64 => arr.as_primitive::<Int64Type>().value(0).into_py(py),
+            DataType::UInt8 => arr.as_primitive::<UInt8Type>().value(0).into_py(py),
+            DataType::UInt16 => arr.as_primitive::<UInt16Type>().value(0).into_py(py),
+            DataType::UInt32 => arr.as_primitive::<UInt32Type>().value(0).into_py(py),
+            DataType::UInt64 => arr.as_primitive::<UInt64Type>().value(0).into_py(py),
+            DataType::Float16 => f32::from(arr.as_primitive::<Float16Type>().value(0)).into_py(py),
+            DataType::Float32 => arr.as_primitive::<Float32Type>().value(0).into_py(py),
+            DataType::Float64 => arr.as_primitive::<Float64Type>().value(0).into_py(py),
+            DataType::Timestamp(time_unit, tz) => {
+                if let Some(tz) = tz {
+                    let tz = Tz::from_str(tz)?;
+                    match time_unit {
+                        TimeUnit::Second => arr
+                            .as_primitive::<TimestampSecondType>()
+                            .value_as_datetime_with_tz(0, tz)
+                            .into_py(py),
+                        TimeUnit::Millisecond => arr
+                            .as_primitive::<TimestampMillisecondType>()
+                            .value_as_datetime_with_tz(0, tz)
+                            .into_py(py),
+                        TimeUnit::Microsecond => arr
+                            .as_primitive::<TimestampMicrosecondType>()
+                            .value_as_datetime_with_tz(0, tz)
+                            .into_py(py),
+                        TimeUnit::Nanosecond => arr
+                            .as_primitive::<TimestampNanosecondType>()
+                            .value_as_datetime_with_tz(0, tz)
+                            .into_py(py),
+                    }
+                } else {
+                    match time_unit {
+                        TimeUnit::Second => arr
+                            .as_primitive::<TimestampSecondType>()
+                            .value_as_datetime(0)
+                            .into_py(py),
+                        TimeUnit::Millisecond => arr
+                            .as_primitive::<TimestampMillisecondType>()
+                            .value_as_datetime(0)
+                            .into_py(py),
+                        TimeUnit::Microsecond => arr
+                            .as_primitive::<TimestampMicrosecondType>()
+                            .value_as_datetime(0)
+                            .into_py(py),
+                        TimeUnit::Nanosecond => arr
+                            .as_primitive::<TimestampNanosecondType>()
+                            .value_as_datetime(0)
+                            .into_py(py),
+                    }
+                }
             }
-            DataType::Float32 => array_ref.as_primitive::<Float32Type>().value(0).into_py(py),
-            DataType::Float64 => array_ref.as_primitive::<Float64Type>().value(0).into_py(py),
-            // TODO: timestamp, date, time, duration, interval
-            DataType::Binary => array_ref.as_binary::<i32>().value(0).into_py(py),
-            DataType::FixedSizeBinary(_) => array_ref.as_fixed_size_binary().value(0).into_py(py),
-            DataType::LargeBinary => array_ref.as_binary::<i64>().value(0).into_py(py),
-            DataType::BinaryView => array_ref.as_binary_view().value(0).into_py(py),
-            DataType::Utf8 => array_ref.as_string::<i32>().value(0).into_py(py),
-            DataType::LargeUtf8 => array_ref.as_string::<i64>().value(0).into_py(py),
-            DataType::Utf8View => array_ref.as_string_view().value(0).into_py(py),
+            DataType::Date32 => arr
+                .as_primitive::<Date32Type>()
+                .value_as_date(0)
+                .into_py(py),
+            DataType::Date64 => arr
+                .as_primitive::<Date64Type>()
+                .value_as_date(0)
+                .into_py(py),
+            DataType::Time32(time_unit) => match time_unit {
+                TimeUnit::Second => arr
+                    .as_primitive::<Time32SecondType>()
+                    .value_as_time(0)
+                    .into_py(py),
+                TimeUnit::Millisecond => arr
+                    .as_primitive::<Time32MillisecondType>()
+                    .value_as_time(0)
+                    .into_py(py),
+                _ => unreachable!(),
+            },
+            DataType::Time64(time_unit) => match time_unit {
+                TimeUnit::Microsecond => arr
+                    .as_primitive::<Time64MicrosecondType>()
+                    .value_as_time(0)
+                    .into_py(py),
+                TimeUnit::Nanosecond => arr
+                    .as_primitive::<Time64NanosecondType>()
+                    .value_as_time(0)
+                    .into_py(py),
+
+                _ => unreachable!(),
+            },
+            DataType::Duration(time_unit) => match time_unit {
+                TimeUnit::Second => arr
+                    .as_primitive::<DurationSecondType>()
+                    .value_as_duration(0)
+                    .into_py(py),
+                TimeUnit::Millisecond => arr
+                    .as_primitive::<DurationMillisecondType>()
+                    .value_as_duration(0)
+                    .into_py(py),
+                TimeUnit::Microsecond => arr
+                    .as_primitive::<DurationMicrosecondType>()
+                    .value_as_duration(0)
+                    .into_py(py),
+                TimeUnit::Nanosecond => arr
+                    .as_primitive::<DurationNanosecondType>()
+                    .value_as_duration(0)
+                    .into_py(py),
+            },
+            DataType::Interval(_) => {
+                // https://github.com/apache/arrow-rs/blob/6c59b7637592e4b67b18762b8313f91086c0d5d8/arrow-array/src/temporal_conversions.rs#L219
+                todo!("interval is not yet fully documented [ARROW-3097]")
+            }
+            DataType::Binary => arr.as_binary::<i32>().value(0).into_py(py),
+            DataType::FixedSizeBinary(_) => arr.as_fixed_size_binary().value(0).into_py(py),
+            DataType::LargeBinary => arr.as_binary::<i64>().value(0).into_py(py),
+            DataType::BinaryView => arr.as_binary_view().value(0).into_py(py),
+            DataType::Utf8 => arr.as_string::<i32>().value(0).into_py(py),
+            DataType::LargeUtf8 => arr.as_string::<i64>().value(0).into_py(py),
+            DataType::Utf8View => arr.as_string_view().value(0).into_py(py),
             DataType::List(inner_field) => {
-                let inner_array = array_ref.as_list::<i32>().value(0);
+                let inner_array = arr.as_list::<i32>().value(0);
                 list_values_to_py(py, inner_array, inner_field)?.into_py(py)
             }
             DataType::LargeList(inner_field) => {
-                let inner_array = array_ref.as_list::<i64>().value(0);
+                let inner_array = arr.as_list::<i64>().value(0);
                 list_values_to_py(py, inner_array, inner_field)?.into_py(py)
             }
             DataType::FixedSizeList(inner_field, _list_size) => {
-                let inner_array = array_ref.as_fixed_size_list().value(0);
+                let inner_array = arr.as_fixed_size_list().value(0);
                 list_values_to_py(py, inner_array, inner_field)?.into_py(py)
             }
             DataType::ListView(_inner_field) => {
                 todo!("as_list_view does not yet exist");
-                // let inner_array = array_ref.as_list_view::<i32>().value(0);
+                // let inner_array = arr.as_list_view::<i32>().value(0);
                 // list_values_to_py(py, inner_array, inner_field)?.into_py(py)
             }
             DataType::LargeListView(_inner_field) => {
                 todo!("as_list_view does not yet exist");
-                // let inner_array = array_ref.as_list_view::<i64>().value(0);
+                // let inner_array = arr.as_list_view::<i64>().value(0);
                 // list_values_to_py(py, inner_array, inner_field)?.into_py(py)
             }
             DataType::Struct(inner_fields) => {
-                let struct_array = array_ref.as_struct();
-                let mut dict_py_objects: HashMap<&str, PyObject> =
-                    HashMap::with_capacity(inner_fields.len());
+                let struct_array = arr.as_struct();
+                let mut dict_py_objects: IndexMap<&str, PyObject> =
+                    IndexMap::with_capacity(inner_fields.len());
                 for (inner_field, column) in inner_fields.iter().zip(struct_array.columns()) {
                     let scalar =
                         unsafe { PyScalar::new_unchecked(column.clone(), inner_field.clone()) };
@@ -134,23 +226,30 @@ impl PyScalar {
                 dict_py_objects.into_py(py)
             }
             DataType::Union(_, _) => {
-                let array = array_ref.as_any().downcast_ref::<UnionArray>().unwrap();
+                let array = arr.as_any().downcast_ref::<UnionArray>().unwrap();
                 let scalar = PyScalar::try_from_array_ref(array.value(0))?;
                 scalar.as_py(py)?
             }
             DataType::Dictionary(_, _) => {
                 todo!()
-                // let array = array_ref.as_any_dictionary();
+                // let array = arr.as_any_dictionary();
                 // array.
                 // todo!()
             }
             DataType::Decimal128(_, _) => {
                 todo!()
             }
-            // Decimal 256
-            // Map
-            // RunEndEncoded
-            _ => todo!(),
+            DataType::Decimal256(_, _) => {
+                todo!()
+            }
+            DataType::Map(_, _) => {
+                let _array = arr.as_map();
+                // array.value(0)
+                todo!()
+            }
+            DataType::RunEndEncoded(_, _) => {
+                todo!()
+            }
         };
         Ok(result)
     }

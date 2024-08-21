@@ -1,10 +1,16 @@
+import itertools
+from time import sleep
+import pytest
+from datetime import datetime, date
+
+import pyarrow as pa
 from arro3.core import (
     Array,
-    Field,
     DataType,
-    struct_array,
-    list_array,
+    Field,
     fixed_size_list_array,
+    list_array,
+    struct_array,
 )
 
 
@@ -39,3 +45,73 @@ def test_as_py():
     fixed_list_arr = fixed_size_list_array(int_arr, 2)
     assert fixed_list_arr[0].as_py() == [1, 2]
     assert fixed_list_arr[1].as_py() == [3, 4]
+
+
+time_units = ["s", "ms", "us", "ns"]
+time_zones = [None, "UTC", "America/New_York"]
+
+
+@pytest.mark.parametrize(
+    "time_unit,time_zone", list(itertools.product(time_units, time_zones))
+)
+def test_as_py_datetime(time_unit: str, time_zone: str | None):
+    now = datetime.now()
+
+    pa_arr = pa.array([now], type=pa.timestamp(time_unit, None))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+
+def test_as_py_date():
+    today = date.today()
+
+    pa_arr = pa.array([today], type=pa.date32())
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([today], type=pa.date64())
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+
+def test_as_py_time():
+    now = datetime.now().time()
+
+    pa_arr = pa.array([now], type=pa.time32("s"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([now], type=pa.time32("ms"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([now], type=pa.time64("us"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([now], type=pa.time64("ns"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+
+def test_as_py_duration():
+    now = datetime.now()
+    sleep(0.001)
+    later = datetime.now()
+    delta = later - now
+
+    pa_arr = pa.array([delta], type=pa.duration("s"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([delta], type=pa.duration("ms"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([delta], type=pa.duration("us"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+
+    pa_arr = pa.array([delta], type=pa.duration("ns"))
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
