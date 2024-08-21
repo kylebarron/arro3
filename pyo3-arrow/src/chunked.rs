@@ -441,6 +441,18 @@ impl PyChunkedArray {
         self.__array__(py, None, None)
     }
 
+    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+        let mut scalars = Vec::with_capacity(self.len());
+        for chunk in &self.chunks {
+            for i in 0..chunk.len() {
+                let scalar =
+                    unsafe { PyScalar::new_unchecked(chunk.slice(i, 1), self.field.clone()) };
+                scalars.push(scalar.as_py(py)?);
+            }
+        }
+        Ok(scalars.into_py(py))
+    }
+
     #[getter]
     fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)

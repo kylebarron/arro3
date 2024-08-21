@@ -71,7 +71,7 @@ impl PyScalar {
         self.to_string()
     }
 
-    fn as_py(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<PyObject> {
         if self.array.is_null(0) {
             return Ok(py.None());
         }
