@@ -23,6 +23,7 @@ fn _core(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<pyo3_arrow::PyField>()?;
     m.add_class::<pyo3_arrow::PyRecordBatch>()?;
     m.add_class::<pyo3_arrow::PyRecordBatchReader>()?;
+    m.add_class::<pyo3_arrow::PyScalar>()?;
     m.add_class::<pyo3_arrow::PySchema>()?;
     m.add_class::<pyo3_arrow::PyTable>()?;
 

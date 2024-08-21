@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow::compute::concat;
 use arrow_array::{Array, ArrayRef};
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -18,7 +18,7 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
-use crate::{PyArray, PyDataType, PyField};
+use crate::{PyArray, PyDataType, PyField, PyScalar};
 
 /// A Python-facing Arrow chunked array.
 ///
@@ -293,6 +293,20 @@ impl PyChunkedArray {
         self.field == other.field && self.chunks == other.chunks
     }
 
+    fn __getitem__(&self, mut i: usize) -> PyArrowResult<PyScalar> {
+        if i >= self.len() {
+            return Err(PyIndexError::new_err("Index out of range").into());
+        }
+        // for chunk in self.ch
+        for chunk in self.chunks() {
+            if i < chunk.len() {
+                return PyScalar::try_new(chunk.slice(i, 1), self.field.clone());
+            }
+            i -= chunk.len();
+        }
+        unreachable!("index in range but past end of last chunk")
+    }
+
     fn __len__(&self) -> usize {
         self.chunks.iter().fold(0, |acc, x| acc + x.len())
     }
@@ -425,6 +439,18 @@ impl PyChunkedArray {
 
     fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
+    }
+
+    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+        let mut scalars = Vec::with_capacity(self.len());
+        for chunk in &self.chunks {
+            for i in 0..chunk.len() {
+                let scalar =
+                    unsafe { PyScalar::new_unchecked(chunk.slice(i, 1), self.field.clone()) };
+                scalars.push(scalar.as_py(py)?);
+            }
+        }
+        Ok(scalars.into_py(py))
     }
 
     #[getter]

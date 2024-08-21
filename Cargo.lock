@@ -3,10 +3,10 @@
 version = 3
 
 [[package]]
-name = "adler"
-version = "1.0.2"
+name = "adler2"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
+checksum = "512761e0bb2578dd7380c6baaa0f4ce03e84f95e960231d1dec8bf4d7d6e2627"
 
 [[package]]
 name = "ahash"
@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-compute"
-version = "0.3.0-beta.1"
+version = "0.3.0-beta.2"
 dependencies = [
  "arrow",
  "arrow-array",
@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-core"
-version = "0.3.0-beta.1"
+version = "0.3.0-beta.2"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -89,7 +89,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-io"
-version = "0.3.0-beta.1"
+version = "0.3.0-beta.2"
 dependencies = [
  "arrow",
  "arrow-array",
@@ -108,7 +108,7 @@ dependencies = [
 [[package]]
 name = "arrow"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-arith",
  "arrow-array",
@@ -128,7 +128,7 @@ dependencies = [
 [[package]]
 name = "arrow-arith"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -142,13 +142,14 @@ dependencies = [
 [[package]]
 name = "arrow-array"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "ahash",
  "arrow-buffer",
  "arrow-data",
  "arrow-schema",
  "chrono",
+ "chrono-tz",
  "half",
  "hashbrown",
  "num",
@@ -157,7 +158,7 @@ dependencies = [
 [[package]]
 name = "arrow-buffer"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "bytes",
  "half",
@@ -167,7 +168,7 @@ dependencies = [
 [[package]]
 name = "arrow-cast"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -186,7 +187,7 @@ dependencies = [
 [[package]]
 name = "arrow-csv"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -204,7 +205,7 @@ dependencies = [
 [[package]]
 name = "arrow-data"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-buffer",
  "arrow-schema",
@@ -215,7 +216,7 @@ dependencies = [
 [[package]]
 name = "arrow-ipc"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -228,7 +229,7 @@ dependencies = [
 [[package]]
 name = "arrow-json"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -247,7 +248,7 @@ dependencies = [
 [[package]]
 name = "arrow-ord"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -261,7 +262,7 @@ dependencies = [
 [[package]]
 name = "arrow-row"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "ahash",
  "arrow-array",
@@ -274,7 +275,7 @@ dependencies = [
 [[package]]
 name = "arrow-schema"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "bitflags 2.6.0",
 ]
@@ -282,7 +283,7 @@ dependencies = [
 [[package]]
 name = "arrow-select"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "ahash",
  "arrow-array",
@@ -295,7 +296,7 @@ dependencies = [
 [[package]]
 name = "arrow-string"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -447,6 +448,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "chrono-tz"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93698b29de5e97ad0ae26447b344c482a7284c737d9ddc5f9e52b74a336671bb"
+dependencies = [
+ "chrono",
+ "chrono-tz-build",
+ "phf",
+]
+
+[[package]]
+name = "chrono-tz-build"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c088aee841df9c3041febbb73934cfc39708749bf96dc827e3359cd39ef11b1"
+dependencies = [
+ "parse-zoneinfo",
+ "phf",
+ "phf_codegen",
+]
+
+[[package]]
 name = "const-random"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -551,9 +574,9 @@ dependencies = [
 
 [[package]]
 name = "flate2"
-version = "1.0.31"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f211bbe8e69bbd0cfdea405084f128ae8b4aaa6b0b522fc8f2b009084797920"
+checksum = "9c0596c1eac1f9e04ed902702e9878208b336edc9d6fddc8a48387349bab3666"
 dependencies = [
  "crc32fast",
  "miniz_oxide",
@@ -808,11 +831,11 @@ dependencies = [
 
 [[package]]
 name = "miniz_oxide"
-version = "0.7.4"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8a240ddb74feaf34a79a7add65a741f3167852fba007066dcac1ca548d89c08"
+checksum = "e2d80299ef12ff69b16a84bb182e3b9df68b5a91574d3d4fa6e41b65deec4df1"
 dependencies = [
- "adler",
+ "adler2",
 ]
 
 [[package]]
@@ -958,7 +981,7 @@ dependencies = [
 [[package]]
 name = "parquet"
 version = "52.2.0"
-source = "git+https://github.com/kylebarron/arrow-rs?rev=9875740e625b78bfb0b6545eab63a17f47c6a122#9875740e625b78bfb0b6545eab63a17f47c6a122"
+source = "git+https://github.com/apache/arrow-rs?rev=6c59b7637592e4b67b18762b8313f91086c0d5d8#6c59b7637592e4b67b18762b8313f91086c0d5d8"
 dependencies = [
  "ahash",
  "arrow-array",
@@ -988,10 +1011,57 @@ dependencies = [
 ]
 
 [[package]]
+name = "parse-zoneinfo"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f2a05b18d44e2957b88f96ba460715e295bc1d7510468a2f3d3b44535d26c24"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
+
+[[package]]
+name = "phf"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ade2d8b8f33c7333b51bcf0428d37e217e9f32192ae4772156f65063b8ce03dc"
+dependencies = [
+ "phf_shared",
+]
+
+[[package]]
+name = "phf_codegen"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8d39688d359e6b34654d328e262234662d16cc0f60ec8dcbe5e718709342a5a"
+dependencies = [
+ "phf_generator",
+ "phf_shared",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48e4cc64c2ad9ebe670cb8fd69dd50ae301650392e81c05f9bfcb2d5bdbc24b0"
+dependencies = [
+ "phf_shared",
+ "rand",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90fcb95eef784c2ac79119d1dd819e162b5da872ce6f3c3abe1e8ca1c082f72b"
+dependencies = [
+ "siphasher",
+]
 
 [[package]]
 name = "pkg-config"
@@ -1032,6 +1102,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5e00b96a521718e08e03b1a622f01c8a8deb50719335de3f60b3b3950f069d8"
 dependencies = [
  "cfg-if",
+ "chrono",
  "indexmap",
  "indoc",
  "libc",
@@ -1123,6 +1194,21 @@ checksum = "0fa76aaf39101c457836aec0ce2316dbdc3ab723cdda1c6bd4e6ad4208acaca7"
 dependencies = [
  "proc-macro2",
 ]
+
+[[package]]
+name = "rand"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
+dependencies = [
+ "rand_core",
+]
+
+[[package]]
+name = "rand_core"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "rawpointer"
@@ -1269,6 +1355,12 @@ name = "shlex"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
+
+[[package]]
+name = "siphasher"
+version = "0.3.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 
 [[package]]
 name = "skeptic"

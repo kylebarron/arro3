@@ -1,6 +1,6 @@
 [package]
 name = "arro3-core"
-version = "0.3.0-beta.1"
+version = "0.3.0-beta.2"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Core library for representing Arrow data in Python."

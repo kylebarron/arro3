@@ -13,7 +13,7 @@ use arrow_array::{
 };
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
-use pyo3::exceptions::{PyNotImplementedError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -25,6 +25,7 @@ use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
+use crate::scalar::PyScalar;
 use crate::{PyBuffer, PyDataType, PyField};
 
 /// A Python-facing Arrow array.
@@ -249,6 +250,13 @@ impl PyArray {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 
+    fn __getitem__(&self, i: usize) -> PyArrowResult<PyScalar> {
+        if i >= self.array.len() {
+            return Err(PyIndexError::new_err("Index out of range").into());
+        }
+        PyScalar::try_new(self.array.slice(i, 1), self.field.clone())
+    }
+
     fn __len__(&self) -> usize {
         self.array.len()
     }
@@ -313,6 +321,11 @@ impl PyArray {
         self.array.get_array_memory_size()
     }
 
+    #[getter]
+    fn null_count(&self) -> usize {
+        self.array.null_count()
+    }
+
     #[pyo3(signature = (offset=0, length=None))]
     fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
@@ -327,6 +340,16 @@ impl PyArray {
 
     fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
+    }
+
+    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+        let mut scalars = Vec::with_capacity(self.array.len());
+        for i in 0..self.array.len() {
+            let scalar =
+                unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
+            scalars.push(scalar.as_py(py)?);
+        }
+        Ok(scalars.into_py(py))
     }
 
     #[getter]

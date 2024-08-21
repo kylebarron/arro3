@@ -15,8 +15,8 @@ rust-version = "1.75"
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
 arrow-schema = { workspace = true }
-arrow = { workspace = true, features = ["ffi"] }
-pyo3 = { version = "0.21" }
+arrow = { workspace = true, features = ["ffi", "chrono-tz"] }
+pyo3 = { workspace = true, features = ["chrono", "indexmap"] }
 half = { workspace = true }
 indexmap = { workspace = true }
 numpy = { workspace = true, features = ["half"] }

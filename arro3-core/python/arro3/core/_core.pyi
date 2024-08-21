@@ -1,4 +1,5 @@
-from typing import Any, Literal, Sequence, overload
+from typing import Any, Iterable, Literal, Sequence, overload
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -55,6 +56,10 @@ class Array:
         to a supported data type.
         """
     def __eq__(self, other) -> bool: ...
+    def __getitem__(self, i: int) -> Scalar: ...
+    # Note: we don't actually implement this, but it's inferred by having a __getitem__
+    # key
+    def __iter__(self) -> Iterable[Scalar]: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
@@ -80,9 +85,6 @@ class Array:
     def from_numpy(cls, array: np.ndarray) -> Array:
         """Construct an Array from a numpy ndarray"""
 
-    def to_numpy(self) -> NDArray:
-        """Return a numpy copy of this array."""
-
     def cast(self, target_type: ArrowSchemaExportable) -> Array:
         """Cast array values to another data type
 
@@ -100,6 +102,8 @@ class Array:
         """
     @property
     def nbytes(self) -> int: ...
+    @property
+    def null_count(self) -> int: ...
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.
 
@@ -111,6 +115,11 @@ class Array:
             The sliced array
         """
     def take(self, indices: ArrowArrayExportable) -> Array: ...
+    def to_numpy(self) -> NDArray:
+        """Return a numpy copy of this array."""
+    def to_pylist(self) -> NDArray:
+        """Convert to a list of native Python objects."""
+
     @property
     def type(self) -> DataType:
         """The data type of this array."""
@@ -119,7 +128,7 @@ class ArrayReader:
     """A stream of Arrow `Array`s.
 
     This is similar to the [`RecordBatchReader`][arro3.core.RecordBatchReader] but each
-    item yielded from the stream is an [`Array`][arro3.Array], not a
+    item yielded from the stream is an [`Array`][arro3.core.Array], not a
     [`RecordBatch`][arro3.core.RecordBatch].
     """
     def __arrow_c_schema__(self) -> object:
@@ -228,6 +237,10 @@ class ChunkedArray:
         pyarrow array, without copying memory.
         """
     def __eq__(self, other) -> bool: ...
+    def __getitem__(self, i: int) -> Scalar: ...
+    # Note: we don't actually implement this, but it's inferred by having a __getitem__
+    # key
+    def __iter__(self) -> Iterable[Scalar]: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
@@ -305,6 +318,8 @@ class ChunkedArray:
         """
     def to_numpy(self) -> NDArray:
         """Copy this array to a `numpy` NDArray"""
+    def to_pylist(self) -> NDArray:
+        """Convert to a list of native Python objects."""
     @property
     def type(self) -> DataType:
         """Return data type of a ChunkedArray."""
@@ -1148,6 +1163,15 @@ class RecordBatchReader:
     @property
     def schema(self) -> Schema:
         """Access the schema of this table."""
+
+class Scalar:
+    """An arrow Scalar."""
+    def __repr__(self) -> str: ...
+    def as_py(self) -> Any: ...
+    @property
+    def is_valid(self) -> bool: ...
+    @property
+    def type(self) -> DataType: ...
 
 class Schema:
     """An arrow Schema."""
