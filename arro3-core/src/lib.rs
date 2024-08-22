@@ -17,6 +17,7 @@ fn _core(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
     m.add_class::<pyo3_arrow::PyArray>()?;
     m.add_class::<pyo3_arrow::PyArrayReader>()?;
+    m.add_class::<pyo3_arrow::PyArrowBuffer>()?;
     m.add_class::<pyo3_arrow::PyChunkedArray>()?;
     m.add_class::<pyo3_arrow::PyDataType>()?;
     m.add_class::<pyo3_arrow::PyField>()?;

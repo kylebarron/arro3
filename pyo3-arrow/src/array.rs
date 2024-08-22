@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::array::{AsArray, BooleanBuilder};
 use arrow::compute::concat;
 use arrow::datatypes::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
@@ -10,13 +11,16 @@ use arrow_array::{
     Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
+use arrow_buffer::ScalarBuffer;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
+use pyo3::buffer::ElementType;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+use crate::buffer::PyAnyBuffer;
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
@@ -25,7 +29,7 @@ use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::scalar::PyScalar;
-use crate::{PyDataType, PyField};
+use crate::{PyArrowBuffer, PyDataType, PyField};
 
 /// A Python-facing Arrow array.
 ///
@@ -207,6 +211,20 @@ impl PyArray {
         Ok(Self::new(array, field))
     }
 
+    fn buffer(&self) -> PyArrowBuffer {
+        match self.array.data_type() {
+            DataType::Int64 => {
+                let arr = self.array.as_primitive::<Int64Type>();
+                let values = arr.values();
+                let buffer = values.inner().clone();
+                PyArrowBuffer {
+                    inner: Some(buffer),
+                }
+            }
+            _ => todo!(),
+        }
+    }
+
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
     fn __array__(
@@ -272,6 +290,92 @@ impl PyArray {
     ) -> PyResult<Self> {
         let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
         Ok(Self::new(array, Arc::new(field)))
+    }
+
+    /// Import via buffer protocol
+    #[classmethod]
+    fn from_buffer(_cls: &Bound<PyType>, buffer: PyAnyBuffer) -> PyArrowResult<Self> {
+        let len = buffer.item_count();
+        let element_type = ElementType::from_format(buffer.format());
+        match element_type {
+            ElementType::Float { bytes } => {
+                if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const f32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Float32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const f64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Float64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected float byte size").into())
+                }
+            }
+            ElementType::UnsignedInteger { bytes } => {
+                if bytes == 1 {
+                    let data = buffer.buf_ptr() as *const u8;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt8Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 2 {
+                    let data = buffer.buf_ptr() as *const u16;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt16Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const u32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const u64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected uint byte size").into())
+                }
+            }
+            ElementType::SignedInteger { bytes } => {
+                if bytes == 1 {
+                    let data = buffer.buf_ptr() as *const i8;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int8Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 2 {
+                    let data = buffer.buf_ptr() as *const i16;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int16Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const i32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const i64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected uint byte size").into())
+                }
+            }
+            ElementType::Bool => {
+                let data = buffer.buf_ptr() as *const u8;
+                let slice = unsafe { std::slice::from_raw_parts(data, len) };
+                let mut builder = BooleanBuilder::with_capacity(slice.len());
+                for val in slice {
+                    builder.append_value(*val > 0);
+                }
+                Ok(Self::from_array_ref(Arc::new(builder.finish())))
+            }
+            ElementType::Unknown => {
+                Err(PyValueError::new_err("Unknown element type in buffer protocol.").into())
+            }
+        }
     }
 
     #[classmethod]

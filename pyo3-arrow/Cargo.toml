@@ -16,7 +16,7 @@ arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
 arrow-schema = { workspace = true }
 arrow = { workspace = true, features = ["ffi", "chrono-tz"] }
-pyo3 = { workspace = true, features = ["abi3-py38", "chrono", "indexmap"] }
+pyo3 = { workspace = true, features = ["chrono", "indexmap"] }
 half = { workspace = true }
 indexmap = { workspace = true }
 numpy = { workspace = true, features = ["half"] }
