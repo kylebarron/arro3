@@ -1,6 +1,7 @@
 from typing import Any, Iterable, Literal, Sequence, overload
 
 import numpy as np
+import pandas as pd
 from numpy.typing import NDArray
 
 from .types import (
@@ -1513,6 +1514,22 @@ class Table:
         Args:
             batches: Sequence of RecordBatch to be converted, all schemas must be equal.
             schema: If not passed, will be inferred from the first RecordBatch. Defaults to None.
+
+        Returns:
+            New Table.
+        """
+    @classmethod
+    def from_pandas(
+        cls,
+        df: pd.DataFrame,
+        *,
+        schema: ArrowSchemaExportable | None = None,
+    ) -> Table:
+        """Construct a Table from a pandas DataFrame
+
+        Args:
+            df: pandas DataFrame to convert to Arrow
+            schema: If not passed, will be inferred.
 
         Returns:
             New Table.
