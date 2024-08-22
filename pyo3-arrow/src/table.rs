@@ -286,10 +286,10 @@ impl PyTable {
     fn from_pandas(
         _cls: &Bound<PyType>,
         py: Python,
-        df: PyObject,
+        df: &Bound<PyAny>,
         schema: Option<PySchema>,
     ) -> PyArrowResult<Self> {
-        let (batches, schema) = from_pandas_dataframe(py, &df, schema.map(|s| s.into_inner()))?;
+        let (batches, schema) = from_pandas_dataframe(py, df, schema.map(|s| s.into_inner()))?;
         Ok(Self::try_new(batches, schema)?)
     }
 
