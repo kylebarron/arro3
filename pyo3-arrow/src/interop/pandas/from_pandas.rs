@@ -1,5 +1,5 @@
 use arrow_array::RecordBatch;
-use arrow_schema::SchemaRef;
+use arrow_schema::{Schema, SchemaRef};
 use indexmap::IndexMap;
 use numpy::PyArrayDescr;
 use pyo3::intern;
@@ -30,9 +30,26 @@ pub fn from_pandas_dataframe(
         }
     }
 
+    let schema = if let Some(schema) = schema {
+        schema
+    } else {
+        infer_arrow_schema(py, df)?
+    };
+    let batch = import_batch(py, df, &schema)?;
+    Ok((vec![batch], schema))
+}
+
+fn infer_arrow_schema<'py>(py: Python<'py>, df: &'py Bound<PyAny>) -> PyResult<SchemaRef> {
     let dtypes = access_dtypes(py, df)?;
-    let mapping = todo!();
-    // let fields = vec![];
+    todo!()
+}
+
+fn import_batch<'py>(
+    py: Python<'py>,
+    df: &'py Bound<PyAny>,
+    schema: &Schema,
+) -> PyResult<RecordBatch> {
+    todo!()
 }
 
 fn access_dtypes<'py>(
