@@ -23,6 +23,6 @@ arrow-cast = { workspace = true }
 arrow-schema = { workspace = true }
 arrow-select = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
-pyo3 = { workspace = true, features = [] }
+pyo3 = { workspace = true }
 pyo3-arrow = { path = "../pyo3-arrow" }
 thiserror = { workspace = true }

@@ -67,3 +67,9 @@ class ArrowStreamExportable(Protocol):
     """
 
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+
+
+class BufferProtocolExportable(Protocol):
+    """A python object that implements the Buffer Protocol"""
+
+    def __buffer__(self, flags: int) -> memoryview: ...

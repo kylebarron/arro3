@@ -7,6 +7,7 @@ from .types import (
     ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
+    BufferProtocolExportable,
 )
 
 class Array:
@@ -80,6 +81,11 @@ class Array:
     @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Array:
         """Construct this object from bare Arrow PyCapsules"""
+
+    # We allow Any here because not many types have updated to expose __buffer__ yet
+    @classmethod
+    def from_buffer(cls, buffer: BufferProtocolExportable | Any) -> Array:
+        """Construct an Array from an object implementing the Python Buffer Protocol."""
 
     @classmethod
     def from_numpy(cls, array: np.ndarray) -> Array:

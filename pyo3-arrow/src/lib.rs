@@ -20,7 +20,7 @@ mod utils;
 
 pub use array::PyArray;
 pub use array_reader::PyArrayReader;
-pub use buffer::PyBuffer;
+pub use buffer::PyArrowBuffer;
 pub use chunked::PyChunkedArray;
 pub use datatypes::PyDataType;
 pub use field::PyField;
