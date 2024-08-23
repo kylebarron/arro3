@@ -96,20 +96,26 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 
 If you're exporting your own Arrow-compatible classes to Python, you can implement the relevant Arrow PyCapsule Interface methods directly on your own classes.
 
+You can use the helper functions `to_array_pycapsules`, `to_schema_pycapsule`, and `to_stream_pycapsule` in the [`ffi` module](https://docs.rs/pyo3-arrow/latest/pyo3_arrow/ffi/index.html) to simplify exporting your data.
+
 To export stream data, add a method to your class with the following signature:
 
 ```rs
-use pyo3_arrow::ffi::to_stream_pycapsule;
+use arrow_array::ArrayRef;
+use arrow_schema::FieldRef;
+use pyo3_arrow::ffi::{to_stream_pycapsule, ArrayIterator};
+use pyo3::types::PyCapsule;
 
 fn __arrow_c_stream__<'py>(
     &'py self,
     py: Python<'py>,
-    requested_schema: Option<Bound<PyCapsule>>,
+    requested_schema: Option<Bound<'py, PyCapsule>>,
 ) -> PyResult<Bound<'py, PyCapsule>> {
-
-    // Construct a PyTable from your data
-    let table: PyTable = todo!();
-    table.__arrow_c_stream__(py, requested_schema)
+    let field: FieldRef = ...;
+    let arrays: Vec<ArrayRef> = ...;
+    let array_reader =
+        Box::new(ArrayIterator::new(arrays.into_iter().map(Ok), field));
+    to_stream_pycapsule(py, array_reader, requested_schema)
 }
 ```
 
