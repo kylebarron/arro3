@@ -5,7 +5,7 @@ use arrow::compute::can_cast_types;
 use arrow::compute::kernels::cast;
 use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::Array;
-use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_schema::{ArrowError, Field, FieldRef};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple};
 
@@ -37,18 +37,13 @@ pub fn to_array_pycapsules<'py>(
     // Cast array if requested
     let (array_data, field) = if let Some(capsule) = requested_schema {
         let schema_ptr = import_schema_pycapsule(&capsule)?;
-
-        // Note: we don't import a Field directly because the name might not be set.
-        // https://github.com/apache/arrow-rs/issues/6251
-        let data_type = DataType::try_from(schema_ptr)?;
+        let output_field =
+            Arc::new(Field::try_from(schema_ptr)?.with_metadata(field.metadata().clone()));
 
         // Only cast the array if we can cast the types.
-        if can_cast_types(field.data_type(), &data_type) {
-            let field =
-                Arc::new(Field::new("", data_type, true).with_metadata(field.metadata().clone()));
-
-            let casted_array = cast(array, field.data_type())?;
-            (casted_array.to_data(), field)
+        if can_cast_types(field.data_type(), output_field.data_type()) {
+            let casted_array = cast(array, output_field.data_type())?;
+            (casted_array.to_data(), output_field)
         } else {
             (array.to_data(), field)
         }
@@ -81,23 +76,17 @@ pub fn to_stream_pycapsule<'py>(
         let schema_ptr = import_schema_pycapsule(&capsule)?;
 
         let existing_field = array_reader.field();
-
-        // Note: we don't import a Field directly because the name might not be set.
-        // https://github.com/apache/arrow-rs/issues/6251
-        let data_type = DataType::try_from(schema_ptr)?;
+        let output_field =
+            Arc::new(Field::try_from(schema_ptr)?.with_metadata(existing_field.metadata().clone()));
+        let iter_field = output_field.clone();
 
         // Only cast the reader if we can cast the types.
-        if can_cast_types(existing_field.data_type(), &data_type) {
-            let field = Arc::new(
-                Field::new("", data_type, true).with_metadata(existing_field.metadata().clone()),
-            );
-
-            let output_field = field.clone();
+        if can_cast_types(existing_field.data_type(), output_field.data_type()) {
             let array_iter = array_reader.map(move |array| {
-                let out = cast(array?.as_ref(), field.data_type())?;
+                let out = cast(array?.as_ref(), output_field.data_type())?;
                 Ok(out)
             });
-            array_reader = Box::new(ArrayIterator::new(array_iter, output_field));
+            array_reader = Box::new(ArrayIterator::new(array_iter, iter_field));
         }
     }
 
