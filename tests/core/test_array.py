@@ -74,3 +74,9 @@ def test_from_buffer():
 
     arr = np.array([1, 2, 3], dtype=np.uint64)
     assert pa.array(Array.from_buffer(memoryview(arr))).type == pa.uint64()
+
+
+def test_getitem():
+    arr = Array([1, 2, 3], DataType.int16())
+    assert arr[0].as_py() == 1
+    assert arr[-1].as_py() == 3

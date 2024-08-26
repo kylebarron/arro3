@@ -253,7 +253,17 @@ impl PyArray {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 
-    fn __getitem__(&self, i: usize) -> PyArrowResult<PyScalar> {
+    fn __getitem__(&self, i: isize) -> PyArrowResult<PyScalar> {
+        // Handle negative indexes from the end
+        let i = if i < 0 {
+            let i = self.array.len() as isize + i;
+            if i < 0 {
+                return Err(PyIndexError::new_err("Index out of range").into());
+            }
+            i as usize
+        } else {
+            i as usize
+        };
         if i >= self.array.len() {
             return Err(PyIndexError::new_err("Index out of range").into());
         }
