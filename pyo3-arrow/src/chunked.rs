@@ -293,11 +293,20 @@ impl PyChunkedArray {
         self.field == other.field && self.chunks == other.chunks
     }
 
-    fn __getitem__(&self, mut i: usize) -> PyArrowResult<PyScalar> {
+    fn __getitem__(&self, i: isize) -> PyArrowResult<PyScalar> {
+        // Handle negative indexes from the end
+        let mut i = if i < 0 {
+            let i = self.len() as isize + i;
+            if i < 0 {
+                return Err(PyIndexError::new_err("Index out of range").into());
+            }
+            i as usize
+        } else {
+            i as usize
+        };
         if i >= self.len() {
             return Err(PyIndexError::new_err("Index out of range").into());
         }
-        // for chunk in self.ch
         for chunk in self.chunks() {
             if i < chunk.len() {
                 return PyScalar::try_new(chunk.slice(i, 1), self.field.clone());
