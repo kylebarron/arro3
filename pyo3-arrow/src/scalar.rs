@@ -5,7 +5,7 @@ use std::sync::Arc;
 use arrow::array::AsArray;
 use arrow::datatypes::*;
 use arrow_array::timezone::Tz;
-use arrow_array::{Array, ArrayRef, UnionArray};
+use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
@@ -62,6 +62,12 @@ impl Display for PyScalar {
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
         Ok(())
+    }
+}
+
+impl Datum for PyScalar {
+    fn get(&self) -> (&dyn Array, bool) {
+        (self.array.as_ref(), true)
     }
 }
 
