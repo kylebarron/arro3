@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
-from arro3.core import ChunkedArray, Table, Array, Field, DataType
+from arro3.core import Array, ChunkedArray, DataType, Field, Table
 
 
 def test_table_getitem():

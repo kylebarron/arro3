@@ -28,8 +28,10 @@ def infer_csv_schema(
     Args:
         file: The input CSV path or buffer.
         has_header: Set whether the CSV file has a header. Defaults to None.
-        max_records: The maximum number of records to read to infer schema. Defaults to None.
-        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to None.
+        max_records: The maximum number of records to read to infer schema. Defaults to
+            None.
+        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to
+            None.
         escape: Set the CSV escape character. Defaults to None.
         quote: Set the CSV quote character. Defaults to None.
         terminator: Set the line terminator. Defaults to None.
@@ -55,10 +57,14 @@ def read_csv(
 
     Args:
         file: The input CSV path or buffer.
-        schema: The Arrow schema for this CSV file. Use [infer_csv_schema][arro3.io.infer_csv_schema] to infer an Arrow schema if needed.
+        schema: The Arrow schema for this CSV file. Use
+            [infer_csv_schema][arro3.io.infer_csv_schema] to infer an Arrow schema if
+        needed.
         has_header: Set whether the CSV file has a header. Defaults to None.
-        batch_size: Set the batch size (number of records to load at one time). Defaults to None.
-        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to None.
+        batch_size: Set the batch size (number of records to load at one time).
+            Defaults to None.
+        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to
+            None.
         escape: Set the CSV escape character. Defaults to None.
         quote: Set the CSV quote character. Defaults to None.
         terminator: Set the line terminator. Defaults to None.
@@ -89,7 +95,8 @@ def write_csv(
         data: The Arrow Table, RecordBatchReader, or RecordBatch to write.
         file: The output buffer or file path for where to write the CSV.
         header: Set whether to write the CSV file with a header. Defaults to None.
-        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to None.
+        delimiter: Set the CSV file's column delimiter as a byte character. Defaults to
+            None.
         escape: Set the CSV file's escape character as a byte character.
 
             In some variants of CSV, quotes are escaped using a special escape character
@@ -119,7 +126,8 @@ def infer_json_schema(
 
     Args:
         file: The input JSON path or buffer.
-        max_records: The maximum number of records to read to infer schema. If not provided, will read the entire file to deduce field types. Defaults to None.
+        max_records: The maximum number of records to read to infer schema. If not
+            provided, will read the entire file to deduce field types. Defaults to None.
 
     Returns:
         Inferred Arrow Schema
@@ -136,7 +144,8 @@ def read_json(
     Args:
         file: The JSON file or buffer to read from.
         schema: The Arrow schema representing the JSON data.
-        batch_size: Set the batch size (number of records to load at one time). Defaults to None.
+        batch_size: Set the batch size (number of records to load at one time). Defaults
+            to None.
 
     Returns:
         An arrow RecordBatchReader.
@@ -148,7 +157,7 @@ def write_json(
     *,
     explicit_nulls: bool | None = None,
 ) -> None:
-    """Write
+    """Write Arrow data to JSON.
 
     By default the writer will skip writing keys with null values for backward
     compatibility.
@@ -156,7 +165,8 @@ def write_json(
     Args:
         data: the Arrow Table, RecordBatchReader, or RecordBatch to write.
         file: the output file or buffer to write to
-        explicit_nulls: Set whether to keep keys with null values, or to omit writing them. Defaults to skipping nulls.
+        explicit_nulls: Set whether to keep keys with null values, or to omit writing
+            them. Defaults to skipping nulls.
     """
 
 def write_ndjson(
@@ -165,14 +175,16 @@ def write_ndjson(
     *,
     explicit_nulls: bool | None = None,
 ) -> None:
-    """
+    """Write Arrow data to newline-delimited JSON.
 
-    By default the writer will skip writing keys with null values for backward compatibility.
+    By default the writer will skip writing keys with null values for backward
+    compatibility.
 
     Args:
         data: the Arrow Table, RecordBatchReader, or RecordBatch to write.
         file: the output file or buffer to write to
-        explicit_nulls: Set whether to keep keys with null values, or to omit writing them. Defaults to skipping nulls.
+        explicit_nulls: Set whether to keep keys with null values, or to omit writing
+            them. Defaults to skipping nulls.
     """
 
 #### IPC
@@ -285,18 +297,26 @@ def write_parquet(
         file: The output file.
 
     Keyword Args:
-        bloom_filter_enabled: Sets if bloom filter is enabled by default for all columns (defaults to `false`).
-        bloom_filter_fpp: Sets the default target bloom filter false positive probability (fpp) for all columns (defaults to `0.05`).
-        bloom_filter_ndv: Sets default number of distinct values (ndv) for bloom filter for all columns (defaults to `1_000_000`).
-        column_compression: Sets compression codec for a specific column. Takes precedence over `compression`.
-        column_dictionary_enabled: Sets flag to enable/disable dictionary encoding for a specific column. Takes precedence over `dictionary_enabled`.
-        column_encoding: Sets encoding for a specific column. Takes precedence over `encoding`.
-        column_max_statistics_size: Sets max size for statistics for a specific column. Takes precedence over `max_statistics_size`.
+        bloom_filter_enabled: Sets if bloom filter is enabled by default for all columns
+            (defaults to `false`).
+        bloom_filter_fpp: Sets the default target bloom filter false positive
+            probability (fpp) for all columns (defaults to `0.05`).
+        bloom_filter_ndv: Sets default number of distinct values (ndv) for bloom filter
+            for all columns (defaults to `1_000_000`).
+        column_compression: Sets compression codec for a specific column. Takes
+            precedence over `compression`.
+        column_dictionary_enabled: Sets flag to enable/disable dictionary encoding for a
+            specific column. Takes precedence over `dictionary_enabled`.
+        column_encoding: Sets encoding for a specific column. Takes precedence over
+            `encoding`.
+        column_max_statistics_size: Sets max size for statistics for a specific column.
+            Takes precedence over `max_statistics_size`.
         compression:
             Sets default compression codec for all columns (default to `uncompressed`).
             Note that you can pass in a custom compression level with a string like
             `"zstd(3)"` or `"gzip(9)"` or `"brotli(3)"`.
-        created_by: Sets "created by" property (defaults to `parquet-rs version <VERSION>`).
+        created_by: Sets "created by" property (defaults to `parquet-rs version
+            <VERSION>`).
         data_page_row_count_limit:
             Sets best effort maximum number of rows in a data page (defaults to
             `20_000`).
@@ -318,7 +338,8 @@ def write_parquet(
             during reading.
 
             Note: this is a best effort limit based on value of `set_write_batch_size`.
-        dictionary_enabled: Sets default flag to enable/disable dictionary encoding for all columns (defaults to `True`).
+        dictionary_enabled: Sets default flag to enable/disable dictionary encoding for
+            all columns (defaults to `True`).
         dictionary_page_size_limit:
             Sets best effort maximum dictionary page size, in bytes (defaults to `1024 *
             1024`).
@@ -337,9 +358,13 @@ def write_parquet(
             columns. In case when dictionary is enabled for any column, this value is
             considered to be a fallback encoding for that column.
         key_value_metadata: Sets "key_value_metadata" property (defaults to `None`).
-        max_row_group_size: Sets maximum number of rows in a row group (defaults to `1024 * 1024`).
-        max_statistics_size: Sets default max statistics size for all columns (defaults to `4096`).
-        skip_arrow_metadata: Parquet files generated by this writer contain embedded arrow schema by default. Set `skip_arrow_metadata` to `True`, to skip encoding the embedded metadata (defaults to `False`).
+        max_row_group_size: Sets maximum number of rows in a row group (defaults to
+            `1024 * 1024`).
+        max_statistics_size: Sets default max statistics size for all columns (defaults
+            to `4096`).
+        skip_arrow_metadata: Parquet files generated by this writer contain embedded
+            arrow schema by default. Set `skip_arrow_metadata` to `True`, to skip
+            encoding the embedded metadata (defaults to `False`).
         write_batch_size:
             Sets write batch size (defaults to 1024).
 
@@ -349,6 +374,8 @@ def write_parquet(
             Additional limits such as such as `set_data_page_row_count_limit` are
             checked between batches, and thus the write batch size value acts as an
             upper-bound on the enforcement granularity of other limits.
-        writer_version: Sets the `WriterVersion` written into the parquet metadata (defaults to `"parquet_1_0"`). This value can determine what features some readers will support.
+        writer_version: Sets the `WriterVersion` written into the parquet metadata
+            (defaults to `"parquet_1_0"`). This value can determine what features some
+            readers will support.
 
     """
