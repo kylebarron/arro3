@@ -7,9 +7,9 @@ name: Build wheels
 
 on:
   push:
-    tags:
-      - "py-v*"
-  workflow_dispatch:
+  #   tags:
+  #     - "py-v*"
+  # workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         platform:
           - runner: ubuntu-latest
             target: x86_64
@@ -44,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -62,6 +63,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         platform:
           - runner: windows-latest
             target: x64
@@ -75,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -93,6 +95,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         platform:
           - runner: macos-latest
             target: x86_64
@@ -106,7 +109,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -140,34 +143,34 @@ jobs:
   #         name: wheels-sdist-${{ matrix.module }}
   #         path: dist
 
-  release:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module:
-          - arro3-core
-          - arro3-compute
-          - arro3-io
-    name: Release
-    environment:
-      name: release
-      url: https://pypi.org/p/${{ matrix.module }}
-    permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [linux, windows, macos]
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: wheels-*-${{ matrix.module }}
-          merge-multiple: true
-          path: dist
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
+  # release:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       module:
+  #         - arro3-core
+  #         - arro3-compute
+  #         - arro3-io
+  #   name: Release
+  #   environment:
+  #     name: release
+  #     url: https://pypi.org/p/${{ matrix.module }}
+  #   permissions:
+  #     # IMPORTANT: this permission is mandatory for trusted publishing
+  #     id-token: write
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   needs: [linux, windows, macos]
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: wheels-*-${{ matrix.module }}
+  #         merge-multiple: true
+  #         path: dist
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: 3.8
 
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
