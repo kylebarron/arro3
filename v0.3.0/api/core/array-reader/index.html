@@ -12,13 +12,13 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/chunked-array/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/array-reader/">
       
       
-        <link rel="prev" href="../array-reader/">
+        <link rel="prev" href="../array/">
       
       
-        <link rel="next" href="../datatype/">
+        <link rel="next" href="../chunked-array/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>ChunkedArray - arro3</title>
+        <title>ArrayReader - arro3</title>
       
     
     
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="ChunkedArray - arro3" >
+        <meta  property="og:title"  content="ArrayReader - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/chunked-array.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array-reader.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/chunked-array/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/array-reader/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="ChunkedArray - arro3" >
+        <meta  name="twitter:title"  content="ArrayReader - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/chunked-array.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array-reader.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#chunkedarray" class="md-skip">
+        <a href="#arrayreader" class="md-skip">
           Skip to content
         </a>
       
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ChunkedArray
+              ArrayReader
             
           </span>
         </div>
@@ -454,27 +454,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../array-reader/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ArrayReader
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -491,7 +470,7 @@
           
   
   <span class="md-ellipsis">
-    ChunkedArray
+    ArrayReader
   </span>
   
 
@@ -502,7 +481,7 @@
         
   
   <span class="md-ellipsis">
-    ChunkedArray
+    ArrayReader
   </span>
   
 
@@ -524,26 +503,26 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ChunkedArray
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrayReader
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" ChunkedArray">
+    <nav class="md-nav" aria-label=" ArrayReader">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.chunks" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.closed" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;chunks
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.field" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.field" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
     </span>
@@ -552,43 +531,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.nbytes" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;nbytes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.null_count" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;null_count
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.num_chunks" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;num_chunks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.type" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;type
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.__arrow_c_schema__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
     </span>
@@ -597,7 +540,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.__arrow_c_stream__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
     </span>
@@ -606,43 +549,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.cast" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;cast
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.chunk" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;chunk
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.combine_chunks" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;combine_chunks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.equals" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;equals
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.from_arrow" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_arrow" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
     </span>
@@ -651,7 +558,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.from_arrow_pycapsule" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
     </span>
@@ -660,45 +567,27 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.length" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_stream" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;length
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.rechunk" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.read_all" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;rechunk
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.slice" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.read_next_array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;slice
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.to_numpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_numpy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.to_pylist" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_pylist
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_array
     </span>
   </a>
   
@@ -713,6 +602,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chunked-array/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ChunkedArray
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1012,26 +922,26 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ChunkedArray
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrayReader
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" ChunkedArray">
+    <nav class="md-nav" aria-label=" ArrayReader">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.chunks" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.closed" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;chunks
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.field" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.field" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
     </span>
@@ -1040,43 +950,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.nbytes" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;nbytes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.null_count" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;null_count
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.num_chunks" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;num_chunks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.type" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;type
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.__arrow_c_schema__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
     </span>
@@ -1085,7 +959,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.__arrow_c_stream__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
     </span>
@@ -1094,43 +968,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.cast" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;cast
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.chunk" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;chunk
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.combine_chunks" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;combine_chunks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.equals" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;equals
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.from_arrow" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_arrow" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
     </span>
@@ -1139,7 +977,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.from_arrow_pycapsule" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
     </span>
@@ -1148,45 +986,27 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.length" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_stream" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;length
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.rechunk" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.read_all" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;rechunk
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.slice" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.read_next_array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;slice
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.to_numpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_numpy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.ChunkedArray.to_pylist" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_pylist
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_array
     </span>
   </a>
   
@@ -1215,24 +1035,27 @@
   
 
 
-<h1 id="chunkedarray">ChunkedArray<a class="headerlink" href="#chunkedarray" title="Permanent link">&para;</a></h1>
+<h1 id="arrayreader">ArrayReader<a class="headerlink" href="#arrayreader" title="Permanent link">&para;</a></h1>
 
 
 <div class="doc doc-object doc-class">
 
 
 
-<h2 id="arro3.core.ChunkedArray" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">arro3.core.ChunkedArray</span>
+<h2 id="arro3.core.ArrayReader" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">arro3.core.ArrayReader</span>
 
 
-<a href="#arro3.core.ChunkedArray" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#arro3.core.ArrayReader" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
     <div class="doc doc-contents first">
 
 
-      <p>An Arrow ChunkedArray.</p>
+      <p>A stream of Arrow <code>Array</code>s.</p>
+<p>This is similar to the <a class="autorefs autorefs-internal" href="../record-batch-reader/#arro3.core.RecordBatchReader"><code>RecordBatchReader</code></a> but each
+item yielded from the stream is an <a class="autorefs autorefs-internal" href="../array/#arro3.core.Array"><code>Array</code></a>, not a
+<a class="autorefs autorefs-internal" href="../record-batch/#arro3.core.RecordBatch"><code>RecordBatch</code></a>.</p>
 
 
 
@@ -1249,21 +1072,21 @@
 
 
 
-<h3 id="arro3.core.ChunkedArray.chunks" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">chunks</span>
+<h3 id="arro3.core.ArrayReader.closed" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">closed</span>
 
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
-<a href="#arro3.core.ChunkedArray.chunks" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">chunks</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span><span class="p">]</span>
+<a href="#arro3.core.ArrayReader.closed" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">closed</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Convert to a list of single-chunked arrays.</p>
+      <p>Returns <code>true</code> if this reader has already been consumed.</p>
     </div>
 
 </div>
@@ -1272,7 +1095,7 @@
 
 
 
-<h3 id="arro3.core.ChunkedArray.field" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.field" class="doc doc-heading">
             <span class="doc doc-object-name doc-attribute-name">field</span>
 
 
@@ -1280,108 +1103,13 @@
       <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
-<a href="#arro3.core.ChunkedArray.field" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#arro3.core.ArrayReader.field" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature codehilite"><pre><span></span><code><span class="n">field</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Field" href="../field/#arro3.core.Field">Field</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Access the field stored on this ChunkedArray.</p>
-<p>Note that this field usually will not have a name associated, but it may have
-metadata that signifies that this array is an extension (user-defined typed)
-array.</p>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="arro3.core.ChunkedArray.nbytes" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">nbytes</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#arro3.core.ChunkedArray.nbytes" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">nbytes</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Total number of bytes consumed by the elements of the chunked array.</p>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="arro3.core.ChunkedArray.null_count" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">null_count</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#arro3.core.ChunkedArray.null_count" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">null_count</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Number of null entries</p>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="arro3.core.ChunkedArray.num_chunks" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">num_chunks</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#arro3.core.ChunkedArray.num_chunks" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">num_chunks</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Number of underlying chunks.</p>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="arro3.core.ChunkedArray.type" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">type</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#arro3.core.ChunkedArray.type" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.DataType" href="../datatype/#arro3.core.DataType">DataType</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Return data type of a ChunkedArray.</p>
+      <p>Access the field of this reader.</p>
     </div>
 
 </div>
@@ -1391,11 +1119,11 @@ array.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.__arrow_c_schema__" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.__arrow_c_schema__" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">__arrow_c_schema__</span>
 
 
-<a href="#arro3.core.ChunkedArray.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_schema__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
 </code></pre></div>
 
@@ -1405,7 +1133,7 @@ array.</p>
 Interface</a>.
 This dunder method should not be called directly, but enables zero-copy data
 transfer to other Python libraries that understand Arrow memory.</p>
-<p>This allows Arrow consumers to inspect the data type of this ChunkedArray. Then
+<p>This allows Arrow consumers to inspect the data type of this ArrayReader. Then
 the consumer can ask the producer (in <code>__arrow_c_stream__</code>) to cast the exported
 data to a supported data type.</p>
 
@@ -1416,11 +1144,11 @@ data to a supported data type.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.__arrow_c_stream__" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.__arrow_c_stream__" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">__arrow_c_stream__</span>
 
 
-<a href="#arro3.core.ChunkedArray.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_stream__</span><span class="p">(</span><span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
 </code></pre></div>
 
@@ -1430,9 +1158,8 @@ data to a supported data type.</p>
 Interface</a>.
 This dunder method should not be called directly, but enables zero-copy data
 transfer to other Python libraries that understand Arrow memory.</p>
-<p>For example (as of pyarrow v16), you can call
-<a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.chunked_array.html#pyarrow.chunked_array"><code>pyarrow.chunked_array()</code></a> to convert this array into a
-pyarrow array, without copying memory.</p>
+<p>For example, you can call <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.chunked_array.html#pyarrow.chunked_array"><code>pyarrow.chunked_array()</code></a> to
+convert this ArrayReader to a pyarrow ChunkedArray, without copying memory.</p>
 
     </div>
 
@@ -1441,121 +1168,7 @@ pyarrow array, without copying memory.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.cast" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">cast</span>
-
-
-<a href="#arro3.core.ChunkedArray.cast" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">cast</span><span class="p">(</span><span class="n">target_type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Cast array values to another data type</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>target_type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>Type to cast array to.</p>
-          </div>
-        </li>
-    </ul>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.chunk" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">chunk</span>
-
-
-<a href="#arro3.core.ChunkedArray.chunk" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">chunk</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Select a chunk by its index.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>i</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>chunk index.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p>new Array.</p>
-          </div>
-        </li>
-    </ul>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.combine_chunks" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">combine_chunks</span>
-
-
-<a href="#arro3.core.ChunkedArray.combine_chunks" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">combine_chunks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Flatten this ChunkedArray into a single non-chunked array.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.equals" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">equals</span>
-
-
-<a href="#arro3.core.ChunkedArray.equals" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Return whether the contents of two chunked arrays are equal.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.from_arrow" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.from_arrow" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">from_arrow</span>
 
 
@@ -1563,16 +1176,15 @@ pyarrow array, without copying memory.</p>
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-<a href="#arro3.core.ChunkedArray.from_arrow" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></span>
+<a href="#arro3.core.ArrayReader.from_arrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
       <p>Construct this from an existing Arrow object.</p>
-<p>It can be called on anything that exports the Arrow stream interface (has an
-<code>__arrow_c_stream__</code> method). All batches from the stream will be materialized
-in memory.</p>
+<p>It can be called on anything that exports the Arrow stream interface
+(has an <code>__arrow_c_stream__</code> method), such as a <code>Table</code> or <code>ArrayReader</code>.</p>
 
     </div>
 
@@ -1581,7 +1193,7 @@ in memory.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.from_arrow_pycapsule" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.from_arrow_pycapsule" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">from_arrow_pycapsule</span>
 
 
@@ -1589,8 +1201,8 @@ in memory.</p>
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-<a href="#arro3.core.ChunkedArray.from_arrow_pycapsule" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow_pycapsule</span><span class="p">(</span><span class="n">capsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></span>
+<a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow_pycapsule</span><span class="p">(</span><span class="n">capsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1604,17 +1216,24 @@ in memory.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.length" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">length</span>
+<h3 id="arro3.core.ArrayReader.from_stream" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_stream</span>
 
 
-<a href="#arro3.core.ChunkedArray.length" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">length</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span>
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.ArrayReader.from_stream" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_stream</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Return length of a ChunkedArray.</p>
+      <p>Construct this from an existing Arrow object.</p>
+<p>This is an alias of and has the same behavior as
+[<code>from_arrow</code>][arro3.ArrayReader.from_arrow], but is included for parity
+with <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatchReader.html#pyarrow.RecordBatchReader"><code>pyarrow.RecordBatchReader</code></a>.</p>
 
     </div>
 
@@ -1623,44 +1242,17 @@ in memory.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.rechunk" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">rechunk</span>
+<h3 id="arro3.core.ArrayReader.read_all" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_all</span>
 
 
-<a href="#arro3.core.ChunkedArray.rechunk" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">rechunk</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">max_chunksize</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></span>
+<a href="#arro3.core.ArrayReader.read_all" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_all</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="../chunked-array/#arro3.core.ChunkedArray">ChunkedArray</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Rechunk a ChunkedArray with a maximum number of rows per chunk.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>max_chunksize</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a> | None</code>, default:
-                  <code>None</code>
-)
-          –
-          <div class="doc-md-description">
-            <p>The maximum number of rows per internal array. Defaults to None, which rechunks into a single array.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></code>
-          –
-          <div class="doc-md-description">
-            <p>The rechunked ChunkedArray.</p>
-          </div>
-        </li>
-    </ul>
+      <p>Read all batches from this stream into a ChunkedArray.</p>
 
     </div>
 
@@ -1669,92 +1261,17 @@ in memory.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.ChunkedArray.slice" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">slice</span>
+<h3 id="arro3.core.ArrayReader.read_next_array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_next_array</span>
 
 
-<a href="#arro3.core.ChunkedArray.slice" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nb">slice</span><span class="p">(</span><span class="nf">offset</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></span>
+<a href="#arro3.core.ArrayReader.read_next_array" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_next_array</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Compute zero-copy slice of this ChunkedArray</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>offset</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>, default:
-                  <code>0</code>
-)
-          –
-          <div class="doc-md-description">
-            <p>Offset from start of array to slice. Defaults to 0.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>length</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a> | None</code>, default:
-                  <code>None</code>
-)
-          –
-          <div class="doc-md-description">
-            <p>Length of slice (default is until end of batch starting from offset).</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="#arro3.core.ChunkedArray">ChunkedArray</a></code>
-          –
-          <div class="doc-md-description">
-            <p>New ChunkedArray</p>
-          </div>
-        </li>
-    </ul>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.to_numpy" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">to_numpy</span>
-
-
-<a href="#arro3.core.ChunkedArray.to_numpy" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">to_numpy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" title="numpy.typing.NDArray" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray">NDArray</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Copy this array to a <code>numpy</code> NDArray</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="arro3.core.ChunkedArray.to_pylist" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">to_pylist</span>
-
-
-<a href="#arro3.core.ChunkedArray.to_pylist" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">to_pylist</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" title="numpy.typing.NDArray" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray">NDArray</a></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Convert to a list of native Python objects.</p>
+      <p>Read the next array from this stream.</p>
 
     </div>
 
