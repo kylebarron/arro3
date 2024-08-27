@@ -95,3 +95,18 @@ def test_slice():
     sliced2 = table.slice(1, 2)
     assert sliced2.num_rows == 2
     assert sliced2.chunk_lengths == [1, 1]
+
+
+def test_from_pandas():
+    df = pd.DataFrame(
+        {
+            "int64": np.array([1, 2, 3, 4], dtype=np.int64),
+            "string": ["a", "b", "c", "d"],
+        }
+    )
+    for x in df.dtypes:
+        pass
+    df["a"].array.__array__().dtype
+    np.array(df["a"].array)
+    dtypes = df.dtypes.to_dict()
+    pass

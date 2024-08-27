@@ -21,6 +21,7 @@ use crate::ffi::to_schema_pycapsule;
 use crate::input::{
     AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
 };
+use crate::interop::pandas::from_pandas::from_pandas_dataframe;
 use crate::schema::display_schema;
 use crate::utils::schema_equals;
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
@@ -277,6 +278,18 @@ impl PyTable {
         let schema = schema
             .map(|s| s.into_inner())
             .unwrap_or(batches.first().unwrap().schema());
+        Ok(Self::try_new(batches, schema)?)
+    }
+
+    #[classmethod]
+    #[pyo3(signature = (df, *, schema=None))]
+    fn from_pandas(
+        _cls: &Bound<PyType>,
+        py: Python,
+        df: &Bound<PyAny>,
+        schema: Option<PySchema>,
+    ) -> PyArrowResult<Self> {
+        let (batches, schema) = from_pandas_dataframe(py, df, schema.map(|s| s.into_inner()))?;
         Ok(Self::try_new(batches, schema)?)
     }
 
