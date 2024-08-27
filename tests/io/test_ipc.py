@@ -1,7 +1,8 @@
-from arro3.io import read_ipc, write_ipc, read_ipc_stream, write_ipc_stream
 from io import BytesIO
 from pathlib import Path
+
 import pyarrow as pa
+from arro3.io import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
 
 
 def test_ipc_round_trip_string():
