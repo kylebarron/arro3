@@ -8,7 +8,7 @@ use arrow::datatypes::{
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_buffer::ScalarBuffer;
@@ -136,6 +136,12 @@ impl Display for PyArray {
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
         Ok(())
+    }
+}
+
+impl Datum for PyArray {
+    fn get(&self) -> (&dyn Array, bool) {
+        (self.array.as_ref(), false)
     }
 }
 
