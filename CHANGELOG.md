@@ -2,7 +2,30 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
-## [0.2.0] - 2024-08-13
+## [0.3.0] - 2024-08-27
+
+### Enhancements :magic_wand:
+
+- Wheels for pyodide are auto-built on CI and published to Github releases.
+- Ensure Parquet schema metadata is added to arrow table by @kylebarron in https://github.com/kylebarron/arro3/pull/137
+- Access dictionary array keys and values by @kylebarron in https://github.com/kylebarron/arro3/pull/139
+- Support reading Parquet from file objects by @kylebarron in https://github.com/kylebarron/arro3/pull/142
+- Implement dictionary encoding by @kylebarron in https://github.com/kylebarron/arro3/pull/136
+- Support for Arrow scalars and converting to Python objects by @kylebarron in https://github.com/kylebarron/arro3/pull/159
+- Move functional accessors to core module by @kylebarron in https://github.com/kylebarron/arro3/pull/151
+- Support for python buffer protocol by @kylebarron in https://github.com/kylebarron/arro3/pull/156
+
+### Bug fixes :bug:
+
+- Fix field metadata propagation by @kylebarron in https://github.com/kylebarron/arro3/pull/150
+- Set strip=true for maturin builds by @kylebarron in https://github.com/kylebarron/arro3/pull/155
+- Support `__getitem__` with a negative index by @kylebarron in https://github.com/kylebarron/arro3/pull/171
+- support f16 in from_numpy by @kylebarron in https://github.com/kylebarron/arro3/pull/154
+- Fix writing to file by @kylebarron in https://github.com/kylebarron/arro3/pull/138
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.2.1...py-v0.3.0
+
+## [0.2.1] - 2024-08-13
 
 ### Bug fixes :bug:
 
