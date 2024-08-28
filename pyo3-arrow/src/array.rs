@@ -304,7 +304,7 @@ impl PyArray {
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
         Ok(Self::new(array, Arc::new(field)))
     }
 
