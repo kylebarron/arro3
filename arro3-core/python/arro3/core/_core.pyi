@@ -175,7 +175,7 @@ class ArrayReader:
         """Construct this object from a bare Arrow PyCapsule"""
     @classmethod
     def from_arrays(
-        cls, schema: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
+        cls, field: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
     ) -> ArrayReader: ...
     @classmethod
     def from_stream(cls, data: ArrowStreamExportable) -> ArrayReader:
