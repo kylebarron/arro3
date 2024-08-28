@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use arrow::array::AsArray;
 use arrow::compute::{concat_batches, take_record_batch};
-use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
+use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
@@ -223,7 +223,8 @@ impl PyRecordBatch {
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        let (array, field, data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+
         match field.data_type() {
             DataType::Struct(fields) => {
                 let struct_array = array.as_struct();
@@ -237,8 +238,19 @@ impl PyRecordBatch {
                 );
 
                 let columns = struct_array.columns().to_vec();
-                let batch = RecordBatch::try_new(Arc::new(schema), columns)
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+                // Special cast to handle zero-column RecordBatches with positive length
+                let batch = if array.len() == 0 && data_len > 0 {
+                    RecordBatch::try_new_with_options(
+                        Arc::new(schema),
+                        columns,
+                        &RecordBatchOptions::new().with_row_count(Some(data_len)),
+                    )
+                    .map_err(|err| PyValueError::new_err(err.to_string()))?
+                } else {
+                    RecordBatch::try_new(Arc::new(schema), columns)
+                        .map_err(|err| PyValueError::new_err(err.to_string()))?
+                };
                 Ok(Self::new(batch))
             }
             dt => Err(PyValueError::new_err(format!(

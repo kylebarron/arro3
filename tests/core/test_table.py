@@ -95,3 +95,12 @@ def test_slice():
     sliced2 = table.slice(1, 2)
     assert sliced2.num_rows == 2
     assert sliced2.chunk_lengths == [1, 1]
+
+
+def test_nonempty_table_no_columns():
+    table = pa.table({"a": [1, 2, 3, 4]}).select([])
+    assert len(table) == 4
+    assert table.num_columns == 0
+    arro3_table = Table.from_arrow(table)
+    retour = pa.table(arro3_table)
+    assert table == retour
