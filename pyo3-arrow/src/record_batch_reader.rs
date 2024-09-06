@@ -30,6 +30,15 @@ impl PyRecordBatchReader {
         Self(Some(reader))
     }
 
+    /// Construct from a raw Arrow C Stream capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+        Ok(Self(Some(Box::new(stream_reader))))
+    }
+
     /// Consume this reader and convert into a [RecordBatchReader].
     ///
     /// The reader can only be consumed once. Calling `into_reader`
@@ -167,15 +176,9 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
-
-        Ok(Self(Some(Box::new(stream_reader))))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[classmethod]

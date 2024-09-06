@@ -48,6 +48,22 @@ impl PyTable {
         Ok(Self { schema, batches })
     }
 
+    /// Construct from a raw Arrow C Stream capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = ArrowRecordBatchStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+        let schema = stream_reader.schema();
+
+        let mut batches = vec![];
+        for batch in stream_reader {
+            let batch = batch.map_err(|err| PyTypeError::new_err(err.to_string()))?;
+            batches.push(batch);
+        }
+
+        Self::try_new(batches, schema)
+    }
+
     /// Access the underlying batches
     pub fn batches(&self) -> &[RecordBatch] {
         &self.batches
@@ -238,22 +254,9 @@ impl PyTable {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = ArrowRecordBatchStreamReader::try_new(stream)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
-        let schema = stream_reader.schema();
-
-        let mut batches = vec![];
-        for batch in stream_reader {
-            let batch = batch.map_err(|err| PyTypeError::new_err(err.to_string()))?;
-            batches.push(batch);
-        }
-
-        Self::try_new(batches, schema)
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[classmethod]

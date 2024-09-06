@@ -40,6 +40,14 @@ impl PyDataType {
         Self(data_type)
     }
 
+    /// Create from a raw Arrow C Schema capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let data_type =
+            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(data_type))
+    }
+
     /// Consume this and return its inner part.
     pub fn into_inner(self) -> DataType {
         self.0
@@ -125,14 +133,9 @@ impl PyDataType {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let schema_ptr = import_schema_pycapsule(capsule)?;
-        let data_type =
-            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-        Ok(Self::new(data_type))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[getter]
