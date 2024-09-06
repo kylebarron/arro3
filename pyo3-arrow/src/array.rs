@@ -74,6 +74,15 @@ impl PyArray {
         Self::new(array, Arc::new(field))
     }
 
+    /// Import from raw Arrow capsules
+    pub fn from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
+        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        Ok(Self::new(array, Arc::new(field)))
+    }
+
     /// Access the underlying [ArrayRef].
     pub fn array(&self) -> &ArrayRef {
         &self.array
@@ -299,13 +308,13 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        Ok(Self::new(array, Arc::new(field)))
+        Self::from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
     /// Import via buffer protocol

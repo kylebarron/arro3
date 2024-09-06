@@ -27,6 +27,14 @@ impl PyField {
         Self(field)
     }
 
+    /// Construct from a raw Arrow C Schema capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let field =
+            Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(Arc::new(field)))
+    }
+
     /// Consume this and return its internal [FieldRef]
     pub fn into_inner(self) -> FieldRef {
         self.0
@@ -124,14 +132,9 @@ impl PyField {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let schema_ptr = import_schema_pycapsule(capsule)?;
-        let field =
-            Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-        Ok(Self::new(Arc::new(field)))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     fn equals(&self, other: PyField) -> bool {
