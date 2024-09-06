@@ -67,6 +67,24 @@ impl PyChunkedArray {
         Ok(Self::try_new(chunks, Arc::new(field))?)
     }
 
+    /// Import from a raw Arrow C Stream capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+
+        let stream_reader = ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+        let field = stream_reader.field();
+
+        let mut chunks = vec![];
+        for array in stream_reader {
+            let array = array.map_err(|err| PyTypeError::new_err(err.to_string()))?;
+            chunks.push(array);
+        }
+
+        PyChunkedArray::try_new(chunks, field)
+    }
+
     /// Access the underlying chunks.
     pub fn chunks(&self) -> &[ArrayRef] {
         &self.chunks
@@ -292,24 +310,9 @@ impl PyChunkedArray {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let stream = import_stream_pycapsule(capsule)?;
-
-        let stream_reader = ArrowArrayStreamReader::try_new(stream)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
-
-        let field = stream_reader.field();
-
-        let mut chunks = vec![];
-        for array in stream_reader {
-            let array = array.map_err(|err| PyTypeError::new_err(err.to_string()))?;
-            chunks.push(array);
-        }
-
-        PyChunkedArray::try_new(chunks, field)
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {

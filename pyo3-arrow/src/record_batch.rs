@@ -32,6 +32,36 @@ impl PyRecordBatch {
         Self(batch)
     }
 
+    /// Construct from raw Arrow capsules
+    pub fn from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        match field.data_type() {
+            DataType::Struct(fields) => {
+                let struct_array = array.as_struct();
+                let schema = SchemaBuilder::from(fields)
+                    .finish()
+                    .with_metadata(field.metadata().clone());
+                assert_eq!(
+                    struct_array.null_count(),
+                    0,
+                    "Cannot convert nullable StructArray to RecordBatch"
+                );
+
+                let columns = struct_array.columns().to_vec();
+                let batch = RecordBatch::try_new(Arc::new(schema), columns)
+                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
+                Ok(Self::new(batch))
+            }
+            dt => Err(PyValueError::new_err(format!(
+                "Unexpected data type {}",
+                dt
+            ))),
+        }
+    }
+
     /// Consume this, returning its internal [RecordBatch].
     pub fn into_inner(self) -> RecordBatch {
         self.0
@@ -204,34 +234,13 @@ impl PyRecordBatch {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        match field.data_type() {
-            DataType::Struct(fields) => {
-                let struct_array = array.as_struct();
-                let schema = SchemaBuilder::from(fields)
-                    .finish()
-                    .with_metadata(field.metadata().clone());
-                assert_eq!(
-                    struct_array.null_count(),
-                    0,
-                    "Cannot convert nullable StructArray to RecordBatch"
-                );
-
-                let columns = struct_array.columns().to_vec();
-                let batch = RecordBatch::try_new(Arc::new(schema), columns)
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
-                Ok(Self::new(batch))
-            }
-            dt => Err(PyValueError::new_err(format!(
-                "Unexpected data type {}",
-                dt
-            ))),
-        }
+        Self::from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
     fn add_column(
