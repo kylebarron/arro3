@@ -39,3 +39,20 @@ def test_ipc_round_trip_buffer():
     bio.seek(0)
     table_retour = pa.table(read_ipc_stream(bio))
     assert table == table_retour
+
+
+def test_ipc_round_trip_compression():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    write_ipc(table, "test.arrow", compression="lz4")
+    table_retour = pa.table(read_ipc("test.arrow"))
+    assert table == table_retour
+
+    table = pa.table({"a": [1, 2, 3, 4]})
+    write_ipc(table, "test.arrow", compression="zstd")
+    table_retour = pa.table(read_ipc("test.arrow"))
+    assert table == table_retour
+
+    table = pa.table({"a": [1, 2, 3, 4]})
+    write_ipc(table, "test.arrow", compression=None)
+    table_retour = pa.table(read_ipc("test.arrow"))
+    assert table == table_retour
