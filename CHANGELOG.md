@@ -2,6 +2,14 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.3.1] - 2024-09-11
+
+### Bug fixes :bug:
+
+- Enable IPC compression by @kylebarron in https://github.com/kylebarron/arro3/pull/187
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.3.0...py-v0.3.1
+
 ## [0.3.0] - 2024-08-27
 
 ### Enhancements :magic_wand:

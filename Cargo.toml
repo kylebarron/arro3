@@ -2,6 +2,18 @@
 members = ["arro3-compute", "arro3-core", "arro3-io", "pyo3-arrow"]
 resolver = "2"
 
+[workspace.package]
+# Package version for arro3-*, not for pyo3-arrow
+version = "0.3.1"
+authors = ["Kyle Barron <kylebarron2@gmail.com>"]
+edition = "2021"
+homepage = "https://kylebarron.dev/arro3"
+repository = "https://github.com/kylebarron/arro3"
+license = "MIT OR Apache-2.0"
+keywords = ["python", "arrow"]
+categories = []
+rust-version = "1.75"
+
 [workspace.dependencies]
 arrow = { version = "53", features = ["ffi"] }
 arrow-array = "53"
