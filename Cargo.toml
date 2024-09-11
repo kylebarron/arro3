@@ -8,7 +8,7 @@ arrow-array = "53"
 arrow-buffer = "53"
 arrow-cast = "53"
 arrow-csv = "53"
-arrow-ipc = "53"
+arrow-ipc = { version = "53", features = ["lz4", "zstd"] }
 arrow-schema = "53"
 arrow-select = "53"
 half = "2"
