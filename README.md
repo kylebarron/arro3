@@ -13,6 +13,20 @@ arro3 features:
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
 - Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files
 
+## Install
+
+arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
+
+```
+pip install arro3-core arro3-io arro3-compute
+```
+
+arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi)
+
+```
+pixi add arro3-core arro3-io arro3-compute
+```
+
 ## Using
 
 Consult the [documentation](https://kylebarron.dev/arro3/latest/).
