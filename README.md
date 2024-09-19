@@ -15,13 +15,13 @@ arro3 features:
 
 ## Install
 
-arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation. 
+arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
 
 ```
 pip install arro3-core arro3-io arro3-compute
 ```
 
-arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi) 
+arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi)
 
 ```
 pixi add arro3-core arro3-io arro3-compute
