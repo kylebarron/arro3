@@ -355,7 +355,11 @@ class DataType:
     def from_arrow_pycapsule(cls, capsule) -> DataType:
         """Construct this object from a bare Arrow PyCapsule"""
     @property
-    def bit_width(self) -> int | None: ...
+    def bit_width(self) -> Literal[8, 16, 32, 64] | None:
+        """Returns the bit width of this type if it is a primitive type
+
+        Returns `None` if not a primitive type
+        """
     def equals(
         self, other: ArrowSchemaExportable, *, check_metadata: bool = False
     ) -> bool:

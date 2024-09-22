@@ -113,6 +113,7 @@ impl Display for PyDataType {
     }
 }
 
+#[allow(non_snake_case)]
 #[pymethods]
 impl PyDataType {
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -140,7 +141,7 @@ impl PyDataType {
 
     #[getter]
     fn bit_width(&self) -> Option<usize> {
-        self.0.primitive_width()
+        self.0.primitive_width().map(|width| width * 8)
     }
 
     #[pyo3(signature=(other, *, check_metadata=false))]
