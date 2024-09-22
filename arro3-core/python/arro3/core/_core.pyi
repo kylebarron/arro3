@@ -995,7 +995,7 @@ class RecordBatch:
             _description_
         """
 
-    def column(self, i: int | str) -> ChunkedArray:
+    def column(self, i: int | str) -> Array:
         """Select single column from Table or RecordBatch.
 
         Args:
