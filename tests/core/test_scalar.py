@@ -59,7 +59,7 @@ time_zones = [None, "UTC", "America/New_York"]
 def test_as_py_datetime(time_unit: str, time_zone: str | None):
     now = datetime.now()
 
-    pa_arr = pa.array([now], type=pa.timestamp(time_unit, None))
+    pa_arr = pa.array([now], type=pa.timestamp(time_unit, time_zone))
     arro3_arr = Array(pa_arr)
     assert arro3_arr[0].as_py() == pa_arr[0].as_py()
 

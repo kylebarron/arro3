@@ -54,6 +54,16 @@ def dictionary_encode(
         The dictionary-encoded array.
     """
 
+def max(input: types.ArrowArrayExportable | types.ArrowStreamExportable) -> core.Scalar:
+    """
+    Returns the max of values in the array.
+    """
+
+def min(input: types.ArrowArrayExportable | types.ArrowStreamExportable) -> core.Scalar:
+    """
+    Returns the min of values in the array.
+    """
+
 def take(
     values: types.ArrowArrayExportable, indices: types.ArrowArrayExportable
 ) -> core.Array:
@@ -80,4 +90,9 @@ def take(
 
     Returns:
         The selected arrow data.
+    """
+
+def sum(input: types.ArrowArrayExportable | types.ArrowStreamExportable) -> core.Scalar:
+    """
+    Returns the sum of values in the array.
     """
