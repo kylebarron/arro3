@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod aggregate;
+mod arith;
 mod cast;
 mod concat;
 mod dictionary;
@@ -20,6 +21,16 @@ fn _compute(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(aggregate::max))?;
     m.add_wrapped(wrap_pyfunction!(aggregate::min))?;
     m.add_wrapped(wrap_pyfunction!(aggregate::sum))?;
+    m.add_wrapped(wrap_pyfunction!(arith::add_wrapping))?;
+    m.add_wrapped(wrap_pyfunction!(arith::add))?;
+    m.add_wrapped(wrap_pyfunction!(arith::div))?;
+    m.add_wrapped(wrap_pyfunction!(arith::mul_wrapping))?;
+    m.add_wrapped(wrap_pyfunction!(arith::mul))?;
+    m.add_wrapped(wrap_pyfunction!(arith::neg_wrapping))?;
+    m.add_wrapped(wrap_pyfunction!(arith::neg))?;
+    m.add_wrapped(wrap_pyfunction!(arith::rem))?;
+    m.add_wrapped(wrap_pyfunction!(arith::sub_wrapping))?;
+    m.add_wrapped(wrap_pyfunction!(arith::sub))?;
     m.add_wrapped(wrap_pyfunction!(cast::cast))?;
     m.add_wrapped(wrap_pyfunction!(concat::concat))?;
     m.add_wrapped(wrap_pyfunction!(dictionary::dictionary_dictionary))?;

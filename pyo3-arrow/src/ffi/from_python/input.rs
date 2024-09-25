@@ -1,6 +1,6 @@
 use crate::array_reader::PyArrayReader;
-use crate::input::{AnyArray, AnyRecordBatch};
-use crate::{PyArray, PyRecordBatch, PyRecordBatchReader};
+use crate::input::{AnyArray, AnyDatum, AnyRecordBatch};
+use crate::{PyArray, PyRecordBatch, PyRecordBatchReader, PyScalar};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::{PyAny, PyResult};
@@ -29,6 +29,18 @@ impl<'a> FromPyObject<'a> for AnyArray {
             Err(PyValueError::new_err(
                 "Expected object with __arrow_c_array__ or __arrow_c_stream__ method",
             ))
+        }
+    }
+}
+
+impl<'a> FromPyObject<'a> for AnyDatum {
+    fn extract_bound(ob: &Bound<'a, PyAny>) -> PyResult<Self> {
+        let array = PyArray::extract_bound(ob)?;
+        if array.as_ref().len() == 1 {
+            let (array, field) = array.into_inner();
+            Ok(Self::Scalar(PyScalar::try_new(array, field)?))
+        } else {
+            Ok(Self::Array(array))
         }
     }
 }

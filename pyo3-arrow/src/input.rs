@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::string::FromUtf8Error;
 use std::sync::Arc;
 
-use arrow_array::{RecordBatchIterator, RecordBatchReader};
+use arrow_array::{Datum, RecordBatchIterator, RecordBatchReader};
 use arrow_schema::{ArrowError, Field, FieldRef, Fields, Schema, SchemaRef};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -15,7 +15,9 @@ use pyo3::prelude::*;
 use crate::array_reader::PyArrayReader;
 use crate::error::PyArrowResult;
 use crate::ffi::{ArrayIterator, ArrayReader};
-use crate::{PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyTable};
+use crate::{
+    PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyScalar, PyTable,
+};
 
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.
@@ -94,6 +96,33 @@ impl AnyArray {
         match self {
             Self::Array(array) => Ok(array.field().clone()),
             Self::Stream(stream) => stream.field_ref(),
+        }
+    }
+}
+
+/// An enum over [PyArray] and [PyScalar], used for functions that accept
+pub enum AnyDatum {
+    /// A single Array, held in a [PyArray].
+    Array(PyArray),
+    /// An Arrow Scalar, held in a [pyScalar]
+    Scalar(PyScalar),
+}
+
+impl AnyDatum {
+    /// Access the field of this object.
+    pub fn field(&self) -> &FieldRef {
+        match self {
+            Self::Array(inner) => inner.field(),
+            Self::Scalar(inner) => inner.field(),
+        }
+    }
+}
+
+impl Datum for AnyDatum {
+    fn get(&self) -> (&dyn arrow_array::Array, bool) {
+        match self {
+            Self::Array(inner) => inner.get(),
+            Self::Scalar(inner) => inner.get(),
         }
     }
 }

@@ -67,7 +67,22 @@ impl PyScalar {
         Self::try_new(array, field)
     }
 
-    /// Export to an arro3.core.Array.
+    /// Access the underlying [ArrayRef].
+    pub fn array(&self) -> &ArrayRef {
+        &self.array
+    }
+
+    /// Access the underlying [FieldRef].
+    pub fn field(&self) -> &FieldRef {
+        &self.field
+    }
+
+    /// Consume self to access the underlying [ArrayRef] and [FieldRef].
+    pub fn into_inner(self) -> (ArrayRef, FieldRef) {
+        (self.array, self.field)
+    }
+
+    /// Export to an arro3.core.Scalar.
     ///
     /// This requires that you depend on arro3-core from your Python package.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
