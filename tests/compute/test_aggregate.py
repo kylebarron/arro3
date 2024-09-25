@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import arro3.compute as ac
+import pyarrow as pa
 from arro3.core import Array, ChunkedArray, DataType
 
 
@@ -39,3 +42,14 @@ def test_sum():
 
     ca = ChunkedArray([arr1, arr2])
     assert ac.sum(ca).as_py() == 12
+
+
+def test_min_max_datetime():
+    dt1 = datetime.now()
+    dt2 = datetime.now()
+    dt3 = datetime.now()
+
+    pa_arr = pa.array([dt1, dt2, dt3], type=pa.timestamp("ns", None))
+    arro3_arr = Array(pa_arr)
+    assert ac.min(arro3_arr).as_py() == dt1
+    assert ac.max(arro3_arr).as_py() == dt3
