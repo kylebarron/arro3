@@ -5,6 +5,16 @@ from typing import overload
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from arro3.compute._arith import add as add
+from arro3.compute._arith import add_wrapping as add_wrapping
+from arro3.compute._arith import div as div
+from arro3.compute._arith import mul as mul
+from arro3.compute._arith import mul_wrapping as mul_wrapping
+from arro3.compute._arith import neg as neg
+from arro3.compute._arith import neg_wrapping as neg_wrapping
+from arro3.compute._arith import rem as rem
+from arro3.compute._arith import sub as sub
+from arro3.compute._arith import sub_wrapping as sub_wrapping
 
 @overload
 def cast(

@@ -1176,7 +1176,23 @@ class RecordBatchReader:
 
 class Scalar:
     """An arrow Scalar."""
+    def __arrow_c_array__(
+        self, requested_schema: object | None = None
+    ) -> tuple[object, object]:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.array()`][pyarrow.array] to
+        convert this Scalar into a pyarrow Array, without copying memory. The generated
+        array is guaranteed to have length 1.
+        """
     def __repr__(self) -> str: ...
+    @classmethod
+    def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Scalar:
+        """Construct this object from bare Arrow PyCapsules"""
     def as_py(self) -> Any: ...
     @property
     def is_valid(self) -> bool: ...
