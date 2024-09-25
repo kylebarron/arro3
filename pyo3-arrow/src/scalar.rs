@@ -8,10 +8,12 @@ use arrow_array::timezone::Tz;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use indexmap::IndexMap;
+use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::PyTuple;
+use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
+use crate::ffi::to_array_pycapsules;
 use crate::{PyArray, PyDataType};
 
 /// A Python-facing Arrow scalar
@@ -54,6 +56,28 @@ impl PyScalar {
 
         Ok(Self { array, field })
     }
+
+    /// Import from raw Arrow capsules
+    pub fn try_from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyArrowResult<Self> {
+        let (array, field) =
+            PyArray::from_arrow_pycapsule(schema_capsule, array_capsule)?.into_inner();
+        Self::try_new(array, field)
+    }
+
+    /// Export to an arro3.core.Array.
+    ///
+    /// This requires that you depend on arro3-core from your Python package.
+    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let core_obj = arro3_mod.getattr(intern!(py, "Scalar"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            self.__arrow_c_array__(py, None)?,
+        )?;
+        Ok(core_obj.to_object(py))
+    }
 }
 
 impl Display for PyScalar {
@@ -73,8 +97,27 @@ impl Datum for PyScalar {
 
 #[pymethods]
 impl PyScalar {
+    #[allow(unused_variables)]
+    fn __arrow_c_array__<'py>(
+        &'py self,
+        py: Python<'py>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<PyTuple>> {
+        to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
+    }
+
     fn __repr__(&self) -> String {
         self.to_string()
+    }
+
+    #[classmethod]
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
+        _cls: &Bound<PyType>,
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyArrowResult<Self> {
+        Self::try_from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
     pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<PyObject> {
