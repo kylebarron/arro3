@@ -54,6 +54,11 @@ def dictionary_encode(
         The dictionary-encoded array.
     """
 
+def min(input: types.ArrowArrayExportable | types.ArrowStreamExportable) -> core.Scalar:
+    """
+    Returns the min of values in the array.
+    """
+
 def take(
     values: types.ArrowArrayExportable, indices: types.ArrowArrayExportable
 ) -> core.Array:
