@@ -1,24 +1,29 @@
+//! Contains the [`PyArrowError`], the Error returned by most fallible functions in this crate.
+
 use pyo3::exceptions::{PyException, PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::PyDowncastError;
+use thiserror::Error;
 
+/// The Error variants returned by this crate.
+#[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum PyArrowError {
-    ArrowError(arrow::error::ArrowError),
-    PyErr(PyErr),
+    /// A wrapped [arrow::error::ArrowError]
+    #[error(transparent)]
+    ArrowError(#[from] arrow::error::ArrowError),
+
+    /// A wrapped [PyErr]
+    #[error(transparent)]
+    PyErr(#[from] PyErr),
 }
 
 impl From<PyArrowError> for PyErr {
     fn from(error: PyArrowError) -> Self {
         match error {
-            PyArrowError::ArrowError(err) => PyException::new_err(err.to_string()),
             PyArrowError::PyErr(err) => err,
+            PyArrowError::ArrowError(err) => PyException::new_err(err.to_string()),
         }
-    }
-}
-
-impl From<arrow::error::ArrowError> for PyArrowError {
-    fn from(other: arrow::error::ArrowError) -> Self {
-        Self::ArrowError(other)
     }
 }
 
@@ -43,10 +48,5 @@ impl From<PyValueError> for PyArrowError {
     }
 }
 
-impl From<PyErr> for PyArrowError {
-    fn from(other: PyErr) -> Self {
-        Self::PyErr(other)
-    }
-}
-
+/// A type wrapper around `Result<T, PyArrowError>`.
 pub type PyArrowResult<T> = Result<T, PyArrowError>;

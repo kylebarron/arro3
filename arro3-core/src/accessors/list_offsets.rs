@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use arrow::array::AsArray;
+use arrow_array::cast::AsArray;
 use arrow_array::{ArrayRef, Int32Array, Int64Array, OffsetSizeTrait};
 use arrow_buffer::{OffsetBuffer, ScalarBuffer};
 use arrow_schema::{ArrowError, DataType, Field};
@@ -31,10 +31,9 @@ pub fn list_offsets(py: Python, input: AnyArray, logical: bool) -> PyArrowResult
                 }
             };
 
-            let iter = reader.into_iter().map(move |array| {
-                let out = _list_offsets(array?, logical)?;
-                Ok(out)
-            });
+            let iter = reader
+                .into_iter()
+                .map(move |array| _list_offsets(array?, logical));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
                     .to_arro3(py)?,

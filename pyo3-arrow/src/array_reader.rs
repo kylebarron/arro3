@@ -11,7 +11,7 @@ use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::{ArrayIterator, ArrayReader};
+use crate::ffi::{to_schema_pycapsule, ArrayIterator, ArrayReader};
 use crate::input::AnyArray;
 use crate::{PyArray, PyChunkedArray, PyField};
 
@@ -22,8 +22,17 @@ use crate::{PyArray, PyChunkedArray, PyField};
 pub struct PyArrayReader(pub(crate) Option<Box<dyn ArrayReader + Send>>);
 
 impl PyArrayReader {
+    /// Construct a new [PyArrayReader] from an existing [ArrayReader].
     pub fn new(reader: Box<dyn ArrayReader + Send>) -> Self {
         Self(Some(reader))
+    }
+
+    /// Import from a raw Arrow C Stream capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+        Ok(Self(Some(Box::new(stream_reader))))
     }
 
     /// Consume this reader and convert into a [ArrayReader].
@@ -48,7 +57,7 @@ impl PyArrayReader {
         for array in stream {
             arrays.push(array?);
         }
-        Ok(PyChunkedArray::new(arrays, field))
+        Ok(PyChunkedArray::try_new(arrays, field)?)
     }
 
     /// Access the [FieldRef] of this ArrayReader.
@@ -102,19 +111,16 @@ impl Display for PyArrayReader {
 
 #[pymethods]
 impl PyArrayReader {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
-    /// into a pyarrow table, without copying memory.
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.field_ref()?.as_ref())
+    }
+
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let array_reader = self
             .0
             .take()
@@ -132,40 +138,29 @@ impl PyArrayReader {
         self.read_next_array(py)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
-    /// Returns `true` if this reader has already been consumed.
     #[getter]
-    pub fn closed(&self) -> bool {
+    fn closed(&self) -> bool {
         self.0.is_none()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`), such as a `Table` or `ArrayReader`.
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
-    /// Construct this object from a bare Arrow PyCapsule.
     #[classmethod]
-    pub fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = ArrowArrayStreamReader::try_new(stream)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
-        Ok(Self(Some(Box::new(stream_reader))))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[classmethod]
-    pub fn from_arrays(_cls: &Bound<PyType>, field: PyField, arrays: Vec<PyArray>) -> Self {
+    fn from_arrays(_cls: &Bound<PyType>, field: PyField, arrays: Vec<PyArray>) -> Self {
         let arrays = arrays
             .into_iter()
             .map(|array| {
@@ -180,17 +175,16 @@ impl PyArrayReader {
     }
 
     #[classmethod]
-    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+    fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
         data.extract()
     }
 
-    /// Access the field of this reader
     #[getter]
-    pub fn field(&self, py: Python) -> PyResult<PyObject> {
+    fn field(&self, py: Python) -> PyResult<PyObject> {
         PyField::new(self.field_ref()?).to_arro3(py)
     }
 
-    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .take()
@@ -200,10 +194,10 @@ impl PyArrayReader {
         for array in stream {
             arrays.push(array?);
         }
-        Ok(PyChunkedArray::new(arrays, field).to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(arrays, field)?.to_arro3(py)?)
     }
 
-    pub fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .as_mut()

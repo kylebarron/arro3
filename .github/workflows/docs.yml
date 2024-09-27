@@ -46,8 +46,9 @@ jobs:
 
       - name: Build python packages
         run: |
-          poetry run maturin develop -m arro3-compute/Cargo.toml
+          # arro3-core needs to be first
           poetry run maturin develop -m arro3-core/Cargo.toml
+          poetry run maturin develop -m arro3-compute/Cargo.toml
           poetry run maturin develop -m arro3-io/Cargo.toml
 
       - name: Install root project
@@ -69,5 +70,5 @@ jobs:
           # Only push docs if no letters in git tag after the first character
           # (usually the git tag will have v as the first character)
           if echo $VERSION | cut -c 1- | grep -q "[A-Za-z]"; then
-            poetry run mike deploy $VERSION latest --update-aliases --push --deploy-prefix core/
+            poetry run mike deploy $VERSION latest --update-aliases --push
           fi

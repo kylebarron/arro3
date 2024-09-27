@@ -6,22 +6,31 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # lint-python:
-  #   name: Lint Python code
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  pre-commit:
+    name: Run pre-commit on Python code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Set up Python 3.8
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: "3.8"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  #     - name: run pre-commit
-  #       run: |
-  #         python -m pip install pre-commit
-  #         pre-commit run --all-files
+      - name: Cache pre-commit virtualenvs
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-3|${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: run pre-commit
+        run: |
+          python -m pip install pre-commit
+          pre-commit run --all-files
 
   test-python:
     name: Build and test Python

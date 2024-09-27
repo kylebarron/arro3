@@ -1,34 +1,45 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::array::{AsArray, BooleanBuilder};
 use arrow::compute::concat;
 use arrow::datatypes::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    make_array, Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
+use arrow_buffer::ScalarBuffer;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
-use pyo3::exceptions::PyNotImplementedError;
+use pyo3::buffer::ElementType;
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+use crate::buffer::PyAnyBuffer;
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
-use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
-use crate::{PyDataType, PyField};
+use crate::scalar::PyScalar;
+use crate::{PyArrowBuffer, PyDataType, PyField};
 
 /// A Python-facing Arrow array.
 ///
 /// This is a wrapper around an [ArrayRef] and a [FieldRef].
+///
+/// It's important for this to wrap both an array _and_ a field so that it can faithfully store all
+/// data transmitted via the `__arrow_c_array__` Python method, which [exports both an Array and a
+/// Field](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html#arrow_c_array__).
+/// In particular, storing a [FieldRef] is required to persist Arrow extension metadata through the
+/// C Data Interface.
 #[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -37,6 +48,8 @@ pub struct PyArray {
 
 impl PyArray {
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
+    ///
+    /// This will panic if the array's data type does not match the field's data type.
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
         assert_eq!(array.data_type(), field.data_type());
         Self { array, field }
@@ -55,15 +68,19 @@ impl PyArray {
         Ok(Self { array, field })
     }
 
-    pub fn from_array<A: Array>(array: A) -> Self {
-        let array = make_array(array.into_data());
-        Self::from_array_ref(array)
-    }
-
     /// Create a new PyArray from an [ArrayRef], inferring its data type automatically.
     pub fn from_array_ref(array: ArrayRef) -> Self {
         let field = Field::new("", array.data_type().clone(), true);
         Self::new(array, Arc::new(field))
+    }
+
+    /// Import from raw Arrow capsules
+    pub fn from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
+        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        Ok(Self::new(array, Arc::new(field)))
     }
 
     /// Access the underlying [ArrayRef].
@@ -131,20 +148,34 @@ impl Display for PyArray {
     }
 }
 
+impl Datum for PyArray {
+    fn get(&self) -> (&dyn Array, bool) {
+        (self.array.as_ref(), false)
+    }
+}
+
 #[pymethods]
 impl PyArray {
     #[new]
-    #[pyo3(signature = (obj, /, r#type, *))]
-    pub fn init(py: Python, obj: PyObject, r#type: PyDataType) -> PyResult<Self> {
+    #[pyo3(signature = (obj, /, r#type = None, *))]
+    fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
+        if let Ok(data) = obj.extract::<PyArray>() {
+            return Ok(data);
+        }
+
         macro_rules! impl_primitive {
             ($rust_type:ty, $arrow_type:ty) => {{
-                let values: Vec<$rust_type> = obj.extract(py)?;
+                let values: Vec<$rust_type> = obj.extract()?;
                 Arc::new(PrimitiveArray::<$arrow_type>::from(values))
             }};
         }
 
-        let data_type = r#type.into_inner();
-        let array: ArrayRef = match data_type {
+        let field = r#type
+            .ok_or(PyValueError::new_err(
+                "type must be passed for non-Arrow input",
+            ))?
+            .into_inner();
+        let array: ArrayRef = match field.data_type() {
             DataType::Float32 => impl_primitive!(f32, Float32Type),
             DataType::Float64 => impl_primitive!(f64, Float64Type),
             DataType::UInt8 => impl_primitive!(u8, UInt8Type),
@@ -156,34 +187,34 @@ impl PyArray {
             DataType::Int32 => impl_primitive!(i32, Int32Type),
             DataType::Int64 => impl_primitive!(i64, Int64Type),
             DataType::Boolean => {
-                let values: Vec<bool> = obj.extract(py)?;
+                let values: Vec<bool> = obj.extract()?;
                 Arc::new(BooleanArray::from(values))
             }
             DataType::Binary => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(BinaryArray::from(slices))
             }
             DataType::LargeBinary => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(LargeBinaryArray::from(slices))
             }
             DataType::BinaryView => {
-                let values: Vec<Vec<u8>> = obj.extract(py)?;
+                let values: Vec<Vec<u8>> = obj.extract()?;
                 let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
                 Arc::new(BinaryViewArray::from(slices))
             }
             DataType::Utf8 => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(StringArray::from(values))
             }
             DataType::LargeUtf8 => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(LargeStringArray::from(values))
             }
             DataType::Utf8View => {
-                let values: Vec<String> = obj.extract(py)?;
+                let values: Vec<String> = obj.extract()?;
                 Arc::new(StringViewArray::from(values))
             }
             dt => {
@@ -192,14 +223,26 @@ impl PyArray {
                 )))
             }
         };
-        Ok(Self::new(array, Field::new("", data_type, true).into()))
+        Ok(Self::new(array, field))
     }
 
-    /// An implementation of the Array interface, for interoperability with numpy and other
-    /// array libraries.
+    fn buffer(&self) -> PyArrowBuffer {
+        match self.array.data_type() {
+            DataType::Int64 => {
+                let arr = self.array.as_primitive::<Int64Type>();
+                let values = arr.values();
+                let buffer = values.inner().clone();
+                PyArrowBuffer {
+                    inner: Some(buffer),
+                }
+            }
+            _ => todo!(),
+        }
+    }
+
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    pub fn __array__(
+    fn __array__(
         &self,
         py: Python,
         dtype: Option<PyObject>,
@@ -208,36 +251,50 @@ impl PyArray {
         to_numpy(py, &self.array)
     }
 
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this array
-    /// into a pyarrow array, without copying memory.
     #[allow(unused_variables)]
-    pub fn __arrow_c_array__<'py>(
+    fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<PyTuple>> {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
-    pub fn __eq__(&self, other: &PyArray) -> bool {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.field.as_ref())
+    }
+
+    fn __eq__(&self, other: &PyArray) -> bool {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __getitem__(&self, i: isize) -> PyArrowResult<PyScalar> {
+        // Handle negative indexes from the end
+        let i = if i < 0 {
+            let i = self.array.len() as isize + i;
+            if i < 0 {
+                return Err(PyIndexError::new_err("Index out of range").into());
+            }
+            i as usize
+        } else {
+            i as usize
+        };
+        if i >= self.array.len() {
+            return Err(PyIndexError::new_err("Index out of range").into());
+        }
+        PyScalar::try_new(self.array.slice(i, 1), self.field.clone())
+    }
+
+    fn __len__(&self) -> usize {
         self.array.len()
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyArray) -> PyArrowResult<Self> {
         match input {
             AnyArray::Array(array) => Ok(array),
             AnyArray::Stream(stream) => {
@@ -251,17 +308,103 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub fn from_arrow_pycapsule(
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        Ok(Self::new(array, Arc::new(field)))
+        Self::from_arrow_pycapsule(schema_capsule, array_capsule)
+    }
+
+    /// Import via buffer protocol
+    #[classmethod]
+    fn from_buffer(_cls: &Bound<PyType>, buffer: PyAnyBuffer) -> PyArrowResult<Self> {
+        let len = buffer.item_count();
+        let element_type = ElementType::from_format(buffer.format());
+        match element_type {
+            ElementType::Float { bytes } => {
+                if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const f32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Float32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const f64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Float64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected float byte size").into())
+                }
+            }
+            ElementType::UnsignedInteger { bytes } => {
+                if bytes == 1 {
+                    let data = buffer.buf_ptr() as *const u8;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt8Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 2 {
+                    let data = buffer.buf_ptr() as *const u16;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt16Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const u32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const u64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<UInt64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected uint byte size").into())
+                }
+            }
+            ElementType::SignedInteger { bytes } => {
+                if bytes == 1 {
+                    let data = buffer.buf_ptr() as *const i8;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int8Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 2 {
+                    let data = buffer.buf_ptr() as *const i16;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int16Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 4 {
+                    let data = buffer.buf_ptr() as *const i32;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int32Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else if bytes == 8 {
+                    let data = buffer.buf_ptr() as *const i64;
+                    let v = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
+                    let arr = PrimitiveArray::<Int64Type>::new(ScalarBuffer::from(v), None);
+                    Ok(Self::from_array_ref(Arc::new(arr)))
+                } else {
+                    Err(PyValueError::new_err("Unexpected uint byte size").into())
+                }
+            }
+            ElementType::Bool => {
+                let data = buffer.buf_ptr() as *const u8;
+                let slice = unsafe { std::slice::from_raw_parts(data, len) };
+                let mut builder = BooleanBuilder::with_capacity(slice.len());
+                for val in slice {
+                    builder.append_value(*val > 0);
+                }
+                Ok(Self::from_array_ref(Arc::new(builder.finish())))
+            }
+            ElementType::Unknown => {
+                Err(PyValueError::new_err("Unknown element type in buffer protocol.").into())
+            }
+        }
     }
 
     #[classmethod]
-    pub fn from_numpy(
+    fn from_numpy(
         _cls: &Bound<PyType>,
         py: Python,
         array: Bound<'_, PyAny>,
@@ -275,11 +418,10 @@ impl PyArray {
         Ok(Self::from_array_ref(arrow_array))
     }
 
-    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
-        let target_type = target_type.into_inner();
-        let new_array = arrow::compute::cast(self.as_ref(), &target_type)?;
-        let new_field = self.field.as_ref().clone().with_data_type(target_type);
-        Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
+    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+        let new_field = target_type.into_inner();
+        let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
+        Ok(PyArray::new(new_array, new_field).to_arro3(py)?)
     }
 
     #[getter]
@@ -293,8 +435,13 @@ impl PyArray {
         self.array.get_array_memory_size()
     }
 
+    #[getter]
+    fn null_count(&self) -> usize {
+        self.array.null_count()
+    }
+
     #[pyo3(signature = (offset=0, length=None))]
-    pub fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+    fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
         let new_array = self.array.slice(offset, length);
         PyArray::new(new_array, self.field().clone()).to_arro3(py)
@@ -305,13 +452,22 @@ impl PyArray {
         Ok(PyArray::new(new_array, self.field.clone()).to_arro3(py)?)
     }
 
-    /// Copy this array to a `numpy` NDArray
-    pub fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+    fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
     }
 
+    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+        let mut scalars = Vec::with_capacity(self.array.len());
+        for i in 0..self.array.len() {
+            let scalar =
+                unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
+            scalars.push(scalar.as_py(py)?);
+        }
+        Ok(scalars.into_py(py))
+    }
+
     #[getter]
-    pub fn r#type(&self, py: Python) -> PyResult<PyObject> {
+    fn r#type(&self, py: Python) -> PyResult<PyObject> {
         PyDataType::new(self.field.data_type().clone()).to_arro3(py)
     }
 }

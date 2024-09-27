@@ -6,8 +6,6 @@ use pyo3::{PyAny, PyResult};
 impl<'a> FromPyObject<'a> for PyRecordBatchReader {
     fn extract_bound(ob: &Bound<'a, PyAny>) -> PyResult<Self> {
         let capsule = call_arrow_c_stream(ob)?;
-        Python::with_gil(|py| {
-            Self::from_arrow_pycapsule(&py.get_type_bound::<PyRecordBatchReader>(), &capsule)
-        })
+        Self::from_arrow_pycapsule(&capsule)
     }
 }

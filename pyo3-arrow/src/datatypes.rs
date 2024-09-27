@@ -29,15 +29,26 @@ impl<'a> FromPyObject<'a> for PyTimeUnit {
     }
 }
 
+/// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
 #[pyclass(module = "arro3.core._core", name = "DataType", subclass)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {
+    /// Construct a new PyDataType around a [DataType].
     pub fn new(data_type: DataType) -> Self {
         Self(data_type)
     }
 
+    /// Create from a raw Arrow C Schema capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let data_type =
+            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(data_type))
+    }
+
+    /// Consume this and return its inner part.
     pub fn into_inner(self) -> DataType {
         self.0
     }
@@ -102,54 +113,35 @@ impl Display for PyDataType {
     }
 }
 
+#[allow(non_snake_case)]
 #[pymethods]
 impl PyDataType {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this array
-    /// into a pyarrow field, without copying memory.
-    pub fn __arrow_c_schema__<'py>(
-        &'py self,
-        py: Python<'py>,
-    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, &self.0)
     }
 
-    pub fn __eq__(&self, other: PyDataType) -> bool {
+    fn __eq__(&self, other: PyDataType) -> bool {
         self.equals(other, false)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow schema interface
-    /// (`__arrow_c_schema__`).
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
+    fn from_arrow(_cls: &Bound<PyType>, input: Self) -> Self {
         input
     }
 
-    /// Construct this object from a bare Arrow PyCapsule
     #[classmethod]
-    pub fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let schema_ptr = import_schema_pycapsule(capsule)?;
-        let data_type =
-            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-        Ok(Self::new(data_type))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[getter]
-    pub fn bit_width(&self) -> Option<usize> {
-        self.0.primitive_width()
+    fn bit_width(&self) -> Option<usize> {
+        self.0.primitive_width().map(|width| width * 8)
     }
 
     #[pyo3(signature=(other, *, check_metadata=false))]

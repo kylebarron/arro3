@@ -11,14 +11,17 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+dynamic = ["version"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
 module-name = "arro3.compute._compute"
 python-source = "python"
+strip = true
 
 [tool.poetry]
 name = "arro3-compute"
+# Overwritten by version in Cargo.toml
 version = "0.0.0"
 description = ""
 authors = []

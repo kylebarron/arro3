@@ -5,4 +5,4 @@
       filters:
         - "!^_"
         - "^__arrow"
-      members:
+      show_if_no_docstring: true

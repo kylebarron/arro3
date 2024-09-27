@@ -1,0 +1,91 @@
+name: Build pyodide wheels
+
+on:
+  # push:
+  #   tags:
+  #     - "py-v*"
+  workflow_dispatch:
+    inputs:
+      python:
+        description: "Python version"
+        required: true
+        default: "3.12"
+        type: choice
+        options:
+          - 3.12
+          - 3.13
+          - 3.14
+          - 3.15
+      pyodide:
+        description: "New Pyodide version to build for"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - arro3-core
+          - arro3-compute
+          - arro3-io
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-emscripten
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Python build dependencies
+        run: pip install maturin pyodide-build==${{ inputs.pyodide }} wheel-filename
+
+      - name: Get emscripten version
+        run: |
+          echo PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version) >> $GITHUB_ENV
+
+      - name: Install emsdk & build wheels
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+          ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+          ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+          source emsdk_env.sh
+          cd ..
+          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
+
+      - name: Get info from built wheel file
+        run: |
+          # get arrow version and wheel name and make metafile
+          ARRO3_WHEEL=$(basename dist/*.whl)
+          ARRO3_VERSION=$(wheel-filename ${ARRO3_WHEEL} | jq -r '.version')
+          ARROW_SHA256=$(sha256sum dist/*.whl | cut -d ' ' -f 1)
+          echo ARRO3_WHEEL=${ARRO3_WHEEL}>>$GITHUB_ENV
+          echo ARRO3_VERSION=${ARRO3_VERSION}>>$GITHUB_ENV
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide-${{ matrix.module }}
+          path: dist
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: pyodide-v${{ inputs.pyodide }}-arro3-v${{ env.ARRO3_VERSION }}
+          name: Build of arro3 for pyodide v${{ inputs.pyodide}} and arro3 v${{ env.ARRO3_VERSION }}
+          artifacts: dist/*
+          replacesArtifacts: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          prerelease: true

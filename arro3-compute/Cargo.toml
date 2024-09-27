@@ -1,15 +1,16 @@
 [package]
 name = "arro3-compute"
-version = "0.1.0-beta.1"
-authors = ["Kyle Barron <kylebarron2@gmail.com>"]
-edition = "2021"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
 description = "Rust-based compute kernels for Arrow in Python."
 readme = "README.md"
-repository = "https://github.com/kylebarron/arro3"
-license = "MIT OR Apache-2.0"
-keywords = ["python", "arrow"]
-categories = []
-rust-version = "1.75"
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+rust-version = { workspace = true }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -23,6 +24,6 @@ arrow-cast = { workspace = true }
 arrow-schema = { workspace = true }
 arrow-select = { workspace = true }
 arrow = { workspace = true, features = ["ffi"] }
-pyo3 = { workspace = true, features = ["abi3-py38"] }
-thiserror = { workspace = true }
+pyo3 = { workspace = true }
 pyo3-arrow = { path = "../pyo3-arrow" }
+thiserror = { workspace = true }

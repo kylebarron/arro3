@@ -13,6 +13,7 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
+use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
@@ -24,8 +25,18 @@ use crate::{PyRecordBatch, PySchema, PyTable};
 pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
 
 impl PyRecordBatchReader {
+    /// Construct a new PyRecordBatchReader from an existing [RecordBatchReader].
     pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
         Self(Some(reader))
+    }
+
+    /// Construct from a raw Arrow C Stream capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let stream = import_stream_pycapsule(capsule)?;
+        let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+
+        Ok(Self(Some(Box::new(stream_reader))))
     }
 
     /// Consume this reader and convert into a [RecordBatchReader].
@@ -50,7 +61,7 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::new(batches, schema))
+        Ok(PyTable::try_new(batches, schema)?)
     }
 
     /// Access the [SchemaRef] of this RecordBatchReader.
@@ -115,19 +126,16 @@ impl Display for PyRecordBatchReader {
 
 #[pymethods]
 impl PyRecordBatchReader {
-    /// An implementation of the [Arrow PyCapsule
-    /// Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
-    /// This dunder method should not be called directly, but enables zero-copy
-    /// data transfer to other Python libraries that understand Arrow memory.
-    ///
-    /// For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this array
-    /// into a pyarrow table, without copying memory.
+    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        to_schema_pycapsule(py, self.schema_ref()?.as_ref())
+    }
+
     #[allow(unused_variables)]
-    pub fn __arrow_c_stream__<'py>(
+    fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
-        requested_schema: Option<Bound<PyCapsule>>,
-    ) -> PyResult<Bound<'py, PyCapsule>> {
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let reader = self
             .0
             .take()
@@ -140,7 +148,9 @@ impl PyRecordBatchReader {
         });
         let array_reader = Box::new(ArrayIterator::new(
             array_reader,
-            Field::new_struct("", schema.fields().clone(), false).into(),
+            Field::new_struct("", schema.fields().clone(), false)
+                .with_metadata(schema.metadata.clone())
+                .into(),
         ));
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
@@ -155,39 +165,24 @@ impl PyRecordBatchReader {
         self.read_next_batch(py)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         self.to_string()
     }
 
-    /// Construct this from an existing Arrow object.
-    ///
-    /// It can be called on anything that exports the Arrow stream interface
-    /// (`__arrow_c_stream__`), such as a `Table` or `RecordBatchReader`.
     #[classmethod]
-    pub fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
+    fn from_arrow(_cls: &Bound<PyType>, input: AnyRecordBatch) -> PyArrowResult<Self> {
         let reader = input.into_reader()?;
         Ok(Self::new(reader))
     }
 
-    /// Construct this object from a bare Arrow PyCapsule.
     #[classmethod]
-    pub fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
-
-        Ok(Self(Some(Box::new(stream_reader))))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[classmethod]
-    pub fn from_batches(
-        _cls: &Bound<PyType>,
-        schema: PySchema,
-        batches: Vec<PyRecordBatch>,
-    ) -> Self {
+    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: Vec<PyRecordBatch>) -> Self {
         let batches = batches
             .into_iter()
             .map(|batch| batch.into_inner())
@@ -199,17 +194,16 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    pub fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
+    fn from_stream(_cls: &Bound<PyType>, data: &Bound<PyAny>) -> PyResult<Self> {
         data.extract()
     }
 
-    /// Returns `true` if this reader has already been consumed.
     #[getter]
-    pub fn closed(&self) -> bool {
+    fn closed(&self) -> bool {
         self.0.is_none()
     }
 
-    pub fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .take()
@@ -219,10 +213,10 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::new(batches, schema).to_arro3(py)?)
+        Ok(PyTable::try_new(batches, schema)?.to_arro3(py)?)
     }
 
-    pub fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
             .as_mut()
@@ -235,9 +229,8 @@ impl PyRecordBatchReader {
         }
     }
 
-    /// Access the schema of this table
     #[getter]
-    pub fn schema(&self, py: Python) -> PyResult<PyObject> {
+    fn schema(&self, py: Python) -> PyResult<PyObject> {
         PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
     }
 }

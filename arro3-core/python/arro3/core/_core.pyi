@@ -1,4 +1,5 @@
-from typing import Any, Literal, Sequence, overload
+from typing import Any, Iterable, Literal, Sequence, overload
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -6,21 +7,60 @@ from .types import (
     ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
+    BufferProtocolExportable,
 )
 
 class Array:
-    def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None:
-        """Create arro3.core.Array instance from a sequence of Python objects.
+    """An Arrow Array."""
+    @overload
+    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
+    @overload
+    def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None: ...
+    def __init__(
+        self,
+        obj: ArrowArrayExportable | Sequence[Any],
+        /,
+        type: ArrowSchemaExportable | None = None,
+    ) -> None:
+        """Create arro3.Array instance from a sequence of Python objects.
 
         Args:
             obj: A sequence of input objects.
-            type: Explicit type to attempt to coerce to.
+            type: Explicit type to attempt to coerce to. You may pass in a `Field` to `type` in order to associate extension metadata with this array.
         """
-    def __array__(self, dtype=None, copy=None) -> NDArray: ...
+    def __array__(self, dtype=None, copy=None) -> NDArray:
+        """
+        An implementation of the Array interface, for interoperability with numpy and
+        other array libraries.
+        """
     def __arrow_c_array__(
         self, requested_schema: object | None = None
-    ) -> tuple[object, object]: ...
+    ) -> tuple[object, object]:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.array()`][pyarrow.array] to convert this
+        array into a pyarrow array, without copying memory.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this array. Then the
+        consumer can ask the producer (in `__arrow_c_array__`) to cast the exported data
+        to a supported data type.
+        """
     def __eq__(self, other) -> bool: ...
+    def __getitem__(self, i: int) -> Scalar: ...
+    # Note: we don't actually implement this, but it's inferred by having a __getitem__
+    # key
+    def __iter__(self) -> Iterable[Scalar]: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
@@ -42,12 +82,14 @@ class Array:
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Array:
         """Construct this object from bare Arrow PyCapsules"""
 
+    # We allow Any here because not many types have updated to expose __buffer__ yet
+    @classmethod
+    def from_buffer(cls, buffer: BufferProtocolExportable | Any) -> Array:
+        """Construct an Array from an object implementing the Python Buffer Protocol."""
+
     @classmethod
     def from_numpy(cls, array: np.ndarray) -> Array:
         """Construct an Array from a numpy ndarray"""
-
-    def to_numpy(self) -> NDArray:
-        """Return a numpy copy of this array."""
 
     def cast(self, target_type: ArrowSchemaExportable) -> Array:
         """Cast array values to another data type
@@ -66,6 +108,8 @@ class Array:
         """
     @property
     def nbytes(self) -> int: ...
+    @property
+    def null_count(self) -> int: ...
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.
 
@@ -77,49 +121,144 @@ class Array:
             The sliced array
         """
     def take(self, indices: ArrowArrayExportable) -> Array: ...
+    def to_numpy(self) -> NDArray:
+        """Return a numpy copy of this array."""
+    def to_pylist(self) -> NDArray:
+        """Convert to a list of native Python objects."""
+
     @property
     def type(self) -> DataType:
         """The data type of this array."""
 
 class ArrayReader:
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+    """A stream of Arrow `Array`s.
+
+    This is similar to the [`RecordBatchReader`][arro3.core.RecordBatchReader] but each
+    item yielded from the stream is an [`Array`][arro3.core.Array], not a
+    [`RecordBatch`][arro3.core.RecordBatch].
+    """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this ArrayReader. Then
+        the consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
+        """
+    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.chunked_array()`][pyarrow.chunked_array] to
+        convert this ArrayReader to a pyarrow ChunkedArray, without copying memory.
+        """
     def __iter__(self) -> ArrayReader: ...
     def __next__(self) -> Array: ...
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrow(
         cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> ArrayReader: ...
+    ) -> ArrayReader:
+        """Construct this from an existing Arrow object.
+
+        It can be called on anything that exports the Arrow stream interface
+        (has an `__arrow_c_stream__` method), such as a `Table` or `ArrayReader`.
+        """
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> ArrayReader:
         """Construct this object from a bare Arrow PyCapsule"""
     @classmethod
     def from_arrays(
-        cls, schema: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
+        cls, field: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
     ) -> ArrayReader: ...
     @classmethod
-    def from_stream(cls, data: ArrowStreamExportable) -> ArrayReader: ...
+    def from_stream(cls, data: ArrowStreamExportable) -> ArrayReader:
+        """Construct this from an existing Arrow object.
+
+        This is an alias of and has the same behavior as
+        [`from_arrow`][arro3.ArrayReader.from_arrow], but is included for parity
+        with [`pyarrow.RecordBatchReader`][pyarrow.RecordBatchReader].
+        """
     @property
-    def closed(self) -> bool: ...
-    def read_all(self) -> ChunkedArray: ...
-    def read_next_array(self) -> Array: ...
-    def field(self) -> Field: ...
+    def closed(self) -> bool:
+        """Returns `true` if this reader has already been consumed."""
+    def read_all(self) -> ChunkedArray:
+        """Read all batches from this stream into a ChunkedArray."""
+    def read_next_array(self) -> Array:
+        """Read the next array from this stream."""
+    @property
+    def field(self) -> Field:
+        """Access the field of this reader."""
 
 class ChunkedArray:
+    """An Arrow ChunkedArray."""
+    @overload
+    def __init__(
+        self, arrays: ArrowArrayExportable | ArrowStreamExportable, type: None = None
+    ) -> None: ...
+    @overload
     def __init__(
         self,
         arrays: Sequence[ArrowArrayExportable],
         type: ArrowSchemaExportable | None = None,
     ) -> None: ...
-    def __array__(self, dtype=None, copy=None) -> NDArray: ...
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+    def __init__(
+        self,
+        arrays: ArrowArrayExportable
+        | ArrowStreamExportable
+        | Sequence[ArrowArrayExportable],
+        type: ArrowSchemaExportable | None = None,
+    ) -> None: ...
+    def __array__(self, dtype=None, copy=None) -> NDArray:
+        """
+        An implementation of the Array interface, for interoperability with numpy and
+        other array libraries.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this ChunkedArray. Then
+        the consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
+        """
+    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example (as of pyarrow v16), you can call
+        [`pyarrow.chunked_array()`][pyarrow.chunked_array] to convert this array into a
+        pyarrow array, without copying memory.
+        """
     def __eq__(self, other) -> bool: ...
+    def __getitem__(self, i: int) -> Scalar: ...
+    # Note: we don't actually implement this, but it's inferred by having a __getitem__
+    # key
+    def __iter__(self) -> Iterable[Scalar]: ...
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrow(
         cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> ChunkedArray: ...
+    ) -> ChunkedArray:
+        """Construct this from an existing Arrow object.
+
+        It can be called on anything that exports the Arrow stream interface (has an
+        `__arrow_c_stream__` method). All batches from the stream will be materialized
+        in memory.
+        """
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> ChunkedArray:
         """Construct this object from a bare Arrow PyCapsule"""
@@ -129,34 +268,98 @@ class ChunkedArray:
         Args:
             target_type: Type to cast array to.
         """
-    def chunk(self, i: int) -> Array: ...
+    def chunk(self, i: int) -> Array:
+        """Select a chunk by its index.
+
+        Args:
+            i: chunk index.
+
+        Returns:
+            new Array.
+        """
     @property
-    def chunks(self) -> list[Array]: ...
-    def combine_chunks(self) -> Array: ...
-    def equals(self, other: ArrowStreamExportable) -> bool: ...
-    def length(self) -> int: ...
+    def chunks(self) -> list[Array]:
+        """Convert to a list of single-chunked arrays."""
+    def combine_chunks(self) -> Array:
+        """Flatten this ChunkedArray into a single non-chunked array."""
+    def equals(self, other: ArrowStreamExportable) -> bool:
+        """Return whether the contents of two chunked arrays are equal."""
     @property
-    def nbytes(self) -> int: ...
+    def field(self) -> Field:
+        """Access the field stored on this ChunkedArray.
+
+        Note that this field usually will not have a name associated, but it may have
+        metadata that signifies that this array is an extension (user-defined typed)
+        array.
+        """
+    def length(self) -> int:
+        """Return length of a ChunkedArray."""
     @property
-    def null_count(self) -> int: ...
+    def nbytes(self) -> int:
+        """Total number of bytes consumed by the elements of the chunked array."""
     @property
-    def num_chunks(self) -> int: ...
-    def slice(self, offset: int = 0, length: int | None = None) -> ChunkedArray: ...
-    def to_numpy(self) -> NDArray: ...
+    def null_count(self) -> int:
+        """Number of null entries"""
     @property
-    def type(self) -> DataType: ...
+    def num_chunks(self) -> int:
+        """Number of underlying chunks."""
+    def rechunk(self, *, max_chunksize: int | None = None) -> ChunkedArray:
+        """Rechunk a ChunkedArray with a maximum number of rows per chunk.
+
+        Args:
+            max_chunksize: The maximum number of rows per internal array. Defaults to None, which rechunks into a single array.
+
+        Returns:
+            The rechunked ChunkedArray.
+        """
+    def slice(self, offset: int = 0, length: int | None = None) -> ChunkedArray:
+        """Compute zero-copy slice of this ChunkedArray
+
+        Args:
+            offset: Offset from start of array to slice. Defaults to 0.
+            length: Length of slice (default is until end of batch starting from offset).
+
+        Returns:
+            New ChunkedArray
+        """
+    def to_numpy(self) -> NDArray:
+        """Copy this array to a `numpy` NDArray"""
+    def to_pylist(self) -> NDArray:
+        """Convert to a list of native Python objects."""
+    @property
+    def type(self) -> DataType:
+        """Return data type of a ChunkedArray."""
 
 class DataType:
-    def __arrow_c_schema__(self) -> object: ...
+    """An Arrow DataType."""
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this
+        array into a pyarrow field, without copying memory.
+        """
     def __eq__(self, other) -> bool: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowSchemaExportable) -> DataType: ...
+    def from_arrow(cls, input: ArrowSchemaExportable) -> DataType:
+        """Construct this from an existing Arrow object.
+
+        It can be called on anything that exports the Arrow schema interface
+        (has an `__arrow_c_schema__` method).
+        """
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> DataType:
         """Construct this object from a bare Arrow PyCapsule"""
     @property
-    def bit_width(self) -> int | None: ...
+    def bit_width(self) -> Literal[8, 16, 32, 64] | None:
+        """Returns the bit width of this type if it is a primitive type
+
+        Returns `None` if not a primitive type
+        """
     def equals(
         self, other: ArrowSchemaExportable, *, check_metadata: bool = False
     ) -> bool:
@@ -564,6 +767,7 @@ class DataType:
     def is_dictionary_key_type(t: ArrowSchemaExportable) -> bool: ...
 
 class Field:
+    """An Arrow Field."""
     def __init__(
         self,
         name: str,
@@ -572,42 +776,142 @@ class Field:
         *,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> None: ...
-    def __arrow_c_schema__(self) -> object: ...
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.field()`][pyarrow.field] to convert this
+        array into a pyarrow field, without copying memory.
+        """
     def __eq__(self, other) -> bool: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowSchemaExportable) -> Field: ...
+    def from_arrow(cls, input: ArrowSchemaExportable) -> Field:
+        """Construct this from an existing Arrow object.
+
+        It can be called on anything that exports the Arrow schema interface
+        (has an `__arrow_c_schema__` method).
+        """
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> Field:
         """Construct this object from a bare Arrow PyCapsule"""
 
-    def equals(self, other: ArrowSchemaExportable) -> bool: ...
+    def equals(self, other: ArrowSchemaExportable) -> bool:
+        """Test if this field is equal to the other."""
     @property
-    def metadata(self) -> dict[bytes, bytes]: ...
+    def metadata(self) -> dict[bytes, bytes]:
+        """The schema's metadata."""
     @property
-    def metadata_str(self) -> dict[str, str]: ...
+    def metadata_str(self) -> dict[str, str]:
+        """The schema's metadata where keys and values are `str`, not `bytes`."""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The field name."""
     @property
-    def nullable(self) -> bool: ...
-    def remove_metadata(self) -> Field: ...
+    def nullable(self) -> bool:
+        """The field nullability."""
+    def remove_metadata(self) -> Field:
+        """Create new field without metadata, if any."""
     @property
-    def type(self) -> DataType: ...
-    def with_metadata(self, metadata: dict[str, str] | dict[bytes, bytes]) -> Field: ...
-    def with_name(self, name: str) -> Field: ...
-    def with_nullable(self, nullable: bool) -> Field: ...
-    def with_type(self, new_type: ArrowSchemaExportable) -> Field: ...
+    def type(self) -> DataType:
+        """Access the data type of this field."""
+    def with_metadata(self, metadata: dict[str, str] | dict[bytes, bytes]) -> Field:
+        """Add metadata as dict of string keys and values to Field."""
+    def with_name(self, name: str) -> Field:
+        """A copy of this field with the replaced name."""
+    def with_nullable(self, nullable: bool) -> Field:
+        """A copy of this field with the replaced nullability."""
+    def with_type(self, new_type: ArrowSchemaExportable) -> Field:
+        """A copy of this field with the replaced type"""
 
 class RecordBatch:
+    """
+    A two-dimensional batch of column-oriented data with a defined
+    [schema][arro3.core.Schema].
+
+    A `RecordBatch` is a two-dimensional dataset of a number of contiguous arrays, each
+    the same length. A record batch has a schema which must match its arrays' datatypes.
+
+    Record batches are a convenient unit of work for various serialization and
+    computation functions, possibly incremental.
+    """
+    @overload
+    def __init__(
+        self,
+        data: ArrowArrayExportable,
+        *,
+        schema: None = None,
+        metadata: None = None,
+    ) -> None: ...
+    # @overload
+    # def __init__(
+    #     self,
+    #     data: Sequence[ArrowArrayExportable],
+    #     *,
+    #     names: Sequence[str],
+    #     schema: None = None,
+    #     metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    # ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable],
+        *,
+        # names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
     def __init__(
         self,
         data: ArrowArrayExportable | dict[str, ArrowArrayExportable],
         *,
-        metadata: ArrowSchemaExportable | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> None: ...
     def __arrow_c_array__(
         self, requested_schema: object | None = None
-    ) -> tuple[object, object]: ...
+    ) -> tuple[object, object]:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.record_batch()`][pyarrow.record_batch] to
+        convert this RecordBatch into a pyarrow RecordBatch, without copying memory.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this RecordBatch. Then
+        the consumer can ask the producer (in `__arrow_c_array__`) to cast the exported
+        data to a supported data type.
+        """
     def __eq__(self, other) -> bool: ...
     def __getitem__(self, key: int | str) -> Array: ...
     def __repr__(self) -> str: ...
@@ -615,7 +919,7 @@ class RecordBatch:
     def from_arrays(
         cls, arrays: Sequence[ArrowArrayExportable], *, schema: ArrowSchemaExportable
     ) -> RecordBatch:
-        """Construct a RecordBatch from multiple pyarrow.Arrays
+        """Construct a RecordBatch from multiple Arrays
 
         Args:
             arrays: One for each field in RecordBatch
@@ -629,7 +933,7 @@ class RecordBatch:
         cls,
         mapping: dict[str, ArrowArrayExportable],
         *,
-        metadata: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch:
         """Construct a Table or RecordBatch from Arrow arrays or columns.
 
@@ -655,7 +959,23 @@ class RecordBatch:
     @classmethod
     def from_arrow(
         cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> RecordBatch: ...
+    ) -> RecordBatch:
+        """
+
+        Construct this from an existing Arrow RecordBatch.
+
+
+        It can be called on anything that exports the Arrow data interface
+        (has a `__arrow_c_array__` method) and returns a StructArray..
+
+
+        Args:
+            input: Arrow array to use for constructing this object
+
+
+        Returns:
+            new RecordBatch
+        """
     @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> RecordBatch:
         """Construct this object from bare Arrow PyCapsules"""
@@ -675,7 +995,7 @@ class RecordBatch:
             _description_
         """
 
-    def column(self, i: int | str) -> ChunkedArray:
+    def column(self, i: int | str) -> Array:
         """Select single column from Table or RecordBatch.
 
         Args:
@@ -710,7 +1030,8 @@ class RecordBatch:
             _description_
         """
     @property
-    def nbytes(self) -> int: ...
+    def nbytes(self) -> int:
+        """Total number of bytes consumed by the elements of the record batch."""
     @property
     def num_columns(self) -> int:
         """Number of columns."""
@@ -733,26 +1054,108 @@ class RecordBatch:
     @property
     def schema(self) -> Schema:
         """Access the schema of this RecordBatch"""
-    def select(self, columns: list[int] | list[str]) -> RecordBatch: ...
+    def select(self, columns: list[int] | list[str]) -> RecordBatch:
+        """
+        Select columns of the RecordBatch.
+
+        Returns a new RecordBatch with the specified columns, and metadata preserved.
+
+
+        Args:
+            columns: The column names or integer indices to select.
+
+        Returns:
+            New RecordBatch.
+        """
     def set_column(
         self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
-    ) -> RecordBatch: ...
+    ) -> RecordBatch:
+        """Replace column in RecordBatch at position.
+
+        Args:
+            i: Index to place the column at.
+            field: If a string is passed then the type is deduced from the column data.
+            column: Column data.
+
+        Returns:
+            New RecordBatch.
+        """
     @property
-    def shape(self) -> tuple[int, int]: ...
-    def slice(self, offset: int = 0, length: int | None = None) -> RecordBatch: ...
-    def take(self, indices: ArrowArrayExportable) -> RecordBatch: ...
-    def to_struct_array(self) -> Array: ...
-    def with_schema(self, schema: ArrowSchemaExportable) -> RecordBatch: ...
+    def shape(self) -> tuple[int, int]:
+        """
+        Dimensions of the table or record batch: (number of rows, number of columns).
+        """
+    def slice(self, offset: int = 0, length: int | None = None) -> RecordBatch:
+        """Compute zero-copy slice of this RecordBatch
+
+        Args:
+            offset: Offset from start of record batch to slice. Defaults to 0.
+            length: Length of slice (default is until end of batch starting from offset). Defaults to None.
+
+        Returns:
+            New RecordBatch.
+        """
+    def take(self, indices: ArrowArrayExportable) -> RecordBatch:
+        """Select rows from a Table or RecordBatch.
+
+        Args:
+            indices: The indices in the tabular object whose rows will be returned.
+
+        Returns:
+            _description_
+        """
+    def to_struct_array(self) -> Array:
+        """Convert to a struct array.
+
+        Returns:
+            _description_
+        """
+    def with_schema(self, schema: ArrowSchemaExportable) -> RecordBatch:
+        """Return a RecordBatch with the provided schema."""
 
 class RecordBatchReader:
-    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
+    """An Arrow RecordBatchReader.
+
+    A RecordBatchReader holds a stream of [`RecordBatch`][arro3.core.RecordBatch].
+    """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this RecordBatchReader.
+        Then the consumer can ask the producer (in `__arrow_c_stream__`) to cast the
+        exported data to a supported data type.
+        """
+    def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call
+        [`pyarrow.RecordBatchReader.from_stream`][pyarrow.RecordBatchReader.from_stream]
+        to convert this stream to a pyarrow `RecordBatchReader`. Alternatively, you can
+        call [`pyarrow.table()`][pyarrow.table] to consume this stream to a pyarrow
+        table or [`Table.from_arrow()`][arro3.core.Table] to consume this stream to an
+        arro3 Table.
+        """
     def __iter__(self) -> RecordBatchReader: ...
     def __next__(self) -> RecordBatch: ...
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrow(
         cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> RecordBatchReader: ...
+    ) -> RecordBatchReader:
+        """
+        Construct this from an existing Arrow object.
+
+        It can be called on anything that exports the Arrow stream interface
+        (has an `__arrow_c_stream__` method), such as a `Table` or `RecordBatchReader`.
+        """
     @classmethod
     def from_arrow_pycapsule(cls, capsule) -> RecordBatchReader:
         """Construct this object from a bare Arrow PyCapsule"""
@@ -763,12 +1166,41 @@ class RecordBatchReader:
     @classmethod
     def from_stream(cls, data: ArrowStreamExportable) -> RecordBatchReader: ...
     @property
-    def closed(self) -> bool: ...
+    def closed(self) -> bool:
+        """Returns `true` if this reader has already been consumed."""
     def read_all(self) -> Table: ...
     def read_next_batch(self) -> RecordBatch: ...
-    def schema(self) -> Schema: ...
+    @property
+    def schema(self) -> Schema:
+        """Access the schema of this table."""
+
+class Scalar:
+    """An arrow Scalar."""
+    def __arrow_c_array__(
+        self, requested_schema: object | None = None
+    ) -> tuple[object, object]:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        For example, you can call [`pyarrow.array()`][pyarrow.array] to
+        convert this Scalar into a pyarrow Array, without copying memory. The generated
+        array is guaranteed to have length 1.
+        """
+    def __repr__(self) -> str: ...
+    @classmethod
+    def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Scalar:
+        """Construct this object from bare Arrow PyCapsules"""
+    def as_py(self) -> Any: ...
+    @property
+    def is_valid(self) -> bool: ...
+    @property
+    def type(self) -> DataType: ...
 
 class Schema:
+    """An arrow Schema."""
     def __init__(
         self,
         fields: Sequence[ArrowSchemaExportable],
@@ -784,10 +1216,6 @@ class Schema:
 
         For example, you can call [`pyarrow.schema()`][pyarrow.schema] to convert this
         array into a pyarrow schema, without copying memory.
-
-
-        Returns:
-            _description_
         """
 
     def __eq__(self, other) -> bool: ...
@@ -936,6 +1364,82 @@ class Schema:
         """
 
 class Table:
+    """A collection of top-level named, equal length Arrow arrays."""
+    @overload
+    def __init__(
+        self,
+        data: ArrowArrayExportable | ArrowStreamExportable,
+        *,
+        names: None = None,
+        schema: None = None,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str],
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        data: ArrowArrayExportable
+        | ArrowStreamExportable
+        | Sequence[ArrowArrayExportable | ArrowStreamExportable]
+        | dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        *,
+        names: Sequence[str] | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None:
+        """Create a Table from a Python data structure or sequence of arrays.
+
+        Args:
+            data: A mapping of strings to Arrow Arrays, a list of arrays or chunked arrays, or any tabular object implementing the Arrow PyCapsule Protocol (has an __arrow_c_array__ or __arrow_c_stream__ method).
+            names: Column names if list of arrays passed as data. Mutually exclusive with 'schema' argument. Defaults to None.
+            schema: The expected schema of the Arrow Table. If not passed, will be inferred from the data. Mutually exclusive with 'names' argument. Defaults to None.
+            metadata: Optional metadata for the schema (if schema not passed). Defaults to None.
+        """
+    def __arrow_c_schema__(self) -> object:
+        """
+        An implementation of the [Arrow PyCapsule
+        Interface](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html).
+        This dunder method should not be called directly, but enables zero-copy data
+        transfer to other Python libraries that understand Arrow memory.
+
+        This allows Arrow consumers to inspect the data type of this Table. Then the
+        consumer can ask the producer (in `__arrow_c_stream__`) to cast the exported
+        data to a supported data type.
+        """
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
         """
         An implementation of the [Arrow PyCapsule
@@ -945,12 +1449,6 @@ class Table:
 
         For example, you can call [`pyarrow.table()`][pyarrow.table] to convert this
         array into a pyarrow table, without copying memory.
-
-        Args:
-            requested_schema: _description_. Defaults to None.
-
-        Returns:
-            _description_
         """
     def __eq__(self, other) -> bool: ...
     def __getitem__(self, key: int | str) -> ChunkedArray: ...
@@ -1029,7 +1527,16 @@ class Table:
         batches: Sequence[ArrowArrayExportable],
         *,
         schema: ArrowSchemaExportable | None = None,
-    ) -> Table: ...
+    ) -> Table:
+        """Construct a Table from a sequence of Arrow RecordBatches.
+
+        Args:
+            batches: Sequence of RecordBatch to be converted, all schemas must be equal.
+            schema: If not passed, will be inferred from the first RecordBatch. Defaults to None.
+
+        Returns:
+            New Table.
+        """
     @overload
     @classmethod
     def from_pydict(
@@ -1138,7 +1645,8 @@ class Table:
             _description_
         """
     @property
-    def nbytes(self) -> int: ...
+    def nbytes(self) -> int:
+        """Total number of bytes consumed by the elements of the table."""
     @property
     def num_columns(self) -> int:
         """Number of columns in this table."""
@@ -1147,6 +1655,15 @@ class Table:
         """Number of rows in this table.
 
         Due to the definition of a table, all columns have the same number of rows.
+        """
+    def rechunk(self, *, max_chunksize: int | None = None) -> Table:
+        """Rechunk a table with a maximum number of rows per chunk.
+
+        Args:
+            max_chunksize: The maximum number of rows per internal RecordBatch. Defaults to None, which rechunks into a single batch.
+
+        Returns:
+            The rechunked table.
         """
     def remove_column(self, i: int) -> Table:
         """Create new Table with the indicated column removed.
@@ -1204,6 +1721,16 @@ class Table:
         Returns:
             (number of rows, number of columns)
         """
+    def slice(self, offset: int = 0, length: int | None = None) -> Table:
+        """Compute zero-copy slice of this table.
+
+        Args:
+            offset: Defaults to 0.
+            length: Defaults to None.
+
+        Returns:
+            The sliced table
+        """
     def to_batches(self) -> list[RecordBatch]:
         """Convert Table to a list of RecordBatch objects.
 
@@ -1242,21 +1769,124 @@ class Table:
             _description_
         """
 
+@overload
+def dictionary_dictionary(array: ArrowArrayExportable) -> Array: ...
+@overload
+def dictionary_dictionary(array: ArrowStreamExportable) -> ArrayReader: ...
+def dictionary_dictionary(
+    array: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """
+    Access the `dictionary` of a dictionary array.
+
+    This is equivalent to the [`.dictionary`][pyarrow.DictionaryArray.dictionary]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The keys of a dictionary-encoded array.
+    """
+
+@overload
+def dictionary_indices(array: ArrowArrayExportable) -> Array: ...
+@overload
+def dictionary_indices(array: ArrowStreamExportable) -> ArrayReader: ...
+def dictionary_indices(
+    array: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """
+    Access the indices of a dictionary array.
+
+    This is equivalent to the [`.indices`][pyarrow.DictionaryArray.indices]
+    attribute on a PyArrow [DictionaryArray][pyarrow.DictionaryArray].
+
+    Args:
+        array: Argument to compute function.
+
+    Returns:
+        The indices of a dictionary-encoded array.
+    """
+
+@overload
+def list_flatten(input: ArrowArrayExportable) -> Array: ...
+@overload
+def list_flatten(input: ArrowStreamExportable) -> ArrayReader: ...
+def list_flatten(
+    input: ArrowArrayExportable | ArrowStreamExportable,
+) -> Array | ArrayReader:
+    """Unnest this ListArray, LargeListArray or FixedSizeListArray.
+
+    Args:
+        input: Input data.
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        The flattened Arrow data.
+    """
+
+@overload
+def list_offsets(input: ArrowArrayExportable, *, logical: bool = True) -> Array: ...
+@overload
+def list_offsets(
+    input: ArrowStreamExportable, *, logical: bool = True
+) -> ArrayReader: ...
+def list_offsets(
+    input: ArrowArrayExportable | ArrowStreamExportable,
+    *,
+    logical: bool = True,
+) -> Array | ArrayReader:
+    """Access the offsets of this ListArray or LargeListArray
+
+    Args:
+        input: _description_
+        physical: If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to `True`.
+
+    Raises:
+        Exception if not a list-typed array.
+
+    Returns:
+        _description_
+    """
+
+def struct_field(
+    values: ArrowArrayExportable,
+    /,
+    indices: int | Sequence[int],
+) -> Array:
+    """Access a column within a StructArray by index
+
+    Args:
+        values: Argument to compute function.
+        indices: List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.
+
+    Raises:
+        Exception if not a struct-typed array.
+
+    Returns:
+        _description_
+    """
+
 def fixed_size_list_array(
     values: ArrowArrayExportable,
     list_size: int,
     *,
     type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new fixed size list array
 
     Args:
-        values: _description_
-        list_size: _description_
-        type: _description_. Defaults to None.
+        values: the values of the new fixed size list array
+        list_size: the number of elements in each item of the list.
+
+    Keyword Args:
+        type: the type of output array. This must have fixed size list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
 
     Returns:
-        _description_
+        a new Array with fixed size list type
     """
 
 def list_array(
@@ -1265,28 +1895,35 @@ def list_array(
     *,
     type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new list array
 
     Args:
-        offsets: _description_
-        values: _description_
-        type: _description_. Defaults to None.
+        offsets: the offsets for the output list array. This array must have type int32 or int64, depending on whether you wish to create a list array or large list array.
+        values: the values for the output list array.
+
+    Keyword Args:
+        type: the type of output array. This must have list or large list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
 
     Returns:
-        _description_
+        a new Array with list or large list type
     """
 
 def struct_array(
     arrays: Sequence[ArrowArrayExportable],
     *,
     fields: Sequence[ArrowSchemaExportable],
+    type: ArrowSchemaExportable | None = None,
 ) -> Array:
-    """_summary_
+    """Construct a new struct array
 
     Args:
-        arrays: _description_
-        fields: _description_
+        arrays: a sequence of arrays for the struct children
+
+    Keyword Args:
+        fields: a sequence of fields that represent each of the struct children
+        type: the type of output array. This must have struct type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .
+
 
     Returns:
-        _description_
+        a new Array with struct type
     """

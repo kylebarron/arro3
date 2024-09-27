@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::string::FromUtf8Error;
 use std::sync::Arc;
 
-use arrow_array::{RecordBatchIterator, RecordBatchReader};
+use arrow_array::{Datum, RecordBatchIterator, RecordBatchReader};
 use arrow_schema::{ArrowError, Field, FieldRef, Fields, Schema, SchemaRef};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -15,16 +15,21 @@ use pyo3::prelude::*;
 use crate::array_reader::PyArrayReader;
 use crate::error::PyArrowResult;
 use crate::ffi::{ArrayIterator, ArrayReader};
-use crate::{PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyTable};
+use crate::{
+    PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyScalar, PyTable,
+};
 
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.
 pub enum AnyRecordBatch {
+    /// A single RecordBatch, held in a [PyRecordBatch].
     RecordBatch(PyRecordBatch),
+    /// A stream of possibly multiple RecordBatches, held in a [PyRecordBatchReader].
     Stream(PyRecordBatchReader),
 }
 
 impl AnyRecordBatch {
+    /// Consume this and convert it into a [RecordBatchReader].
     pub fn into_reader(self) -> PyResult<Box<dyn RecordBatchReader + Send>> {
         match self {
             Self::RecordBatch(batch) => {
@@ -36,13 +41,17 @@ impl AnyRecordBatch {
         }
     }
 
+    /// Consume this and convert it into a [PyTable].
+    ///
+    /// All record batches from the stream will be materialized in memory.
     pub fn into_table(self) -> PyArrowResult<PyTable> {
         let reader = self.into_reader()?;
         let schema = reader.schema();
         let batches = reader.collect::<Result<_, ArrowError>>()?;
-        Ok(PyTable::new(batches, schema))
+        Ok(PyTable::try_new(batches, schema)?)
     }
 
+    /// Access the underlying [SchemaRef] of this object.
     pub fn schema(&self) -> PyResult<SchemaRef> {
         match self {
             Self::RecordBatch(batch) => Ok(batch.as_ref().schema()),
@@ -54,18 +63,24 @@ impl AnyRecordBatch {
 /// An enum over [PyArray] and [PyArrayReader], used when a function accepts either
 /// Arrow object as input.
 pub enum AnyArray {
+    /// A single Array, held in a [PyArray].
     Array(PyArray),
+    /// A stream of possibly multiple Arrays, held in a [PyArrayReader].
     Stream(PyArrayReader),
 }
 
 impl AnyArray {
+    /// Consume this and convert it into a [PyChunkedArray].
+    ///
+    /// All arrays from the stream will be materialized in memory.
     pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
         let reader = self.into_reader()?;
         let field = reader.field();
         let chunks = reader.collect::<Result<_, ArrowError>>()?;
-        Ok(PyChunkedArray::new(chunks, field))
+        Ok(PyChunkedArray::try_new(chunks, field)?)
     }
 
+    /// Consume this and convert it into a [ArrayReader].
     pub fn into_reader(self) -> PyResult<Box<dyn ArrayReader + Send>> {
         match self {
             Self::Array(array) => {
@@ -76,6 +91,7 @@ impl AnyArray {
         }
     }
 
+    /// Access the underlying [FieldRef] of this object.
     pub fn field(&self) -> PyResult<FieldRef> {
         match self {
             Self::Array(array) => Ok(array.field().clone()),
@@ -84,8 +100,35 @@ impl AnyArray {
     }
 }
 
+/// An enum over [PyArray] and [PyScalar], used for functions that accept
+pub enum AnyDatum {
+    /// A single Array, held in a [PyArray].
+    Array(PyArray),
+    /// An Arrow Scalar, held in a [pyScalar]
+    Scalar(PyScalar),
+}
+
+impl AnyDatum {
+    /// Access the field of this object.
+    pub fn field(&self) -> &FieldRef {
+        match self {
+            Self::Array(inner) => inner.field(),
+            Self::Scalar(inner) => inner.field(),
+        }
+    }
+}
+
+impl Datum for AnyDatum {
+    fn get(&self) -> (&dyn arrow_array::Array, bool) {
+        match self {
+            Self::Array(inner) => inner.get(),
+            Self::Scalar(inner) => inner.get(),
+        }
+    }
+}
+
 #[derive(FromPyObject)]
-pub enum MetadataInput {
+pub(crate) enum MetadataInput {
     String(HashMap<String, String>),
     Bytes(HashMap<Vec<u8>, Vec<u8>>),
 }
@@ -113,7 +156,7 @@ impl Default for MetadataInput {
 }
 
 #[derive(FromPyObject)]
-pub enum FieldIndexInput {
+pub(crate) enum FieldIndexInput {
     Name(String),
     Position(usize),
 }
@@ -128,7 +171,7 @@ impl FieldIndexInput {
 }
 
 #[derive(FromPyObject)]
-pub enum NameOrField {
+pub(crate) enum NameOrField {
     Name(String),
     Field(PyField),
 }
@@ -150,7 +193,7 @@ impl NameOrField {
 }
 
 #[derive(FromPyObject)]
-pub enum SelectIndices {
+pub(crate) enum SelectIndices {
     Names(Vec<String>),
     Positions(Vec<usize>),
 }

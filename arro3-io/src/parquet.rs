@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 
+use arrow_array::{RecordBatchIterator, RecordBatchReader};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::ArrowWriter;
@@ -18,17 +20,24 @@ use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
 pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
-    match file {
-        FileReader::File(f) => {
-            let builder = ParquetRecordBatchReaderBuilder::try_new(f).unwrap();
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
 
-            let reader = builder.build().unwrap();
-            Ok(PyRecordBatchReader::new(Box::new(reader)).to_arro3(py)?)
-        }
-        FileReader::FileLike(_) => {
-            Err(PyTypeError::new_err("File objects not yet supported for reading parquet").into())
-        }
-    }
+    let metadata = builder.schema().metadata().clone();
+    let reader = builder.build().unwrap();
+
+    // Add source schema metadata onto reader's schema. The original schema is not valid
+    // with a given column projection, but we want to persist the source's metadata.
+    let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
+
+    // Create a new iterator with the arrow schema specifically
+    //
+    // Passing ParquetRecordBatchReader directly to PyRecordBatchReader::new loses schema
+    // metadata
+    //
+    // https://docs.rs/parquet/latest/parquet/arrow/arrow_reader/struct.ParquetRecordBatchReader.html#method.schema
+    // https://github.com/apache/arrow-rs/pull/5135
+    let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
+    Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
 }
 
 pub(crate) struct PyWriterVersion(WriterVersion);
@@ -105,6 +114,7 @@ impl<'py> FromPyObject<'py> for PyColumnPath {
     key_value_metadata = None,
     max_row_group_size = None,
     max_statistics_size = None,
+    skip_arrow_metadata = false,
     write_batch_size = None,
     writer_version = None,
 ))]
@@ -129,6 +139,7 @@ pub(crate) fn write_parquet(
     key_value_metadata: Option<HashMap<String, String>>,
     max_row_group_size: Option<usize>,
     max_statistics_size: Option<usize>,
+    skip_arrow_metadata: bool,
     write_batch_size: Option<usize>,
     writer_version: Option<PyWriterVersion>,
 ) -> PyArrowResult<()> {
@@ -207,7 +218,9 @@ pub(crate) fn write_parquet(
 
     let reader = data.into_reader()?;
 
-    let writer_options = ArrowWriterOptions::new().with_properties(props.build());
+    let writer_options = ArrowWriterOptions::new()
+        .with_properties(props.build())
+        .with_skip_arrow_metadata(skip_arrow_metadata);
     let mut writer =
         ArrowWriter::try_new_with_options(file, reader.schema(), writer_options).unwrap();
     for batch in reader {

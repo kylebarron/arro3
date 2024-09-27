@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use arrow::datatypes::{
-    Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
-    UInt64Type, UInt8Type,
+    Float16Type, Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
+    UInt32Type, UInt64Type, UInt8Type,
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
 use numpy::{dtype_bound, PyArray1, PyArrayDescr, PyUntypedArray};
@@ -21,7 +21,9 @@ pub fn from_numpy(py: Python, array: &PyUntypedArray) -> PyArrowResult<ArrayRef>
         }};
     }
     let dtype = array.dtype();
-    if is_type::<f32>(py, dtype) {
+    if is_type::<half::f16>(py, dtype) {
+        numpy_to_arrow!(half::f16, Float16Type)
+    } else if is_type::<f32>(py, dtype) {
         numpy_to_arrow!(f32, Float32Type)
     } else if is_type::<f64>(py, dtype) {
         numpy_to_arrow!(f64, Float64Type)
