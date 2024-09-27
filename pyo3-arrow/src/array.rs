@@ -158,7 +158,7 @@ impl Datum for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
+    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
         if let Ok(data) = obj.extract::<PyArray>() {
             return Ok(data);
         }

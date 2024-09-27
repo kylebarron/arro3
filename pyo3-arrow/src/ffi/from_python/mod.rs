@@ -7,6 +7,7 @@ mod field;
 mod input;
 mod record_batch;
 mod record_batch_reader;
+mod scalar;
 mod schema;
 mod table;
 pub(crate) mod utils;
