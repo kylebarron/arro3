@@ -40,9 +40,7 @@ fn _compute(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(cast::cast))?;
     m.add_wrapped(wrap_pyfunction!(concat::concat))?;
     m.add_wrapped(wrap_pyfunction!(concat::concat))?;
-    m.add_wrapped(wrap_pyfunction!(dictionary::dictionary_dictionary))?;
     m.add_wrapped(wrap_pyfunction!(dictionary::dictionary_encode))?;
-    m.add_wrapped(wrap_pyfunction!(dictionary::dictionary_indices))?;
     m.add_wrapped(wrap_pyfunction!(filter::filter))?;
     m.add_wrapped(wrap_pyfunction!(take::take))?;
 
