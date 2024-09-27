@@ -107,9 +107,11 @@ class Array:
         array.
         """
     @property
-    def nbytes(self) -> int: ...
+    def nbytes(self) -> int:
+        """The number of bytes in this Array."""
     @property
-    def null_count(self) -> int: ...
+    def null_count(self) -> int:
+        """The number of null values in this Array."""
     def slice(self, offset: int = 0, length: int | None = None) -> Array:
         """Compute zero-copy slice of this array.
 
@@ -120,7 +122,8 @@ class Array:
         Returns:
             The sliced array
         """
-    def take(self, indices: ArrowArrayExportable) -> Array: ...
+    def take(self, indices: ArrowArrayExportable) -> Array:
+        """Take specific indices from this Array."""
     def to_numpy(self) -> NDArray:
         """Return a numpy copy of this array."""
     def to_pylist(self) -> NDArray:
@@ -176,7 +179,13 @@ class ArrayReader:
     @classmethod
     def from_arrays(
         cls, field: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
-    ) -> ArrayReader: ...
+    ) -> ArrayReader:
+        """Construct an ArrayReader from existing data.
+
+        Args:
+            field: The Arrow field that describes the sequence of array data.
+            arrays: A sequence (list or tuple) of Array data.
+        """
     @classmethod
     def from_stream(cls, data: ArrowStreamExportable) -> ArrayReader:
         """Construct this from an existing Arrow object.
@@ -214,7 +223,13 @@ class ChunkedArray:
         | ArrowStreamExportable
         | Sequence[ArrowArrayExportable],
         type: ArrowSchemaExportable | None = None,
-    ) -> None: ...
+    ) -> None:
+        """Construct a new ChunkedArray.
+
+        Args:
+            arrays: _description_
+            type: _description_. Defaults to None.
+        """
     def __array__(self, dtype=None, copy=None) -> NDArray:
         """
         An implementation of the Array interface, for interoperability with numpy and
@@ -393,7 +408,8 @@ class DataType:
     def num_fields(self) -> int:
         """The number of child fields."""
     @property
-    def value_type(self) -> DataType | None: ...
+    def value_type(self) -> DataType | None:
+        """The child type, if it exists."""
     #################
     #### Constructors
     #################
@@ -981,7 +997,20 @@ class RecordBatch:
         """Construct this object from bare Arrow PyCapsules"""
     def add_column(
         self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
-    ) -> RecordBatch: ...
+    ) -> RecordBatch:
+        """Add column to RecordBatch at position.
+
+        A new RecordBatch is returned with the column added, the original RecordBatch
+        object is left unchanged.
+
+        Args:
+            i: Index to place the column at.
+            field: _description_
+            column: Column data.
+
+        Returns:
+            New RecordBatch with the passed column added.
+        """
     def append_column(
         self, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
     ) -> RecordBatch:
@@ -1162,14 +1191,23 @@ class RecordBatchReader:
     @classmethod
     def from_batches(
         cls, schema: ArrowSchemaExportable, batches: Sequence[ArrowArrayExportable]
-    ) -> RecordBatchReader: ...
+    ) -> RecordBatchReader:
+        """Construct a new RecordBatchReader from existing data.
+
+        Args:
+            schema: The schema of the Arrow batches.
+            batches: The existing batches.
+        """
     @classmethod
-    def from_stream(cls, data: ArrowStreamExportable) -> RecordBatchReader: ...
+    def from_stream(cls, data: ArrowStreamExportable) -> RecordBatchReader:
+        """Import a RecordBatchReader from an object that exports an Arrow C Stream."""
     @property
     def closed(self) -> bool:
         """Returns `true` if this reader has already been consumed."""
-    def read_all(self) -> Table: ...
-    def read_next_batch(self) -> RecordBatch: ...
+    def read_all(self) -> Table:
+        """Read all batches into a Table."""
+    def read_next_batch(self) -> RecordBatch:
+        """Read the next batch in the stream."""
     @property
     def schema(self) -> Schema:
         """Access the schema of this table."""
@@ -1193,11 +1231,14 @@ class Scalar:
     @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Scalar:
         """Construct this object from bare Arrow PyCapsules"""
-    def as_py(self) -> Any: ...
+    def as_py(self) -> Any:
+        """Convert this scalar to a pure-Python object."""
     @property
-    def is_valid(self) -> bool: ...
+    def is_valid(self) -> bool:
+        """Return `True` if this scalar is not null."""
     @property
-    def type(self) -> DataType: ...
+    def type(self) -> DataType:
+        """Access the type of this scalar."""
 
 class Schema:
     """An arrow Schema."""
