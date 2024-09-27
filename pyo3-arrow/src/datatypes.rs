@@ -207,6 +207,30 @@ impl PyDataType {
     }
 
     #[getter]
+    fn time_unit(&self) -> Option<&str> {
+        match &self.0 {
+            DataType::Time32(unit)
+            | DataType::Time64(unit)
+            | DataType::Timestamp(unit, _)
+            | DataType::Duration(unit) => match unit {
+                TimeUnit::Second => Some("s"),
+                TimeUnit::Millisecond => Some("ms"),
+                TimeUnit::Microsecond => Some("us"),
+                TimeUnit::Nanosecond => Some("ns"),
+            },
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn tz(&self) -> Option<&str> {
+        match &self.0 {
+            DataType::Timestamp(_, tz) => tz.as_deref(),
+            _ => None,
+        }
+    }
+
+    #[getter]
     fn value_type(&self, py: Python) -> PyResult<Option<PyObject>> {
         match &self.0 {
             DataType::FixedSizeList(value_field, _)

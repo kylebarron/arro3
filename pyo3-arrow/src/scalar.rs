@@ -10,11 +10,11 @@ use arrow_schema::{ArrowError, DataType, FieldRef};
 use indexmap::IndexMap;
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::ffi::to_array_pycapsules;
-use crate::{PyArray, PyDataType};
+use crate::{PyArray, PyDataType, PyField};
 
 /// A Python-facing Arrow scalar
 #[pyclass(module = "arro3.core._core", name = "Scalar", subclass)]
@@ -112,6 +112,19 @@ impl Datum for PyScalar {
 
 #[pymethods]
 impl PyScalar {
+    #[new]
+    #[pyo3(signature = (obj, /, r#type = None, *))]
+    fn init(py: Python, obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        if let Ok(data) = obj.extract::<PyScalar>() {
+            return Ok(data);
+        }
+
+        let obj = PyList::new_bound(py, vec![obj]);
+        let array = PyArray::init(&obj, r#type)?;
+        let (array, field) = array.into_inner();
+        Self::try_new(array, field)
+    }
+
     #[allow(unused_variables)]
     fn __arrow_c_array__<'py>(
         &'py self,
@@ -123,6 +136,11 @@ impl PyScalar {
 
     fn __repr__(&self) -> String {
         self.to_string()
+    }
+
+    #[classmethod]
+    fn from_arrow(_cls: &Bound<PyType>, input: PyScalar) -> Self {
+        input
     }
 
     #[classmethod]
@@ -354,6 +372,20 @@ impl PyScalar {
             }
         };
         Ok(result)
+    }
+
+    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+        let new_field = target_type.into_inner();
+        let new_array = arrow::compute::cast(&self.array, new_field.data_type())?;
+        Ok(PyScalar::try_new(new_array, new_field)
+            .unwrap()
+            .to_arro3(py)?)
+    }
+
+    #[getter]
+    #[pyo3(name = "field")]
+    fn py_field(&self, py: Python) -> PyResult<PyObject> {
+        PyField::new(self.field.clone()).to_arro3(py)
     }
 
     #[getter]

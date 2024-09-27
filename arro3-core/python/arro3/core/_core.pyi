@@ -408,6 +408,12 @@ class DataType:
     def num_fields(self) -> int:
         """The number of child fields."""
     @property
+    def time_unit(self) -> Literal["s", "ms", "us", "ns"] | None:
+        """The time unit, if the data type has one."""
+    @property
+    def tz(self) -> str | None:
+        """The timestamp time zone, if any, or None."""
+    @property
     def value_type(self) -> DataType | None:
         """The child type, if it exists."""
     #################
@@ -1214,6 +1220,22 @@ class RecordBatchReader:
 
 class Scalar:
     """An arrow Scalar."""
+    @overload
+    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
+    @overload
+    def __init__(self, obj: Any, /, type: ArrowSchemaExportable) -> None: ...
+    def __init__(
+        self,
+        obj: ArrowArrayExportable | Any,
+        /,
+        type: ArrowSchemaExportable | None = None,
+    ) -> None:
+        """Create arro3.Scalar instance from a Python object.
+
+        Args:
+            obj: An input object.
+            type: Explicit type to attempt to coerce to. You may pass in a `Field` to `type` in order to associate extension metadata with this array.
+        """
     def __arrow_c_array__(
         self, requested_schema: object | None = None
     ) -> tuple[object, object]:
@@ -1229,10 +1251,39 @@ class Scalar:
         """
     def __repr__(self) -> str: ...
     @classmethod
+    def from_arrow(cls, input: ArrowArrayExportable) -> Scalar:
+        """Construct this from an existing Arrow Scalar.
+
+        It can be called on anything that exports the Arrow data interface (has a
+        `__arrow_c_array__` method) and returns an array with a single element.
+
+        Args:
+            input: Arrow scalar to use for constructing this object
+
+        Returns:
+            new Scalar
+        """
+    @classmethod
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Scalar:
         """Construct this object from bare Arrow PyCapsules"""
     def as_py(self) -> Any:
         """Convert this scalar to a pure-Python object."""
+    def cast(self, target_type: ArrowSchemaExportable) -> Scalar:
+        """Cast scalar to another data type
+
+        Args:
+            target_type: Type to cast to.
+        """
+
+    @property
+    def field(self) -> Field:
+        """Access the field stored on this Scalar.
+
+        Note that this field usually will not have a name associated, but it may have
+        metadata that signifies that this scalar is an extension (user-defined typed)
+        scalar.
+        """
+
     @property
     def is_valid(self) -> bool:
         """Return `True` if this scalar is not null."""
