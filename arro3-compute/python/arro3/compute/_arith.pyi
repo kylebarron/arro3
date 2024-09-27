@@ -1,41 +1,32 @@
-# Note: importing with
-# `from arro3.core import Array`
-# will cause Array to be included in the generated docs in this module.
-import arro3.core as core
-import arro3.core.types as types
+from arro3.core import Array
+from arro3.core.types import ArrowArrayExportable
 
-def add(lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable) -> core.Array:
+def add(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
     """Perform `lhs + rhs`, returning an error on overflow"""
 
-def add_wrapping(
-    lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable
-) -> core.Array:
-    """Perform `lhs + rhs`, wrapping on overflow for DataType::is_integer"""
+def add_wrapping(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
+    """Perform `lhs + rhs`, wrapping on overflow for integer data types."""
 
-def div(lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable) -> core.Array:
+def div(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
     """Perform `lhs / rhs`"""
 
-def mul(lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable) -> core.Array:
+def mul(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
     """Perform `lhs * rhs`, returning an error on overflow"""
 
-def mul_wrapping(
-    lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable
-) -> core.Array:
-    """Perform `lhs * rhs`, wrapping on overflow for DataType::is_integer"""
+def mul_wrapping(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
+    """Perform `lhs * rhs`, wrapping on overflow for integer data types."""
 
-def neg(array: types.ArrowArrayExportable) -> core.Array:
+def neg(array: ArrowArrayExportable) -> Array:
     """Negates each element of array, returning an error on overflow"""
 
-def neg_wrapping(array: types.ArrowArrayExportable) -> core.Array:
-    """Negates each element of array, wrapping on overflow for DataType::is_integer"""
+def neg_wrapping(array: ArrowArrayExportable) -> Array:
+    """Negates each element of array, wrapping on overflow for integer data types."""
 
-def rem(lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable) -> core.Array:
+def rem(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
     """Perform `lhs % rhs`"""
 
-def sub(lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable) -> core.Array:
+def sub(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
     """Perform `lhs - rhs`, returning an error on overflow"""
 
-def sub_wrapping(
-    lhs: types.ArrowArrayExportable, rhs: types.ArrowArrayExportable
-) -> core.Array:
-    """Perform `lhs - rhs`, wrapping on overflow for DataType::is_integer"""
+def sub_wrapping(lhs: ArrowArrayExportable, rhs: ArrowArrayExportable) -> Array:
+    """Perform `lhs - rhs`, wrapping on overflow for integer data types."""

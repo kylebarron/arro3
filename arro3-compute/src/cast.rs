@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
-use pyo3_arrow::{PyArray, PyArrayReader, PyField};
+use pyo3_arrow::{PyArray, PyArrayReader, PyDataType, PyField};
 
 /// Cast `input` to the provided data type and return a new Arrow object with type `to_type`, if
 /// possible.
