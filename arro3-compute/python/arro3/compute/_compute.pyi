@@ -18,3 +18,4 @@ from arro3.compute._cast import cast as cast
 from arro3.compute._dictionary import dictionary_encode as dictionary_encode
 from arro3.compute._filter import filter as filter
 from arro3.compute._take import take as take
+from arro3.compute._temporal import date_part as date_part

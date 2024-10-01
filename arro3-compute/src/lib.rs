@@ -8,6 +8,7 @@ mod concat;
 mod dictionary;
 mod filter;
 mod take;
+mod temporal;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -43,6 +44,7 @@ fn _compute(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(dictionary::dictionary_encode))?;
     m.add_wrapped(wrap_pyfunction!(filter::filter))?;
     m.add_wrapped(wrap_pyfunction!(take::take))?;
+    m.add_wrapped(wrap_pyfunction!(temporal::date_part))?;
 
     Ok(())
 }
