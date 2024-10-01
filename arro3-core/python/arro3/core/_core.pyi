@@ -1248,6 +1248,7 @@ class Scalar:
         convert this Scalar into a pyarrow Array, without copying memory. The generated
         array is guaranteed to have length 1.
         """
+    def __eq__(self, other) -> bool: ...
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrow(cls, input: ArrowArrayExportable) -> Scalar:
