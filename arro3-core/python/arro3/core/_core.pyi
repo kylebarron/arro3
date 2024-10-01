@@ -1248,7 +1248,12 @@ class Scalar:
         convert this Scalar into a pyarrow Array, without copying memory. The generated
         array is guaranteed to have length 1.
         """
-    def __eq__(self, other) -> bool: ...
+    def __eq__(self, other) -> bool:
+        """Check for equality with other Python objects (`==`)
+
+        If `other` is not an Arrow scalar, `self` will be converted to a Python object
+        (with `as_py`), and then its `__eq__` method will be called.
+        """
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrow(cls, input: ArrowArrayExportable) -> Scalar:
