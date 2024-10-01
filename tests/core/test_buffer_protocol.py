@@ -1,6 +1,9 @@
+from datetime import datetime, timedelta
+
 import arro3.compute as ac
 import numpy as np
 import pyarrow as pa
+import pytest
 from arro3.core import Array
 
 
@@ -31,6 +34,12 @@ def test_from_buffer():
 
     arr = np.array([1, 2, 3], dtype=np.uint64)
     assert pa.array(Array.from_buffer(memoryview(arr))).type == pa.uint64()
+
+    # Datetime array
+    # https://stackoverflow.com/a/34325416
+    arr = np.arange(datetime(1985, 7, 1), datetime(2015, 7, 1), timedelta(days=1))
+    with pytest.raises(ValueError):
+        Array.from_buffer(arr)
 
 
 def test_operation_on_buffer():
