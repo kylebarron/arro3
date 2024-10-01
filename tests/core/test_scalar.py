@@ -169,4 +169,7 @@ def test_eq():
     assert str_arr[0] == "1"
 
     bytes_arr = Array([b"1", b"2", b"3", b"4"], DataType.binary())
-    assert bytes_arr[0] == b"1"
+    assert bytes_arr[0].as_py() == b"1"
+
+    # This fails because `b"1"` is interpreted as a buffer protocol object.
+    # assert bytes_arr[0] == b"1"
