@@ -77,6 +77,7 @@ class BufferProtocolExportable(Protocol):
     def __buffer__(self, flags: int) -> memoryview: ...
 
 
+# Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
 ArrayInput = ArrowArrayExportable | BufferProtocolExportable | np.ndarray
 """Accepted input as an Arrow array.
 
