@@ -1,14 +1,14 @@
 from typing import overload
 
 from arro3.core import Array, ArrayReader
-from arro3.core.types import ArrowArrayExportable, ArrowStreamExportable
+from arro3.core.types import ArrayInput, ArrowStreamExportable
 
 @overload
-def dictionary_encode(array: ArrowArrayExportable) -> Array: ...
+def dictionary_encode(array: ArrayInput) -> Array: ...
 @overload
 def dictionary_encode(array: ArrowStreamExportable) -> ArrayReader: ...
 def dictionary_encode(
-    array: ArrowArrayExportable | ArrowStreamExportable,
+    array: ArrayInput | ArrowStreamExportable,
 ) -> Array | ArrayReader:
     """
     Dictionary-encode array.

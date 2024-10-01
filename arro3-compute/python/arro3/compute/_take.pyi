@@ -1,7 +1,7 @@
 from arro3.core import Array
-from arro3.core.types import ArrowArrayExportable
+from arro3.core.types import ArrayInput
 
-def take(values: ArrowArrayExportable, indices: ArrowArrayExportable) -> Array:
+def take(values: ArrayInput, indices: ArrayInput) -> Array:
     """Take elements by index from Array, creating a new Array from those indexes.
 
     ```
