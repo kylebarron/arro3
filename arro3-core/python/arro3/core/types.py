@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol, Tuple
+from typing import Protocol, Tuple, Union
 
 import numpy as np
 
@@ -78,7 +78,7 @@ class BufferProtocolExportable(Protocol):
 
 
 # Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
-ArrayInput = ArrowArrayExportable | BufferProtocolExportable | np.ndarray
+ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, np.ndarray]
 """Accepted input as an Arrow array.
 
 Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
