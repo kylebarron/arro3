@@ -248,9 +248,11 @@ impl AnyBufferProtocol {
     /// to be copied, because boolean Python buffers are one _byte_ per element, while Arrow
     /// buffers are one _bit_ per element. All numeric buffers are zero-copy compatible.
     ///
-    /// This uses [`Buffer::from_custom_allocation`][], which manages memory deallocation. When
-    ///
-    ///  other than those with boolean
+    /// This uses [`Buffer::from_custom_allocation`][], which creates Arrow buffers from existing
+    /// memory regions. The [`Buffer`] tracks ownership of the [`PyBuffer`] memory via reference
+    /// counting. The [`PyBuffer`]'s release callback will be called when the Arrow [`Buffer`] sees
+    /// that the `PyBuffer`'s reference count
+    /// reaches zero.
     ///
     /// ## Safety
     ///
