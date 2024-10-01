@@ -134,6 +134,22 @@ impl PyScalar {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
+    fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<PyObject> {
+        if let Ok(other) = other.extract::<PyScalar>() {
+            let eq = self.array == other.array && self.field == other.field;
+            Ok(eq.into_py(py))
+        } else {
+            // If other is not an Arrow scalar, cast self to a Python object, and then call its
+            // `__eq__` method.
+            let self_py = self.as_py(py)?;
+            self_py.call_method1(
+                py,
+                intern!(py, "__eq__"),
+                PyTuple::new_bound(py, vec![other]),
+            )
+        }
+    }
+
     fn __repr__(&self) -> String {
         self.to_string()
     }

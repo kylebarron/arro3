@@ -157,3 +157,19 @@ def test_map_array():
     arro3_arr = Array(pa_arr)
     for i in range(len(pa_arr)):
         assert pa_arr[i].as_py() == arro3_arr[i].as_py()
+
+
+def test_eq():
+    """Test for scalar equality via as_py"""
+    int_arr = Array([1, 2, 3, 4], DataType.int16())
+    assert int_arr[0] == int_arr[0]
+    assert int_arr[0] == 1
+
+    str_arr = Array(["1", "2", "3", "4"], DataType.string())
+    assert str_arr[0] == "1"
+
+    bytes_arr = Array([b"1", b"2", b"3", b"4"], DataType.binary())
+    assert bytes_arr[0].as_py() == b"1"
+
+    # This fails because `b"1"` is interpreted as a buffer protocol object.
+    # assert bytes_arr[0] == b"1"
