@@ -1,12 +1,12 @@
 from typing import overload
 
 from arro3.core import Array, ArrayReader
-from arro3.core.types import ArrowArrayExportable, ArrowStreamExportable
+from arro3.core.types import ArrayInput, ArrowStreamExportable
 
 @overload
 def filter(
-    values: ArrowArrayExportable,
-    predicate: ArrowArrayExportable,
+    values: ArrayInput,
+    predicate: ArrayInput,
 ) -> Array: ...
 @overload
 def filter(
@@ -14,8 +14,8 @@ def filter(
     predicate: ArrowStreamExportable,
 ) -> ArrayReader: ...
 def filter(
-    values: ArrowArrayExportable | ArrowStreamExportable,
-    predicate: ArrowArrayExportable | ArrowStreamExportable,
+    values: ArrayInput | ArrowStreamExportable,
+    predicate: ArrayInput | ArrowStreamExportable,
 ) -> Array | ArrayReader:
     """
     Returns a filtered `values` array where the corresponding elements of

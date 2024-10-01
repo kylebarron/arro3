@@ -4,6 +4,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .types import (
+    ArrayInput,
     ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
@@ -13,12 +14,12 @@ from .types import (
 class Array:
     """An Arrow Array."""
     @overload
-    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
+    def __init__(self, obj: ArrayInput, /, type: None = None) -> None: ...
     @overload
     def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None: ...
     def __init__(
         self,
-        obj: ArrowArrayExportable | Sequence[Any],
+        obj: ArrayInput | Sequence[Any],
         /,
         type: ArrowSchemaExportable | None = None,
     ) -> None:
@@ -122,7 +123,7 @@ class Array:
         Returns:
             The sliced array
         """
-    def take(self, indices: ArrowArrayExportable) -> Array:
+    def take(self, indices: ArrayInput) -> Array:
         """Take specific indices from this Array."""
     def to_numpy(self) -> NDArray:
         """Return a numpy copy of this array."""
@@ -209,19 +210,17 @@ class ChunkedArray:
     """An Arrow ChunkedArray."""
     @overload
     def __init__(
-        self, arrays: ArrowArrayExportable | ArrowStreamExportable, type: None = None
+        self, arrays: ArrayInput | ArrowStreamExportable, type: None = None
     ) -> None: ...
     @overload
     def __init__(
         self,
-        arrays: Sequence[ArrowArrayExportable],
+        arrays: Sequence[ArrayInput],
         type: ArrowSchemaExportable | None = None,
     ) -> None: ...
     def __init__(
         self,
-        arrays: ArrowArrayExportable
-        | ArrowStreamExportable
-        | Sequence[ArrowArrayExportable],
+        arrays: ArrayInput | ArrowStreamExportable | Sequence[ArrayInput],
         type: ArrowSchemaExportable | None = None,
     ) -> None:
         """Construct a new ChunkedArray.
@@ -880,7 +879,7 @@ class RecordBatch:
     @overload
     def __init__(
         self,
-        data: Sequence[ArrowArrayExportable],
+        data: Sequence[ArrayInput],
         *,
         # names: None = None,
         schema: ArrowSchemaExportable,
@@ -889,7 +888,7 @@ class RecordBatch:
     @overload
     def __init__(
         self,
-        data: dict[str, ArrowArrayExportable],
+        data: dict[str, ArrayInput],
         *,
         # names: None = None,
         schema: None = None,
@@ -898,7 +897,7 @@ class RecordBatch:
     @overload
     def __init__(
         self,
-        data: dict[str, ArrowArrayExportable],
+        data: dict[str, ArrayInput],
         *,
         # names: None = None,
         schema: ArrowSchemaExportable,
@@ -906,7 +905,7 @@ class RecordBatch:
     ) -> None: ...
     def __init__(
         self,
-        data: ArrowArrayExportable | dict[str, ArrowArrayExportable],
+        data: ArrayInput | dict[str, ArrayInput],
         *,
         schema: ArrowSchemaExportable | None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
@@ -939,7 +938,7 @@ class RecordBatch:
     def __repr__(self) -> str: ...
     @classmethod
     def from_arrays(
-        cls, arrays: Sequence[ArrowArrayExportable], *, schema: ArrowSchemaExportable
+        cls, arrays: Sequence[ArrayInput], *, schema: ArrowSchemaExportable
     ) -> RecordBatch:
         """Construct a RecordBatch from multiple Arrays
 
@@ -953,7 +952,7 @@ class RecordBatch:
     @classmethod
     def from_pydict(
         cls,
-        mapping: dict[str, ArrowArrayExportable],
+        mapping: dict[str, ArrayInput],
         *,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch:
@@ -1002,7 +1001,7 @@ class RecordBatch:
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> RecordBatch:
         """Construct this object from bare Arrow PyCapsules"""
     def add_column(
-        self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrayInput
     ) -> RecordBatch:
         """Add column to RecordBatch at position.
 
@@ -1018,7 +1017,7 @@ class RecordBatch:
             New RecordBatch with the passed column added.
         """
     def append_column(
-        self, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
+        self, field: str | ArrowSchemaExportable, column: ArrayInput
     ) -> RecordBatch:
         """Append column at end of columns.
 
@@ -1103,7 +1102,7 @@ class RecordBatch:
             New RecordBatch.
         """
     def set_column(
-        self, i: int, field: str | ArrowSchemaExportable, column: ArrowArrayExportable
+        self, i: int, field: str | ArrowSchemaExportable, column: ArrayInput
     ) -> RecordBatch:
         """Replace column in RecordBatch at position.
 
@@ -1130,7 +1129,7 @@ class RecordBatch:
         Returns:
             New RecordBatch.
         """
-    def take(self, indices: ArrowArrayExportable) -> RecordBatch:
+    def take(self, indices: ArrayInput) -> RecordBatch:
         """Select rows from a Table or RecordBatch.
 
         Args:
@@ -1221,12 +1220,12 @@ class RecordBatchReader:
 class Scalar:
     """An arrow Scalar."""
     @overload
-    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
+    def __init__(self, obj: ArrayInput, /, type: None = None) -> None: ...
     @overload
     def __init__(self, obj: Any, /, type: ArrowSchemaExportable) -> None: ...
     def __init__(
         self,
-        obj: ArrowArrayExportable | Any,
+        obj: ArrayInput | Any,
         /,
         type: ArrowSchemaExportable | None = None,
     ) -> None:
@@ -1469,7 +1468,7 @@ class Table:
     @overload
     def __init__(
         self,
-        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        data: Sequence[ArrayInput | ArrowStreamExportable],
         *,
         names: Sequence[str],
         schema: None = None,
@@ -1478,7 +1477,7 @@ class Table:
     @overload
     def __init__(
         self,
-        data: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        data: Sequence[ArrayInput | ArrowStreamExportable],
         *,
         names: None = None,
         schema: ArrowSchemaExportable,
@@ -1487,7 +1486,7 @@ class Table:
     @overload
     def __init__(
         self,
-        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        data: dict[str, ArrayInput | ArrowStreamExportable],
         *,
         names: None = None,
         schema: None = None,
@@ -1496,7 +1495,7 @@ class Table:
     @overload
     def __init__(
         self,
-        data: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        data: dict[str, ArrayInput | ArrowStreamExportable],
         *,
         names: None = None,
         schema: ArrowSchemaExportable,
@@ -1506,8 +1505,8 @@ class Table:
         self,
         data: ArrowArrayExportable
         | ArrowStreamExportable
-        | Sequence[ArrowArrayExportable | ArrowStreamExportable]
-        | dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        | Sequence[ArrayInput | ArrowStreamExportable]
+        | dict[str, ArrayInput | ArrowStreamExportable],
         *,
         names: Sequence[str] | None = None,
         schema: ArrowSchemaExportable | None = None,
@@ -1550,7 +1549,7 @@ class Table:
     @classmethod
     def from_arrays(
         cls,
-        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        arrays: Sequence[ArrayInput | ArrowStreamExportable],
         *,
         names: Sequence[str],
         schema: None = None,
@@ -1560,7 +1559,7 @@ class Table:
     @classmethod
     def from_arrays(
         cls,
-        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        arrays: Sequence[ArrayInput | ArrowStreamExportable],
         *,
         names: None = None,
         schema: ArrowSchemaExportable,
@@ -1569,7 +1568,7 @@ class Table:
     @classmethod
     def from_arrays(
         cls,
-        arrays: Sequence[ArrowArrayExportable | ArrowStreamExportable],
+        arrays: Sequence[ArrayInput | ArrowStreamExportable],
         *,
         names: Sequence[str] | None = None,
         schema: ArrowSchemaExportable | None = None,
@@ -1633,7 +1632,7 @@ class Table:
     @classmethod
     def from_pydict(
         cls,
-        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        mapping: dict[str, ArrayInput | ArrowStreamExportable],
         *,
         schema: None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
@@ -1642,7 +1641,7 @@ class Table:
     @classmethod
     def from_pydict(
         cls,
-        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        mapping: dict[str, ArrayInput | ArrowStreamExportable],
         *,
         schema: ArrowSchemaExportable,
         metadata: None = None,
@@ -1650,7 +1649,7 @@ class Table:
     @classmethod
     def from_pydict(
         cls,
-        mapping: dict[str, ArrowArrayExportable | ArrowStreamExportable],
+        mapping: dict[str, ArrayInput | ArrowStreamExportable],
         *,
         schema: ArrowSchemaExportable | None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
@@ -1963,7 +1962,7 @@ def struct_field(
     """
 
 def fixed_size_list_array(
-    values: ArrowArrayExportable,
+    values: ArrayInput,
     list_size: int,
     *,
     type: ArrowSchemaExportable | None = None,
@@ -1982,8 +1981,8 @@ def fixed_size_list_array(
     """
 
 def list_array(
-    offsets: ArrowArrayExportable,
-    values: ArrowArrayExportable,
+    offsets: ArrayInput,
+    values: ArrayInput,
     *,
     type: ArrowSchemaExportable | None = None,
 ) -> Array:
@@ -2001,7 +2000,7 @@ def list_array(
     """
 
 def struct_array(
-    arrays: Sequence[ArrowArrayExportable],
+    arrays: Sequence[ArrayInput],
     *,
     fields: Sequence[ArrowSchemaExportable],
     type: ArrowSchemaExportable | None = None,
