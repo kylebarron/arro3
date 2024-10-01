@@ -2,14 +2,14 @@ from typing import overload
 
 from arro3.core import Array, ArrayReader
 from arro3.core.types import (
-    ArrowArrayExportable,
+    ArrayInput,
     ArrowSchemaExportable,
     ArrowStreamExportable,
 )
 
 @overload
 def cast(
-    input: ArrowArrayExportable,
+    input: ArrayInput,
     to_type: ArrowSchemaExportable,
 ) -> Array: ...
 @overload
@@ -18,7 +18,7 @@ def cast(
     to_type: ArrowSchemaExportable,
 ) -> ArrayReader: ...
 def cast(
-    input: ArrowArrayExportable | ArrowStreamExportable,
+    input: ArrayInput | ArrowStreamExportable,
     to_type: ArrowSchemaExportable,
 ) -> Array | ArrayReader:
     """

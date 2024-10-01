@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol, Tuple
 
+import numpy as np
+
 
 class ArrowSchemaExportable(Protocol):
     """
@@ -73,3 +75,12 @@ class BufferProtocolExportable(Protocol):
     """A python object that implements the Buffer Protocol"""
 
     def __buffer__(self, flags: int) -> memoryview: ...
+
+
+# Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
+ArrayInput = ArrowArrayExportable | BufferProtocolExportable | np.ndarray
+"""Accepted input as an Arrow array.
+
+Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
+case of boolean-typed input, which must be copied to the Arrow format.
+"""

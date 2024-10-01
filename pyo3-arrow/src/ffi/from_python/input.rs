@@ -21,13 +21,13 @@ impl<'a> FromPyObject<'a> for AnyRecordBatch {
 
 impl<'a> FromPyObject<'a> for AnyArray {
     fn extract_bound(ob: &Bound<'a, PyAny>) -> PyResult<Self> {
-        if ob.hasattr("__arrow_c_array__")? {
-            Ok(Self::Array(PyArray::extract_bound(ob)?))
-        } else if ob.hasattr("__arrow_c_stream__")? {
-            Ok(Self::Stream(PyArrayReader::extract_bound(ob)?))
+        if let Ok(arr) = ob.extract::<PyArray>() {
+            Ok(Self::Array(arr))
+        } else if let Ok(stream) = ob.extract::<PyArrayReader>() {
+            Ok(Self::Stream(stream))
         } else {
             Err(PyValueError::new_err(
-                "Expected object with __arrow_c_array__ or __arrow_c_stream__ method",
+                "Expected object with __arrow_c_array__ or __arrow_c_stream__ method or implementing buffer protocol.",
             ))
         }
     }
