@@ -79,7 +79,7 @@ class BufferProtocolExportable(Protocol):
 
 
 # Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
-ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, "np.ndarray"]
+ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, np.ndarray]
 """Accepted input as an Arrow array.
 
 Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
