@@ -12,13 +12,13 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/types/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/array-reader/">
       
       
-        <link rel="prev" href="../accessors/">
+        <link rel="prev" href="../array/">
       
       
-        <link rel="next" href="../../compute/">
+        <link rel="next" href="../chunked-array/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>types - arro3</title>
+        <title>ArrayReader - arro3</title>
       
     
     
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="types - arro3" >
+        <meta  property="og:title"  content="ArrayReader - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/types.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array-reader.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/types/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/array-reader/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="types - arro3" >
+        <meta  name="twitter:title"  content="ArrayReader - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/types.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/array-reader.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#types" class="md-skip">
+        <a href="#arrayreader" class="md-skip">
           Skip to content
         </a>
       
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              types
+              ArrayReader
             
           </span>
         </div>
@@ -454,10 +454,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../array-reader/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ArrayReader
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -466,6 +486,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrayReader
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label=" ArrayReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.closed" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.field" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrays
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_arrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.read_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.read_next_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_array
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -685,30 +830,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    types
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../types/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -717,131 +842,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#arro3.core.types" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;types
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" types">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrayInput" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;ArrayInput
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowArrayExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowArrayExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowSchemaExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowSchemaExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowStreamExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowStreamExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.BufferProtocolExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;BufferProtocolExportable
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -931,60 +931,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.core.types" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;types
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrayReader
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" types">
+    <nav class="md-nav" aria-label=" ArrayReader">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrayInput" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.closed" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;ArrayInput
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.field" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowArrayExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowArrayExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;field
     </span>
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowSchemaExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowSchemaExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
     </span>
@@ -992,23 +967,8 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowStreamExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowStreamExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
     </span>
@@ -1016,15 +976,55 @@
   
 </li>
         
-      </ul>
-    </nav>
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrays
+    </span>
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.types.BufferProtocolExportable" class="md-nav__link">
+  <a href="#arro3.core.ArrayReader.from_arrow" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;BufferProtocolExportable
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.from_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.read_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.ArrayReader.read_next_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_array
     </span>
   </a>
   
@@ -1053,20 +1053,28 @@
   
 
 
-<h1 id="types">types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h1>
+<h1 id="arrayreader">ArrayReader<a class="headerlink" href="#arrayreader" title="Permanent link">&para;</a></h1>
 
 
-<div class="doc doc-object doc-module">
+<div class="doc doc-object doc-class">
 
 
 
-<h2 id="arro3.core.types" class="doc doc-heading">
-            <span class="doc doc-object-name doc-module-name">arro3.core.types</span>
+<h2 id="arro3.core.ArrayReader" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">arro3.core.ArrayReader</span>
 
 
-<a href="#arro3.core.types" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#arro3.core.ArrayReader" class="headerlink" title="Permanent link">&para;</a></h2>
+
 
     <div class="doc doc-contents first">
+
+
+        <p>A stream of Arrow <code>Array</code>s.</p>
+<p>This is similar to the <a class="autorefs autorefs-internal" href="../record-batch-reader/#arro3.core.RecordBatchReader"><code>RecordBatchReader</code></a> but each
+item yielded from the stream is an <a class="autorefs autorefs-internal" href="../array/#arro3.core.Array"><code>Array</code></a>, not a
+<a class="autorefs autorefs-internal" href="../record-batch/#arro3.core.RecordBatch"><code>RecordBatch</code></a>.</p>
+
 
 
 
@@ -1082,273 +1090,256 @@
 
 
 
-<h3 id="arro3.core.types.ArrayInput" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">ArrayInput</span>
+<h3 id="arro3.core.ArrayReader.closed" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">closed</span>
 
 
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
-<a href="#arro3.core.types.ArrayInput" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">ArrayInput</span> <span class="o">=</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Union" href="https://docs.python.org/3/library/typing.html#typing.Union">Union</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.BufferProtocolExportable" href="#arro3.core.types.BufferProtocolExportable">BufferProtocolExportable</a></span><span class="p">,</span> <span class="s2">&quot;np.ndarray&quot;</span><span class="p">]</span>
+<a href="#arro3.core.ArrayReader.closed" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">closed</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Accepted input as an Arrow array.</p>
-<p>Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
-case of boolean-typed input, which must be copied to the Arrow format.</p>
+        <p>Returns <code>true</code> if this reader has already been consumed.</p>
     </div>
 
 </div>
 
-
-<div class="doc doc-object doc-class">
-
+<div class="doc doc-object doc-attribute">
 
 
-<h3 id="arro3.core.types.ArrowArrayExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowArrayExportable</span>
+
+<h3 id="arro3.core.ArrayReader.field" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">field</span>
 
 
-<a href="#arro3.core.types.ArrowArrayExportable" class="headerlink" title="Permanent link">&para;</a></h3>
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
 
+<a href="#arro3.core.ArrayReader.field" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">field</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Field" href="../field/#arro3.core.Field">Field</a></span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
 
+        <p>Access the field of this reader.</p>
+    </div>
 
-        <p>An object with an <code>__arrow_c_array__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Array</code> or <code>RecordBatch</code> objects.</li>
-<li>pyarrow <code>Array</code> or <code>RecordBatch</code> objects</li>
-</ul>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CDataInterface.html">Arrow C Data Interface
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
-Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
+</div>
 
 
 
 <div class="doc doc-object doc-function">
 
 
-<h4 id="arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">__arrow_c_array__</span>
-
-
-<a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_array__</span><span class="p">(</span>
-    <span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Tuple" href="https://docs.python.org/3/library/typing.html#typing.Tuple">Tuple</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.ArrowSchemaExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowSchemaExportable</span>
-
-
-<a href="#arro3.core.types.ArrowSchemaExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>An object with an <code>__arrow_c_schema__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Schema</code>, <code>Field</code>, or <code>DataType</code> objects.</li>
-<li>pyarrow <code>Schema</code>, <code>Field</code>, or <code>DataType</code> objects.</li>
-</ul>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CDataInterface.html">Arrow C Data Interface
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
-Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.__arrow_c_schema__" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">__arrow_c_schema__</span>
 
 
-<a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h4>
+<a href="#arro3.core.ArrayReader.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_schema__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.ArrowStreamExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowStreamExportable</span>
-
-
-<a href="#arro3.core.types.ArrowStreamExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>An object with an <code>__arrow_c_stream__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Table</code>, <code>RecordBatchReader</code>, <code>ChunkedArray</code>, or <code>ArrayReader</code> objects.</li>
-<li>Polars <code>Series</code> or <code>DataFrame</code> objects (polars v1.2 or higher)</li>
-<li>pyarrow <code>RecordBatchReader</code>, <code>Table</code>, or <code>ChunkedArray</code> objects (pyarrow v14 or
-    higher)</li>
-<li>pandas <code>DataFrame</code>s  (pandas v2.2 or higher)</li>
-<li>ibis <code>Table</code> objects.</li>
-</ul>
-<p>For an up to date list of supported objects, see <a href="https://github.com/apache/arrow/issues/39195#issuecomment-2245718008">this
-issue</a>.</p>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CStreamInterface.html">Arrow C Stream
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
+        <p>An implementation of the <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
 Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
+This dunder method should not be called directly, but enables zero-copy data
+transfer to other Python libraries that understand Arrow memory.</p>
+<p>This allows Arrow consumers to inspect the data type of this ArrayReader. Then
+the consumer can ask the producer (in <code>__arrow_c_stream__</code>) to cast the exported
+data to a supported data type.</p>
 
+    </div>
 
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
+</div>
 
 <div class="doc doc-object doc-function">
 
 
-<h4 id="arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="doc doc-heading">
+<h3 id="arro3.core.ArrayReader.__arrow_c_stream__" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">__arrow_c_stream__</span>
 
 
-<a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h4>
+<a href="#arro3.core.ArrayReader.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_stream__</span><span class="p">(</span><span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
+        <p>An implementation of the <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
+Interface</a>.
+This dunder method should not be called directly, but enables zero-copy data
+transfer to other Python libraries that understand Arrow memory.</p>
+<p>For example, you can call <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.chunked_array.html#pyarrow.chunked_array"><code>pyarrow.chunked_array()</code></a> to
+convert this ArrayReader to a pyarrow ChunkedArray, without copying memory.</p>
+
     </div>
 
 </div>
 
+<div class="doc doc-object doc-function">
 
 
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
+<h3 id="arro3.core.ArrayReader.from_arrays" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrays</span>
 
 
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
 
-<h3 id="arro3.core.types.BufferProtocolExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">BufferProtocolExportable</span>
-
-
-<a href="#arro3.core.types.BufferProtocolExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<a href="#arro3.core.ArrayReader.from_arrays" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrays</span><span class="p">(</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">,</span> <span class="n">arrays</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
+
+        <p>Construct an ArrayReader from existing data.</p>
 
 
-        <p>A python object that implements the Buffer Protocol</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-  </div>
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>field</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>The Arrow field that describes the sequence of array data.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>arrays</code></b>
+              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>A sequence (list or tuple) of Array data.</p>
+          </div>
+        </li>
+    </ul>
 
     </div>
 
 </div>
 
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.ArrayReader.from_arrow" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.ArrayReader.from_arrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct this from an existing Arrow object.</p>
+<p>It can be called on anything that exports the Arrow stream interface
+(has an <code>__arrow_c_stream__</code> method), such as a <code>Table</code> or <code>ArrayReader</code>.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.ArrayReader.from_arrow_pycapsule" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow_pycapsule</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.ArrayReader.from_arrow_pycapsule" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow_pycapsule</span><span class="p">(</span><span class="n">capsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct this object from a bare Arrow PyCapsule</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.ArrayReader.from_stream" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_stream</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.ArrayReader.from_stream" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_stream</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowStreamExportable" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ArrayReader" href="#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct this from an existing Arrow object.</p>
+<p>This is an alias of and has the same behavior as
+[<code>from_arrow</code>][arro3.ArrayReader.from_arrow], but is included for parity
+with <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatchReader.html#pyarrow.RecordBatchReader"><code>pyarrow.RecordBatchReader</code></a>.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.ArrayReader.read_all" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_all</span>
+
+
+<a href="#arro3.core.ArrayReader.read_all" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_all</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.ChunkedArray" href="../chunked-array/#arro3.core.ChunkedArray">ChunkedArray</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read all batches from this stream into a ChunkedArray.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.ArrayReader.read_next_array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_next_array</span>
+
+
+<a href="#arro3.core.ArrayReader.read_next_array" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_next_array</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read the next array from this stream.</p>
+
+    </div>
+
+</div>
 
 
 

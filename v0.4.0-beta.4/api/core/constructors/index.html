@@ -12,13 +12,13 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/types/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/constructors/">
       
       
-        <link rel="prev" href="../accessors/">
+        <link rel="prev" href="../table/">
       
       
-        <link rel="next" href="../../compute/">
+        <link rel="next" href="../accessors/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>types - arro3</title>
+        <title>Constructors - arro3</title>
       
     
     
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="types - arro3" >
+        <meta  property="og:title"  content="Constructors - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/types.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/types/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/constructors/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="types - arro3" >
+        <meta  name="twitter:title"  content="Constructors - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/types.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#types" class="md-skip">
+        <a href="#constructors" class="md-skip">
           Skip to content
         </a>
       
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              types
+              Constructors
             
           </span>
         </div>
@@ -643,10 +643,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../constructors/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Constructors
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -655,6 +675,68 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#arro3.core" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;core
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label=" core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.list_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.struct_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -685,30 +767,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    types
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../types/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -717,131 +779,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#arro3.core.types" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;types
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" types">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrayInput" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;ArrayInput
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowArrayExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowArrayExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowSchemaExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowSchemaExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowStreamExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowStreamExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.BufferProtocolExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;BufferProtocolExportable
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -931,100 +868,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.core.types" class="md-nav__link">
+  <a href="#arro3.core" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;types
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;core
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" types">
+    <nav class="md-nav" aria-label=" core">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrayInput" class="md-nav__link">
+  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;ArrayInput
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable" class="md-nav__link">
+  <a href="#arro3.core.list_array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowArrayExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowArrayExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_array__
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
     </span>
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
           <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable" class="md-nav__link">
+  <a href="#arro3.core.struct_array" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowSchemaExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowSchemaExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArrowStreamExportable
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" ArrowStreamExportable">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.types.BufferProtocolExportable" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;BufferProtocolExportable
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
     </span>
   </a>
   
@@ -1053,18 +927,18 @@
   
 
 
-<h1 id="types">types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h1>
+<h1 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<h2 id="arro3.core.types" class="doc doc-heading">
-            <span class="doc doc-object-name doc-module-name">arro3.core.types</span>
+<h2 id="arro3.core" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">arro3.core</span>
 
 
-<a href="#arro3.core.types" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#arro3.core" class="headerlink" title="Permanent link">&para;</a></h2>
 
     <div class="doc doc-contents first">
 
@@ -1078,277 +952,217 @@
 
 
 
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="arro3.core.types.ArrayInput" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">ArrayInput</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
-  </span>
-
-<a href="#arro3.core.types.ArrayInput" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="n">ArrayInput</span> <span class="o">=</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Union" href="https://docs.python.org/3/library/typing.html#typing.Union">Union</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowArrayExportable" href="#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.BufferProtocolExportable" href="#arro3.core.types.BufferProtocolExportable">BufferProtocolExportable</a></span><span class="p">,</span> <span class="s2">&quot;np.ndarray&quot;</span><span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Accepted input as an Arrow array.</p>
-<p>Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
-case of boolean-typed input, which must be copied to the Arrow format.</p>
-    </div>
-
-</div>
-
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.ArrowArrayExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowArrayExportable</span>
-
-
-<a href="#arro3.core.types.ArrowArrayExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>An object with an <code>__arrow_c_array__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Array</code> or <code>RecordBatch</code> objects.</li>
-<li>pyarrow <code>Array</code> or <code>RecordBatch</code> objects</li>
-</ul>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CDataInterface.html">Arrow C Data Interface
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
-Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
 
 
 <div class="doc doc-object doc-function">
 
 
-<h4 id="arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">__arrow_c_array__</span>
+<h3 id="arro3.core.fixed_size_list_array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fixed_size_list_array</span>
 
 
-<a href="#arro3.core.types.ArrowArrayExportable.__arrow_c_array__" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_array__</span><span class="p">(</span>
-    <span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Tuple" href="https://docs.python.org/3/library/typing.html#typing.Tuple">Tuple</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span><span class="p">]</span>
+<a href="#arro3.core.fixed_size_list_array" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">fixed_size_list_array</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
+    <span class="n">list_size</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
+        <p>Construct a new fixed size list array</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>values</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>the values of the new fixed size list array</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>list_size</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>the number of elements in each item of the list.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Other Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>type</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the type of output array. This must have fixed size list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></code>
+          –
+          <div class="doc-md-description">
+            <p>a new Array with fixed size list type</p>
+          </div>
+        </li>
+    </ul>
+
     </div>
 
 </div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.ArrowSchemaExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowSchemaExportable</span>
-
-
-<a href="#arro3.core.types.ArrowSchemaExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>An object with an <code>__arrow_c_schema__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Schema</code>, <code>Field</code>, or <code>DataType</code> objects.</li>
-<li>pyarrow <code>Schema</code>, <code>Field</code>, or <code>DataType</code> objects.</li>
-</ul>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CDataInterface.html">Arrow C Data Interface
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
-Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
 
 <div class="doc doc-object doc-function">
 
 
-<h4 id="arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">__arrow_c_schema__</span>
+<h3 id="arro3.core.list_array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">list_array</span>
 
 
-<a href="#arro3.core.types.ArrowSchemaExportable.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_schema__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
+<a href="#arro3.core.list_array" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_array</span><span class="p">(</span>
+    <span class="n">offsets</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
+        <p>Construct a new list array</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>offsets</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>the offsets for the output list array. This array must have type int32 or int64, depending on whether you wish to create a list array or large list array.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>values</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>the values for the output list array.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Other Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>type</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the type of output array. This must have list or large list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></code>
+          –
+          <div class="doc-md-description">
+            <p>a new Array with list or large list type</p>
+          </div>
+        </li>
+    </ul>
+
     </div>
 
 </div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.ArrowStreamExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ArrowStreamExportable</span>
-
-
-<a href="#arro3.core.types.ArrowStreamExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>An object with an <code>__arrow_c_stream__</code> method.</p>
-<p>Supported objects include:</p>
-<ul>
-<li>arro3 <code>Table</code>, <code>RecordBatchReader</code>, <code>ChunkedArray</code>, or <code>ArrayReader</code> objects.</li>
-<li>Polars <code>Series</code> or <code>DataFrame</code> objects (polars v1.2 or higher)</li>
-<li>pyarrow <code>RecordBatchReader</code>, <code>Table</code>, or <code>ChunkedArray</code> objects (pyarrow v14 or
-    higher)</li>
-<li>pandas <code>DataFrame</code>s  (pandas v2.2 or higher)</li>
-<li>ibis <code>Table</code> objects.</li>
-</ul>
-<p>For an up to date list of supported objects, see <a href="https://github.com/apache/arrow/issues/39195#issuecomment-2245718008">this
-issue</a>.</p>
-<p>Such an object implements the <a href="https://arrow.apache.org/docs/format/CStreamInterface.html">Arrow C Stream
-interface</a> via the
-<a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
-Interface</a>.
-This allows for zero-copy Arrow data interchange across libraries.</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
 
 <div class="doc doc-object doc-function">
 
 
-<h4 id="arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">__arrow_c_stream__</span>
+<h3 id="arro3.core.struct_array" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">struct_array</span>
 
 
-<a href="#arro3.core.types.ArrowStreamExportable.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_stream__</span><span class="p">(</span><span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
+<a href="#arro3.core.struct_array" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">struct_array</span><span class="p">(</span>
+    <span class="n">arrays</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">],</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
+        <p>Construct a new struct array</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>arrays</code></b>
+              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="arro3.core.types.ArrayInput" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>a sequence of arrays for the struct children</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Other Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>fields</code></b>
+              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>a sequence of fields that represent each of the struct children</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>type</code></b>
+              (<code><a class="autorefs autorefs-internal" title="arro3.core.types.ArrowSchemaExportable" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the type of output array. This must have struct type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-internal" title="arro3.core._core.Array" href="../array/#arro3.core.Array">Array</a></code>
+          –
+          <div class="doc-md-description">
+            <p>a new Array with struct type</p>
+          </div>
+        </li>
+    </ul>
+
     </div>
 
 </div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="arro3.core.types.BufferProtocolExportable" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">BufferProtocolExportable</span>
-
-
-<a href="#arro3.core.types.BufferProtocolExportable" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-external" title="typing.Protocol" href="https://docs.python.org/3/library/typing.html#typing.Protocol">Protocol</a></code></p>
-
-
-        <p>A python object that implements the Buffer Protocol</p>
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
 
 
 
