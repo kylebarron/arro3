@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Protocol, Tuple, Union
+from typing import TYPE_CHECKING, Protocol, Tuple, Union
 
-import numpy as np
+if TYPE_CHECKING:
+    import numpy as np
 
 
 class ArrowSchemaExportable(Protocol):
@@ -78,7 +79,7 @@ class BufferProtocolExportable(Protocol):
 
 
 # Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
-ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, np.ndarray]
+ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, "np.ndarray"]
 """Accepted input as an Arrow array.
 
 Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
