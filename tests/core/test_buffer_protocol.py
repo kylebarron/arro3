@@ -50,3 +50,19 @@ def test_operation_on_buffer():
     indices = np.array([2, 3, 4], dtype=np.uint64)
     out = ac.take(np_arr, indices)
     assert pa.array(out) == pa.array(indices)
+
+
+def test_multi_dimensional():
+    np_arr = np.arange(6, dtype=np.uint8).reshape((2, 3))
+    arro3_arr = Array(np_arr)
+    pa_arr = pa.array(arro3_arr)
+    assert pa_arr.type.list_size == 3
+    assert pa_arr.type.value_type == pa.uint8()
+
+    np_arr = np.arange(12, dtype=np.uint8).reshape((1, 2, 3, 2))
+    arro3_arr = Array(np_arr)
+    pa_arr = pa.array(arro3_arr)
+    assert pa_arr.type.list_size == 2
+    assert pa_arr.type.value_type.list_size == 3
+    assert pa_arr.type.value_type.value_type.list_size == 2
+    assert pa_arr.type.value_type.value_type.value_type == pa.uint8()
