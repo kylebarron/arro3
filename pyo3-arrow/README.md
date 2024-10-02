@@ -187,6 +187,8 @@ In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` 
 
 pyo3-arrow will automatically interpret Python objects that implement the [Python Buffer Protocol](https://docs.python.org/3/c-api/buffer.html). This is implemented as part of the `FromPyObject` impl on `PyArray`. So if your function accepts `PyArray`, it will automatically accept buffer protocol input. This conversion is zero-copy.
 
+Multi-dimensional buffer protocol objects are interpreted as nested fixed size lists.
+
 ## Why not use arrow-rs's Python integration?
 
 arrow-rs has [some existing Python integration](https://docs.rs/arrow/latest/arrow/pyarrow/index.html), but there are a few reasons why I created `pyo3-arrow`:

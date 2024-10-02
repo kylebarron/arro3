@@ -12,8 +12,9 @@ use std::sync::Arc;
 
 use arrow::array::BooleanBuilder;
 use arrow_array::{
-    ArrayRef, Datum, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array, Int8Array,
-    RecordBatchIterator, RecordBatchReader, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
+    ArrayRef, Datum, FixedSizeListArray, Float32Array, Float64Array, Int16Array, Int32Array,
+    Int64Array, Int8Array, RecordBatchIterator, RecordBatchReader, UInt16Array, UInt32Array,
+    UInt64Array, UInt8Array,
 };
 use arrow_buffer::{Buffer, ScalarBuffer};
 use arrow_schema::{ArrowError, Field, FieldRef, Fields, Schema, SchemaRef};
@@ -212,6 +213,7 @@ impl AnyBufferProtocol {
         }
     }
 
+    #[allow(dead_code)]
     fn dimensions(&self) -> usize {
         match self {
             Self::UInt8(buf) => buf.dimensions(),
@@ -265,6 +267,31 @@ impl AnyBufferProtocol {
     pub fn into_arrow_array(self) -> PyArrowResult<ArrayRef> {
         self.validate_buffer()?;
 
+        let shape = self.shape().to_vec();
+
+        // Handle multi dimensional arrays by wrapping in FixedSizeLists
+        if shape.len() == 1 {
+            self.into_arrow_values()
+        } else {
+            assert!(shape.len() > 1, "shape cannot be 0");
+
+            let mut values = self.into_arrow_values()?;
+
+            for size in shape[1..].iter().rev() {
+                let field = Arc::new(Field::new("item", values.data_type().clone(), false));
+                let x = FixedSizeListArray::new(field, (*size).try_into().unwrap(), values, None);
+                values = Arc::new(x);
+            }
+
+            Ok(values)
+        }
+    }
+
+    /// Convert the raw buffer to an [ArrayRef].
+    ///
+    /// In `into_arrow_array` the values will be wrapped in FixedSizeLists if needed for multi
+    /// dimensional input.
+    fn into_arrow_values(self) -> PyArrowResult<ArrayRef> {
         let len = self.item_count();
         let len_bytes = self.len_bytes();
         let ptr = NonNull::new(self.buf_ptr() as _).unwrap();
@@ -438,8 +465,6 @@ impl AnyBufferProtocol {
         }
     }
 
-    // TODO: in the future, construct an Arrow FixedSizeList for each dimension
-    #[allow(dead_code)]
     fn shape(&self) -> &[usize] {
         match self {
             Self::UInt8(buf) => buf.shape(),
@@ -455,15 +480,34 @@ impl AnyBufferProtocol {
         }
     }
 
+    fn strides(&self) -> &[isize] {
+        match self {
+            Self::UInt8(buf) => buf.strides(),
+            Self::UInt16(buf) => buf.strides(),
+            Self::UInt32(buf) => buf.strides(),
+            Self::UInt64(buf) => buf.strides(),
+            Self::Int8(buf) => buf.strides(),
+            Self::Int16(buf) => buf.strides(),
+            Self::Int32(buf) => buf.strides(),
+            Self::Int64(buf) => buf.strides(),
+            Self::Float32(buf) => buf.strides(),
+            Self::Float64(buf) => buf.strides(),
+        }
+    }
+
     fn validate_buffer(&self) -> PyArrowResult<()> {
         if !self.is_c_contiguous() {
             return Err(PyValueError::new_err("Buffer is not C contiguous").into());
         }
 
-        if self.dimensions() != 1 {
+        if self.shape().iter().any(|s| *s == 0) {
             return Err(
-                PyValueError::new_err("Only 1-dimensional arrays currently supported.").into(),
+                PyValueError::new_err("0-length dimension not currently supported.").into(),
             );
+        }
+
+        if self.strides().iter().any(|s| *s == 0) {
+            return Err(PyValueError::new_err("Non-zero strides not currently supported.").into());
         }
 
         Ok(())

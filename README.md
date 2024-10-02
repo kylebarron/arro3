@@ -43,7 +43,7 @@ Consult the [documentation](https://kylebarron.dev/arro3/latest/).
 
     Every functional API in arro3 accepts Arrow data from _any_ Python library. So you can pass a `pyarrow.Table` directly into `arro3.io.write_parquet`, and it'll _just work_.
 
-- **Extensible**. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more [compute kernels](https://docs.rs/arrow/latest/arrow/compute/index.html) provided by the Rust Arrow implementation as well as .
+- **Extensible**. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more [compute kernels](https://docs.rs/arrow/latest/arrow/compute/index.html) provided by the Rust Arrow implementation.
 - **Compliant**. Full support for the Arrow specification, including extension types. (Arrow's new view types will be supported from the next Rust `arrow` release).
 - **Streaming-first**. All compute and IO functionality is streaming-based with lazy iterators, so you can work with larger-than-memory data.
 
