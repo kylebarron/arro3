@@ -11,6 +11,13 @@ keywords = { workspace = true }
 categories = { workspace = true }
 rust-version = { workspace = true }
 
+[features]
+default = ["buffer_protocol"]
+
+# Support buffer protocol. Requires `abi3-py311` pyo3 feature or non-abi3
+# wheels.
+buffer_protocol = []
+
 [dependencies]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }

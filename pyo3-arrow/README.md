@@ -189,6 +189,8 @@ pyo3-arrow will automatically interpret Python objects that implement the [Pytho
 
 Multi-dimensional buffer protocol objects are interpreted as nested fixed size lists.
 
+Buffer protocol support is behind a `buffer_protocol` feature flag (turned on by default), as it requires either the `abi3-py311` pyo3 feature or building non-abi3 wheels.
+
 ## Why not use arrow-rs's Python integration?
 
 arrow-rs has [some existing Python integration](https://docs.rs/arrow/latest/arrow/pyarrow/index.html), but there are a few reasons why I created `pyo3-arrow`:

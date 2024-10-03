@@ -3,7 +3,8 @@
 
 mod array;
 mod array_reader;
-mod buffer;
+#[cfg(feature = "buffer_protocol")]
+pub mod buffer;
 mod chunked;
 mod datatypes;
 pub mod error;
@@ -20,6 +21,7 @@ mod utils;
 
 pub use array::PyArray;
 pub use array_reader::PyArrayReader;
+#[cfg(feature = "buffer_protocol")]
 pub use buffer::PyArrowBuffer;
 pub use chunked::PyChunkedArray;
 pub use datatypes::PyDataType;

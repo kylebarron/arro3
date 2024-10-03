@@ -18,11 +18,13 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+#[cfg(feature = "buffer_protocol")]
+use crate::buffer::AnyBufferProtocol;
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
-use crate::input::{AnyArray, AnyBufferProtocol};
+use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::scalar::PyScalar;
@@ -315,6 +317,7 @@ impl PyArray {
     }
 
     /// Import via buffer protocol
+    #[cfg(feature = "buffer_protocol")]
     #[classmethod]
     fn from_buffer(_cls: &Bound<PyType>, buffer: AnyBufferProtocol) -> PyArrowResult<Self> {
         buffer.try_into()
@@ -332,13 +335,14 @@ impl PyArray {
         };
 
         // Prefer zero-copy route via buffer protocol, if possible
+        #[cfg(feature = "buffer_protocol")]
         if let Ok(buf) = numpy_array.extract::<AnyBufferProtocol>() {
-            buf.try_into()
-        } else {
-            let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
-            let arrow_array = from_numpy(py, numpy_array)?;
-            Ok(Self::from_array_ref(arrow_array))
+            return buf.try_into();
         }
+
+        let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
+        let arrow_array = from_numpy(py, numpy_array)?;
+        Ok(Self::from_array_ref(arrow_array))
     }
 
     fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
