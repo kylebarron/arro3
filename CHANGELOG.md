@@ -2,6 +2,35 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.0] - 2024-10-03
+
+### Enhancements :magic_wand:
+
+- Zero-copy buffer protocol data import by @kylebarron in https://github.com/kylebarron/arro3/pull/204
+
+  - Handle multi-dimensional buffer protocol input by @kylebarron in https://github.com/kylebarron/arro3/pull/208
+  - Prefer zero-copy in from_numpy by @kylebarron in https://github.com/kylebarron/arro3/pull/214
+
+- New compute functions:
+  - Add date_part by @kylebarron in https://github.com/kylebarron/arro3/pull/202
+  - Aggregate functions: array min, max, sum by @kylebarron in https://github.com/kylebarron/arro3/pull/193
+  - Arith functions by @kylebarron in https://github.com/kylebarron/arro3/pull/194
+  - More compute functions by @kylebarron in https://github.com/kylebarron/arro3/pull/104
+- Implement scalar equality by @kylebarron in https://github.com/kylebarron/arro3/pull/205
+- Improved docstrings by @kylebarron in https://github.com/kylebarron/arro3/pull/198
+- Add installation section to readme by @kylebarron in https://github.com/kylebarron/arro3/pull/189
+
+### Bug fixes :bug:
+
+- Fix data type bit width by @kylebarron in https://github.com/kylebarron/arro3/pull/190
+- Fix return type of `RecordBatch.column` by @kylebarron in https://github.com/kylebarron/arro3/pull/191
+
+## New Contributors
+
+- @3ok made their first contribution in https://github.com/kylebarron/arro3/pull/210
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.3.1...py-v0.4.0
+
 ## [0.3.1] - 2024-09-11
 
 ### Bug fixes :bug:
