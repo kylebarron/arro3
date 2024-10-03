@@ -330,9 +330,15 @@ impl PyArray {
         if numpy_array.hasattr("__array__")? {
             numpy_array = numpy_array.call_method0("__array__")?;
         };
-        let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
-        let arrow_array = from_numpy(py, numpy_array)?;
-        Ok(Self::from_array_ref(arrow_array))
+
+        // Prefer zero-copy route via buffer protocol, if possible
+        if let Ok(buf) = numpy_array.extract::<AnyBufferProtocol>() {
+            buf.try_into()
+        } else {
+            let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
+            let arrow_array = from_numpy(py, numpy_array)?;
+            Ok(Self::from_array_ref(arrow_array))
+        }
     }
 
     fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
