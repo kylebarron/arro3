@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0] - 2024-10-03
+
+### Enhancements :magic_wand:
+
+- Zero-copy buffer protocol data import by @kylebarron in https://github.com/kylebarron/arro3/pull/204
+  - Handle multi-dimensional buffer protocol input by @kylebarron in https://github.com/kylebarron/arro3/pull/208
+- Put buffer protocol behind feature flag by @kylebarron in https://github.com/kylebarron/arro3/pull/215
+- Implement `FromPyObject` for `PyScalar` by @kylebarron in https://github.com/kylebarron/arro3/pull/199
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.3.0...pyo3-arrow-v0.4.0
+
 ## [0.3.0] - 2024-09-27
 
 ### Enhancements :magic_wand:
