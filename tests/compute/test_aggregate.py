@@ -62,8 +62,6 @@ def test_min_max_datetime_with_timezone():
     arr = pa.array([dt1, dt2, dt3])
     assert arr.type.tz == "UTC"
 
-    # pa_arr = pa.array([dt1, dt2, dt3], type=pa.timestamp("ns", None))
-    # arro3_arr = Array(pa_arr)
     assert ac.min(arr).as_py() == dt1
     assert ac.min(arr).type.tz == "UTC"
     assert ac.max(arr).as_py() == dt3
