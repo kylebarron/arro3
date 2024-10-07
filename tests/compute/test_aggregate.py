@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import arro3.compute as ac
 import pyarrow as pa
@@ -53,3 +53,16 @@ def test_min_max_datetime():
     arro3_arr = Array(pa_arr)
     assert ac.min(arro3_arr).as_py() == dt1
     assert ac.max(arro3_arr).as_py() == dt3
+
+
+def test_min_max_datetime_with_timezone():
+    dt1 = datetime.now(timezone.utc)
+    dt2 = datetime.now(timezone.utc)
+    dt3 = datetime.now(timezone.utc)
+    arr = pa.array([dt1, dt2, dt3])
+    assert arr.type.tz == "UTC"
+
+    assert ac.min(arr).as_py() == dt1
+    assert ac.min(arr).type.tz == "UTC"
+    assert ac.max(arr).as_py() == dt3
+    assert ac.max(arr).type.tz == "UTC"

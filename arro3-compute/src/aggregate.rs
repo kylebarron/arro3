@@ -6,7 +6,7 @@ use arrow::array::{
 };
 use arrow::{compute, downcast_primitive_array};
 use arrow_array::{
-    ArrayRef, ArrowPrimitiveType, BinaryViewArray, BooleanArray, GenericBinaryArray,
+    Array, ArrayRef, ArrowPrimitiveType, BinaryViewArray, BooleanArray, GenericBinaryArray,
     GenericStringArray, OffsetSizeTrait, PrimitiveArray, StringViewArray,
 };
 use arrow_schema::{ArrowError, DataType};
@@ -71,7 +71,9 @@ fn max_array(array: ArrayRef) -> Result<ArrayRef, ArrowError> {
 fn max_primitive<T: ArrowPrimitiveType>(array: &PrimitiveArray<T>) -> ArrayRef {
     let mut builder = PrimitiveBuilder::<T>::with_capacity(1);
     builder.append_option(compute::max(array));
-    Arc::new(builder.finish())
+    // Need to append the original data type, because PrimitiveBuilder::<T> will sometimes lose the
+    // exact data type. E.g. It will lose the time zone for datetime types.
+    Arc::new(builder.finish().with_data_type(array.data_type().clone()))
 }
 
 #[inline(never)]
@@ -164,7 +166,9 @@ fn min_array(array: ArrayRef) -> Result<ArrayRef, ArrowError> {
 fn min_primitive<T: ArrowPrimitiveType>(array: &PrimitiveArray<T>) -> ArrayRef {
     let mut builder = PrimitiveBuilder::<T>::with_capacity(1);
     builder.append_option(compute::min(array));
-    Arc::new(builder.finish())
+    // Need to append the original data type, because PrimitiveBuilder::<T> will sometimes lose the
+    // exact data type. E.g. It will lose the time zone for datetime types.
+    Arc::new(builder.finish().with_data_type(array.data_type().clone()))
 }
 
 #[inline(never)]

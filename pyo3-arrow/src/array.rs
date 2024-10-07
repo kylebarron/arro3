@@ -50,8 +50,7 @@ impl PyArray {
     ///
     /// This will panic if the array's data type does not match the field's data type.
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
-        assert_eq!(array.data_type(), field.data_type());
-        Self { array, field }
+        Self::try_new(array, field).unwrap()
     }
 
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
@@ -61,7 +60,7 @@ impl PyArray {
         // providing.
         if array.data_type() != field.data_type() {
             return Err(ArrowError::SchemaError(
-                "Array DataType must match Field DataType".to_string(),
+                format!("Array DataType must match Field DataType. Array DataType is {}; field DataType is {}", array.data_type(), field.data_type())
             ));
         }
         Ok(Self { array, field })
