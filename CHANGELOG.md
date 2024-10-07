@@ -2,6 +2,15 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.1] - 2024-10-07
+
+### What's Changed
+
+- Support for string view and binary view data types (upgrade to `arrow` 53.1) by @kylebarron in https://github.com/kylebarron/arro3/pull/219
+- Fix min/max with datetimes with timezones by @kylebarron in https://github.com/kylebarron/arro3/pull/220
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.0...py-v0.4.1
+
 ## [0.4.0] - 2024-10-03
 
 ### Enhancements :magic_wand:
