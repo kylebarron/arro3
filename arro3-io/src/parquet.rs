@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -5,11 +6,11 @@ use std::sync::Arc;
 use arrow_array::{RecordBatchIterator, RecordBatchReader};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
-use parquet::arrow::ArrowWriter;
+use parquet::arrow::{ArrowWriter, ProjectionMask};
 use parquet::basic::{Compression, Encoding};
 use parquet::file::properties::{WriterProperties, WriterVersion};
 use parquet::format::KeyValue;
-use parquet::schema::types::ColumnPath;
+use parquet::schema::types::{ColumnPath, SchemaDescriptor};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
@@ -19,8 +20,21 @@ use pyo3_arrow::PyRecordBatchReader;
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
-pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+pub fn read_parquet(
+    py: Python,
+    file: FileReader,
+    rgs: Option<Vec<usize>>,
+    columns: Option<Vec<usize>>,
+) -> PyArrowResult<PyObject> {
+    let mut builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+    if let Some(nn) = rgs {
+        builder = builder.with_row_groups(nn);
+    }
+
+    if let Some(cols) = columns {
+        let projection = ProjectionMask::leaves(builder.parquet_schema(), cols);
+        builder = builder.with_projection(projection);
+    }
 
     let metadata = builder.schema().metadata().clone();
     let reader = builder.build().unwrap();
