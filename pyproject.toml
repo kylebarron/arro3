@@ -20,7 +20,25 @@ aiohttp = "^3.10.3"
 black = "^23.10.1"
 griffe-inherited-docstrings = "^1.0.0"
 mkdocs = "^1.4.3"
-mkdocstrings = { version = "^0.25.1", extras = ["python"] }
+mkdocstrings = { version = ">=0.25.1", extras = ["python"] }
 # https://github.com/squidfunk/mkdocs-material/issues/6983
 mkdocs-material = { version = "^9.5.17", extras = ["imaging"] }
 mike = "^2"
+
+
+[tool.ruff]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    # "E",
+    "W",
+    # isort
+    "I",
+]
+
+[tool.ruff.extend-per-file-ignores]
+"__init__.py" = [
+    "F401", # Allow unused imports in __init__.py files
+    "F403", # unable to detect undefined names
+]

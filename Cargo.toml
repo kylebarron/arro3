@@ -2,15 +2,28 @@
 members = ["arro3-compute", "arro3-core", "arro3-io", "pyo3-arrow"]
 resolver = "2"
 
+[workspace.package]
+# Package version for arro3-*, not for pyo3-arrow
+version = "0.4.1"
+authors = ["Kyle Barron <kylebarron2@gmail.com>"]
+edition = "2021"
+homepage = "https://kylebarron.dev/arro3"
+repository = "https://github.com/kylebarron/arro3"
+license = "MIT OR Apache-2.0"
+keywords = ["python", "arrow"]
+categories = []
+rust-version = "1.75"
+
 [workspace.dependencies]
-arrow = { version = "52", features = ["ffi"] }
-arrow-array = "52"
-arrow-buffer = "52"
-arrow-cast = "52"
-arrow-csv = "52"
-arrow-ipc = "52"
-arrow-schema = "52"
-arrow-select = "52"
+arrow = { version = "53", features = ["ffi"] }
+arrow-array = "53"
+arrow-buffer = "53"
+arrow-cast = "53"
+arrow-csv = "53"
+arrow-ipc = { version = "53", features = ["lz4", "zstd"] }
+arrow-schema = "53"
+arrow-select = "53"
+half = "2"
 indexmap = "2"
 # numpy = "0.21"
 # TODO: Pin to released version once NumPy 2.0 support is merged
@@ -18,7 +31,11 @@ indexmap = "2"
 # This is the fork used by polars
 # https://github.com/pola-rs/polars/blob/fac700d9670feb57f1df32beaeee38377725fccf/py-polars/Cargo.toml#L33-L35
 numpy = { git = "https://github.com/stinodego/rust-numpy.git", rev = "9ba9962ae57ba26e35babdce6f179edf5fe5b9c8", default-features = false }
-parquet = "52"
-pyo3 = "0.21"
+parquet = "53"
+pyo3 = { version = "0.21", features = ["macros", "indexmap"] }
 pyo3-file = "0.8.1"
 thiserror = "1"
+
+[profile.release]
+lto = true
+codegen-units = 1

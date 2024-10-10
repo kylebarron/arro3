@@ -40,6 +40,14 @@ impl PyDataType {
         Self(data_type)
     }
 
+    /// Create from a raw Arrow C Schema capsule
+    pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        let schema_ptr = import_schema_pycapsule(capsule)?;
+        let data_type =
+            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
+        Ok(Self::new(data_type))
+    }
+
     /// Consume this and return its inner part.
     pub fn into_inner(self) -> DataType {
         self.0
@@ -105,6 +113,7 @@ impl Display for PyDataType {
     }
 }
 
+#[allow(non_snake_case)]
 #[pymethods]
 impl PyDataType {
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -125,19 +134,14 @@ impl PyDataType {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
-        _cls: &Bound<PyType>,
-        capsule: &Bound<PyCapsule>,
-    ) -> PyResult<Self> {
-        let schema_ptr = import_schema_pycapsule(capsule)?;
-        let data_type =
-            DataType::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-        Ok(Self::new(data_type))
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(_cls: &Bound<PyType>, capsule: &Bound<PyCapsule>) -> PyResult<Self> {
+        Self::from_arrow_pycapsule(capsule)
     }
 
     #[getter]
     fn bit_width(&self) -> Option<usize> {
-        self.0.primitive_width()
+        self.0.primitive_width().map(|width| width * 8)
     }
 
     #[pyo3(signature=(other, *, check_metadata=false))]
@@ -199,6 +203,30 @@ impl PyDataType {
             DataType::Union(fields, _) => fields.len(),
             // Is this accurate?
             DataType::Dictionary(_, _) | DataType::Map(_, _) | DataType::RunEndEncoded(_, _) => 2,
+        }
+    }
+
+    #[getter]
+    fn time_unit(&self) -> Option<&str> {
+        match &self.0 {
+            DataType::Time32(unit)
+            | DataType::Time64(unit)
+            | DataType::Timestamp(unit, _)
+            | DataType::Duration(unit) => match unit {
+                TimeUnit::Second => Some("s"),
+                TimeUnit::Millisecond => Some("ms"),
+                TimeUnit::Microsecond => Some("us"),
+                TimeUnit::Nanosecond => Some("ns"),
+            },
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn tz(&self) -> Option<&str> {
+        match &self.0 {
+            DataType::Timestamp(_, tz) => tz.as_deref(),
+            _ => None,
         }
     }
 

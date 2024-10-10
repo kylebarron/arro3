@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
-from arro3.core import ChunkedArray, Table
+from arro3.core import Array, ChunkedArray, DataType, Field, Table
 
 
 def test_table_getitem():
@@ -29,6 +29,19 @@ def test_table_from_pydict():
     arro3_table = Table.from_pydict(mapping)
     pa_table = pa.Table.from_pydict(mapping)
     assert pa.table(arro3_table) == pa_table
+
+
+def test_table_constructor_ext_array():
+    typ = DataType.uint8()
+    metadata = {"ARROW:extension:name": "ext_name"}
+    field = Field("", type=typ, nullable=True, metadata=metadata)
+    arr = Array([1, 2, 3, 4], field)
+    t = Table({"a": arr})
+    assert t.schema.field("a").metadata_str["ARROW:extension:name"] == "ext_name"
+
+    ca = ChunkedArray([arr], field)
+    t = Table({"a": ca})
+    assert t.schema.field("a").metadata_str["ARROW:extension:name"] == "ext_name"
 
 
 def test_table_append_array_extension_type():
@@ -82,3 +95,12 @@ def test_slice():
     sliced2 = table.slice(1, 2)
     assert sliced2.num_rows == 2
     assert sliced2.chunk_lengths == [1, 1]
+
+
+def test_nonempty_table_no_columns():
+    table = pa.table({"a": [1, 2, 3, 4]}).select([])
+    assert len(table) == 4
+    assert table.num_columns == 0
+    arro3_table = Table.from_arrow(table)
+    retour = pa.table(arro3_table)
+    assert table == retour

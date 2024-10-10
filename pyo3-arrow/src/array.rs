@@ -1,22 +1,25 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
+use arrow::array::AsArray;
 use arrow::compute::concat;
 use arrow::datatypes::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, LargeBinaryArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
-use pyo3::exceptions::{PyNotImplementedError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
+#[cfg(feature = "buffer_protocol")]
+use crate::buffer::AnyBufferProtocol;
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
@@ -24,7 +27,8 @@ use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
 use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
-use crate::{PyDataType, PyField};
+use crate::scalar::PyScalar;
+use crate::{PyArrowBuffer, PyDataType, PyField};
 
 /// A Python-facing Arrow array.
 ///
@@ -46,8 +50,7 @@ impl PyArray {
     ///
     /// This will panic if the array's data type does not match the field's data type.
     pub fn new(array: ArrayRef, field: FieldRef) -> Self {
-        assert_eq!(array.data_type(), field.data_type());
-        Self { array, field }
+        Self::try_new(array, field).unwrap()
     }
 
     /// Create a new Python Array from an [ArrayRef] and a [FieldRef].
@@ -57,7 +60,7 @@ impl PyArray {
         // providing.
         if array.data_type() != field.data_type() {
             return Err(ArrowError::SchemaError(
-                "Array DataType must match Field DataType".to_string(),
+                format!("Array DataType must match Field DataType. Array DataType is {}; field DataType is {}", array.data_type(), field.data_type())
             ));
         }
         Ok(Self { array, field })
@@ -67,6 +70,15 @@ impl PyArray {
     pub fn from_array_ref(array: ArrayRef) -> Self {
         let field = Field::new("", array.data_type().clone(), true);
         Self::new(array, Arc::new(field))
+    }
+
+    /// Import from raw Arrow capsules
+    pub fn from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
+        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        Ok(Self::new(array, Arc::new(field)))
     }
 
     /// Access the underlying [ArrayRef].
@@ -134,11 +146,17 @@ impl Display for PyArray {
     }
 }
 
+impl Datum for PyArray {
+    fn get(&self) -> (&dyn Array, bool) {
+        (self.array.as_ref(), false)
+    }
+}
+
 #[pymethods]
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    fn init(obj: &Bound<PyAny>, r#type: Option<PyDataType>) -> PyResult<Self> {
+    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
         if let Ok(data) = obj.extract::<PyArray>() {
             return Ok(data);
         }
@@ -150,12 +168,12 @@ impl PyArray {
             }};
         }
 
-        let data_type = r#type
+        let field = r#type
             .ok_or(PyValueError::new_err(
                 "type must be passed for non-Arrow input",
             ))?
             .into_inner();
-        let array: ArrayRef = match data_type {
+        let array: ArrayRef = match field.data_type() {
             DataType::Float32 => impl_primitive!(f32, Float32Type),
             DataType::Float64 => impl_primitive!(f64, Float64Type),
             DataType::UInt8 => impl_primitive!(u8, UInt8Type),
@@ -203,7 +221,21 @@ impl PyArray {
                 )))
             }
         };
-        Ok(Self::new(array, Field::new("", data_type, true).into()))
+        Ok(Self::new(array, field))
+    }
+
+    fn buffer(&self) -> PyArrowBuffer {
+        match self.array.data_type() {
+            DataType::Int64 => {
+                let arr = self.array.as_primitive::<Int64Type>();
+                let values = arr.values();
+                let buffer = values.inner().clone();
+                PyArrowBuffer {
+                    inner: Some(buffer),
+                }
+            }
+            _ => todo!(),
+        }
     }
 
     #[pyo3(signature = (dtype=None, copy=None))]
@@ -234,6 +266,23 @@ impl PyArray {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 
+    fn __getitem__(&self, i: isize) -> PyArrowResult<PyScalar> {
+        // Handle negative indexes from the end
+        let i = if i < 0 {
+            let i = self.array.len() as isize + i;
+            if i < 0 {
+                return Err(PyIndexError::new_err("Index out of range").into());
+            }
+            i as usize
+        } else {
+            i as usize
+        };
+        if i >= self.array.len() {
+            return Err(PyIndexError::new_err("Index out of range").into());
+        }
+        PyScalar::try_new(self.array.slice(i, 1), self.field.clone())
+    }
+
     fn __len__(&self) -> usize {
         self.array.len()
     }
@@ -257,13 +306,20 @@ impl PyArray {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        Ok(Self::new(array, Arc::new(field)))
+        Self::from_arrow_pycapsule(schema_capsule, array_capsule)
+    }
+
+    /// Import via buffer protocol
+    #[cfg(feature = "buffer_protocol")]
+    #[classmethod]
+    fn from_buffer(_cls: &Bound<PyType>, buffer: AnyBufferProtocol) -> PyArrowResult<Self> {
+        buffer.try_into()
     }
 
     #[classmethod]
@@ -276,16 +332,22 @@ impl PyArray {
         if numpy_array.hasattr("__array__")? {
             numpy_array = numpy_array.call_method0("__array__")?;
         };
+
+        // Prefer zero-copy route via buffer protocol, if possible
+        #[cfg(feature = "buffer_protocol")]
+        if let Ok(buf) = numpy_array.extract::<AnyBufferProtocol>() {
+            return buf.try_into();
+        }
+
         let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
         let arrow_array = from_numpy(py, numpy_array)?;
         Ok(Self::from_array_ref(arrow_array))
     }
 
-    fn cast(&self, py: Python, target_type: PyDataType) -> PyArrowResult<PyObject> {
-        let target_type = target_type.into_inner();
-        let new_array = arrow::compute::cast(self.as_ref(), &target_type)?;
-        let new_field = self.field.as_ref().clone().with_data_type(target_type);
-        Ok(PyArray::new(new_array, new_field.into()).to_arro3(py)?)
+    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+        let new_field = target_type.into_inner();
+        let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
+        Ok(PyArray::new(new_array, new_field).to_arro3(py)?)
     }
 
     #[getter]
@@ -297,6 +359,11 @@ impl PyArray {
     #[getter]
     fn nbytes(&self) -> usize {
         self.array.get_array_memory_size()
+    }
+
+    #[getter]
+    fn null_count(&self) -> usize {
+        self.array.null_count()
     }
 
     #[pyo3(signature = (offset=0, length=None))]
@@ -313,6 +380,16 @@ impl PyArray {
 
     fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
         self.__array__(py, None, None)
+    }
+
+    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+        let mut scalars = Vec::with_capacity(self.array.len());
+        for i in 0..self.array.len() {
+            let scalar =
+                unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
+            scalars.push(scalar.as_py(py)?);
+        }
+        Ok(scalars.into_py(py))
     }
 
     #[getter]

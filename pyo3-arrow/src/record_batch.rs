@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use arrow::array::AsArray;
 use arrow::compute::{concat_batches, take_record_batch};
-use arrow_array::{Array, ArrayRef, RecordBatch, StructArray};
+use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
@@ -31,6 +31,48 @@ impl PyRecordBatch {
     /// Construct a new PyRecordBatch from a [RecordBatch].
     pub fn new(batch: RecordBatch) -> Self {
         Self(batch)
+    }
+
+    /// Construct from raw Arrow capsules
+    pub fn from_arrow_pycapsule(
+        schema_capsule: &Bound<PyCapsule>,
+        array_capsule: &Bound<PyCapsule>,
+    ) -> PyResult<Self> {
+        let (array, field, data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+
+        match field.data_type() {
+            DataType::Struct(fields) => {
+                let struct_array = array.as_struct();
+                let schema = SchemaBuilder::from(fields)
+                    .finish()
+                    .with_metadata(field.metadata().clone());
+                assert_eq!(
+                    struct_array.null_count(),
+                    0,
+                    "Cannot convert nullable StructArray to RecordBatch"
+                );
+
+                let columns = struct_array.columns().to_vec();
+
+                // Special cast to handle zero-column RecordBatches with positive length
+                let batch = if array.len() == 0 && data_len > 0 {
+                    RecordBatch::try_new_with_options(
+                        Arc::new(schema),
+                        columns,
+                        &RecordBatchOptions::new().with_row_count(Some(data_len)),
+                    )
+                    .map_err(|err| PyValueError::new_err(err.to_string()))?
+                } else {
+                    RecordBatch::try_new(Arc::new(schema), columns)
+                        .map_err(|err| PyValueError::new_err(err.to_string()))?
+                };
+                Ok(Self::new(batch))
+            }
+            dt => Err(PyValueError::new_err(format!(
+                "Unexpected data type {}",
+                dt
+            ))),
+        }
     }
 
     /// Consume this, returning its internal [RecordBatch].
@@ -218,34 +260,13 @@ impl PyRecordBatch {
     }
 
     #[classmethod]
-    pub(crate) fn from_arrow_pycapsule(
+    #[pyo3(name = "from_arrow_pycapsule")]
+    fn from_arrow_pycapsule_py(
         _cls: &Bound<PyType>,
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
-        match field.data_type() {
-            DataType::Struct(fields) => {
-                let struct_array = array.as_struct();
-                let schema = SchemaBuilder::from(fields)
-                    .finish()
-                    .with_metadata(field.metadata().clone());
-                assert_eq!(
-                    struct_array.null_count(),
-                    0,
-                    "Cannot convert nullable StructArray to RecordBatch"
-                );
-
-                let columns = struct_array.columns().to_vec();
-                let batch = RecordBatch::try_new(Arc::new(schema), columns)
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?;
-                Ok(Self::new(batch))
-            }
-            dt => Err(PyValueError::new_err(format!(
-                "Unexpected data type {}",
-                dt
-            ))),
-        }
+        Self::from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
     fn add_column(

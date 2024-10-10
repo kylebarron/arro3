@@ -3,12 +3,12 @@ import pyarrow as pa
 from arro3.core import (
     Array,
     DataType,
-    fixed_size_list_array,
     Field,
+    fixed_size_list_array,
     list_array,
+    list_offsets,
     struct_array,
 )
-from arro3.compute import list_offsets
 
 
 def test_fixed_size_list_array():

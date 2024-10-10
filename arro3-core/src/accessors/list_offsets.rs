@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use arrow::array::AsArray;
+use arrow_array::cast::AsArray;
 use arrow_array::{ArrayRef, Int32Array, Int64Array, OffsetSizeTrait};
 use arrow_buffer::{OffsetBuffer, ScalarBuffer};
 use arrow_schema::{ArrowError, DataType, Field};

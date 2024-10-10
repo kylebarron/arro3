@@ -1,5 +1,10 @@
 # arro3
 
+[![PyPI][pypi_arro3_core]][pypi_link_arro3_core]
+
+[pypi_arro3_core]: https://badge.fury.io/py/arro3-core.svg
+[pypi_link_arro3_core]: https://pypi.org/project/arro3-core/
+
 A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs).
 
 arro3 features:
@@ -7,6 +12,24 @@ arro3 features:
 - Classes to manage and operate on Arrow data.
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
 - Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files
+
+## Install
+
+arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
+
+```
+pip install arro3-core arro3-io arro3-compute
+```
+
+arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi)
+
+```
+pixi add arro3-core arro3-io arro3-compute
+```
+
+## Using
+
+Consult the [documentation](https://kylebarron.dev/arro3/latest/).
 
 ## Why another Arrow library?
 
@@ -20,7 +43,7 @@ arro3 features:
 
     Every functional API in arro3 accepts Arrow data from _any_ Python library. So you can pass a `pyarrow.Table` directly into `arro3.io.write_parquet`, and it'll _just work_.
 
-- **Extensible**. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more [compute kernels](https://docs.rs/arrow/latest/arrow/compute/index.html) provided by the Rust Arrow implementation as well as .
+- **Extensible**. arro3 and its sister library pyo3-arrow make it easier for Rust Arrow libraries to be exported to Python. Over time, arro3 can connect to more [compute kernels](https://docs.rs/arrow/latest/arrow/compute/index.html) provided by the Rust Arrow implementation.
 - **Compliant**. Full support for the Arrow specification, including extension types. (Arrow's new view types will be supported from the next Rust `arrow` release).
 - **Streaming-first**. All compute and IO functionality is streaming-based with lazy iterators, so you can work with larger-than-memory data.
 

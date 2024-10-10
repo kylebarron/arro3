@@ -96,20 +96,26 @@ For example, `PySchema` and `PyField` both use the `__arrow_c_schema__` mechanis
 
 If you're exporting your own Arrow-compatible classes to Python, you can implement the relevant Arrow PyCapsule Interface methods directly on your own classes.
 
+You can use the helper functions `to_array_pycapsules`, `to_schema_pycapsule`, and `to_stream_pycapsule` in the [`ffi` module](https://docs.rs/pyo3-arrow/latest/pyo3_arrow/ffi/index.html) to simplify exporting your data.
+
 To export stream data, add a method to your class with the following signature:
 
 ```rs
-use pyo3_arrow::ffi::to_stream_pycapsule;
+use arrow_array::ArrayRef;
+use arrow_schema::FieldRef;
+use pyo3_arrow::ffi::{to_stream_pycapsule, ArrayIterator};
+use pyo3::types::PyCapsule;
 
 fn __arrow_c_stream__<'py>(
     &'py self,
     py: Python<'py>,
-    requested_schema: Option<Bound<PyCapsule>>,
+    requested_schema: Option<Bound<'py, PyCapsule>>,
 ) -> PyResult<Bound<'py, PyCapsule>> {
-
-    // Construct a PyTable from your data
-    let table: PyTable = todo!();
-    table.__arrow_c_stream__(py, requested_schema)
+    let field: FieldRef = ...;
+    let arrays: Vec<ArrayRef> = ...;
+    let array_reader =
+        Box::new(ArrayIterator::new(arrays.into_iter().map(Ok), field));
+    to_stream_pycapsule(py, array_reader, requested_schema)
 }
 ```
 
@@ -175,13 +181,24 @@ In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` 
 | ---------- | ---- | -------- |
 | 0.1        | 0.21 | 52       |
 | 0.2        | 0.21 | 52       |
+| 0.3        | 0.21 | 53       |
+| 0.4        | 0.21 | 53       |
+
+## Buffer Protocol
+
+pyo3-arrow will automatically interpret Python objects that implement the [Python Buffer Protocol](https://docs.python.org/3/c-api/buffer.html). This is implemented as part of the `FromPyObject` impl on `PyArray`. So if your function accepts `PyArray`, it will automatically accept buffer protocol input. This conversion is zero-copy.
+
+Multi-dimensional buffer protocol objects are interpreted as nested fixed size lists.
+
+Buffer protocol support is behind a `buffer_protocol` feature flag (turned on by default), as it requires either the `abi3-py311` pyo3 feature or building non-abi3 wheels.
 
 ## Why not use arrow-rs's Python integration?
 
 arrow-rs has [some existing Python integration](https://docs.rs/arrow/latest/arrow/pyarrow/index.html), but there are a few reasons why I created `pyo3-arrow`:
 
-- arrow-rs's Python FFI integration does not support Arrow extension types, because it omits field metadata when constructing an `Arc<dyn Array>`. pyo3-arrow gets around this by storing both an `ArrayRef` (`Arc<dyn Array>`) and a `FieldRef` (`Arc<Field>`) in a `PyArray` struct.
-- arrow-rs has no ability to work with an Arrow stream of bare arrays that are not record batches, and so it has no way to interop with a `pyarrow.ChunkedArray` or `polars.Series`.
+- arrow-rs's Python FFI integration **does not support Arrow extension types**, because it omits field metadata when constructing an `Arc<dyn Array>`. pyo3-arrow gets around this by storing both an `ArrayRef` (`Arc<dyn Array>`) and a `FieldRef` (`Arc<Field>`) in a `PyArray` struct.
+- arrow-rs has no ability to work with an Arrow stream of bare arrays that are not record batches, and so **arrow-rs has no way to interop with a `pyarrow.ChunkedArray` or `polars.Series`**.
+- pyo3-arrow will **automatically convert Python buffer protocol objects** (such as numpy arrays, `memoryview`s, `bytes` objects, and more) to `PyArray`. This conversion is zero copy.
+- **arrow-rs only supports returning data to pyarrow**. Pyarrow is a very large dependency (its unpacked Linux wheels are 130MB, not including a required dependency on Numpy) and some projects may wish not to use it. Now that the Arrow PyCapsule interface exists, it's possible to have a modular approach, where a very small library contains core Arrow objects, and works seamlessly with other libraries.
 - pyo3-arrow implements [schema negotiation](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html#schema-requests) for the PyCapsule Interface on data export, allowing other Python libraries to request Arrow data types they know how to handle.
-- arrow-rs only supports returning data to pyarrow. Pyarrow is a very large dependency (its unpacked Linux wheels are 130MB, not including a required dependency on Numpy) and some projects may wish not to use it. Now that the Arrow PyCapsule interface exists, it's possible to have a modular approach, where a very small library contains core Arrow objects, and works seamlessly with other libraries.
 - In my opinion arrow-rs is too tightly connected to pyo3 and pyarrow. pyo3 releases don't line up with arrow-rs's release cadence, which means it could be a bit of a wait to use the latest pyo3 version with arrow-rs, especially with arrow-rs [waiting longer to release breaking changes](https://github.com/apache/arrow-rs#release-versioning-and-schedule).

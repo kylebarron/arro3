@@ -1,15 +1,16 @@
 [package]
 name = "arro3-io"
-version = "0.2.1"
-authors = ["Kyle Barron <kylebarron2@gmail.com>"]
-edition = "2021"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
 description = "Rust-based readers and writers for Arrow in Python."
 readme = "README.md"
-repository = "https://github.com/kylebarron/arro3"
-license = "MIT OR Apache-2.0"
-keywords = ["python", "arrow"]
-categories = []
-rust-version = "1.75"
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+rust-version = { workspace = true }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -26,7 +27,7 @@ arrow = { workspace = true, features = ["ffi"] }
 bytes = "1.7.0"
 futures = "0.3.30"
 parquet = { workspace = true, features = ["async"] }
-pyo3 = { workspace = true, features = ["abi3-py38"] }
+pyo3 = { workspace = true }
 pyo3-arrow = { path = "../pyo3-arrow" }
 pyo3-asyncio-0-21 = { version = "0.21.0", features = ["tokio-runtime"] }
 pyo3-file = { workspace = true }

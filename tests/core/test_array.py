@@ -41,3 +41,20 @@ def test_extension_array_meta_persists():
     pa_table = pa.Table.from_arrays([arr], schema=pa.schema([field]))
     table = Table.from_arrow(pa_table)
     assert table[0].chunks[0].field.metadata_str == input_metadata
+
+
+def test_getitem():
+    arr = Array([1, 2, 3], DataType.int16())
+    assert arr[0].as_py() == 1
+    assert arr[-1].as_py() == 3
+
+
+def test_string_view():
+    arr = pa.array(
+        ["foo", "bar", "baz", "foooooobarrrrrrbazzzzzzzz"], type=pa.string_view()
+    )
+    assert Array(arr)[0].as_py() == "foo"
+    assert Array(arr)[1].as_py() == "bar"
+    assert Array(arr)[2].as_py() == "baz"
+    assert Array(arr)[3].as_py() == "foooooobarrrrrrbazzzzzzzz"
+    assert pa.array(Array(arr)) == arr
