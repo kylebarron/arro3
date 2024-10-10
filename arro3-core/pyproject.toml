@@ -18,17 +18,3 @@ features = ["pyo3/extension-module"]
 module-name = "arro3.core._core"
 python-source = "python"
 strip = true
-
-[tool.poetry]
-name = "arro3-core"
-# Overwritten by version in Cargo.toml
-version = "0.0.0"
-description = ""
-authors = []
-packages = [{ include = "python/arro3/core" }]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-
-[tool.poetry.group.dev.dependencies]
-maturin = "^1.6.0"
