@@ -1,5 +1,11 @@
 [workspace]
-members = ["arro3-compute", "arro3-core", "arro3-io", "pyo3-arrow"]
+members = [
+    "arro3-compute",
+    "arro3-core",
+    "arro3-io",
+    "pyo3-arrow",
+    "pyo3-object_store",
+]
 resolver = "2"
 
 [workspace.package]
