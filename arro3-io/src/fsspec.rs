@@ -4,7 +4,7 @@ use bytes::{Buf, Bytes};
 use futures::future::{BoxFuture, FutureExt};
 use parquet::arrow::async_reader::AsyncFileReader;
 use parquet::errors::ParquetError;
-use parquet::file::footer::{decode_footer, decode_metadata};
+use parquet::file::metadata::ParquetMetaDataReader;
 use parquet::file::FOOTER_SIZE;
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -78,7 +78,7 @@ impl AsyncFileReader for AsyncFsspec {
                 .await?
                 .copy_to_slice(&mut buf);
 
-            let metadata_len = decode_footer(&buf)?;
+            let metadata_len = ParquetMetaDataReader::decode_footer(&buf)?;
 
             let metadata_start_range = self.file_length - FOOTER_SIZE - metadata_len;
             let metadata_end_range = self.file_length - FOOTER_SIZE;
@@ -87,7 +87,9 @@ impl AsyncFileReader for AsyncFsspec {
                 .get_bytes(metadata_start_range..metadata_end_range)
                 .await?;
 
-            Ok(Arc::new(decode_metadata(&metadata_bytes)?))
+            Ok(Arc::new(ParquetMetaDataReader::decode_metadata(
+                &metadata_bytes,
+            )?))
         }
         .boxed()
     }
