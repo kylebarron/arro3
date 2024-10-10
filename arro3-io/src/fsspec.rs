@@ -64,6 +64,35 @@ impl AsyncFileReader for AsyncFsspec {
         .boxed()
     }
 
+    fn get_byte_ranges(
+        &mut self,
+        ranges: Vec<std::ops::Range<usize>>,
+    ) -> BoxFuture<'_, parquet::errors::Result<Vec<Bytes>>> {
+        async move {
+            let py_bytes_list = Python::with_gil(|py| -> PyResult<_> {
+                let paths = PyList::new_bound(py, ranges.iter().map(|_| self.path.as_str()));
+                let starts = PyList::new_bound(py, ranges.iter().map(|r| r.start));
+                let ends = PyList::new_bound(py, ranges.iter().map(|r| r.end));
+
+                let args =
+                    PyTuple::new_bound(py, vec![paths.to_object(py), starts.into(), ends.into()]);
+
+                let coroutine =
+                    self.fs
+                        .call_method_bound(py, intern!(py, "_cat_ranges"), args, None)?;
+                pyo3_asyncio_0_21::tokio::into_future(coroutine.bind(py).clone())
+            })
+            .map_err(|err| ParquetError::External(Box::new(err)))?
+            .await
+            .map_err(|err| ParquetError::External(Box::new(err)))?;
+
+            let buffers = Python::with_gil(|py| py_bytes_list.extract::<Vec<Vec<u8>>>(py))
+                .map_err(|err| ParquetError::External(Box::new(err)))?;
+            Ok(buffers.into_iter().map(Bytes::from).collect())
+        }
+        .boxed()
+    }
+
     fn get_metadata(
         &mut self,
     ) -> BoxFuture<
