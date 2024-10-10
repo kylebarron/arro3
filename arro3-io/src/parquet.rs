@@ -3,9 +3,10 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use arrow_array::{RecordBatchIterator, RecordBatchReader};
+use futures::TryStreamExt;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
-use parquet::arrow::ArrowWriter;
+use parquet::arrow::{ArrowWriter, ParquetRecordBatchStreamBuilder};
 use parquet::basic::{Compression, Encoding};
 use parquet::file::properties::{WriterProperties, WriterVersion};
 use parquet::format::KeyValue;
@@ -14,8 +15,9 @@ use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
-use pyo3_arrow::PyRecordBatchReader;
+use pyo3_arrow::{PyRecordBatchReader, PyTable};
 
+use crate::fsspec::AsyncFsspec;
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
@@ -38,6 +40,29 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
     // https://github.com/apache/arrow-rs/pull/5135
     let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
     Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
+}
+
+#[pyfunction]
+pub fn read_parquet_async(
+    py: Python,
+    path: String,
+    fs: PyObject,
+    file_length: usize,
+) -> PyArrowResult<PyObject> {
+    let fs = AsyncFsspec::new(fs, path, file_length);
+
+    let fut = pyo3_asyncio_0_21::tokio::future_into_py(py, async move {
+        let builder = ParquetRecordBatchStreamBuilder::new(fs).await.unwrap();
+
+        let metadata = builder.schema().metadata().clone();
+        let reader = builder.build().unwrap();
+
+        let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
+
+        let batches = reader.try_collect::<Vec<_>>().await.unwrap();
+        Ok(PyTable::try_new(batches, arrow_schema).unwrap())
+    })?;
+    Ok(fut.into())
 }
 
 pub(crate) struct PyWriterVersion(WriterVersion);

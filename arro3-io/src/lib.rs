@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod csv;
+mod fsspec;
 mod ipc;
 mod json;
 mod parquet;
@@ -32,6 +33,7 @@ fn _io(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
 
     m.add_wrapped(wrap_pyfunction!(parquet::read_parquet))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::read_parquet_async))?;
     m.add_wrapped(wrap_pyfunction!(parquet::write_parquet))?;
 
     Ok(())
