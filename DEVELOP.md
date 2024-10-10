@@ -2,12 +2,12 @@
 
 ```bash
 rm -rf .venv
-poetry install
+uv sync
 # Note: need to install core first because others depend on core
-poetry run maturin develop -m arro3-core/Cargo.toml
-poetry run maturin develop -m arro3-compute/Cargo.toml
-poetry run maturin develop -m arro3-io/Cargo.toml
-poetry run mkdocs serve
+uv run maturin develop -m arro3-core/Cargo.toml
+uv run maturin develop -m arro3-compute/Cargo.toml
+uv run maturin develop -m arro3-io/Cargo.toml
+uv run mkdocs serve
 ```
 
 ### Adding a new module
@@ -24,7 +24,7 @@ rustup toolchain install nightly
 rustup target add --toolchain nightly wasm32-unknown-emscripten
 ```
 
-Install maturin and pyodide-build
+Install maturin and pyodide-build (choose a specific version of pyodide-build if desired)
 
 ```bash
 pip install -U maturin
