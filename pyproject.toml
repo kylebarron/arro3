@@ -9,6 +9,7 @@ dependencies = []
 [tool.uv]
 dev-dependencies = [
     "black>=24.10.0",
+    "boto3>=1.35.38",
     "geoarrow-types>=0.2.0",
     "griffe-inherited-docstrings>=1.0.1",
     "ipykernel>=6.29.5",
