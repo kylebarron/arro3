@@ -31,15 +31,10 @@ arrow-schema = "53"
 arrow-select = "53"
 half = "2"
 indexmap = "2"
-# numpy = "0.21"
-# TODO: Pin to released version once NumPy 2.0 support is merged
-# https://github.com/PyO3/rust-numpy/issues/409
-# This is the fork used by polars
-# https://github.com/pola-rs/polars/blob/fac700d9670feb57f1df32beaeee38377725fccf/py-polars/Cargo.toml#L33-L35
-numpy = { git = "https://github.com/stinodego/rust-numpy.git", rev = "9ba9962ae57ba26e35babdce6f179edf5fe5b9c8", default-features = false }
+numpy = "0.22"
 parquet = "53"
-pyo3 = { version = "0.21", features = ["macros", "indexmap"] }
-pyo3-file = "0.8.1"
+pyo3 = { version = "0.22", features = ["macros", "indexmap"] }
+pyo3-file = "0.9"
 thiserror = "1"
 
 [profile.release]

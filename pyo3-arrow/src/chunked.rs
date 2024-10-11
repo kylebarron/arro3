@@ -239,6 +239,7 @@ impl Display for PyChunkedArray {
 #[pymethods]
 impl PyChunkedArray {
     #[new]
+    #[pyo3(signature = (arrays, r#type=None))]
     fn init(arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
         if let Ok(data) = arrays.extract::<AnyArray>() {
             Ok(data.into_chunked_array()?)
@@ -295,6 +296,7 @@ impl PyChunkedArray {
     }
 
     #[allow(unused_variables)]
+    #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
         &'py self,
         py: Python<'py>,
