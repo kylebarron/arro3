@@ -14,4 +14,4 @@ pub use azure::PyAzureStore;
 pub use client::{PyClientConfigKey, PyClientOptions};
 pub use gcp::PyGCSStore;
 pub use http::PyHttpStore;
-pub use store::AnyObjectStore;
+pub use store::PyObjectStore;

@@ -1,7 +1,6 @@
-use object_store::GetOptions;
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
-use pyo3_object_store::AnyObjectStore;
+use pyo3_object_store::PyObjectStore;
 use url::Url;
 
 mod csv;
@@ -18,7 +17,7 @@ fn ___version() -> &'static str {
 }
 
 #[pyfunction]
-pub fn accept_store(store: AnyObjectStore) {
+pub fn accept_store(store: PyObjectStore) {
     dbg!(store.into_inner().to_string());
     // todo!()
 }
@@ -47,7 +46,7 @@ impl IntoPy<PyObject> for BytesWrapper {
 }
 
 #[pyfunction]
-pub fn read_path(py: Python, store: AnyObjectStore, path: String) -> PyResult<PyObject> {
+pub fn read_path(py: Python, store: PyObjectStore, path: String) -> PyResult<PyObject> {
     // let (store, path) = object_store::parse_url(&Url::parse(&url).unwrap()).unwrap();
     // dbg!(store.to_string());
     // dbg!(path.to_string());
