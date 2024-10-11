@@ -119,7 +119,7 @@ impl ObjectStore for AsyncFsspec {
                 let args = PyTuple::new_bound(py, vec![path]);
 
                 let coroutine = self.fs.call_method1(py, intern!(py, "_rm"), args)?;
-                pyo3_asyncio_0_21::tokio::into_future(coroutine.bind(py).clone())
+                pyo3_async_runtimes::tokio::into_future(coroutine.bind(py).clone())
             })
             .unwrap()
             .await

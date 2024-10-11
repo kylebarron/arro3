@@ -29,7 +29,7 @@ pub fn from_url(py: Python, url: String) -> PyResult<PyObject> {
     dbg!(store.to_string());
     dbg!(path.to_string());
 
-    let fut = pyo3_asyncio_0_21::tokio::future_into_py(py, async move {
+    let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let resp = store.get_opts(&path, Default::default()).await.unwrap();
         let bytes = resp.bytes().await.unwrap();
         let v = bytes.to_vec();
@@ -52,7 +52,7 @@ pub fn read_path(py: Python, store: AnyObjectStore, path: String) -> PyResult<Py
     // dbg!(store.to_string());
     // dbg!(path.to_string());
 
-    let fut = pyo3_asyncio_0_21::tokio::future_into_py(py, async move {
+    let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let resp = store
             .inner()
             .get_opts(&path.into(), Default::default())
