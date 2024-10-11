@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0] - 2024-10-11
+
+## What's Changed
+
+- Bump to pyo3 0.22 by @kylebarron in https://github.com/kylebarron/arro3/pull/226
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.4.0...pyo3-arrow-v0.5.0
+
 ## [0.4.0] - 2024-10-03
 
 ### Enhancements :magic_wand:
