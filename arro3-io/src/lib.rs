@@ -68,7 +68,7 @@ pub fn read_path(py: Python, store: AnyObjectStore, path: String) -> PyResult<Py
 fn _io(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(___version))?;
 
-    m.add_class::<pyo3_object_store::S3Store>()?;
+    m.add_class::<pyo3_object_store::PyS3Store>()?;
     m.add_wrapped(wrap_pyfunction!(accept_store))?;
     m.add_wrapped(wrap_pyfunction!(from_url))?;
     m.add_wrapped(wrap_pyfunction!(read_path))?;
