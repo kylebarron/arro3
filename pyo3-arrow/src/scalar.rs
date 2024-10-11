@@ -126,6 +126,7 @@ impl PyScalar {
     }
 
     #[allow(unused_variables)]
+    #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,

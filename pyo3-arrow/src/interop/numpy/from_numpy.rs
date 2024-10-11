@@ -5,13 +5,16 @@ use arrow::datatypes::{
     UInt32Type, UInt64Type, UInt8Type,
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
-use numpy::{dtype_bound, PyArray1, PyArrayDescr, PyUntypedArray};
+use numpy::{
+    dtype_bound, PyArray1, PyArrayDescr, PyArrayDescrMethods, PyArrayMethods, PyUntypedArray,
+    PyUntypedArrayMethods,
+};
 use pyo3::exceptions::PyValueError;
-use pyo3::Python;
+use pyo3::prelude::*;
 
 use crate::error::PyArrowResult;
 
-pub fn from_numpy(py: Python, array: &PyUntypedArray) -> PyArrowResult<ArrayRef> {
+pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
     macro_rules! numpy_to_arrow {
         ($rust_type:ty, $arrow_type:ty) => {{
             let arr = array.downcast::<PyArray1<$rust_type>>()?;
@@ -21,29 +24,29 @@ pub fn from_numpy(py: Python, array: &PyUntypedArray) -> PyArrowResult<ArrayRef>
         }};
     }
     let dtype = array.dtype();
-    if is_type::<half::f16>(py, dtype) {
+    if is_type::<half::f16>(py, &dtype) {
         numpy_to_arrow!(half::f16, Float16Type)
-    } else if is_type::<f32>(py, dtype) {
+    } else if is_type::<f32>(py, &dtype) {
         numpy_to_arrow!(f32, Float32Type)
-    } else if is_type::<f64>(py, dtype) {
+    } else if is_type::<f64>(py, &dtype) {
         numpy_to_arrow!(f64, Float64Type)
-    } else if is_type::<u8>(py, dtype) {
+    } else if is_type::<u8>(py, &dtype) {
         numpy_to_arrow!(u8, UInt8Type)
-    } else if is_type::<u16>(py, dtype) {
+    } else if is_type::<u16>(py, &dtype) {
         numpy_to_arrow!(u16, UInt16Type)
-    } else if is_type::<u32>(py, dtype) {
+    } else if is_type::<u32>(py, &dtype) {
         numpy_to_arrow!(u32, UInt32Type)
-    } else if is_type::<u64>(py, dtype) {
+    } else if is_type::<u64>(py, &dtype) {
         numpy_to_arrow!(u64, UInt64Type)
-    } else if is_type::<i8>(py, dtype) {
+    } else if is_type::<i8>(py, &dtype) {
         numpy_to_arrow!(i8, Int8Type)
-    } else if is_type::<i16>(py, dtype) {
+    } else if is_type::<i16>(py, &dtype) {
         numpy_to_arrow!(i16, Int16Type)
-    } else if is_type::<i32>(py, dtype) {
+    } else if is_type::<i32>(py, &dtype) {
         numpy_to_arrow!(i32, Int32Type)
-    } else if is_type::<i64>(py, dtype) {
+    } else if is_type::<i64>(py, &dtype) {
         numpy_to_arrow!(i64, Int64Type)
-    } else if is_type::<bool>(py, dtype) {
+    } else if is_type::<bool>(py, &dtype) {
         let arr = array.downcast::<PyArray1<bool>>()?;
         Ok(Arc::new(BooleanArray::from(arr.to_owned_array().to_vec())))
     } else {
@@ -51,6 +54,6 @@ pub fn from_numpy(py: Python, array: &PyUntypedArray) -> PyArrowResult<ArrayRef>
     }
 }
 
-fn is_type<T: numpy::Element>(py: Python, dtype: &PyArrayDescr) -> bool {
-    dtype.is_equiv_to(dtype_bound::<T>(py).as_gil_ref())
+fn is_type<T: numpy::Element>(py: Python, dtype: &Bound<PyArrayDescr>) -> bool {
+    dtype.is_equiv_to(&dtype_bound::<T>(py))
 }

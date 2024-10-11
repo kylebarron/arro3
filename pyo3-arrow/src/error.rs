@@ -1,8 +1,8 @@
 //! Contains the [`PyArrowError`], the Error returned by most fallible functions in this crate.
 
-use pyo3::exceptions::{PyException, PyTypeError, PyValueError};
+use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
-use pyo3::PyDowncastError;
+use pyo3::DowncastError;
 use thiserror::Error;
 
 /// The Error variants returned by this crate.
@@ -27,24 +27,12 @@ impl From<PyArrowError> for PyErr {
     }
 }
 
-impl From<PyTypeError> for PyArrowError {
-    fn from(other: PyTypeError) -> Self {
-        Self::PyErr((&other).into())
-    }
-}
-
-impl<'a> From<PyDowncastError<'a>> for PyArrowError {
-    fn from(other: PyDowncastError<'a>) -> Self {
+impl<'a, 'py> From<DowncastError<'a, 'py>> for PyArrowError {
+    fn from(other: DowncastError<'a, 'py>) -> Self {
         Self::PyErr(PyValueError::new_err(format!(
             "Could not downcast: {}",
             other
         )))
-    }
-}
-
-impl From<PyValueError> for PyArrowError {
-    fn from(other: PyValueError) -> Self {
-        Self::PyErr((&other).into())
     }
 }
 
