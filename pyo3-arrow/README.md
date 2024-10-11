@@ -179,10 +179,11 @@ In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` 
 
 | pyo3-arrow | pyo3 | arrow-rs |
 | ---------- | ---- | -------- |
-| 0.1        | 0.21 | 52       |
-| 0.2        | 0.21 | 52       |
-| 0.3        | 0.21 | 53       |
-| 0.4        | 0.21 | 53       |
+| 0.1.x      | 0.21 | 52       |
+| 0.2.x      | 0.21 | 52       |
+| 0.3.x      | 0.21 | 53       |
+| 0.4.x      | 0.21 | 53       |
+| 0.5.x      | 0.22 | 53       |
 
 ## Buffer Protocol
 
