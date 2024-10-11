@@ -250,6 +250,7 @@ impl PyArray {
     }
 
     #[allow(unused_variables)]
+    #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_array__<'py>(
         &'py self,
         py: Python<'py>,
@@ -339,8 +340,8 @@ impl PyArray {
             return buf.try_into();
         }
 
-        let numpy_array: &PyUntypedArray = FromPyObject::extract_bound(&numpy_array)?;
-        let arrow_array = from_numpy(py, numpy_array)?;
+        let numpy_array: Bound<PyUntypedArray> = FromPyObject::extract_bound(&numpy_array)?;
+        let arrow_array = from_numpy(py, &numpy_array)?;
         Ok(Self::from_array_ref(arrow_array))
     }
 

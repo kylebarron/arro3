@@ -116,6 +116,7 @@ impl PyArrayReader {
     }
 
     #[allow(unused_variables)]
+    #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
         &'py mut self,
         py: Python<'py>,
