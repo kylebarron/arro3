@@ -2,6 +2,15 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.2] - 2024-10-14
+
+### What's Changed
+
+- Ensure total numpy v2 support by @kylebarron in https://github.com/kylebarron/arro3/pull/226
+- Fix segfault when releasing buffer protocol object by @kylebarron in https://github.com/kylebarron/arro3/pull/231
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.1...py-v0.4.2
+
 ## [0.4.1] - 2024-10-07
 
 ### What's Changed
