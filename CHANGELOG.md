@@ -2,6 +2,19 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.2] - 2024-10-14
+
+### What's Changed
+
+- Switch poetry to uv by @kylebarron in https://github.com/kylebarron/arro3/pull/224
+- Bump to pyo3 0.22 by @kylebarron in https://github.com/kylebarron/arro3/pull/226
+- bump pyo3-arrow to 0.5 by @kylebarron in https://github.com/kylebarron/arro3/pull/227
+- validate no-default-features on ci for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/232
+- Custom drop on PyBufferWrapper by @kylebarron in https://github.com/kylebarron/arro3/pull/231
+- bump pyo3-arrow to 0.5.1 by @kylebarron in https://github.com/kylebarron/arro3/pull/233
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.1...py-v0.4.2
+
 ## [0.4.1] - 2024-10-07
 
 ### What's Changed
