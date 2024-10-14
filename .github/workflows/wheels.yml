@@ -99,7 +99,7 @@ jobs:
       matrix:
         platform:
           - runner: windows-latest
-            target: x86
+            target: x64
         module:
           - arro3-core
           - arro3-compute
