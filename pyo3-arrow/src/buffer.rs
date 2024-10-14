@@ -247,7 +247,8 @@ impl AnyBufferProtocol {
     fn into_arrow_values(self) -> PyArrowResult<ArrayRef> {
         let len = self.item_count()?;
         let len_bytes = self.len_bytes()?;
-        let ptr = NonNull::new(self.buf_ptr()? as _).unwrap();
+        let ptr = NonNull::new(self.buf_ptr()? as _)
+            .ok_or(PyValueError::new_err("Expected buffer ptr to be non null"))?;
         let element_type = ElementType::from_format(self.format()?);
 
         // TODO: couldn't get this macro to work with error
