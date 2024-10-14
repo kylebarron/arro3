@@ -1,8 +1,17 @@
 # Changelog
 
-## [0.5.0] - 2024-10-11
+## [0.5.1] - 2024-10-14
 
 ## What's Changed
+
+- Fix `no-default-features` for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/232
+- Custom drop on PyBufferWrapper by @kylebarron in https://github.com/kylebarron/arro3/pull/231
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.5.0...pyo3-arrow-v0.5.1
+
+## [0.5.0] - 2024-10-11
+
+### What's Changed
 
 - Bump to pyo3 0.22 by @kylebarron in https://github.com/kylebarron/arro3/pull/226
 

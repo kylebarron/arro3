@@ -35,3 +35,19 @@ jobs:
         run: |
           cargo test --all
           cargo test --all --all-features
+
+  check-features:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        args:
+          - "-p pyo3-arrow --no-default-features"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Test
+        run: cargo check ${{ matrix.args }}
