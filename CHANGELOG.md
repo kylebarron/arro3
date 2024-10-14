@@ -6,12 +6,8 @@ This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
 ### What's Changed
 
-- Switch poetry to uv by @kylebarron in https://github.com/kylebarron/arro3/pull/224
-- Bump to pyo3 0.22 by @kylebarron in https://github.com/kylebarron/arro3/pull/226
-- bump pyo3-arrow to 0.5 by @kylebarron in https://github.com/kylebarron/arro3/pull/227
-- validate no-default-features on ci for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/232
-- Custom drop on PyBufferWrapper by @kylebarron in https://github.com/kylebarron/arro3/pull/231
-- bump pyo3-arrow to 0.5.1 by @kylebarron in https://github.com/kylebarron/arro3/pull/233
+- Ensure total numpy v2 support by @kylebarron in https://github.com/kylebarron/arro3/pull/226
+- Fix segfault when releasing buffer protocol object by @kylebarron in https://github.com/kylebarron/arro3/pull/231
 
 **Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.1...py-v0.4.2
 
