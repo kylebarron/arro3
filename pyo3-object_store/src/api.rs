@@ -13,7 +13,7 @@ pub fn register_store_module(
 ) -> PyResult<()> {
     let full_module_string = format!("{}.store", parent_module_str);
 
-    let child_module = PyModule::new_bound(parent_module.py(), full_module_string.as_str())?;
+    let child_module = PyModule::new_bound(parent_module.py(), "store")?;
 
     child_module.add_class::<PyAzureStore>()?;
     child_module.add_class::<PyGCSStore>()?;
