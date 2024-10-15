@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use object_store::ObjectStore;
 use pyo3::exceptions::PyValueError;
+use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::pybacked::PyBackedStr;
 
 use crate::http::PyHttpStore;
 use crate::{PyAzureStore, PyGCSStore, PyLocalStore, PyMemoryStore, PyS3Store};
@@ -28,9 +30,28 @@ impl<'py> FromPyObject<'py> for PyObjectStore {
         } else if let Ok(store) = ob.downcast::<PyMemoryStore>() {
             Ok(Self(store.borrow().as_ref().clone()))
         } else {
+            let py = ob.py();
+            // Check for object-store instance from other library
+            let cls_name = ob
+                .getattr(intern!(py, "__class__"))?
+                .getattr(intern!(py, "__name__"))?
+                .extract::<PyBackedStr>()?;
+            if [
+                "AzureStore",
+                "GCSStore",
+                "HTTPStore",
+                "LocalStore",
+                "MemoryStore",
+                "S3Store",
+            ]
+            .contains(&cls_name.as_ref())
+            {
+                return Err(PyValueError::new_err("You must use an object store instance exported from **the same library** as this function. They cannot be used across libraries.\nThis is because object store instances are compiled with a specific version of Rust and Python." ));
+            }
+
             // TODO: Check for fsspec
             Err(PyValueError::new_err(format!(
-                "Expected an object store instance, got {}.\nAlso note that the object store instance must be exported by this same exact library. They cannot be used across libraries.",
+                "Expected an object store instance, got {}",
                 ob.repr()?
             )))
         }
