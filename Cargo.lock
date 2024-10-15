@@ -1292,6 +1292,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "object-store-rs"
+version = "0.4.2"
+dependencies = [
+ "bytes",
+ "object_store",
+ "pyo3",
+ "pyo3-object_store",
+ "tokio",
+]
+
+[[package]]
 name = "object_store"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

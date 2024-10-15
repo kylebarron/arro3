@@ -35,7 +35,7 @@ arrow-buffer = { workspace = true }
 arrow-csv = { workspace = true }
 arrow-ipc = { workspace = true }
 arrow-schema = { workspace = true }
-bytes = "1.7.0"
+bytes = { workspace = true }
 futures = { version = "0.3.30", optional = true }
 object_store = { workspace = true, optional = true }
 parquet = { workspace = true }

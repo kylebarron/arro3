@@ -1,0 +1,30 @@
+[package]
+name = "object-store-rs"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+description = "Core library for representing Arrow data in Python."
+readme = "README.md"
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+rust-version = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "_object_store_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+bytes = { workspace = true }
+object_store = { workspace = true }
+pyo3 = { workspace = true }
+pyo3-object_store = { path = "../pyo3-object_store" }
+tokio = { version = "1.40", features = [
+    "macros",
+    "rt",
+    "rt-multi-thread",
+    "sync",
+] }
