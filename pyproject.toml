@@ -24,6 +24,9 @@ dev-dependencies = [
     "pytest>=8.3.3",
 ]
 
+[tool.uv.workspace]
+members = ["types-pyo3-object-store"]
+
 [tool.ruff]
 select = [
     # Pyflakes

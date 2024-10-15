@@ -32,6 +32,7 @@ arrow-select = "53"
 half = "2"
 indexmap = "2"
 numpy = "0.22"
+object_store = "0.11"
 parquet = "53"
 pyo3 = { version = "0.22", features = ["macros", "indexmap"] }
 pyo3-file = "0.9"
