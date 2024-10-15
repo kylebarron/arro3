@@ -7,6 +7,8 @@ mod azure;
 mod client;
 mod gcp;
 mod http;
+mod local;
+mod memory;
 mod retry;
 mod store;
 
@@ -16,4 +18,6 @@ pub use azure::PyAzureStore;
 pub use client::{PyClientConfigKey, PyClientOptions};
 pub use gcp::PyGCSStore;
 pub use http::PyHttpStore;
+pub use local::PyLocalStore;
+pub use memory::PyMemoryStore;
 pub use store::PyObjectStore;

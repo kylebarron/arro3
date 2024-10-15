@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
 use object_store::ObjectStore;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::http::PyHttpStore;
-use crate::{PyAzureStore, PyGCSStore, PyS3Store};
+use crate::{PyAzureStore, PyGCSStore, PyLocalStore, PyMemoryStore, PyS3Store};
 
 /// A wrapper around a Rust ObjectStore instance that allows any rust-native implementation of
 /// ObjectStore.
@@ -22,11 +23,16 @@ impl<'py> FromPyObject<'py> for PyObjectStore {
             Ok(Self(store.borrow().as_ref().clone()))
         } else if let Ok(store) = ob.downcast::<PyHttpStore>() {
             Ok(Self(store.borrow().as_ref().clone()))
+        } else if let Ok(store) = ob.downcast::<PyLocalStore>() {
+            Ok(Self(store.borrow().as_ref().clone()))
+        } else if let Ok(store) = ob.downcast::<PyMemoryStore>() {
+            Ok(Self(store.borrow().as_ref().clone()))
         } else {
-            // Check for fsspec, else raise exception.
-            // Also note in this exception that the store instances must have been created by _this
-            // library_
-            todo!()
+            // TODO: Check for fsspec
+            Err(PyValueError::new_err(format!(
+                "Expected an object store instance, got {}.\nAlso note that the object store instance must be exported by this same exact library. They cannot be used across libraries.",
+                ob.repr()?
+            )))
         }
     }
 }
