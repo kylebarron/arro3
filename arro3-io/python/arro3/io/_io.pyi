@@ -7,6 +7,8 @@ from typing import IO, Literal, Sequence
 import arro3.core as core
 import arro3.core.types as types
 
+from ._pyo3_object_store import ObjectStore
+
 #### CSV
 
 def infer_csv_schema(
@@ -270,6 +272,16 @@ def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
 
     Args:
         file: The input Parquet file path or buffer.
+
+    Returns:
+        The loaded Arrow data.
+    """
+
+async def read_parquet_async(path: str, *, store: ObjectStore) -> core.Table:
+    """Read a Parquet file to an Arrow Table in an async fashion
+
+    Args:
+        file: The path to the Parquet file in the given store
 
     Returns:
         The loaded Arrow data.

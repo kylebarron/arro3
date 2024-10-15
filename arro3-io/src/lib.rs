@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod csv;
+mod error;
 mod ipc;
 mod json;
 mod parquet;
@@ -14,8 +15,10 @@ fn ___version() -> &'static str {
 }
 
 #[pymodule]
-fn _io(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
+fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(___version))?;
+
+    pyo3_object_store::register_store_module(py, m, "arro3.io")?;
 
     m.add_wrapped(wrap_pyfunction!(csv::infer_csv_schema))?;
     m.add_wrapped(wrap_pyfunction!(csv::read_csv))?;
@@ -32,6 +35,7 @@ fn _io(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
 
     m.add_wrapped(wrap_pyfunction!(parquet::read_parquet))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::read_parquet_async))?;
     m.add_wrapped(wrap_pyfunction!(parquet::write_parquet))?;
 
     Ok(())

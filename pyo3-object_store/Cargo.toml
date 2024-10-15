@@ -1,0 +1,27 @@
+[package]
+name = "pyo3-object_store"
+version = "0.1.0"
+authors = { workspace = true }
+edition = { workspace = true }
+description = "object_store integration for pyo3."
+readme = "README.md"
+repository = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+futures = "0.3.30"
+object_store = { workspace = true, features = ["aws", "azure", "gcp", "http"] }
+pyo3 = { workspace = true, features = ["chrono", "indexmap"] }
+pyo3-async-runtimes = { git = "https://github.com/PyO3/pyo3-async-runtimes", features = [
+    "tokio-runtime",
+] }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+arrow-select = { workspace = true }
+
+[lib]
+crate-type = ["rlib"]
