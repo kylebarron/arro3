@@ -50,8 +50,8 @@ impl PyArrowBuffer {
 impl PyArrowBuffer {
     /// new
     #[new]
-    pub fn new(buf: Vec<u8>) -> Self {
-        Self(Buffer::from_vec(buf))
+    pub fn new(buf: PyArrowBuffer) -> Self {
+        buf
     }
 
     /// This is taken from opendal:
