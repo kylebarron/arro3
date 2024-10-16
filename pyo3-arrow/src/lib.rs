@@ -21,8 +21,6 @@ mod utils;
 
 pub use array::PyArray;
 pub use array_reader::PyArrayReader;
-#[cfg(feature = "buffer_protocol")]
-pub use buffer::PyArrowBuffer;
 pub use chunked::PyChunkedArray;
 pub use datatypes::PyDataType;
 pub use field::PyField;
