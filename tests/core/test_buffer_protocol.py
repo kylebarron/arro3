@@ -4,7 +4,7 @@ import arro3.compute as ac
 import numpy as np
 import pyarrow as pa
 import pytest
-from arro3.core import Array
+from arro3.core import Array, Buffer
 
 
 def test_from_buffer():
@@ -66,3 +66,12 @@ def test_multi_dimensional():
     assert pa_arr.type.value_type.list_size == 3
     assert pa_arr.type.value_type.value_type.list_size == 2
     assert pa_arr.type.value_type.value_type.value_type == pa.uint8()
+
+
+def test_round_trip_buffer():
+    arr = np.arange(5, dtype=np.uint8)
+    buffer = Buffer(arr)
+    retour = np.frombuffer(buffer, dtype=np.uint8)
+    assert np.array_equal(arr, retour)
+
+    assert np.array_equal(arr, Array(buffer).to_numpy())

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import array as _array
+import mmap
+import sys
 from typing import TYPE_CHECKING, Protocol, Tuple, Union
 
 if TYPE_CHECKING:
@@ -78,8 +81,24 @@ class BufferProtocolExportable(Protocol):
     def __buffer__(self, flags: int) -> memoryview: ...
 
 
+# From numpy
+# https://github.com/numpy/numpy/blob/961b70f6aaeed67147245b56ddb3f12ed1a050b5/numpy/__init__.pyi#L1772C1-L1785C1
+if sys.version_info >= (3, 12):
+    from collections.abc import Buffer as _SupportsBuffer
+else:
+    _SupportsBuffer = Union[
+        bytes,
+        bytearray,
+        memoryview,
+        _array.array,
+        mmap.mmap,
+        "np.ndarray",
+        BufferProtocolExportable,
+    ]
+
+
 # Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
-ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, "np.ndarray"]
+ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, _SupportsBuffer]
 """Accepted input as an Arrow array.
 
 Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
