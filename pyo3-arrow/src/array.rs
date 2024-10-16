@@ -232,7 +232,7 @@ impl PyArray {
                 let arr = self.array.as_primitive::<Int64Type>();
                 let values = arr.values();
                 let buffer = values.inner().clone();
-                crate::buffer::PyArrowBuffer::from_arrow(buffer)
+                crate::buffer::PyArrowBuffer::new(buffer)
             }
             _ => todo!(),
         }
