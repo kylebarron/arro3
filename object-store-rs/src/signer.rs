@@ -4,12 +4,12 @@ use std::sync::Arc;
 use object_store::aws::AmazonS3;
 use object_store::azure::MicrosoftAzure;
 use object_store::gcp::GoogleCloudStorage;
-use object_store::path::Path;
 use object_store::signer::Signer;
 use pyo3::exceptions::PyValueError;
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::pybacked::PyBackedStr;
+use pyo3_object_store::error::{PyObjectStoreError, PyObjectStoreResult};
 use pyo3_object_store::{PyAzureStore, PyGCSStore, PyS3Store};
 use url::Url;
 
@@ -131,15 +131,14 @@ pub(crate) fn sign_url(
     method: PyMethod,
     path: String,
     expires_in: Duration,
-) -> PyResult<String> {
+) -> PyObjectStoreResult<String> {
     let runtime = get_runtime(py)?;
     let method = method.0;
 
     let signed_url = py.allow_threads(|| {
-        runtime
-            .block_on(store.signed_url(method, &path.into(), expires_in))
-            .unwrap()
-    });
+        let url = runtime.block_on(store.signed_url(method, &path.into(), expires_in))?;
+        Ok::<_, object_store::Error>(url)
+    })?;
     Ok(signed_url.into())
 }
 
@@ -152,17 +151,11 @@ pub(crate) fn sign_url_async(
     expires_in: Duration,
 ) -> PyResult<PyObject> {
     let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        sign_url_async_inner(store, method.0, path.into(), expires_in).await
+        let url = store
+            .signed_url(method.0, &path.into(), expires_in)
+            .await
+            .map_err(PyObjectStoreError::ObjectStoreError)?;
+        Ok(PyUrl(url))
     })?;
     Ok(fut.into())
-}
-
-async fn sign_url_async_inner(
-    store: SignCapableStore,
-    method: http::Method,
-    path: Path,
-    expires_in: Duration,
-) -> PyResult<PyUrl> {
-    let url = store.signed_url(method, &path, expires_in).await.unwrap();
-    Ok(PyUrl(url))
 }
