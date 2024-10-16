@@ -36,7 +36,8 @@ impl AsRef<Buffer> for PyArrowBuffer {
 }
 
 impl PyArrowBuffer {
-    pub(crate) fn from_arrow(buffer: Buffer) -> Self {
+    /// Construct a new [PyArrowBuffer]
+    pub fn new(buffer: Buffer) -> Self {
         Self(buffer)
     }
 
@@ -50,7 +51,7 @@ impl PyArrowBuffer {
 impl PyArrowBuffer {
     /// new
     #[new]
-    pub fn new(buf: PyArrowBuffer) -> Self {
+    fn py_new(buf: PyArrowBuffer) -> Self {
         buf
     }
 
