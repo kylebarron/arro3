@@ -27,19 +27,31 @@ use crate::PyArray;
 /// the core buffer into Python. This allows for zero-copy data sharing with numpy via
 /// `numpy.frombuffer`.
 #[pyclass(module = "arro3.core._core", name = "Buffer", subclass)]
-pub struct PyArrowBuffer {
-    pub(crate) inner: Option<Buffer>,
+pub struct PyArrowBuffer(Buffer);
+
+impl AsRef<Buffer> for PyArrowBuffer {
+    fn as_ref(&self) -> &Buffer {
+        &self.0
+    }
+}
+
+impl PyArrowBuffer {
+    pub(crate) fn from_arrow(buffer: Buffer) -> Self {
+        Self(buffer)
+    }
+
+    /// Consume and return the [Buffer]
+    pub fn into_inner(self) -> Buffer {
+        self.0
+    }
 }
 
 #[pymethods]
-
 impl PyArrowBuffer {
     /// new
     #[new]
     pub fn new(buf: Vec<u8>) -> Self {
-        Self {
-            inner: Some(Buffer::from_vec(buf)),
-        }
+        Self(Buffer::from_vec(buf))
     }
 
     /// This is taken from opendal:
@@ -49,27 +61,32 @@ impl PyArrowBuffer {
         view: *mut ffi::Py_buffer,
         flags: c_int,
     ) -> PyResult<()> {
-        if let Some(buf) = &slf.inner {
-            let bytes = buf.as_slice();
-            let ret = ffi::PyBuffer_FillInfo(
-                view,
-                slf.as_ptr() as *mut _,
-                bytes.as_ptr() as *mut _,
-                bytes.len().try_into().unwrap(),
-                1, // read only
-                flags,
-            );
-            if ret == -1 {
-                return Err(PyErr::fetch(slf.py()));
-            }
-            Ok(())
-        } else {
-            Err(PyValueError::new_err("Buffer has already been disposed"))
+        let bytes = slf.0.as_slice();
+        let ret = ffi::PyBuffer_FillInfo(
+            view,
+            slf.as_ptr() as *mut _,
+            bytes.as_ptr() as *mut _,
+            bytes.len().try_into().unwrap(),
+            1, // read only
+            flags,
+        );
+        if ret == -1 {
+            return Err(PyErr::fetch(slf.py()));
         }
+        Ok(())
     }
 
-    unsafe fn __releasebuffer__(mut slf: PyRefMut<Self>, _view: *mut ffi::Py_buffer) {
-        slf.inner.take();
+    unsafe fn __releasebuffer__(&self, _view: *mut ffi::Py_buffer) {}
+}
+
+impl<'py> FromPyObject<'py> for PyArrowBuffer {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let buffer = ob.extract::<AnyBufferProtocol>()?;
+        if !matches!(buffer, AnyBufferProtocol::UInt8(_)) {
+            return Err(PyValueError::new_err("Expected u8 buffer protocol object"));
+        }
+
+        Ok(Self(buffer.into_arrow_buffer()?))
     }
 }
 
@@ -372,6 +389,57 @@ impl AnyBufferProtocol {
                 )))
             }
         }
+    }
+
+    /// Consume this buffer protocol object and convert to an Arrow [Buffer].
+    pub fn into_arrow_buffer(self) -> PyArrowResult<Buffer> {
+        let len_bytes = self.len_bytes()?;
+        let ptr = NonNull::new(self.buf_ptr()? as _)
+            .ok_or(PyValueError::new_err("Expected buffer ptr to be non null"))?;
+
+        let buffer = match self {
+            Self::UInt8(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::UInt16(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::UInt32(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::UInt64(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Int8(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Int16(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Int32(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Int64(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Float32(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+            Self::Float64(buf) => {
+                let owner = Arc::new(buf);
+                unsafe { Buffer::from_custom_allocation(ptr, len_bytes, owner) }
+            }
+        };
+        Ok(buffer)
     }
 
     fn item_count(&self) -> PyResult<usize> {

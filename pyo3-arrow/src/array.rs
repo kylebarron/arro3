@@ -224,7 +224,7 @@ impl PyArray {
     }
 
     #[cfg(feature = "buffer_protocol")]
-    fn buffer(&self) -> crate::PyArrowBuffer {
+    fn buffer(&self) -> crate::buffer::PyArrowBuffer {
         use arrow::array::AsArray;
 
         match self.array.data_type() {
@@ -232,9 +232,7 @@ impl PyArray {
                 let arr = self.array.as_primitive::<Int64Type>();
                 let values = arr.values();
                 let buffer = values.inner().clone();
-                crate::PyArrowBuffer {
-                    inner: Some(buffer),
-                }
+                crate::buffer::PyArrowBuffer::from_arrow(buffer)
             }
             _ => todo!(),
         }
