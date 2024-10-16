@@ -3,8 +3,10 @@ use pyo3::prelude::*;
 mod api;
 mod copy;
 mod delete;
+mod file;
 mod get;
 mod list;
+mod put;
 mod runtime;
 mod signer;
 
@@ -38,6 +40,8 @@ fn _object_store_rs(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter_async))?;
     m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter))?;
     m.add_wrapped(wrap_pyfunction!(list::list))?;
+    m.add_wrapped(wrap_pyfunction!(put::put_file_async))?;
+    m.add_wrapped(wrap_pyfunction!(put::put_file))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url_async))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url))?;
 

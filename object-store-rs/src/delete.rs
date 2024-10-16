@@ -17,14 +17,13 @@ pub fn delete(py: Python, store: PyObjectStore, location: String) -> PyObjectSto
 }
 
 #[pyfunction]
-pub fn delete_async(py: Python, store: PyObjectStore, location: String) -> PyResult<PyObject> {
+pub fn delete_async(py: Python, store: PyObjectStore, location: String) -> PyResult<Bound<PyAny>> {
     let store = store.into_inner().clone();
-    let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
         store
             .delete(&location.into())
             .await
             .map_err(PyObjectStoreError::ObjectStoreError)?;
         Ok(())
-    })?;
-    Ok(fut.into())
+    })
 }
