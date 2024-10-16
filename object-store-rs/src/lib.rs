@@ -23,8 +23,16 @@ fn _object_store_rs(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
     m.add_wrapped(wrap_pyfunction!(delete::delete_async))?;
     m.add_wrapped(wrap_pyfunction!(delete::delete))?;
+    m.add_wrapped(wrap_pyfunction!(get::get))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_async))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_range))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_range_async))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_ranges))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_ranges_async))?;
     m.add_wrapped(wrap_pyfunction!(list::list_async))?;
     m.add_wrapped(wrap_pyfunction!(list::list))?;
+    m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter))?;
+    m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter_async))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url_async))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url))?;
     Ok(())
