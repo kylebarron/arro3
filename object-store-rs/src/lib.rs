@@ -21,6 +21,8 @@ fn _object_store_rs(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     pyo3_object_store::register_store_module(py, m, "object_store_rs")?;
 
     m.add_wrapped(wrap_pyfunction!(runtime::get))?;
+    m.add_wrapped(wrap_pyfunction!(delete::delete))?;
+    m.add_wrapped(wrap_pyfunction!(delete::delete_async))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url_async))?;
 
