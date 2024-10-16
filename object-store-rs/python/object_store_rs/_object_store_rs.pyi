@@ -22,6 +22,10 @@ from ._list import list_with_delimiter as list_with_delimiter
 from ._list import list_with_delimiter_async as list_with_delimiter_async
 from ._put import put as put
 from ._put import put_async as put_async
+from ._rename import rename as rename
+from ._rename import rename_async as rename_async
+from ._rename import rename_if_not_exists as rename_if_not_exists
+from ._rename import rename_if_not_exists_async as rename_if_not_exists_async
 from ._sign import HTTP_METHOD as HTTP_METHOD
 from ._sign import SignCapableStore as SignCapableStore
 from ._sign import sign_url as sign_url
