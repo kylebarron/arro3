@@ -18,8 +18,8 @@ from ._list import list as list
 from ._list import list_async as list_async
 from ._list import list_with_delimiter as list_with_delimiter
 from ._list import list_with_delimiter_async as list_with_delimiter_async
-from ._put import put_file as put_file
-from ._put import put_file_async as put_file_async
+from ._put import put as put
+from ._put import put_async as put_async
 from ._sign import HTTP_METHOD as HTTP_METHOD
 from ._sign import SignCapableStore as SignCapableStore
 from ._sign import sign_url as sign_url
