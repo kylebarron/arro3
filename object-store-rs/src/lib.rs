@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 
-mod api;
 mod copy;
 mod delete;
 mod get;
