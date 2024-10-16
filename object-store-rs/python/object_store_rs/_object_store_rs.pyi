@@ -12,6 +12,8 @@ from ._get import get_range as get_range
 from ._get import get_range_async as get_range_async
 from ._get import get_ranges as get_ranges
 from ._get import get_ranges_async as get_ranges_async
+from ._head import head as head
+from ._head import head_async as head_async
 from ._list import ListResult as ListResult
 from ._list import ObjectMeta as ObjectMeta
 from ._list import list as list
