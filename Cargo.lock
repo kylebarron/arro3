@@ -1296,6 +1296,7 @@ name = "object-store-rs"
 version = "0.4.2"
 dependencies = [
  "bytes",
+ "futures",
  "http",
  "object_store",
  "pyo3",

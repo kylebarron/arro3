@@ -19,6 +19,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bytes = { workspace = true }
+futures = "0.3.31"
 http = "1.1"
 object_store = { workspace = true }
 pyo3 = { workspace = true }
