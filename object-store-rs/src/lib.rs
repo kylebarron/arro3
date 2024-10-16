@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod api;
+mod copy;
 mod delete;
 mod get;
 mod list;
@@ -21,19 +22,24 @@ fn _object_store_rs(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
     pyo3_object_store::register_store_module(py, m, "object_store_rs")?;
 
+    m.add_wrapped(wrap_pyfunction!(copy::copy_async))?;
+    m.add_wrapped(wrap_pyfunction!(copy::copy_if_not_exists_async))?;
+    m.add_wrapped(wrap_pyfunction!(copy::copy_if_not_exists))?;
+    m.add_wrapped(wrap_pyfunction!(copy::copy))?;
     m.add_wrapped(wrap_pyfunction!(delete::delete_async))?;
     m.add_wrapped(wrap_pyfunction!(delete::delete))?;
-    m.add_wrapped(wrap_pyfunction!(get::get))?;
     m.add_wrapped(wrap_pyfunction!(get::get_async))?;
-    m.add_wrapped(wrap_pyfunction!(get::get_range))?;
     m.add_wrapped(wrap_pyfunction!(get::get_range_async))?;
-    m.add_wrapped(wrap_pyfunction!(get::get_ranges))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_range))?;
     m.add_wrapped(wrap_pyfunction!(get::get_ranges_async))?;
+    m.add_wrapped(wrap_pyfunction!(get::get_ranges))?;
+    m.add_wrapped(wrap_pyfunction!(get::get))?;
     m.add_wrapped(wrap_pyfunction!(list::list_async))?;
-    m.add_wrapped(wrap_pyfunction!(list::list))?;
-    m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter))?;
     m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter_async))?;
+    m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter))?;
+    m.add_wrapped(wrap_pyfunction!(list::list))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url_async))?;
     m.add_wrapped(wrap_pyfunction!(signer::sign_url))?;
+
     Ok(())
 }

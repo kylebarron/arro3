@@ -1,3 +1,7 @@
+from ._copy import copy as copy
+from ._copy import copy_async as copy_async
+from ._copy import copy_if_not_exists as copy_if_not_exists
+from ._copy import copy_if_not_exists_async as copy_if_not_exists_async
 from ._delete import delete as delete
 from ._delete import delete_async as delete_async
 from ._get import GetOptions as GetOptions
