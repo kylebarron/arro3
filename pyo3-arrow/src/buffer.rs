@@ -23,6 +23,20 @@ use crate::PyArray;
 
 /// A wrapper around an Arrow [Buffer].
 ///
+/// This implements both import and export via the Python buffer protocol.
+///
+/// ### Buffer import
+///
+/// This can be very useful as a general way to support ingest of a Python buffer protocol object.
+/// The underlying Arrow [Buffer] manages the external memory, automatically calling the Python
+/// buffer's release callback when the Arrow [Buffer] reference count reaches 0.
+///
+/// This does not need to be used with Arrow at all! This can be used with any API where you want
+/// to handle both Python-provided and Rust-provided buffers. [`PyArrowBuffer`] implements
+/// `AsRef<[u8]>`.
+///
+/// ### Buffer export
+///
 /// The Python buffer protocol is implemented on this buffer to enable zero-copy data transfer of
 /// the core buffer into Python. This allows for zero-copy data sharing with numpy via
 /// `numpy.frombuffer`.
@@ -32,6 +46,12 @@ pub struct PyArrowBuffer(Buffer);
 impl AsRef<Buffer> for PyArrowBuffer {
     fn as_ref(&self) -> &Buffer {
         &self.0
+    }
+}
+
+impl AsRef<[u8]> for PyArrowBuffer {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_ref()
     }
 }
 
