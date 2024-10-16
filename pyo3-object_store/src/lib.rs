@@ -5,6 +5,7 @@ mod api;
 mod aws;
 mod azure;
 mod client;
+pub mod error;
 mod gcp;
 mod http;
 mod local;

@@ -9,6 +9,7 @@ use pyo3::pybacked::PyBackedStr;
 use pyo3::types::PyType;
 
 use crate::client::PyClientOptions;
+use crate::error::{PyObjectStoreError, PyObjectStoreResult};
 use crate::retry::PyRetryConfig;
 
 #[pyclass(name = "S3Store")]
@@ -37,7 +38,7 @@ impl PyS3Store {
         config: Option<HashMap<PyAmazonS3ConfigKey, String>>,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         let mut builder = AmazonS3Builder::from_env().with_bucket_name(bucket);
         if let Some(config) = config {
             for (key, value) in config.into_iter() {
@@ -50,7 +51,7 @@ impl PyS3Store {
         if let Some(retry_config) = retry_config {
             builder = builder.with_retry(retry_config.into())
         }
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 
     // Create from an existing boto3.Session or botocore.session.Session object
@@ -65,7 +66,7 @@ impl PyS3Store {
         config: Option<HashMap<PyAmazonS3ConfigKey, String>>,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         // boto3.Session has a region_name attribute, but botocore.session.Session does not.
         let region = if let Ok(region) = session.getattr(intern!(py, "region_name")) {
             Some(region.extract::<String>()?)
@@ -111,7 +112,7 @@ impl PyS3Store {
             builder = builder.with_retry(retry_config.into())
         }
 
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 
     #[classmethod]
@@ -122,7 +123,7 @@ impl PyS3Store {
         config: Option<HashMap<PyAmazonS3ConfigKey, String>>,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         let mut builder = AmazonS3Builder::from_env().with_url(url);
         if let Some(config) = config {
             for (key, value) in config.into_iter() {
@@ -135,7 +136,7 @@ impl PyS3Store {
         if let Some(retry_config) = retry_config {
             builder = builder.with_retry(retry_config.into())
         }
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 }
 
@@ -145,7 +146,7 @@ pub struct PyAmazonS3ConfigKey(AmazonS3ConfigKey);
 impl<'py> FromPyObject<'py> for PyAmazonS3ConfigKey {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         let s = ob.extract::<PyBackedStr>()?.to_lowercase();
-        // TODO: remove unwrap
-        Ok(Self(AmazonS3ConfigKey::from_str(&s).unwrap()))
+        let key = AmazonS3ConfigKey::from_str(&s).map_err(PyObjectStoreError::ObjectStoreError)?;
+        Ok(Self(key))
     }
 }

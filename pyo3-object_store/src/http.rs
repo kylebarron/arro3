@@ -4,6 +4,7 @@ use object_store::http::{HttpBuilder, HttpStore};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 
+use crate::error::PyObjectStoreResult;
 use crate::retry::PyRetryConfig;
 use crate::PyClientOptions;
 
@@ -31,7 +32,7 @@ impl PyHttpStore {
         url: &str,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         let mut builder = HttpBuilder::new().with_url(url);
         if let Some(client_options) = client_options {
             builder = builder.with_client_options(client_options.into())
@@ -39,6 +40,6 @@ impl PyHttpStore {
         if let Some(retry_config) = retry_config {
             builder = builder.with_retry(retry_config.into())
         }
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 }

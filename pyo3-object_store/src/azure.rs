@@ -8,6 +8,7 @@ use pyo3::pybacked::PyBackedStr;
 use pyo3::types::PyType;
 
 use crate::client::PyClientOptions;
+use crate::error::{PyObjectStoreError, PyObjectStoreResult};
 use crate::retry::PyRetryConfig;
 
 #[pyclass(name = "AzureStore")]
@@ -36,7 +37,7 @@ impl PyAzureStore {
         config: Option<HashMap<PyAzureConfigKey, String>>,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         let mut builder = MicrosoftAzureBuilder::from_env().with_container_name(container);
         if let Some(config) = config {
             for (key, value) in config.into_iter() {
@@ -49,7 +50,7 @@ impl PyAzureStore {
         if let Some(retry_config) = retry_config {
             builder = builder.with_retry(retry_config.into())
         }
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 
     #[classmethod]
@@ -60,7 +61,7 @@ impl PyAzureStore {
         config: Option<HashMap<PyAzureConfigKey, String>>,
         client_options: Option<PyClientOptions>,
         retry_config: Option<PyRetryConfig>,
-    ) -> PyResult<Self> {
+    ) -> PyObjectStoreResult<Self> {
         let mut builder = MicrosoftAzureBuilder::from_env().with_url(url);
         if let Some(config) = config {
             for (key, value) in config.into_iter() {
@@ -73,7 +74,7 @@ impl PyAzureStore {
         if let Some(retry_config) = retry_config {
             builder = builder.with_retry(retry_config.into())
         }
-        Ok(Self(Arc::new(builder.build().unwrap())))
+        Ok(Self(Arc::new(builder.build()?)))
     }
 }
 
@@ -83,7 +84,7 @@ pub struct PyAzureConfigKey(AzureConfigKey);
 impl<'py> FromPyObject<'py> for PyAzureConfigKey {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         let s = ob.extract::<PyBackedStr>()?.to_lowercase();
-        // TODO: remove unwrap
-        Ok(Self(AzureConfigKey::from_str(&s).unwrap()))
+        let key = AzureConfigKey::from_str(&s).map_err(PyObjectStoreError::ObjectStoreError)?;
+        Ok(Self(key))
     }
 }

@@ -3,6 +3,8 @@ use std::sync::Arc;
 use object_store::local::LocalFileSystem;
 use pyo3::prelude::*;
 
+use crate::error::PyObjectStoreResult;
+
 #[pyclass(name = "LocalStore")]
 pub struct PyLocalStore(Arc<LocalFileSystem>);
 
@@ -22,9 +24,9 @@ impl PyLocalStore {
 impl PyLocalStore {
     #[new]
     #[pyo3(signature = (prefix = None))]
-    fn py_new(prefix: Option<std::path::PathBuf>) -> PyResult<Self> {
+    fn py_new(prefix: Option<std::path::PathBuf>) -> PyObjectStoreResult<Self> {
         let fs = if let Some(prefix) = prefix {
-            LocalFileSystem::new_with_prefix(prefix).unwrap()
+            LocalFileSystem::new_with_prefix(prefix)?
         } else {
             LocalFileSystem::new()
         };
