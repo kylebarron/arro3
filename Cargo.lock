@@ -1296,10 +1296,13 @@ name = "object-store-rs"
 version = "0.4.2"
 dependencies = [
  "bytes",
+ "http",
  "object_store",
  "pyo3",
+ "pyo3-async-runtimes",
  "pyo3-object_store",
  "tokio",
+ "url",
 ]
 
 [[package]]

@@ -19,8 +19,10 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bytes = { workspace = true }
+http = "1.1"
 object_store = { workspace = true }
 pyo3 = { workspace = true }
+pyo3-async-runtimes = { workspace = true, features = ["tokio-runtime"] }
 pyo3-object_store = { path = "../pyo3-object_store" }
 tokio = { version = "1.40", features = [
     "macros",
@@ -28,3 +30,4 @@ tokio = { version = "1.40", features = [
     "rt-multi-thread",
     "sync",
 ] }
+url = "2"

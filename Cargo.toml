@@ -37,6 +37,9 @@ numpy = "0.22"
 object_store = "0.11"
 parquet = "53"
 pyo3 = { version = "0.22", features = ["macros", "indexmap"] }
+pyo3-async-runtimes = { git = "https://github.com/PyO3/pyo3-async-runtimes", features = [
+    "tokio-runtime",
+] }
 pyo3-file = "0.9"
 thiserror = "1"
 
