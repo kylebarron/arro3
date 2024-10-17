@@ -5,14 +5,16 @@ use object_store::{ClientConfigKey, ClientOptions};
 use pyo3::prelude::*;
 use pyo3::pybacked::PyBackedStr;
 
+use crate::error::PyObjectStoreError;
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct PyClientConfigKey(ClientConfigKey);
 
 impl<'py> FromPyObject<'py> for PyClientConfigKey {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         let s = ob.extract::<PyBackedStr>()?.to_lowercase();
-        // TODO: remove unwrap
-        Ok(Self(ClientConfigKey::from_str(&s).unwrap()))
+        let key = ClientConfigKey::from_str(&s).map_err(PyObjectStoreError::ObjectStoreError)?;
+        Ok(Self(key))
     }
 }
 

@@ -476,8 +476,10 @@ checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-targets",
 ]
 
@@ -1289,6 +1291,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aedf0a2d09c573ed1d8d85b30c119153926a2b36dce0ab28322c09a117a4683e"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "object-store-rs"
+version = "0.4.2"
+dependencies = [
+ "bytes",
+ "chrono",
+ "futures",
+ "http",
+ "object_store",
+ "pyo3",
+ "pyo3-async-runtimes",
+ "pyo3-object_store",
+ "tokio",
+ "url",
 ]
 
 [[package]]
