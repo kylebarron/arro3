@@ -42,6 +42,7 @@ nav:
           - api/io/parquet.md
       - object_store_rs:
           - object_store_rs.store:
+              - api/object_store/store/index.md
               - api/object_store/store/aws.md
               - api/object_store/store/azure.md
               - api/object_store/store/gcs.md
@@ -49,7 +50,6 @@ nav:
               - api/object_store/store/local.md
               - api/object_store/store/memory.md
               - api/object_store/store/config.md
-              - api/object_store/store/object_store.md
           - api/object_store/copy.md
           - api/object_store/delete.md
           - api/object_store/get.md
@@ -63,6 +63,7 @@ watch:
   - arro3-compute/python
   - arro3-core/python
   - arro3-io/python
+  - object-store-rs/python
   - docs
 
 theme:

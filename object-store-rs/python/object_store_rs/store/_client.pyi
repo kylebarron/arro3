@@ -36,13 +36,15 @@ Either lower case or upper case strings are accepted.
 
 - `"allow_http"`: Allow non-TLS, i.e. non-HTTPS connections.
 - `"allow_invalid_certificates"`: Skip certificate validation on https connections.
-    **Warning**
 
-    You should think very carefully before using this method. If
-    invalid certificates are trusted, *any* certificate for *any* site
-    will be trusted for use. This includes expired certificates. This
-    introduces significant vulnerabilities, and should only be used
-    as a last resort or for testing
+    !!! warning
+
+        You should think very carefully before using this method. If
+        invalid certificates are trusted, *any* certificate for *any* site
+        will be trusted for use. This includes expired certificates. This
+        introduces significant vulnerabilities, and should only be used
+        as a last resort or for testing
+
 - `"connect_timeout"`: Timeout for only the connect phase of a Client
 - `"default_content_type"`: default `CONTENT_TYPE` for uploads
 - `"http1_only"`: Only use http1 connections.
