@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Literal
 
-from ._pyo3_object_store import AzureStore, GCSStore, S3Store
+from .store import AzureStore, GCSStore, S3Store
 
 HTTP_METHOD = Literal[
     "GET", "PUT", "POST", "HEAD", "PATCH", "TRACE", "DELETE", "OPTIONS", "CONNECT"

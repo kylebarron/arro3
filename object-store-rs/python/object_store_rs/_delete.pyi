@@ -1,4 +1,4 @@
-from ._pyo3_object_store import ObjectStore
+from .store import ObjectStore
 
 def delete(store: ObjectStore, location: str) -> None:
     """Delete the object at the specified location.

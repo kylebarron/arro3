@@ -1,4 +1,4 @@
-from ._pyo3_object_store import ObjectStore
+from .store import ObjectStore
 
 def copy(store: ObjectStore, from_: str, to: str) -> None:
     """Copy an object from one path to another in the same object store.

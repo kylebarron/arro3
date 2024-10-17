@@ -1,5 +1,5 @@
 from ._list import ObjectMeta
-from ._pyo3_object_store import ObjectStore
+from .store import ObjectStore
 
 def head(store: ObjectStore, location: str) -> ObjectMeta:
     """Return the metadata for the specified location

@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import List, TypedDict
 
-from ._pyo3_object_store import ObjectStore
 from ._sign import HTTP_METHOD as HTTP_METHOD
 from ._sign import SignCapableStore as SignCapableStore
 from ._sign import sign_url as sign_url
 from ._sign import sign_url_async as sign_url_async
+from .store import ObjectStore
 
 class ObjectMeta(TypedDict):
     """The metadata that describes an object."""

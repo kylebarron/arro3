@@ -1,4 +1,4 @@
-from ._pyo3_object_store import ObjectStore
+from .store import ObjectStore
 
 def rename(store: ObjectStore, from_: str, to: str) -> None:
     """

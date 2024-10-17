@@ -1,5 +1,6 @@
 # TODO: move this to a standalone package/docs website that can be shared across
 # multiple python packages.
+# TODO: coalesce with other version
 
 from __future__ import annotations
 
@@ -29,7 +30,7 @@ class AzureStore:
         config: Dict[str, str] | None = None,
         client_options: Dict[str, str] | None = None,
         retry_config: RetryConfig | None = None,
-    ) -> S3Store: ...
+    ) -> AzureStore: ...
     @classmethod
     def from_url(
         cls,
@@ -38,7 +39,7 @@ class AzureStore:
         config: Dict[str, str] | None = None,
         client_options: Dict[str, str] | None = None,
         retry_config: RetryConfig | None = None,
-    ) -> S3Store: ...
+    ) -> AzureStore: ...
 
 class GCSStore:
     @classmethod
@@ -49,7 +50,7 @@ class GCSStore:
         config: Dict[str, str] | None = None,
         client_options: Dict[str, str] | None = None,
         retry_config: RetryConfig | None = None,
-    ) -> S3Store: ...
+    ) -> GCSStore: ...
     @classmethod
     def from_url(
         cls,
@@ -58,7 +59,7 @@ class GCSStore:
         config: Dict[str, str] | None = None,
         client_options: Dict[str, str] | None = None,
         retry_config: RetryConfig | None = None,
-    ) -> S3Store: ...
+    ) -> GCSStore: ...
 
 class HTTPStore:
     @classmethod
@@ -68,7 +69,7 @@ class HTTPStore:
         *,
         client_options: Dict[str, str] | None = None,
         retry_config: RetryConfig | None = None,
-    ) -> S3Store: ...
+    ) -> HTTPStore: ...
 
 class S3Store:
     @classmethod

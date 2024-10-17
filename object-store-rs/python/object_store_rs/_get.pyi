@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import List, Sequence, TypedDict
 
 from ._list import ObjectMeta
-from ._pyo3_object_store import ObjectStore
 from ._sign import HTTP_METHOD as HTTP_METHOD
 from ._sign import SignCapableStore as SignCapableStore
 from ._sign import sign_url as sign_url
 from ._sign import sign_url_async as sign_url_async
+from .store import ObjectStore
 
 class GetOptions(TypedDict):
     """Options for a get request, such as range"""
