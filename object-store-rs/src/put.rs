@@ -14,9 +14,9 @@ use pyo3_object_store::PyObjectStore;
 
 use crate::runtime::get_runtime;
 
-/// Input types for which a multipart put upload is used
+/// Input types supported by multipart upload
 #[derive(Debug)]
-pub enum MultipartPutInput {
+pub(crate) enum MultipartPutInput {
     File(BufReader<File>),
     FileLike(PyFileLikeObject),
     Buffer(Cursor<PyBackedBytes>),
@@ -53,7 +53,7 @@ impl Read for MultipartPutInput {
 
 #[pyfunction]
 #[pyo3(signature = (store, location, file, *, chunk_size = 5120, max_concurrency = 12))]
-pub fn put_file(
+pub(crate) fn put_file(
     py: Python,
     store: PyObjectStore,
     location: String,
@@ -73,7 +73,7 @@ pub fn put_file(
 
 #[pyfunction]
 #[pyo3(signature = (store, location, file, *, chunk_size = 5120, max_concurrency = 12))]
-pub fn put_file_async(
+pub(crate) fn put_file_async(
     py: Python,
     store: PyObjectStore,
     location: String,
