@@ -52,12 +52,13 @@ impl Read for MultipartPutInput {
 }
 
 #[pyfunction]
-#[pyo3(signature = (store, location, file, *, max_concurrency = 12))]
+#[pyo3(signature = (store, location, file, *, chunk_size = 5120, max_concurrency = 12))]
 pub fn put_file(
     py: Python,
     store: PyObjectStore,
     location: String,
     file: MultipartPutInput,
+    chunk_size: usize,
     max_concurrency: usize,
 ) -> PyObjectStoreResult<()> {
     let runtime = get_runtime(py)?;
@@ -65,24 +66,30 @@ pub fn put_file(
         store.into_inner(),
         &location.into(),
         file,
+        chunk_size,
         max_concurrency,
     ))
 }
 
 #[pyfunction]
-#[pyo3(signature = (store, location, file, *, max_concurrency = 12))]
+#[pyo3(signature = (store, location, file, *, chunk_size = 5120, max_concurrency = 12))]
 pub fn put_file_async(
     py: Python,
     store: PyObjectStore,
     location: String,
     file: MultipartPutInput,
+    chunk_size: usize,
     max_concurrency: usize,
 ) -> PyResult<Bound<PyAny>> {
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        Ok(
-            put_multipart_inner(store.into_inner(), &location.into(), file, max_concurrency)
-                .await?,
+        Ok(put_multipart_inner(
+            store.into_inner(),
+            &location.into(),
+            file,
+            chunk_size,
+            max_concurrency,
         )
+        .await?)
     })
 }
 
@@ -90,11 +97,12 @@ async fn put_multipart_inner<R: Read>(
     store: Arc<dyn ObjectStore>,
     location: &Path,
     mut reader: R,
+    chunk_size: usize,
     max_concurrency: usize,
 ) -> PyObjectStoreResult<()> {
     let upload = store.put_multipart(location).await?;
     let mut write = WriteMultipart::new(upload);
-    let mut scratch_buffer = vec![0; 1024];
+    let mut scratch_buffer = vec![0; chunk_size];
     loop {
         let read_size = reader
             .read(&mut scratch_buffer)

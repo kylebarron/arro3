@@ -8,6 +8,7 @@ def put_file(
     location: str,
     file: IO[bytes] | Path | bytes,
     *,
+    chunk_size: int = 5 * 1024,
     max_concurrency: int = 12,
 ) -> None: ...
 async def put_file_async(
@@ -15,5 +16,6 @@ async def put_file_async(
     location: str,
     file: IO[bytes] | Path | bytes,
     *,
+    chunk_size: int = 5 * 1024,
     max_concurrency: int = 12,
 ) -> None: ...
