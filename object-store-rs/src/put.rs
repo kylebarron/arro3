@@ -53,7 +53,7 @@ impl Read for MultipartPutInput {
 
 #[pyfunction]
 #[pyo3(signature = (store, location, file, *, max_concurrency = 12))]
-pub fn put(
+pub fn put_file(
     py: Python,
     store: PyObjectStore,
     location: String,
@@ -71,7 +71,7 @@ pub fn put(
 
 #[pyfunction]
 #[pyo3(signature = (store, location, file, *, max_concurrency = 12))]
-pub fn put_async(
+pub fn put_file_async(
     py: Python,
     store: PyObjectStore,
     location: String,

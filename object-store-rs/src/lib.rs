@@ -42,8 +42,8 @@ fn _object_store_rs(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter_async))?;
     m.add_wrapped(wrap_pyfunction!(list::list_with_delimiter))?;
     m.add_wrapped(wrap_pyfunction!(list::list))?;
-    m.add_wrapped(wrap_pyfunction!(put::put_async))?;
-    m.add_wrapped(wrap_pyfunction!(put::put))?;
+    m.add_wrapped(wrap_pyfunction!(put::put_file_async))?;
+    m.add_wrapped(wrap_pyfunction!(put::put_file))?;
     m.add_wrapped(wrap_pyfunction!(rename::rename_async))?;
     m.add_wrapped(wrap_pyfunction!(rename::rename_if_not_exists_async))?;
     m.add_wrapped(wrap_pyfunction!(rename::rename_if_not_exists))?;

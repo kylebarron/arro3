@@ -20,8 +20,8 @@ from ._list import list as list
 from ._list import list_async as list_async
 from ._list import list_with_delimiter as list_with_delimiter
 from ._list import list_with_delimiter_async as list_with_delimiter_async
-from ._put import put as put
-from ._put import put_async as put_async
+from ._put import put_file as put_file
+from ._put import put_file_async as put_file_async
 from ._rename import rename as rename
 from ._rename import rename_async as rename_async
 from ._rename import rename_if_not_exists as rename_if_not_exists
