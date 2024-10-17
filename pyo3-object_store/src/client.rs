@@ -7,6 +7,7 @@ use pyo3::pybacked::PyBackedStr;
 
 use crate::error::PyObjectStoreError;
 
+/// A wrapper around `ClientConfigKey` that implements [`FromPyObject`].
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct PyClientConfigKey(ClientConfigKey);
 
@@ -18,6 +19,7 @@ impl<'py> FromPyObject<'py> for PyClientConfigKey {
     }
 }
 
+/// A wrapper around `ClientOptions` that implements [`FromPyObject`].
 #[derive(Debug)]
 pub struct PyClientOptions(ClientOptions);
 

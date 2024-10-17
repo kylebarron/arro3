@@ -35,7 +35,20 @@ nav:
           - api/core/accessors.md
           - api/core/types.md
       - api/compute.md
-      - api/io.md
+      - arro3.io:
+          - api/io/csv.md
+          - api/io/json.md
+          - api/io/ipc.md
+          - api/io/parquet.md
+      - object_store_rs:
+          - api/object_store/copy.md
+          - api/object_store/delete.md
+          - api/object_store/get.md
+          - api/object_store/head.md
+          - api/object_store/list.md
+          - api/object_store/put.md
+          - api/object_store/rename.md
+          - api/object_store/sign.md
 
 watch:
   - arro3-compute/python

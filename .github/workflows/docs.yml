@@ -48,6 +48,7 @@ jobs:
           uv run maturin develop -m arro3-core/Cargo.toml
           uv run maturin develop -m arro3-compute/Cargo.toml
           uv run maturin develop -m arro3-io/Cargo.toml
+          uv run maturin develop -m object-store-rs/Cargo.toml
 
       - name: Deploy docs
         env:

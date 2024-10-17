@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 
 use crate::error::PyObjectStoreResult;
 
+/// A Python-facing wrapper around a [`LocalFileSystem`].
 #[pyclass(name = "LocalStore")]
 pub struct PyLocalStore(Arc<LocalFileSystem>);
 
@@ -15,6 +16,7 @@ impl AsRef<Arc<LocalFileSystem>> for PyLocalStore {
 }
 
 impl PyLocalStore {
+    /// Consume self and return the underlying [`LocalFileSystem`].
     pub fn into_inner(self) -> Arc<LocalFileSystem> {
         self.0
     }

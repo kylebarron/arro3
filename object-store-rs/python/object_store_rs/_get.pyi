@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Sequence, TypedDict
+from typing import List, Sequence, TypedDict
 
 from ._list import ObjectMeta
 from ._pyo3_object_store import ObjectStore
@@ -82,6 +82,8 @@ class GetOptions(TypedDict):
     """
 
 class GetResult:
+    """Result for a get request"""
+
     def bytes(self) -> bytes:
         """
         Collects the data into bytes
@@ -98,17 +100,78 @@ class GetResult:
 
 def get(
     store: ObjectStore, location: str, *, options: GetOptions | None = None
-) -> GetResult: ...
+) -> GetResult:
+    """Return the bytes that are stored at the specified location.
+
+    Args:
+        store: The ObjectStore instance to use.
+        location: The path within ObjectStore to retrieve.
+        options: options for accessing the file. Defaults to None.
+
+    Returns:
+        GetResult
+    """
+
 async def get_async(
     store: ObjectStore, location: str, *, options: GetOptions | None = None
-) -> GetResult: ...
-def get_range(store: ObjectStore, location: str, offset: int, length: int) -> bytes: ...
+) -> GetResult:
+    """Call `get` asynchronously.
+
+    Refer to the documentation for [get][object_store_rs.get].
+    """
+
+def get_range(store: ObjectStore, location: str, offset: int, length: int) -> bytes:
+    """
+    Return the bytes that are stored at the specified location in the given byte range.
+
+    If the given range is zero-length or starts after the end of the object, an error
+    will be returned. Additionally, if the range ends after the end of the object, the
+    entire remainder of the object will be returned. Otherwise, the exact requested
+    range will be returned.
+
+    Args:
+        store: The ObjectStore instance to use.
+        location: The path within ObjectStore to retrieve.
+        offset: The start of the byte range.
+        length: The number of bytes.
+
+    Returns:
+        bytes
+    """
+
 async def get_range_async(
     store: ObjectStore, location: str, offset: int, length: int
-) -> bytes: ...
+) -> bytes:
+    """Call `get_range` asynchronously.
+
+    Refer to the documentation for [get_range][object_store_rs.get_range].
+    """
+
 def get_ranges(
-    store: ObjectStore, location: str, offset: Sequence[int], length: Sequence[int]
-) -> bytes: ...
+    store: ObjectStore, location: str, offsets: Sequence[int], lengths: Sequence[int]
+) -> List[bytes]:
+    """
+    Return the bytes that are stored at the specified locationin the given byte ranges
+
+    To improve performance this will:
+
+    - Combine ranges less than 10MB apart into a single call to `fetch`
+    - Make multiple `fetch` requests in parallel (up to maximum of 10)
+
+    Args:
+        store: The ObjectStore instance to use.
+        location: The path within ObjectStore to retrieve.
+        offsets: A sequence of `int` where each offset starts.
+        lengths: A sequence of `int` representing the number of bytes within each range.
+
+    Returns:
+        A sequence of `bytes`, one for each range.
+    """
+
 async def get_ranges_async(
-    store: ObjectStore, location: str, offset: Sequence[int], length: Sequence[int]
-) -> bytes: ...
+    store: ObjectStore, location: str, offsets: Sequence[int], lengths: Sequence[int]
+) -> List[bytes]:
+    """Call `get_ranges` asynchronously.
+
+    Refer to the documentation for [get_ranges][object_store_rs.get_ranges].
+    """

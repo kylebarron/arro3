@@ -65,6 +65,7 @@ impl AsRef<Arc<dyn ObjectStore>> for PyObjectStore {
 }
 
 impl PyObjectStore {
+    /// Consume self and return the underlying [`ObjectStore`].
     pub fn into_inner(self) -> Arc<dyn ObjectStore> {
         self.0
     }

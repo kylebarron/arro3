@@ -1,5 +1,5 @@
 #![doc = include_str!("../README.md")]
-// #![deny(missing_docs)]
+#![warn(missing_docs)]
 
 mod api;
 mod aws;

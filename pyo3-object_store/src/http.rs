@@ -8,6 +8,7 @@ use crate::error::PyObjectStoreResult;
 use crate::retry::PyRetryConfig;
 use crate::PyClientOptions;
 
+/// A Python-facing wrapper around a [`HttpStore`].
 #[pyclass(name = "HTTPStore")]
 pub struct PyHttpStore(Arc<HttpStore>);
 
@@ -18,6 +19,7 @@ impl AsRef<Arc<HttpStore>> for PyHttpStore {
 }
 
 impl PyHttpStore {
+    /// Consume self and return the underlying [`HttpStore`].
     pub fn into_inner(self) -> Arc<HttpStore> {
         self.0
     }

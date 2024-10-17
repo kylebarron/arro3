@@ -12,6 +12,7 @@ use crate::client::PyClientOptions;
 use crate::error::{PyObjectStoreError, PyObjectStoreResult};
 use crate::retry::PyRetryConfig;
 
+/// A Python-facing wrapper around an [`AmazonS3`].
 #[pyclass(name = "S3Store")]
 pub struct PyS3Store(Arc<AmazonS3>);
 
@@ -22,6 +23,7 @@ impl AsRef<Arc<AmazonS3>> for PyS3Store {
 }
 
 impl PyS3Store {
+    /// Consume self and return the underlying [`AmazonS3`].
     pub fn into_inner(self) -> Arc<AmazonS3> {
         self.0
     }

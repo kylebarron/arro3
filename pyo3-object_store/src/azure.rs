@@ -11,6 +11,7 @@ use crate::client::PyClientOptions;
 use crate::error::{PyObjectStoreError, PyObjectStoreResult};
 use crate::retry::PyRetryConfig;
 
+/// A Python-facing wrapper around a [`MicrosoftAzure`].
 #[pyclass(name = "AzureStore")]
 pub struct PyAzureStore(Arc<MicrosoftAzure>);
 
@@ -21,6 +22,7 @@ impl AsRef<Arc<MicrosoftAzure>> for PyAzureStore {
 }
 
 impl PyAzureStore {
+    /// Consume self and return the underlying [`MicrosoftAzure`].
     pub fn into_inner(self) -> Arc<MicrosoftAzure> {
         self.0
     }
