@@ -476,10 +476,8 @@ checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
- "js-sys",
  "num-traits",
  "serde",
- "wasm-bindgen",
  "windows-targets",
 ]
 
@@ -861,9 +859,9 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
-version = "1.4.1"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50dfd22e0e76d0f662d429a5f80fcaf3855009297eab6a0a9f8543834744ba05"
+checksum = "bbbff0a806a4728c99295b254c8838933b5b082d75e3cb70c8dab21fdfbcfa9a"
 dependencies = [
  "bytes",
  "futures-channel",
@@ -1294,22 +1292,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "object-store-rs"
-version = "0.4.2"
-dependencies = [
- "bytes",
- "chrono",
- "futures",
- "http",
- "object_store",
- "pyo3",
- "pyo3-async-runtimes",
- "pyo3-object_store",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "object_store"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1635,8 +1617,8 @@ dependencies = [
 [[package]]
 name = "pyo3-object_store"
 version = "0.1.0"
+source = "git+https://github.com/developmentseed/object-store-rs?rev=922b58ff784271345ce80342cf4cd6cddce61adf#922b58ff784271345ce80342cf4cd6cddce61adf"
 dependencies = [
- "arrow-select",
  "futures",
  "object_store",
  "pyo3",
@@ -1874,9 +1856,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.14"
+version = "0.23.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "415d9944693cb90382053259f89fbb077ea730ad7273047ec63b19bc9b160ba8"
+checksum = "5fbb44d7acc4e873d613422379f69f237a1b141928c02f6bc6ccfddddc2d7993"
 dependencies = [
  "once_cell",
  "ring",
@@ -1910,9 +1892,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-pki-types"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e696e35370c65c9c541198af4543ccd580cf17fc25d8e05c5a242b202488c55"
+checksum = "16f1201b3c9a7ee8039bcadc17b7e605e2945b27eee7631788c1bd2b0643674b"
 
 [[package]]
 name = "rustls-webpki"

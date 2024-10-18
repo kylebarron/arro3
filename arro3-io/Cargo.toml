@@ -45,5 +45,5 @@ pyo3-async-runtimes = { workspace = true, features = [
     "tokio-runtime",
 ], optional = true }
 pyo3-file = { workspace = true }
-pyo3-object_store = { path = "../pyo3-object_store", optional = true }
+pyo3-object_store = { git = "https://github.com/developmentseed/object-store-rs", rev = "922b58ff784271345ce80342cf4cd6cddce61adf", optional = true }
 thiserror = { workspace = true }
