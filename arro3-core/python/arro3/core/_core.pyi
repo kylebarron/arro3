@@ -210,6 +210,8 @@ class Buffer:
     """An Arrow Buffer"""
     def __init__(self, buffer) -> None: ...
     def __buffer__(self, flags: int) -> memoryview: ...
+    def as_bytes(self) -> bytes:
+        """Copy this buffer into a Python `bytes` object."""
 
 class ChunkedArray:
     """An Arrow ChunkedArray."""

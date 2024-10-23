@@ -17,6 +17,7 @@ use pyo3::buffer::{Element, ElementType, PyBuffer};
 use pyo3::exceptions::PyValueError;
 use pyo3::ffi;
 use pyo3::prelude::*;
+use pyo3::types::PyBytes;
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::PyArray;
@@ -73,6 +74,10 @@ impl PyArrowBuffer {
     #[new]
     fn py_new(buf: PyArrowBuffer) -> Self {
         buf
+    }
+
+    fn as_bytes<'py>(&'py self, py: Python<'py>) -> Bound<'py, PyBytes> {
+        PyBytes::new_bound(py, &self.0)
     }
 
     /// This is taken from opendal:
