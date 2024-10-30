@@ -80,8 +80,8 @@ impl PyArrowBuffer {
         PyBytes::new_bound(py, &self.0)
     }
 
-    fn __len__(&self) -> PyResult<usize> {
-        Ok(self.0.len())
+    fn __len__(&self) -> usize {
+        self.0.len()
     }
 
     /// This is taken from opendal:
