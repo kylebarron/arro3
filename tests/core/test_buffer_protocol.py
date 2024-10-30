@@ -71,6 +71,7 @@ def test_multi_dimensional():
 def test_round_trip_buffer():
     arr = np.arange(5, dtype=np.uint8)
     buffer = Buffer(arr)
+    assert len(buffer) == arr.nbytes
     retour = np.frombuffer(buffer, dtype=np.uint8)
     assert np.array_equal(arr, retour)
 
