@@ -52,10 +52,12 @@ async def test_stream_parquet():
     url = "https://overturemaps-us-west-2.s3.amazonaws.com/release/2024-03-12-alpha.0/theme=buildings/type=building/part-00217-4dfc75cd-2680-4d52-b5e0-f4cc9f36b267-c000.zstd.parquet"
     store = HTTPStore.from_url(url)
     stream = await read_parquet_async("", store=store)
-    first = await stream.__anext__()
     t1 = time()
+    first = await stream.__anext__()
+    t2 = time()
 
     print(t1 - t0)
+    print(t2 - t1)
 
     test = await stream.collect_async()
     len(test)
