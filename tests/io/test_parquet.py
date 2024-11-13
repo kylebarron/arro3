@@ -2,7 +2,8 @@ from io import BytesIO
 
 import pyarrow as pa
 import pyarrow.parquet as pq
-from arro3.io import read_parquet, write_parquet
+from arro3.io import read_parquet, read_parquet_async, write_parquet
+from arro3.io.store import HTTPStore
 
 
 def test_parquet_round_trip():
@@ -42,3 +43,26 @@ def test_copy_parquet_kv_metadata():
 
     reader = read_parquet("test.parquet")
     assert reader.schema.metadata[b"hello"] == b"world"
+
+
+async def test_stream_parquet():
+    from time import time
+
+    t0 = time()
+    url = "https://overturemaps-us-west-2.s3.amazonaws.com/release/2024-03-12-alpha.0/theme=buildings/type=building/part-00217-4dfc75cd-2680-4d52-b5e0-f4cc9f36b267-c000.zstd.parquet"
+    store = HTTPStore.from_url(url)
+    stream = await read_parquet_async("", store=store)
+    first = await stream.__anext__()
+    t1 = time()
+
+    print(t1 - t0)
+
+    test = await stream.collect_async()
+    len(test)
+    async for batch in stream:
+        break
+
+    batch.num_rows
+    x = await stream.__anext__()
+
+    pass

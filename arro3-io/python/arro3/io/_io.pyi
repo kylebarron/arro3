@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import IO, Literal, Sequence
+from typing import IO, Literal, Self, Sequence
 
 # Note: importing with
 # `from arro3.core import Array`
@@ -267,6 +267,24 @@ ParquetEncoding = Literal[
 ]
 """Allowed Parquet encodings."""
 
+class ParquetRecordBatchStream:
+    """
+    A stream of [RecordBatch][core.RecordBatch] that can be polled in a sync or
+    async fashion.
+    """
+
+    def __aiter__(self) -> Self:
+        """Return `Self` as an async iterator."""
+
+    def __iter__(self) -> Self:
+        """Return `Self` as an async iterator."""
+
+    async def collect_async(self) -> core.Table:
+        """Collect all remaining batches in the stream into a table."""
+
+    async def __anext__(self) -> core.RecordBatch:
+        """Return the next record batch in the stream."""
+
 def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
     """Read a Parquet file to an Arrow RecordBatchReader
 
@@ -277,8 +295,10 @@ def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
         The loaded Arrow data.
     """
 
-async def read_parquet_async(path: str, *, store: ObjectStore) -> core.Table:
-    """Read a Parquet file to an Arrow Table in an async fashion
+async def read_parquet_async(
+    path: str, *, store: ObjectStore
+) -> ParquetRecordBatchStream:
+    """Create an async stream of Arrow record batches from a Parquet file.
 
     Args:
         file: The path to the Parquet file in the given store

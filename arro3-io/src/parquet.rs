@@ -3,22 +3,26 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use arrow_array::{RecordBatchIterator, RecordBatchReader};
+use arrow_schema::SchemaRef;
+use futures::StreamExt;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
-use parquet::arrow::async_reader::ParquetObjectReader;
+use parquet::arrow::async_reader::{ParquetObjectReader, ParquetRecordBatchStream};
 use parquet::arrow::ArrowWriter;
+use parquet::arrow::ParquetRecordBatchStreamBuilder;
 use parquet::basic::{Compression, Encoding};
 use parquet::file::properties::{WriterProperties, WriterVersion};
 use parquet::format::KeyValue;
 use parquet::schema::types::ColumnPath;
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::exceptions::{PyStopAsyncIteration, PyStopIteration, PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
-use pyo3_arrow::{PyRecordBatchReader, PyTable};
+use pyo3_arrow::{PyRecordBatch, PyRecordBatchReader, PyTable};
 use pyo3_object_store::PyObjectStore;
+use tokio::sync::Mutex;
 
-use crate::error::Arro3IoResult;
+use crate::error::{Arro3IoError, Arro3IoResult};
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
@@ -49,21 +53,92 @@ pub fn read_parquet_async(
     py: Python,
     path: String,
     store: PyObjectStore,
-) -> PyArrowResult<PyObject> {
-    let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
+) -> PyResult<Bound<PyAny>> {
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
         Ok(read_parquet_async_inner(store.into_inner(), path).await?)
-    })?;
+    })
+}
 
-    Ok(fut.into())
+struct PyRecordBatchWrapper(PyRecordBatch);
+
+impl IntoPy<PyObject> for PyRecordBatchWrapper {
+    fn into_py(self, py: Python<'_>) -> PyObject {
+        self.0.to_arro3(py).unwrap()
+    }
+}
+
+struct PyTableWrapper(PyTable);
+
+impl IntoPy<PyObject> for PyTableWrapper {
+    fn into_py(self, py: Python<'_>) -> PyObject {
+        self.0.to_arro3(py).unwrap()
+    }
+}
+
+#[pyclass(name = "ParquetRecordBatchStream")]
+struct PyParquetRecordBatchStream {
+    stream: Arc<Mutex<ParquetRecordBatchStream<ParquetObjectReader>>>,
+    schema: SchemaRef,
+}
+
+#[pymethods]
+impl PyParquetRecordBatchStream {
+    fn __aiter__(slf: Py<Self>) -> Py<Self> {
+        slf
+    }
+
+    fn __anext__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<PyAny>> {
+        let stream = self.stream.clone();
+        pyo3_async_runtimes::tokio::future_into_py(py, next_stream(stream, false))
+    }
+
+    fn collect_async<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<PyAny>> {
+        let stream = self.stream.clone();
+        pyo3_async_runtimes::tokio::future_into_py(py, collect_stream(stream, self.schema.clone()))
+    }
+}
+
+async fn next_stream(
+    stream: Arc<Mutex<ParquetRecordBatchStream<ParquetObjectReader>>>,
+    sync: bool,
+) -> PyResult<PyRecordBatchWrapper> {
+    let mut stream = stream.lock().await;
+    match stream.next().await {
+        Some(Ok(batch)) => Ok(PyRecordBatchWrapper(PyRecordBatch::new(batch))),
+        Some(Err(err)) => Err(Arro3IoError::ParquetError(err).into()),
+        None => {
+            // Depending on whether the iteration is sync or not, we raise either a
+            // StopIteration or a StopAsyncIteration
+            if sync {
+                Err(PyStopIteration::new_err("stream exhausted"))
+            } else {
+                Err(PyStopAsyncIteration::new_err("stream exhausted"))
+            }
+        }
+    }
+}
+
+async fn collect_stream(
+    stream: Arc<Mutex<ParquetRecordBatchStream<ParquetObjectReader>>>,
+    schema: SchemaRef,
+) -> PyResult<PyTableWrapper> {
+    let mut stream = stream.lock().await;
+    let mut batches: Vec<_> = vec![];
+    loop {
+        match stream.next().await {
+            Some(Ok(batch)) => {
+                batches.push(batch);
+            }
+            Some(Err(err)) => return Err(Arro3IoError::ParquetError(err).into()),
+            None => return Ok(PyTableWrapper(PyTable::try_new(batches, schema)?)),
+        };
+    }
 }
 
 async fn read_parquet_async_inner(
     store: Arc<dyn object_store::ObjectStore>,
     path: String,
-) -> Arro3IoResult<PyTable> {
-    use futures::TryStreamExt;
-    use parquet::arrow::ParquetRecordBatchStreamBuilder;
-
+) -> Arro3IoResult<PyParquetRecordBatchStream> {
     let meta = store.head(&path.into()).await?;
 
     let object_reader = ParquetObjectReader::new(store, meta);
@@ -74,8 +149,10 @@ async fn read_parquet_async_inner(
 
     let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
 
-    let batches = reader.try_collect::<Vec<_>>().await?;
-    Ok(PyTable::try_new(batches, arrow_schema)?)
+    Ok(PyParquetRecordBatchStream {
+        stream: Arc::new(Mutex::new(reader)),
+        schema: arrow_schema,
+    })
 }
 
 pub(crate) struct PyWriterVersion(WriterVersion);

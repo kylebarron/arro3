@@ -40,6 +40,7 @@ fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(___version))?;
 
     pyo3_object_store::register_store_module(py, m, "arro3.io")?;
+    pyo3_object_store::register_exceptions_module(py, m, "arro3.io")?;
 
     m.add_wrapped(wrap_pyfunction!(csv::infer_csv_schema))?;
     m.add_wrapped(wrap_pyfunction!(csv::read_csv))?;
