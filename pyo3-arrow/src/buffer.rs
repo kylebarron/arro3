@@ -76,7 +76,7 @@ impl PyArrowBuffer {
         buf
     }
 
-    fn as_bytes<'py>(&'py self, py: Python<'py>) -> Bound<'py, PyBytes> {
+    fn to_bytes<'py>(&'py self, py: Python<'py>) -> Bound<'py, PyBytes> {
         PyBytes::new_bound(py, &self.0)
     }
 
