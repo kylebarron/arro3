@@ -132,7 +132,9 @@ jobs:
           version: "0.4.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
+        # Note: we exclude 3.13 from Windows, because it failed with a link error
+        # https://github.com/kylebarron/arro3/actions/runs/11957080778/job/33333367496
+        run: uv python install 3.9 3.10 3.11 3.12 pypy3.10
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
