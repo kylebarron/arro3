@@ -43,9 +43,20 @@ jobs:
           - arro3-io
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          version: "0.4.x"
+
+      # Install Python versions to be found in --find-interpreter
+      - name: Install Python versions
+        run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10
+
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.13
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -59,101 +70,122 @@ jobs:
           name: wheels-linux-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
-  musllinux:
-    runs-on: ${{ matrix.platform.runner }}
-    strategy:
-      matrix:
-        platform:
-          - runner: ubuntu-latest
-            target: x86_64
-          - runner: ubuntu-latest
-            target: x86
-          - runner: ubuntu-latest
-            target: aarch64
-          - runner: ubuntu-latest
-            target: armv7
-        module:
-          - arro3-core
-          - arro3-compute
-          - arro3-io
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
-          sccache: "true"
-          manylinux: musllinux_1_2
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-musllinux-${{ matrix.platform.target }}-${{ matrix.module }}
-          path: dist
+  # musllinux:
+  #   runs-on: ${{ matrix.platform.runner }}
+  #   strategy:
+  #     matrix:
+  #       platform:
+  #         - runner: ubuntu-latest
+  #           target: x86_64
+  #         - runner: ubuntu-latest
+  #           target: x86
+  #         - runner: ubuntu-latest
+  #           target: aarch64
+  #         - runner: ubuntu-latest
+  #           target: armv7
+  #       module:
+  #         - arro3-core
+  #         - arro3-compute
+  #         - arro3-io
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: 3.13
+  #     - name: Build wheels
+  #       uses: PyO3/maturin-action@v1
+  #       with:
+  #         target: ${{ matrix.platform.target }}
+  #         args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
+  #         sccache: "true"
+  #         manylinux: musllinux_1_2
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wheels-musllinux-${{ matrix.platform.target }}-${{ matrix.module }}
+  #         path: dist
 
-  windows:
-    runs-on: ${{ matrix.platform.runner }}
-    strategy:
-      matrix:
-        platform:
-          - runner: windows-latest
-            target: x64
-        module:
-          - arro3-core
-          - arro3-compute
-          - arro3-io
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-          architecture: ${{ matrix.platform.target }}
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
-          sccache: "true"
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.module }}
-          path: dist
+  # windows:
+  #   runs-on: ${{ matrix.platform.runner }}
+  #   strategy:
+  #     matrix:
+  #       platform:
+  #         - runner: windows-latest
+  #           target: x64
+  #       module:
+  #         - arro3-core
+  #         - arro3-compute
+  #         - arro3-io
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: 3.13
+  #         architecture: ${{ matrix.platform.target }}
+  #     - name: Build wheels
+  #       uses: PyO3/maturin-action@v1
+  #       with:
+  #         target: ${{ matrix.platform.target }}
+  #         args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
+  #         sccache: "true"
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.module }}
+  #         path: dist
 
-  macos:
-    runs-on: ${{ matrix.platform.runner }}
-    strategy:
-      matrix:
-        platform:
-          - runner: macos-12
-            target: x86_64
-          - runner: macos-14
-            target: aarch64
-        module:
-          - arro3-core
-          - arro3-compute
-          - arro3-io
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
-          sccache: "true"
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
-          path: dist
+  # macos:
+  #   runs-on: ${{ matrix.platform.runner }}
+  #   strategy:
+  #     matrix:
+  #       platform:
+  #         - runner: macos-12
+  #           target: x86_64
+  #         - runner: macos-14
+  #           target: aarch64
+  #       module:
+  #         - arro3-core
+  #         - arro3-compute
+  #         - arro3-io
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: 3.13
+  #     - name: Build wheels
+  #       uses: PyO3/maturin-action@v1
+  #       with:
+  #         target: ${{ matrix.platform.target }}
+  #         args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
+  #         sccache: "true"
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
+  #         path: dist
 
-  # sdist:
+  # # sdist:
+  # #   runs-on: ubuntu-latest
+  # #   strategy:
+  # #     matrix:
+  # #       module:
+  # #         - arro3-core
+  # #         - arro3-compute
+  # #         - arro3-io
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Build sdist
+  # #       uses: PyO3/maturin-action@v1
+  # #       with:
+  # #         command: sdist
+  # #         args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
+  # #     - name: Upload sdist
+  # #       uses: actions/upload-artifact@v4
+  # #       with:
+  # #         name: wheels-sdist-${{ matrix.module }}
+  # #         path: dist
+
+  # release:
   #   runs-on: ubuntu-latest
   #   strategy:
   #     matrix:
@@ -161,47 +193,26 @@ jobs:
   #         - arro3-core
   #         - arro3-compute
   #         - arro3-io
+  #   name: Release
+  #   environment:
+  #     name: release
+  #     url: https://pypi.org/p/${{ matrix.module }}
+  #   permissions:
+  #     # IMPORTANT: this permission is mandatory for trusted publishing
+  #     id-token: write
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   needs: [linux, windows, macos]
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build sdist
-  #       uses: PyO3/maturin-action@v1
+  #     - uses: actions/download-artifact@v4
   #       with:
-  #         command: sdist
-  #         args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
-  #     - name: Upload sdist
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wheels-sdist-${{ matrix.module }}
+  #         pattern: wheels-*-${{ matrix.module }}
+  #         merge-multiple: true
   #         path: dist
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: 3.8
 
-  release:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module:
-          - arro3-core
-          - arro3-compute
-          - arro3-io
-    name: Release
-    environment:
-      name: release
-      url: https://pypi.org/p/${{ matrix.module }}
-    permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [linux, windows, macos]
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: wheels-*-${{ matrix.module }}
-          merge-multiple: true
-          path: dist
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
