@@ -55,18 +55,12 @@ jobs:
         id: python-paths
         run: |
           uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
-          echo " -i $(uv python find 3.9)" >> "$GITHUB_OUTPUT"
-          echo " -i $(uv python find 3.10)" >> "$GITHUB_OUTPUT"
-          echo " -i $(uv python find 3.11)" >> "$GITHUB_OUTPUT"
-          echo " -i $(uv python find 3.12)" >> "$GITHUB_OUTPUT"
-          echo " -i $(uv python find 3.13)" >> "$GITHUB_OUTPUT"
-          echo " -i $(uv python find pypy3.10)" >> "$GITHUB_OUTPUT"
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ steps.python-paths.outputs }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: auto
 
