@@ -50,20 +50,26 @@ jobs:
           enable-cache: true
           version: "0.4.x"
 
-      # Install Python versions to be found in --find-interpreter
+      # Install Python versions and access their executable paths
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10
+        id: python-paths
+        run: |
+          uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
+          echo " -i $(uv python find 3.9)" >> "$GITHUB_OUTPUT"
+          echo " -i $(uv python find 3.10)" >> "$GITHUB_OUTPUT"
+          echo " -i $(uv python find 3.11)" >> "$GITHUB_OUTPUT"
+          echo " -i $(uv python find 3.12)" >> "$GITHUB_OUTPUT"
+          echo " -i $(uv python find 3.13)" >> "$GITHUB_OUTPUT"
+          echo " -i $(uv python find pypy3.10)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist ${{ steps.python-paths.outputs }} --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: auto
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
