@@ -2,6 +2,21 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.3] - 2024-11-21
+
+### What's Changed
+
+- Build wheels for Python 3.13 by @kylebarron in https://github.com/kylebarron/arro3/pull/260
+- Raise RuntimeWarning when compiled in debug mode by @kylebarron in https://github.com/kylebarron/arro3/pull/255
+- Add `Buffer.to_bytes` by @kylebarron in https://github.com/kylebarron/arro3/pull/251
+- Make buffers have a length by @martindurant in https://github.com/kylebarron/arro3/pull/252
+
+## New Contributors
+
+- @martindurant made their first contribution in https://github.com/kylebarron/arro3/pull/252
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.2...py-0.4.3
+
 ## [0.4.2] - 2024-10-14
 
 ### What's Changed
