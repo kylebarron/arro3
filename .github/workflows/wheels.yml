@@ -89,6 +89,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          version: "0.4.x"
+
       - name: Install Python versions
         run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
 
@@ -118,6 +124,12 @@ jobs:
           - arro3-io
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          version: "0.4.x"
 
       - name: Install Python versions
         run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
@@ -149,6 +161,12 @@ jobs:
           - arro3-io
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          version: "0.4.x"
 
       - name: Install Python versions
         run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
