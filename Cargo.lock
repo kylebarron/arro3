@@ -112,10 +112,11 @@ dependencies = [
  "parquet",
  "pyo3",
  "pyo3-arrow",
- "pyo3-async-runtimes",
+ "pyo3-async-runtimes 0.21.0",
  "pyo3-file",
  "pyo3-object_store",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]
@@ -1561,6 +1562,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "pyo3-async-runtimes"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2529f0be73ffd2be0cc43c013a640796558aa12d7ca0aab5cc14f375b4733031"
+dependencies = [
+ "futures",
+ "once_cell",
+ "pin-project-lite",
+ "pyo3",
+ "tokio",
+]
+
+[[package]]
 name = "pyo3-build-config"
 version = "0.22.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1616,14 +1630,15 @@ dependencies = [
 
 [[package]]
 name = "pyo3-object_store"
-version = "0.1.0"
-source = "git+https://github.com/developmentseed/object-store-rs?rev=922b58ff784271345ce80342cf4cd6cddce61adf#922b58ff784271345ce80342cf4cd6cddce61adf"
+version = "0.1.0-beta.1"
+source = "git+https://github.com/developmentseed/obstore?rev=f0dad90f1e5e157760335d1ccb4045e1f3b4f194#f0dad90f1e5e157760335d1ccb4045e1f3b4f194"
 dependencies = [
  "futures",
  "object_store",
  "pyo3",
- "pyo3-async-runtimes",
+ "pyo3-async-runtimes 0.22.0",
  "thiserror",
+ "url",
 ]
 
 [[package]]
@@ -2181,9 +2196,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.40.0"
+version = "1.41.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2b070231665d27ad9ec9b8df639893f46727666c6767db40317fbe920a5d998"
+checksum = "22cfb5bee7a6a52939ca9224d6ac897bb669134078daa8735560897f69de4d33"
 dependencies = [
  "backtrace",
  "bytes",
