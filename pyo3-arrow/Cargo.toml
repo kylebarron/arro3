@@ -27,7 +27,9 @@ pyo3 = { version = "0.23", features = ["chrono", "indexmap"] }
 half = "2"
 indexmap = "2"
 # numpy = { version = "0.23", features = ["half"] }
-numpy = { git = "https://github.com/PyO3/rust-numpy", rev = "b34bc295414015931d6c7bd5350cab2c6c829d6e" }
+numpy = { git = "https://github.com/PyO3/rust-numpy", rev = "b34bc295414015931d6c7bd5350cab2c6c829d6e", features = [
+    "half",
+] }
 thiserror = "1"
 
 [dev-dependencies]

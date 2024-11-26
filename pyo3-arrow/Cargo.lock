@@ -710,6 +710,7 @@ name = "numpy"
 version = "0.23.0-dev"
 source = "git+https://github.com/PyO3/rust-numpy?rev=b34bc295414015931d6c7bd5350cab2c6c829d6e#b34bc295414015931d6c7bd5350cab2c6c829d6e"
 dependencies = [
+ "half",
  "libc",
  "ndarray",
  "num-complex",
