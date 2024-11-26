@@ -1,12 +1,12 @@
 use std::fmt::Display;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
 use arrow_schema::{Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
@@ -22,12 +22,12 @@ use crate::{PyRecordBatch, PySchema, PyTable};
 ///
 /// This is a wrapper around a [RecordBatchReader].
 #[pyclass(module = "arro3.core._core", name = "RecordBatchReader", subclass)]
-pub struct PyRecordBatchReader(pub(crate) Option<Box<dyn RecordBatchReader + Send>>);
+pub struct PyRecordBatchReader(pub(crate) Mutex<Option<Box<dyn RecordBatchReader + Send>>>);
 
 impl PyRecordBatchReader {
     /// Construct a new PyRecordBatchReader from an existing [RecordBatchReader].
     pub fn new(reader: Box<dyn RecordBatchReader + Send>) -> Self {
-        Self(Some(reader))
+        Self(Mutex::new(Some(reader)))
     }
 
     /// Construct from a raw Arrow C Stream capsule
@@ -36,24 +36,28 @@ impl PyRecordBatchReader {
         let stream_reader = arrow::ffi_stream::ArrowArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
-        Ok(Self(Some(Box::new(stream_reader))))
+        Ok(Self::new(Box::new(stream_reader)))
     }
 
     /// Consume this reader and convert into a [RecordBatchReader].
     ///
     /// The reader can only be consumed once. Calling `into_reader`
-    pub fn into_reader(mut self) -> PyResult<Box<dyn RecordBatchReader + Send>> {
+    pub fn into_reader(self) -> PyResult<Box<dyn RecordBatchReader + Send>> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         Ok(stream)
     }
 
     /// Consume this reader and create a [PyTable] object
-    pub fn into_table(mut self) -> PyArrowResult<PyTable> {
+    pub fn into_table(self) -> PyArrowResult<PyTable> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         let schema = stream.schema();
@@ -68,8 +72,8 @@ impl PyRecordBatchReader {
     ///
     /// If the stream has already been consumed, this method will error.
     pub fn schema_ref(&self) -> PyResult<SchemaRef> {
-        let stream = self
-            .0
+        let inner = self.0.lock().unwrap();
+        let stream = inner
             .as_ref()
             .ok_or(PyIOError::new_err("Stream already closed."))?;
         Ok(stream.schema())
@@ -77,14 +81,14 @@ impl PyRecordBatchReader {
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
     pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
+                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
             )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -96,13 +100,13 @@ impl PyRecordBatchReader {
     ///
     /// Requires pyarrow >=15
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let record_batch_reader_class = pyarrow_mod.getattr(intern!(py, "RecordBatchReader"))?;
         let pyarrow_obj = record_batch_reader_class.call_method1(
             intern!(py, "from_stream"),
-            PyTuple::new_bound(py, vec![self.into_py(py)]),
+            PyTuple::new(py, vec![self.into_pyobject(py)?])?,
         )?;
-        Ok(pyarrow_obj.to_object(py))
+        pyarrow_obj.into_py_any(py)
     }
 }
 
@@ -139,6 +143,8 @@ impl PyRecordBatchReader {
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let reader = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
 
@@ -201,12 +207,14 @@ impl PyRecordBatchReader {
 
     #[getter]
     fn closed(&self) -> bool {
-        self.0.is_none()
+        self.0.lock().unwrap().is_none()
     }
 
     fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         let schema = stream.schema();
@@ -218,8 +226,8 @@ impl PyRecordBatchReader {
     }
 
     fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
-        let stream = self
-            .0
+        let mut inner = self.0.lock().unwrap();
+        let stream = inner
             .as_mut()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 

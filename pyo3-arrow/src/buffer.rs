@@ -77,7 +77,7 @@ impl PyArrowBuffer {
     }
 
     fn to_bytes<'py>(&'py self, py: Python<'py>) -> Bound<'py, PyBytes> {
-        PyBytes::new_bound(py, &self.0)
+        PyBytes::new(py, &self.0)
     }
 
     fn __len__(&self) -> usize {

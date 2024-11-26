@@ -13,9 +13,9 @@ use arrow_array::{
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 #[cfg(feature = "buffer_protocol")]
 use crate::buffer::AnyBufferProtocol;
@@ -99,12 +99,12 @@ impl PyArray {
     ///
     /// This requires that you depend on arro3-core from your Python package.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
         )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.Array`.
@@ -116,11 +116,11 @@ impl PyArray {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "array"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_obj.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        pyarrow_obj.into_py_any(py)
     }
 }
 
@@ -390,7 +390,7 @@ impl PyArray {
                 unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
             scalars.push(scalar.as_py(py)?);
         }
-        Ok(scalars.into_py(py))
+        scalars.into_py_any(py)
     }
 
     #[getter]

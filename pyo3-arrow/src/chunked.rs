@@ -5,9 +5,9 @@ use arrow::compute::concat;
 use arrow_array::{Array, ArrayRef};
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
@@ -186,14 +186,14 @@ impl PyChunkedArray {
 
     /// Export this to a Python `arro3.core.ChunkedArray`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "ChunkedArray"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
+                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
             )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -205,11 +205,11 @@ impl PyChunkedArray {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "chunked_array"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_obj.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        pyarrow_obj.into_py_any(py)
     }
 }
 
@@ -464,7 +464,7 @@ impl PyChunkedArray {
                 scalars.push(scalar.as_py(py)?);
             }
         }
-        Ok(scalars.into_py(py))
+        scalars.into_py_any(py)
     }
 
     #[getter]

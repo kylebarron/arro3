@@ -4,9 +4,9 @@ use std::sync::Arc;
 use arrow::datatypes::DataType;
 use arrow_schema::{Field, IntervalUnit, TimeUnit};
 use pyo3::exceptions::{PyTypeError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
@@ -55,12 +55,12 @@ impl PyDataType {
 
     /// Export this to a Python `arro3.core.Field`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new_bound(py, vec![self.__arrow_c_schema__(py)?]),
+            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
         )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.Schema`.
@@ -72,11 +72,15 @@ impl PyDataType {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_field = pyarrow_mod
             .getattr(intern!(py, "field"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_field.getattr(intern!(py, "type"))?.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        Ok(pyarrow_field
+            .getattr(intern!(py, "type"))?
+            .into_pyobject(py)?
+            .into_any()
+            .unbind())
     }
 }
 

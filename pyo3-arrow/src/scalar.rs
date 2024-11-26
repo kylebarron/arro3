@@ -8,9 +8,9 @@ use arrow_array::timezone::Tz;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use indexmap::IndexMap;
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::to_array_pycapsules;
@@ -86,12 +86,12 @@ impl PyScalar {
     ///
     /// This requires that you depend on arro3-core from your Python package.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Scalar"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
         )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 }
 
@@ -119,7 +119,7 @@ impl PyScalar {
             return Ok(data);
         }
 
-        let obj = PyList::new_bound(py, vec![obj]);
+        let obj = PyList::new(py, vec![obj])?;
         let array = PyArray::init(&obj, r#type)?;
         let (array, field) = array.into_inner();
         Self::try_new(array, field)
@@ -138,16 +138,13 @@ impl PyScalar {
     fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<PyObject> {
         if let Ok(other) = other.extract::<PyScalar>() {
             let eq = self.array == other.array && self.field == other.field;
-            Ok(eq.into_py(py))
+            eq.into_py_any(py)
+            // Ok(eq.into_pyobject(py)?.into_any().unbind())
         } else {
             // If other is not an Arrow scalar, cast self to a Python object, and then call its
             // `__eq__` method.
             let self_py = self.as_py(py)?;
-            self_py.call_method1(
-                py,
-                intern!(py, "__eq__"),
-                PyTuple::new_bound(py, vec![other]),
-            )
+            self_py.call_method1(py, intern!(py, "__eq__"), PyTuple::new(py, vec![other])?)
         }
     }
 
@@ -178,18 +175,20 @@ impl PyScalar {
         let arr = self.array.as_ref();
         let result = match self.array.data_type() {
             DataType::Null => py.None(),
-            DataType::Boolean => arr.as_boolean().value(0).into_py(py),
-            DataType::Int8 => arr.as_primitive::<Int8Type>().value(0).into_py(py),
-            DataType::Int16 => arr.as_primitive::<Int16Type>().value(0).into_py(py),
-            DataType::Int32 => arr.as_primitive::<Int32Type>().value(0).into_py(py),
-            DataType::Int64 => arr.as_primitive::<Int64Type>().value(0).into_py(py),
-            DataType::UInt8 => arr.as_primitive::<UInt8Type>().value(0).into_py(py),
-            DataType::UInt16 => arr.as_primitive::<UInt16Type>().value(0).into_py(py),
-            DataType::UInt32 => arr.as_primitive::<UInt32Type>().value(0).into_py(py),
-            DataType::UInt64 => arr.as_primitive::<UInt64Type>().value(0).into_py(py),
-            DataType::Float16 => f32::from(arr.as_primitive::<Float16Type>().value(0)).into_py(py),
-            DataType::Float32 => arr.as_primitive::<Float32Type>().value(0).into_py(py),
-            DataType::Float64 => arr.as_primitive::<Float64Type>().value(0).into_py(py),
+            DataType::Boolean => arr.as_boolean().value(0).into_py_any(py)?,
+            DataType::Int8 => arr.as_primitive::<Int8Type>().value(0).into_py_any(py)?,
+            DataType::Int16 => arr.as_primitive::<Int16Type>().value(0).into_py_any(py)?,
+            DataType::Int32 => arr.as_primitive::<Int32Type>().value(0).into_py_any(py)?,
+            DataType::Int64 => arr.as_primitive::<Int64Type>().value(0).into_py_any(py)?,
+            DataType::UInt8 => arr.as_primitive::<UInt8Type>().value(0).into_py_any(py)?,
+            DataType::UInt16 => arr.as_primitive::<UInt16Type>().value(0).into_py_any(py)?,
+            DataType::UInt32 => arr.as_primitive::<UInt32Type>().value(0).into_py_any(py)?,
+            DataType::UInt64 => arr.as_primitive::<UInt64Type>().value(0).into_py_any(py)?,
+            DataType::Float16 => {
+                f32::from(arr.as_primitive::<Float16Type>().value(0)).into_py_any(py)?
+            }
+            DataType::Float32 => arr.as_primitive::<Float32Type>().value(0).into_py_any(py)?,
+            DataType::Float64 => arr.as_primitive::<Float64Type>().value(0).into_py_any(py)?,
             DataType::Timestamp(time_unit, tz) => {
                 if let Some(tz) = tz {
                     let tz = Tz::from_str(tz)?;
@@ -197,69 +196,69 @@ impl PyScalar {
                         TimeUnit::Second => arr
                             .as_primitive::<TimestampSecondType>()
                             .value_as_datetime_with_tz(0, tz)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Millisecond => arr
                             .as_primitive::<TimestampMillisecondType>()
                             .value_as_datetime_with_tz(0, tz)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Microsecond => arr
                             .as_primitive::<TimestampMicrosecondType>()
                             .value_as_datetime_with_tz(0, tz)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Nanosecond => arr
                             .as_primitive::<TimestampNanosecondType>()
                             .value_as_datetime_with_tz(0, tz)
-                            .into_py(py),
+                            .into_py_any(py)?,
                     }
                 } else {
                     match time_unit {
                         TimeUnit::Second => arr
                             .as_primitive::<TimestampSecondType>()
                             .value_as_datetime(0)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Millisecond => arr
                             .as_primitive::<TimestampMillisecondType>()
                             .value_as_datetime(0)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Microsecond => arr
                             .as_primitive::<TimestampMicrosecondType>()
                             .value_as_datetime(0)
-                            .into_py(py),
+                            .into_py_any(py)?,
                         TimeUnit::Nanosecond => arr
                             .as_primitive::<TimestampNanosecondType>()
                             .value_as_datetime(0)
-                            .into_py(py),
+                            .into_py_any(py)?,
                     }
                 }
             }
             DataType::Date32 => arr
                 .as_primitive::<Date32Type>()
                 .value_as_date(0)
-                .into_py(py),
+                .into_py_any(py)?,
             DataType::Date64 => arr
                 .as_primitive::<Date64Type>()
                 .value_as_date(0)
-                .into_py(py),
+                .into_py_any(py)?,
             DataType::Time32(time_unit) => match time_unit {
                 TimeUnit::Second => arr
                     .as_primitive::<Time32SecondType>()
                     .value_as_time(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 TimeUnit::Millisecond => arr
                     .as_primitive::<Time32MillisecondType>()
                     .value_as_time(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 _ => unreachable!(),
             },
             DataType::Time64(time_unit) => match time_unit {
                 TimeUnit::Microsecond => arr
                     .as_primitive::<Time64MicrosecondType>()
                     .value_as_time(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 TimeUnit::Nanosecond => arr
                     .as_primitive::<Time64NanosecondType>()
                     .value_as_time(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
 
                 _ => unreachable!(),
             },
@@ -267,52 +266,52 @@ impl PyScalar {
                 TimeUnit::Second => arr
                     .as_primitive::<DurationSecondType>()
                     .value_as_duration(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 TimeUnit::Millisecond => arr
                     .as_primitive::<DurationMillisecondType>()
                     .value_as_duration(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 TimeUnit::Microsecond => arr
                     .as_primitive::<DurationMicrosecondType>()
                     .value_as_duration(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
                 TimeUnit::Nanosecond => arr
                     .as_primitive::<DurationNanosecondType>()
                     .value_as_duration(0)
-                    .into_py(py),
+                    .into_py_any(py)?,
             },
             DataType::Interval(_) => {
                 // https://github.com/apache/arrow-rs/blob/6c59b7637592e4b67b18762b8313f91086c0d5d8/arrow-array/src/temporal_conversions.rs#L219
                 todo!("interval is not yet fully documented [ARROW-3097]")
             }
-            DataType::Binary => arr.as_binary::<i32>().value(0).into_py(py),
-            DataType::FixedSizeBinary(_) => arr.as_fixed_size_binary().value(0).into_py(py),
-            DataType::LargeBinary => arr.as_binary::<i64>().value(0).into_py(py),
-            DataType::BinaryView => arr.as_binary_view().value(0).into_py(py),
-            DataType::Utf8 => arr.as_string::<i32>().value(0).into_py(py),
-            DataType::LargeUtf8 => arr.as_string::<i64>().value(0).into_py(py),
-            DataType::Utf8View => arr.as_string_view().value(0).into_py(py),
+            DataType::Binary => arr.as_binary::<i32>().value(0).into_py_any(py)?,
+            DataType::FixedSizeBinary(_) => arr.as_fixed_size_binary().value(0).into_py_any(py)?,
+            DataType::LargeBinary => arr.as_binary::<i64>().value(0).into_py_any(py)?,
+            DataType::BinaryView => arr.as_binary_view().value(0).into_py_any(py)?,
+            DataType::Utf8 => arr.as_string::<i32>().value(0).into_py_any(py)?,
+            DataType::LargeUtf8 => arr.as_string::<i64>().value(0).into_py_any(py)?,
+            DataType::Utf8View => arr.as_string_view().value(0).into_py_any(py)?,
             DataType::List(inner_field) => {
                 let inner_array = arr.as_list::<i32>().value(0);
-                list_values_to_py(py, inner_array, inner_field)?.into_py(py)
+                list_values_to_py(py, inner_array, inner_field)?.into_py_any(py)?
             }
             DataType::LargeList(inner_field) => {
                 let inner_array = arr.as_list::<i64>().value(0);
-                list_values_to_py(py, inner_array, inner_field)?.into_py(py)
+                list_values_to_py(py, inner_array, inner_field)?.into_py_any(py)?
             }
             DataType::FixedSizeList(inner_field, _list_size) => {
                 let inner_array = arr.as_fixed_size_list().value(0);
-                list_values_to_py(py, inner_array, inner_field)?.into_py(py)
+                list_values_to_py(py, inner_array, inner_field)?.into_py_any(py)?
             }
             DataType::ListView(_inner_field) => {
                 todo!("as_list_view does not yet exist");
                 // let inner_array = arr.as_list_view::<i32>().value(0);
-                // list_values_to_py(py, inner_array, inner_field)?.into_py(py)
+                // list_values_to_py(py, inner_array, inner_field)?.into_py_any(py)?
             }
             DataType::LargeListView(_inner_field) => {
                 todo!("as_list_view does not yet exist");
                 // let inner_array = arr.as_list_view::<i64>().value(0);
-                // list_values_to_py(py, inner_array, inner_field)?.into_py(py)
+                // list_values_to_py(py, inner_array, inner_field)?.into_py_any(py)?
             }
             DataType::Struct(inner_fields) => {
                 let struct_array = arr.as_struct();
@@ -323,7 +322,7 @@ impl PyScalar {
                         unsafe { PyScalar::new_unchecked(column.clone(), inner_field.clone()) };
                     dict_py_objects.insert(inner_field.name(), scalar.as_py(py)?);
                 }
-                dict_py_objects.into_py(py)
+                dict_py_objects.into_py_any(py)?
             }
             DataType::Union(_, _) => {
                 let array = arr.as_any().downcast_ref::<UnionArray>().unwrap();
@@ -379,10 +378,10 @@ impl PyScalar {
                     let py_key = PyScalar::try_from_array_ref(key_arr.slice(i, 1))?.as_py(py)?;
                     let py_value =
                         PyScalar::try_from_array_ref(value_arr.slice(i, 1))?.as_py(py)?;
-                    entries.push(PyTuple::new_bound(py, vec![py_key, py_value]));
+                    entries.push(PyTuple::new(py, vec![py_key, py_value])?);
                 }
 
-                entries.into_py(py)
+                entries.into_py_any(py)?
             }
             DataType::RunEndEncoded(_, _) => {
                 todo!()

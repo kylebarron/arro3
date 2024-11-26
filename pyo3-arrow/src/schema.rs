@@ -4,9 +4,9 @@ use std::sync::Arc;
 
 use arrow_schema::{Schema, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
@@ -42,12 +42,12 @@ impl PySchema {
 
     /// Export this to a Python `arro3.core.Schema`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new_bound(py, vec![self.__arrow_c_schema__(py)?]),
+            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
         )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.Schema`.
@@ -59,11 +59,11 @@ impl PySchema {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "schema"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_obj.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        pyarrow_obj.into_py_any(py)
     }
 }
 
@@ -218,11 +218,11 @@ impl PySchema {
     // a list, not bytes
     #[getter]
     fn metadata<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
-        let d = PyDict::new_bound(py);
+        let d = PyDict::new(py);
         self.0.metadata().iter().try_for_each(|(key, val)| {
             d.set_item(
-                PyBytes::new_bound(py, key.as_bytes()),
-                PyBytes::new_bound(py, val.as_bytes()),
+                PyBytes::new(py, key.as_bytes()),
+                PyBytes::new(py, val.as_bytes()),
             )
         })?;
         Ok(d)

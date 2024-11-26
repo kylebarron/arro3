@@ -1,10 +1,11 @@
 use std::fmt::Display;
+use std::sync::Mutex;
 
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
@@ -19,12 +20,12 @@ use crate::{PyArray, PyChunkedArray, PyField};
 ///
 /// This is a wrapper around a [ArrayReader].
 #[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass)]
-pub struct PyArrayReader(pub(crate) Option<Box<dyn ArrayReader + Send>>);
+pub struct PyArrayReader(pub(crate) Mutex<Option<Box<dyn ArrayReader + Send>>>);
 
 impl PyArrayReader {
     /// Construct a new [PyArrayReader] from an existing [ArrayReader].
     pub fn new(reader: Box<dyn ArrayReader + Send>) -> Self {
-        Self(Some(reader))
+        Self(Mutex::new(Some(reader)))
     }
 
     /// Import from a raw Arrow C Stream capsule
@@ -32,24 +33,28 @@ impl PyArrayReader {
         let stream = import_stream_pycapsule(capsule)?;
         let stream_reader = ArrowArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
-        Ok(Self(Some(Box::new(stream_reader))))
+        Ok(Self::new(Box::new(stream_reader)))
     }
 
     /// Consume this reader and convert into a [ArrayReader].
     ///
     /// The reader can only be consumed once. Calling `into_reader`
-    pub fn into_reader(mut self) -> PyResult<Box<dyn ArrayReader + Send>> {
+    pub fn into_reader(self) -> PyResult<Box<dyn ArrayReader + Send>> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
         Ok(stream)
     }
 
     /// Consume this reader and create a [PyChunkedArray] object
-    pub fn into_chunked_array(mut self) -> PyArrowResult<PyChunkedArray> {
+    pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
         let field = stream.field();
@@ -64,8 +69,8 @@ impl PyArrayReader {
     ///
     /// If the stream has already been consumed, this method will error.
     pub fn field_ref(&self) -> PyResult<FieldRef> {
-        let stream = self
-            .0
+        let inner = self.0.lock().unwrap();
+        let stream = inner
             .as_ref()
             .ok_or(PyIOError::new_err("Stream already closed."))?;
         Ok(stream.field())
@@ -74,14 +79,14 @@ impl PyArrayReader {
     /// Export this to a Python `arro3.core.ArrayReader`.
     #[allow(clippy::wrong_self_convention)]
     pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "ArrayReader"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
+                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
             )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -124,6 +129,8 @@ impl PyArrayReader {
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let array_reader = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
         to_stream_pycapsule(py, array_reader, requested_schema)
@@ -145,7 +152,7 @@ impl PyArrayReader {
 
     #[getter]
     fn closed(&self) -> bool {
-        self.0.is_none()
+        self.0.lock().unwrap().is_none()
     }
 
     #[classmethod]
@@ -188,6 +195,8 @@ impl PyArrayReader {
     fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
         let stream = self
             .0
+            .lock()
+            .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
         let field = stream.field();
@@ -199,8 +208,8 @@ impl PyArrayReader {
     }
 
     fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
-        let stream = self
-            .0
+        let mut inner = self.0.lock().unwrap();
+        let stream = inner
             .as_mut()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 

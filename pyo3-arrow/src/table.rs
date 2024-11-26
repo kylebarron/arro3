@@ -8,9 +8,9 @@ use arrow_array::{RecordBatch, RecordBatchIterator};
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
@@ -76,12 +76,12 @@ impl PyTable {
 
     /// Export this to a Python `arro3.core.Table`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new_bound(py, vec![self.__arrow_c_stream__(py, None)?]),
+            PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
         )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -93,11 +93,11 @@ impl PyTable {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "table"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_obj.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        pyarrow_obj.into_py_any(py)
     }
 
     pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
@@ -191,15 +191,9 @@ impl PyTable {
         if let Ok(data) = data.extract::<AnyRecordBatch>() {
             Ok(data.into_table()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
-            Self::from_pydict(&py.get_type_bound::<PyTable>(), mapping, schema, metadata)
+            Self::from_pydict(&py.get_type::<PyTable>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {
-            Self::from_arrays(
-                &py.get_type_bound::<PyTable>(),
-                arrays,
-                names,
-                schema,
-                metadata,
-            )
+            Self::from_arrays(&py.get_type::<PyTable>(), arrays, names, schema, metadata)
         } else {
             Err(PyTypeError::new_err(
                 "Expected Table-like input or dict of arrays or sequence of arrays.",

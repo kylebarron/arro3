@@ -6,7 +6,7 @@ use arrow::datatypes::{
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
 use numpy::{
-    dtype_bound, PyArray1, PyArrayDescr, PyArrayDescrMethods, PyArrayMethods, PyUntypedArray,
+    PyArray1, PyArrayDescr, PyArrayDescrMethods, PyArrayMethods, PyUntypedArray,
     PyUntypedArrayMethods,
 };
 use pyo3::exceptions::PyValueError;
@@ -55,5 +55,5 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
 }
 
 fn is_type<T: numpy::Element>(py: Python, dtype: &Bound<PyArrayDescr>) -> bool {
-    dtype.is_equiv_to(&dtype_bound::<T>(py))
+    dtype.is_equiv_to(&numpy::dtype::<T>(py))
 }
