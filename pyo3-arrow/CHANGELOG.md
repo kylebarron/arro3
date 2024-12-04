@@ -1,8 +1,21 @@
 # Changelog
 
+## [0.6.0] - 2024-12-04
+
+### What's Changed
+
+* Bump pyo3-arrow to pyo3 0.23 by @kylebarron in https://github.com/kylebarron/arro3/pull/265
+* Add test for segmentation fault when converting arro3.core.Array to pyarrow.Array at interpreter exit by @3ok in https://github.com/kylebarron/arro3/pull/236
+* Implement FromPyObject for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/241
+* rust constructor for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/242
+
+### New Contributors
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.5.1...pyo3-arrow-v0.6.0
+
 ## [0.5.1] - 2024-10-14
 
-## What's Changed
+### What's Changed
 
 - Fix `no-default-features` for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/232
 - Custom drop on PyBufferWrapper by @kylebarron in https://github.com/kylebarron/arro3/pull/231
