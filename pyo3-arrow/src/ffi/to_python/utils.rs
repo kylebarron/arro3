@@ -22,7 +22,7 @@ pub fn to_schema_pycapsule(
 ) -> PyArrowResult<Bound<PyCapsule>> {
     let ffi_schema: FFI_ArrowSchema = field.try_into()?;
     let schema_capsule_name = CString::new("arrow_schema").unwrap();
-    let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
+    let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
     Ok(schema_capsule)
 }
 
@@ -57,9 +57,9 @@ pub fn to_array_pycapsules<'py>(
     let schema_capsule_name = CString::new("arrow_schema").unwrap();
     let array_capsule_name = CString::new("arrow_array").unwrap();
 
-    let schema_capsule = PyCapsule::new_bound(py, ffi_schema, Some(schema_capsule_name))?;
-    let array_capsule = PyCapsule::new_bound(py, ffi_array, Some(array_capsule_name))?;
-    let tuple = PyTuple::new_bound(py, vec![schema_capsule, array_capsule]);
+    let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
+    let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
+    let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule])?;
 
     Ok(tuple)
 }
@@ -92,9 +92,5 @@ pub fn to_stream_pycapsule<'py>(
 
     let ffi_stream = new_stream(array_reader);
     let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-    Ok(PyCapsule::new_bound(
-        py,
-        ffi_stream,
-        Some(stream_capsule_name),
-    )?)
+    Ok(PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?)
 }

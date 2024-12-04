@@ -5,7 +5,7 @@ use arrow_schema::DataType;
 use numpy::ToPyArray;
 use pyo3::exceptions::{PyNotImplementedError, PyValueError};
 use pyo3::types::{PyAnyMethods, PyBytes, PyDict, PyList, PyString, PyTuple};
-use pyo3::{intern, PyObject, PyResult, Python, ToPyObject};
+use pyo3::{intern, IntoPyObjectExt, PyObject, PyResult, Python};
 
 pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
     if arr.null_count() > 0 {
@@ -18,8 +18,8 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
         ($arrow_type:ty) => {
             arr.as_primitive::<$arrow_type>()
                 .values()
-                .to_pyarray_bound(py)
-                .to_object(py)
+                .to_pyarray(py)
+                .into_py_any(py)?
         };
     }
 
@@ -37,7 +37,7 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
         DataType::Int64 => impl_primitive!(Int64Type),
         DataType::Boolean => {
             let bools = arr.as_boolean().values().iter().collect::<Vec<_>>();
-            bools.to_pyarray_bound(py).to_object(py)
+            bools.to_pyarray(py).into_py_any(py)?
         }
         // For other data types we create Python objects and then create an object-typed numpy
         // array
@@ -45,14 +45,14 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
             let mut py_bytes = Vec::with_capacity(arr.len());
             arr.as_binary::<i32>()
                 .iter()
-                .for_each(|x| py_bytes.push(PyBytes::new_bound(py, x.unwrap())));
-            let py_list = PyList::new_bound(py, py_bytes);
-            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new_bound(py);
+                .for_each(|x| py_bytes.push(PyBytes::new(py, x.unwrap())));
+            let py_list = PyList::new(py, py_bytes)?;
+            let numpy_mod = py.import(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
             let np_arr = numpy_mod.call_method(
                 intern!(py, "array"),
-                PyTuple::new_bound(py, vec![py_list]),
+                PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
             )?;
             np_arr.into()
@@ -61,14 +61,14 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
             let mut py_bytes = Vec::with_capacity(arr.len());
             arr.as_binary::<i64>()
                 .iter()
-                .for_each(|x| py_bytes.push(PyBytes::new_bound(py, x.unwrap())));
-            let py_list = PyList::new_bound(py, py_bytes);
-            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new_bound(py);
+                .for_each(|x| py_bytes.push(PyBytes::new(py, x.unwrap())));
+            let py_list = PyList::new(py, py_bytes)?;
+            let numpy_mod = py.import(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
             let np_arr = numpy_mod.call_method(
                 intern!(py, "array"),
-                PyTuple::new_bound(py, vec![py_list]),
+                PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
             )?;
             np_arr.into()
@@ -77,14 +77,14 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
             let mut py_bytes = Vec::with_capacity(arr.len());
             arr.as_string::<i32>()
                 .iter()
-                .for_each(|x| py_bytes.push(PyString::new_bound(py, x.unwrap())));
-            let py_list = PyList::new_bound(py, py_bytes);
-            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new_bound(py);
+                .for_each(|x| py_bytes.push(PyString::new(py, x.unwrap())));
+            let py_list = PyList::new(py, py_bytes)?;
+            let numpy_mod = py.import(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
             let np_arr = numpy_mod.call_method(
                 intern!(py, "array"),
-                PyTuple::new_bound(py, vec![py_list]),
+                PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
             )?;
             np_arr.into()
@@ -93,14 +93,14 @@ pub fn to_numpy(py: Python, arr: &dyn Array) -> PyResult<PyObject> {
             let mut py_bytes = Vec::with_capacity(arr.len());
             arr.as_string::<i64>()
                 .iter()
-                .for_each(|x| py_bytes.push(PyString::new_bound(py, x.unwrap())));
-            let py_list = PyList::new_bound(py, py_bytes);
-            let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new_bound(py);
+                .for_each(|x| py_bytes.push(PyString::new(py, x.unwrap())));
+            let py_list = PyList::new(py, py_bytes)?;
+            let numpy_mod = py.import(intern!(py, "numpy"))?;
+            let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
             let np_arr = numpy_mod.call_method(
                 intern!(py, "array"),
-                PyTuple::new_bound(py, vec![py_list]),
+                PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
             )?;
             np_arr.into()
@@ -120,8 +120,8 @@ pub fn chunked_to_numpy(py: Python, arrs: &[&dyn Array]) -> PyResult<PyObject> {
         .map(|arr| to_numpy(py, *arr))
         .collect::<PyResult<Vec<_>>>()?;
 
-    let numpy_mod = py.import_bound(intern!(py, "numpy"))?;
-    Ok(numpy_mod
+    let numpy_mod = py.import(intern!(py, "numpy"))?;
+    numpy_mod
         .call_method1(intern!(py, "concatenate"), (py_arrays,))?
-        .to_object(py))
+        .into_py_any(py)
 }

@@ -7,9 +7,9 @@ use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray}
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_array_pycapsules;
@@ -82,14 +82,14 @@ impl PyRecordBatch {
 
     /// Export this to a Python `arro3.core.RecordBatch`.
     pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
-        let arro3_mod = py.import_bound(intern!(py, "arro3.core"))?;
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         let core_obj = arro3_mod
             .getattr(intern!(py, "RecordBatch"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
                 self.__arrow_c_array__(py, None)?,
             )?;
-        Ok(core_obj.to_object(py))
+        core_obj.into_py_any(py)
     }
 
     /// Export this to a Python `nanoarrow.Array`.
@@ -101,11 +101,11 @@ impl PyRecordBatch {
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
-        let pyarrow_mod = py.import_bound(intern!(py, "pyarrow"))?;
+        let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_obj = pyarrow_mod
             .getattr(intern!(py, "record_batch"))?
-            .call1(PyTuple::new_bound(py, vec![self.into_py(py)]))?;
-        Ok(pyarrow_obj.to_object(py))
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
+        pyarrow_obj.into_py_any(py)
     }
 }
 
@@ -148,10 +148,10 @@ impl PyRecordBatch {
         if let Ok(data) = data.extract::<PyRecordBatch>() {
             Ok(data)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
-            Self::from_pydict(&py.get_type_bound::<PyRecordBatch>(), mapping, metadata)
+            Self::from_pydict(&py.get_type::<PyRecordBatch>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
             Self::from_arrays(
-                &py.get_type_bound::<PyRecordBatch>(),
+                &py.get_type::<PyRecordBatch>(),
                 arrays,
                 schema.ok_or(PyValueError::new_err(
                     "Schema must be passed with list of arrays",
