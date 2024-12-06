@@ -51,12 +51,11 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
             let numpy_mod = py.import(intern!(py, "numpy"))?;
             let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            let np_arr = numpy_mod.call_method(
+            numpy_mod.call_method(
                 intern!(py, "array"),
                 PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
-            )?;
-            np_arr
+            )?
         }
         DataType::LargeBinary => {
             let mut py_bytes = Vec::with_capacity(arr.len());
@@ -67,12 +66,11 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
             let numpy_mod = py.import(intern!(py, "numpy"))?;
             let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            let np_arr = numpy_mod.call_method(
+            numpy_mod.call_method(
                 intern!(py, "array"),
                 PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
-            )?;
-            np_arr
+            )?
         }
         DataType::Utf8 => {
             let mut py_bytes = Vec::with_capacity(arr.len());
@@ -83,12 +81,11 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
             let numpy_mod = py.import(intern!(py, "numpy"))?;
             let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            let np_arr = numpy_mod.call_method(
+            numpy_mod.call_method(
                 intern!(py, "array"),
                 PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
-            )?;
-            np_arr
+            )?
         }
         DataType::LargeUtf8 => {
             let mut py_bytes = Vec::with_capacity(arr.len());
@@ -99,12 +96,11 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
             let numpy_mod = py.import(intern!(py, "numpy"))?;
             let kwargs = PyDict::new(py);
             kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            let np_arr = numpy_mod.call_method(
+            numpy_mod.call_method(
                 intern!(py, "array"),
                 PyTuple::new(py, vec![py_list])?,
                 Some(&kwargs),
-            )?;
-            np_arr
+            )?
         }
         dt => {
             return Err(PyNotImplementedError::new_err(format!(
@@ -117,7 +113,7 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
 
 pub fn chunked_to_numpy<'py>(
     py: Python<'py>,
-    arrs: &'py [&dyn Array],
+    arrs: Vec<&'py dyn Array>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let py_arrays = arrs
         .iter()

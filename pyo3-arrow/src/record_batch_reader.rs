@@ -9,6 +9,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
@@ -92,7 +93,7 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    pub fn to_nanoarrow(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
@@ -168,8 +169,8 @@ impl PyRecordBatchReader {
         self.to_arro3(py)
     }
 
-    fn __next__(&mut self, py: Python) -> PyArrowResult<PyObject> {
-        self.read_next_batch(py)
+    fn __next__(&mut self) -> PyArrowResult<Arro3RecordBatch> {
+        self.read_next_batch()
     }
 
     fn __repr__(&self) -> String {
@@ -210,7 +211,7 @@ impl PyRecordBatchReader {
         self.0.lock().unwrap().is_none()
     }
 
-    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self) -> PyArrowResult<Arro3Table> {
         let stream = self
             .0
             .lock()
@@ -222,24 +223,24 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::try_new(batches, schema)?.to_arro3(py)?)
+        Ok(PyTable::try_new(batches, schema)?.into())
     }
 
-    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_batch(&mut self) -> PyArrowResult<Arro3RecordBatch> {
         let mut inner = self.0.lock().unwrap();
         let stream = inner
             .as_mut()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 
         if let Some(next_batch) = stream.next() {
-            Ok(PyRecordBatch::new(next_batch?).to_arro3(py)?)
+            Ok(next_batch?.into())
         } else {
             Err(PyStopIteration::new_err("").into())
         }
     }
 
     #[getter]
-    fn schema(&self, py: Python) -> PyResult<PyObject> {
-        PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
+    fn schema(&self) -> PyResult<Arro3Schema> {
+        Ok(PySchema::new(self.schema_ref()?.clone()).into())
     }
 }

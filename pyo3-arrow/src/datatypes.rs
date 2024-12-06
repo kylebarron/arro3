@@ -4,11 +4,12 @@ use std::sync::Arc;
 use arrow::datatypes::DataType;
 use arrow_schema::{Field, IntervalUnit, TimeUnit};
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::Arro3DataType;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_schema_pycapsule;
@@ -53,22 +54,21 @@ impl PyDataType {
         self.0
     }
 
-    /// Export this to a Python `arro3.core.Field`.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    /// Export this to a Python `arro3.core.DataType`.
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
+        arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
-        )?;
-        core_obj.into_py_any(py)
+        )
     }
 
     /// Export this to a Python `nanoarrow.Schema`.
-    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
     }
 
-    /// Export to a pyarrow.Field
+    /// Export to a pyarrow.DataType
     ///
     /// Requires pyarrow >=14
     pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
@@ -120,7 +120,10 @@ impl Display for PyDataType {
 #[allow(non_snake_case)]
 #[pymethods]
 impl PyDataType {
-    fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
+    pub(crate) fn __arrow_c_schema__<'py>(
+        &'py self,
+        py: Python<'py>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, &self.0)
     }
 
@@ -235,20 +238,20 @@ impl PyDataType {
     }
 
     #[getter]
-    fn value_type(&self, py: Python) -> PyResult<Option<PyObject>> {
+    fn value_type(&self) -> Option<Arro3DataType> {
         match &self.0 {
             DataType::FixedSizeList(value_field, _)
             | DataType::List(value_field)
             | DataType::LargeList(value_field)
             | DataType::ListView(value_field)
             | DataType::LargeListView(value_field)
-            | DataType::RunEndEncoded(_, value_field) => Ok(Some(
-                PyDataType::new(value_field.data_type().clone()).to_arro3(py)?,
-            )),
-            DataType::Dictionary(_key_type, value_type) => {
-                Ok(Some(PyDataType::new(*value_type.clone()).to_arro3(py)?))
+            | DataType::RunEndEncoded(_, value_field) => {
+                Some(PyDataType::new(value_field.data_type().clone()).into())
             }
-            _ => Ok(None),
+            DataType::Dictionary(_key_type, value_type) => {
+                Some(PyDataType::new(*value_type.clone()).into())
+            }
+            _ => None,
         }
     }
 

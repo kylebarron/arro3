@@ -4,11 +4,12 @@ use std::sync::Arc;
 
 use arrow_schema::{Field, FieldRef};
 use pyo3::exceptions::PyTypeError;
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::{Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
@@ -18,6 +19,7 @@ use crate::PyDataType;
 /// A Python-facing Arrow field.
 ///
 /// This is a wrapper around a [FieldRef].
+#[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "Field", subclass)]
 pub struct PyField(FieldRef);
 
@@ -41,29 +43,28 @@ impl PyField {
     }
 
     /// Export this to a Python `arro3.core.Field`.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod.getattr(intern!(py, "Field"))?.call_method1(
+        arro3_mod.getattr(intern!(py, "Field"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
-        )?;
-        core_obj.into_py_any(py)
+        )
     }
 
     /// Export this to a Python `nanoarrow.Schema`.
-    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
     }
 
     /// Export to a pyarrow.Field
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn to_pyarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        let cloned = PyField::new(self.0.clone());
+        pyarrow_mod
             .getattr(intern!(py, "field"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![cloned.into_pyobject(py)?])?)
     }
 }
 
@@ -170,7 +171,7 @@ impl PyField {
         self.0.is_nullable()
     }
 
-    fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
+    fn remove_metadata(&self) -> Arro3Field {
         PyField::new(
             self.0
                 .as_ref()
@@ -178,34 +179,34 @@ impl PyField {
                 .with_metadata(Default::default())
                 .into(),
         )
-        .to_arro3(py)
+        .into()
     }
 
     #[getter]
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
-        PyDataType::new(self.0.data_type().clone()).to_arro3(py)
+    fn r#type(&self) -> Arro3DataType {
+        PyDataType::new(self.0.data_type().clone()).into()
     }
 
-    fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
-        PyField::new(
+    fn with_metadata(&self, metadata: MetadataInput) -> PyResult<Arro3Field> {
+        Ok(PyField::new(
             self.0
                 .as_ref()
                 .clone()
                 .with_metadata(metadata.into_string_hashmap()?)
                 .into(),
         )
-        .to_arro3(py)
+        .into())
     }
 
-    fn with_name(&self, py: Python, name: String) -> PyResult<PyObject> {
-        PyField::new(self.0.as_ref().clone().with_name(name).into()).to_arro3(py)
+    fn with_name(&self, name: String) -> Arro3Field {
+        PyField::new(self.0.as_ref().clone().with_name(name).into()).into()
     }
 
-    fn with_nullable(&self, py: Python, nullable: bool) -> PyResult<PyObject> {
-        PyField::new(self.0.as_ref().clone().with_nullable(nullable).into()).to_arro3(py)
+    fn with_nullable(&self, nullable: bool) -> Arro3Field {
+        PyField::new(self.0.as_ref().clone().with_nullable(nullable).into()).into()
     }
 
-    fn with_type(&self, py: Python, new_type: PyDataType) -> PyResult<PyObject> {
+    fn with_type(&self, new_type: PyDataType) -> Arro3Field {
         PyField::new(
             self.0
                 .as_ref()
@@ -213,6 +214,6 @@ impl PyField {
                 .with_data_type(new_type.into_inner())
                 .into(),
         )
-        .to_arro3(py)
+        .into()
     }
 }

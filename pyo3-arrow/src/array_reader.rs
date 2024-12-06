@@ -3,11 +3,12 @@ use std::sync::Mutex;
 
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::Arro3Field;
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
@@ -78,20 +79,17 @@ impl PyArrayReader {
 
     /// Export this to a Python `arro3.core.ArrayReader`.
     #[allow(clippy::wrong_self_convention)]
-    pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod
-            .getattr(intern!(py, "ArrayReader"))?
-            .call_method1(
-                intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
-            )?;
-        core_obj.into_py_any(py)
+        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
+        )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
     #[allow(clippy::wrong_self_convention)]
-    pub fn to_nanoarrow(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 }
@@ -138,7 +136,7 @@ impl PyArrayReader {
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__(&mut self, py: Python) -> PyResult<PyObject> {
+    fn __iter__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.to_arro3(py)
     }
 
@@ -188,8 +186,8 @@ impl PyArrayReader {
     }
 
     #[getter]
-    fn field(&self, py: Python) -> PyResult<PyObject> {
-        PyField::new(self.field_ref()?).to_arro3(py)
+    fn field(&self) -> PyResult<Arro3Field> {
+        Ok(PyField::new(self.field_ref()?).into())
     }
 
     fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
@@ -214,7 +212,10 @@ impl PyArrayReader {
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 
         if let Some(next_batch) = stream.next() {
-            Ok(PyArray::new(next_batch?, stream.field()).to_arro3(py)?)
+            Ok(PyArray::new(next_batch?, stream.field())
+                .to_arro3(py)?
+                .into_any()
+                .unbind())
         } else {
             Err(PyStopIteration::new_err("").into())
         }

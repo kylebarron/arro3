@@ -10,6 +10,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
+use crate::export::{Arro3Array, Arro3DataType, Arro3Field};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
@@ -23,6 +24,7 @@ use crate::{PyArray, PyDataType, PyField, PyScalar};
 /// A Python-facing Arrow chunked array.
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
+#[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
@@ -197,7 +199,7 @@ impl PyChunkedArray {
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
@@ -277,18 +279,18 @@ impl PyChunkedArray {
 
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    fn __array__(
-        &self,
-        py: Python,
+    fn __array__<'py>(
+        &'py self,
+        py: Python<'py>,
         dtype: Option<PyObject>,
         copy: Option<PyObject>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Bound<'py, PyAny>> {
         let chunk_refs = self
             .chunks
             .iter()
             .map(|arr| arr.as_ref())
             .collect::<Vec<_>>();
-        chunked_to_numpy(py, chunk_refs.as_slice())
+        chunked_to_numpy(py, chunk_refs)
     }
 
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -365,30 +367,30 @@ impl PyChunkedArray {
         Ok(PyChunkedArray::try_new(new_chunks, new_field)?.to_arro3(py)?)
     }
 
-    fn chunk(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    fn chunk(&self, i: usize) -> PyResult<Arro3Array> {
         let field = self.field().clone();
         let array = self
             .chunks
             .get(i)
             .ok_or(PyValueError::new_err("out of index"))?
             .clone();
-        PyArray::new(array, field).to_arro3(py)
+        Ok(PyArray::new(array, field).into())
     }
 
     #[getter]
     #[pyo3(name = "chunks")]
-    fn chunks_py(&self, py: Python) -> PyResult<Vec<PyObject>> {
+    fn chunks_py(&self) -> Vec<Arro3Array> {
         let field = self.field().clone();
         self.chunks
             .iter()
-            .map(|array| PyArray::new(array.clone(), field.clone()).to_arro3(py))
+            .map(|array| PyArray::new(array.clone(), field.clone()).into())
             .collect()
     }
 
-    fn combine_chunks(&self, py: Python) -> PyArrowResult<PyObject> {
+    fn combine_chunks(&self) -> PyArrowResult<Arro3Array> {
         let field = self.field().clone();
         let arrays: Vec<&dyn Array> = self.chunks.iter().map(|arr| arr.as_ref()).collect();
-        Ok(PyArray::new(concat(&arrays)?, field).to_arro3(py)?)
+        Ok(PyArray::new(concat(&arrays)?, field).into())
     }
 
     fn equals(&self, other: PyChunkedArray) -> bool {
@@ -397,8 +399,8 @@ impl PyChunkedArray {
 
     #[getter]
     #[pyo3(name = "field")]
-    fn py_field(&self, py: Python) -> PyResult<PyObject> {
-        PyField::new(self.field.clone()).to_arro3(py)
+    fn py_field(&self) -> Arro3Field {
+        PyField::new(self.field.clone()).into()
     }
 
     fn length(&self) -> usize {
@@ -451,7 +453,7 @@ impl PyChunkedArray {
         Ok(sliced_chunked_array.to_arro3(py)?)
     }
 
-    fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+    fn to_numpy<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.__array__(py, None, None)
     }
 
@@ -468,7 +470,7 @@ impl PyChunkedArray {
     }
 
     #[getter]
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
-        PyDataType::new(self.field.data_type().clone()).to_arro3(py)
+    fn r#type(&self) -> Arro3DataType {
+        PyDataType::new(self.field.data_type().clone()).into()
     }
 }

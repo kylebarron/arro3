@@ -13,10 +13,12 @@ use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::{Arro3DataType, Arro3Field, Arro3Scalar};
 use crate::ffi::to_array_pycapsules;
-use crate::{PyArray, PyDataType, PyField};
+use crate::{PyArray, PyField};
 
 /// A Python-facing Arrow scalar
+#[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "Scalar", subclass)]
 pub struct PyScalar {
     array: ArrayRef,
@@ -131,7 +133,7 @@ impl PyScalar {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
-    ) -> PyArrowResult<Bound<PyTuple>> {
+    ) -> PyArrowResult<Bound<'py, PyTuple>> {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
@@ -390,18 +392,16 @@ impl PyScalar {
         Ok(result)
     }
 
-    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+    fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Scalar> {
         let new_field = target_type.into_inner();
         let new_array = arrow::compute::cast(&self.array, new_field.data_type())?;
-        Ok(PyScalar::try_new(new_array, new_field)
-            .unwrap()
-            .to_arro3(py)?)
+        Ok(PyScalar::try_new(new_array, new_field).unwrap().into())
     }
 
     #[getter]
     #[pyo3(name = "field")]
-    fn py_field(&self, py: Python) -> PyResult<PyObject> {
-        PyField::new(self.field.clone()).to_arro3(py)
+    fn py_field(&self) -> Arro3Field {
+        self.field.clone().into()
     }
 
     #[getter]
@@ -410,8 +410,8 @@ impl PyScalar {
     }
 
     #[getter]
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
-        PyDataType::new(self.field.data_type().clone()).to_arro3(py)
+    fn r#type(&self) -> Arro3DataType {
+        self.field.data_type().clone().into()
     }
 }
 

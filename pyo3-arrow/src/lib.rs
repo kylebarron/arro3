@@ -8,6 +8,7 @@ pub mod buffer;
 mod chunked;
 mod datatypes;
 pub mod error;
+pub mod export;
 pub mod ffi;
 mod field;
 pub mod input;
