@@ -187,15 +187,14 @@ impl PyChunkedArray {
     }
 
     /// Export this to a Python `arro3.core.ChunkedArray`.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod
+        arro3_mod
             .getattr(intern!(py, "ChunkedArray"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
                 PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
-            )?;
-        core_obj.into_py_any(py)
+            )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -212,6 +211,16 @@ impl PyChunkedArray {
             .getattr(intern!(py, "chunked_array"))?
             .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
         pyarrow_obj.into_py_any(py)
+    }
+
+    pub(crate) fn to_stream_pycapsule<'py>(
+        py: Python<'py>,
+        chunks: Vec<ArrayRef>,
+        field: FieldRef,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 }
 
@@ -304,11 +313,12 @@ impl PyChunkedArray {
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        let array_reader = Box::new(ArrayIterator::new(
-            self.chunks.clone().into_iter().map(Ok),
+        Self::to_stream_pycapsule(
+            py,
+            self.chunks.clone(),
             self.field.clone(),
-        ));
-        to_stream_pycapsule(py, array_reader, requested_schema)
+            requested_schema,
+        )
     }
 
     fn __eq__(&self, other: &PyChunkedArray) -> bool {

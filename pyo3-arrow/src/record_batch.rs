@@ -105,6 +105,16 @@ impl PyRecordBatch {
             .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
         pyarrow_obj.into_py_any(py)
     }
+
+    pub(crate) fn to_array_pycapsules<'py>(
+        py: Python<'py>,
+        record_batch: RecordBatch,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyTuple>> {
+        let field = Field::new_struct("", record_batch.schema_ref().fields().clone(), false);
+        let array: ArrayRef = Arc::new(StructArray::from(record_batch.clone()));
+        to_array_pycapsules(py, field.into(), &array, requested_schema)
+    }
 }
 
 impl From<RecordBatch> for PyRecordBatch {
@@ -170,9 +180,7 @@ impl PyRecordBatch {
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyTuple>> {
-        let field = Field::new_struct("", self.0.schema_ref().fields().clone(), false);
-        let array: ArrayRef = Arc::new(StructArray::from(self.0.clone()));
-        to_array_pycapsules(py, field.into(), &array, requested_schema)
+        Self::to_array_pycapsules(py, self.0.clone(), requested_schema)
     }
 
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {

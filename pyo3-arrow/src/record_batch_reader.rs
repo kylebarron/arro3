@@ -81,15 +81,14 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
-    pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod
+        arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
                 PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
-            )?;
-        core_obj.into_py_any(py)
+            )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
@@ -108,6 +107,25 @@ impl PyRecordBatchReader {
             PyTuple::new(py, vec![self.into_pyobject(py)?])?,
         )?;
         pyarrow_obj.into_py_any(py)
+    }
+
+    pub(crate) fn to_stream_pycapsule<'py>(
+        py: Python<'py>,
+        reader: Box<dyn RecordBatchReader + Send>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        let schema = reader.schema().clone();
+        let array_reader = reader.into_iter().map(|maybe_batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(maybe_batch?));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", schema.fields().clone(), false)
+                .with_metadata(schema.metadata.clone())
+                .into(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 }
 
@@ -148,24 +166,12 @@ impl PyRecordBatchReader {
             .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
-
-        let schema = reader.schema().clone();
-        let array_reader = reader.into_iter().map(|maybe_batch| {
-            let arr: ArrayRef = Arc::new(StructArray::from(maybe_batch?));
-            Ok(arr)
-        });
-        let array_reader = Box::new(ArrayIterator::new(
-            array_reader,
-            Field::new_struct("", schema.fields().clone(), false)
-                .with_metadata(schema.metadata.clone())
-                .into(),
-        ));
-        to_stream_pycapsule(py, array_reader, requested_schema)
+        Self::to_stream_pycapsule(py, reader, requested_schema)
     }
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__(&mut self, py: Python) -> PyResult<PyObject> {
+    fn __iter__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.to_arro3(py)
     }
 

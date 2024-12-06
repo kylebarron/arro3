@@ -87,13 +87,12 @@ impl PyScalar {
     /// Export to an arro3.core.Scalar.
     ///
     /// This requires that you depend on arro3-core from your Python package.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod.getattr(intern!(py, "Scalar"))?.call_method1(
+        arro3_mod.getattr(intern!(py, "Scalar"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
-        )?;
-        core_obj.into_py_any(py)
+        )
     }
 }
 

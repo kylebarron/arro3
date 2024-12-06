@@ -123,15 +123,6 @@ impl PyArray {
             .getattr(intern!(py, "array"))?
             .call1(PyTuple::new(py, vec![cloned.into_pyobject(py)?])?)
     }
-
-    pub(crate) fn to_array_pycapsules<'py>(
-        py: Python<'py>,
-        field: FieldRef,
-        array: ArrayRef,
-        requested_schema: Option<Bound<'py, PyCapsule>>,
-    ) -> PyArrowResult<Bound<'py, PyTuple>> {
-        to_array_pycapsules(py, field.clone(), &array, requested_schema)
-    }
 }
 
 impl From<ArrayRef> for PyArray {

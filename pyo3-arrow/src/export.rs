@@ -1,30 +1,31 @@
-/// Wrappers around objects defined in this crate to simplify returning data to `arro3-core`.
-///
-/// By default, if you return something like a `PyArray` from your Python function, it will work
-/// because `PyArray` implements `#[pyclass]`, but it will statically link the private methods
-/// defined on `PyArray` in your given version of `pyo3-arrow`.
-///
-/// This isn't ideal for a few reasons. For one, this means that the actual classes returned from
-/// multiple packages will be _different_. This also means that any updates in the latest `arro3`
-/// version won't be reflected in your exported classes.
-///
-/// Instead, because Arrow is an ABI-stable format, it's easy to _dynamically_ link the data. So we
-/// can pass Arrow data at runtime to whatever version of `arro3-core` the user has in their Python
-/// environment.
-///
-/// Because each of the objects in this module implements `[IntoPyObject]`, you can return these
-/// objects directly.
-///
-/// ```notest
-/// /// A function that will automatically return
-/// #[pyfunction]
-/// fn my_function() -> pyo3_arrow::export::Arro3Array {
-///     todo!()
-/// }
-/// ```
-///
-/// Note that this means you must require `arro3-core` as a Python dependency in the
-/// `pyproject.toml` of your Rust-Python library.
+//! Wrappers around objects defined in this crate to simplify returning data to `arro3-core`.
+//!
+//! By default, if you return something like a `PyArray` from your Python function, it will work
+//! because `PyArray` implements `#[pyclass]`, but it will statically link the private methods
+//! defined on `PyArray` in your given version of `pyo3-arrow`.
+//!
+//! This isn't ideal for a few reasons. For one, this means that the actual classes returned from
+//! multiple packages will be _different_. This also means that any updates in the latest `arro3`
+//! version won't be reflected in your exported classes.
+//!
+//! Instead, because Arrow is an ABI-stable format, it's easy to _dynamically_ link the data. So we
+//! can pass Arrow data at runtime to whatever version of `arro3-core` the user has in their Python
+//! environment.
+//!
+//! Because each of the objects in this module implements `[IntoPyObject]`, you can return these
+//! objects directly.
+//!
+//! ```notest
+//! /// A function that will automatically return
+//! #[pyfunction]
+//! fn my_function() -> pyo3_arrow::export::Arro3Array {
+//!     todo!()
+//! }
+//! ```
+//!
+//! Note that this means you must require `arro3-core` as a Python dependency in the
+//! `pyproject.toml` of your Rust-Python library.
+
 use std::sync::Arc;
 
 use arrow_array::{RecordBatch, RecordBatchReader};
@@ -87,12 +88,20 @@ impl<'py> IntoPyObject<'py> for Arro3ChunkedArray {
     type Error = PyErr;
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        todo!()
-        // let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        // arro3_mod.getattr(intern!(py, "ChunkedArray"))?.call_method1(
-        //     intern!(py, "from_arrow_pycapsule"),
-        //     PyTuple::new(py, vec![self.0.to_stream_pycapsule(py, None)?])?,
-        // )
+        let capsule = PyChunkedArray::to_stream_pycapsule(
+            py,
+            self.0.chunks().to_vec(),
+            self.0.field().clone(),
+            None,
+        )?;
+
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        arro3_mod
+            .getattr(intern!(py, "ChunkedArray"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![capsule])?,
+            )
     }
 }
 
@@ -196,12 +205,11 @@ impl<'py> IntoPyObject<'py> for Arro3RecordBatch {
     type Error = PyErr;
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        todo!()
-        // let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        // arro3_mod.getattr(intern!(py, "RecordBatch"))?.call_method1(
-        //     intern!(py, "from_arrow_pycapsule"),
-        //     PyTuple::new(py, vec![self.0.to_stream_pycapsule(py, None)?])?,
-        // )
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsules = PyRecordBatch::to_array_pycapsules(py, self.0.into_inner(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatch"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 }
 
@@ -230,12 +238,14 @@ impl<'py> IntoPyObject<'py> for Arro3RecordBatchReader {
     type Error = PyErr;
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        todo!()
-        // let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        // arro3_mod.getattr(intern!(py, "RecordBatchReader"))?.call_method1(
-        //     intern!(py, "from_arrow_pycapsule"),
-        //     PyTuple::new(py, vec![self.0.to_stream_pycapsule(py, None)?])?,
-        // )
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = PyRecordBatchReader::to_stream_pycapsule(py, self.0.into_reader()?, None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatchReader"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![capsule])?,
+            )
     }
 }
 
@@ -259,12 +269,12 @@ impl<'py> IntoPyObject<'py> for Arro3Scalar {
     type Error = PyErr;
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        todo!()
-        // let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        // arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
-        //     intern!(py, "from_arrow_pycapsule"),
-        //     PyTuple::new(py, vec![to_schema_pycapsule(py, self.0.as_ref())?])?,
-        // )
+        let capsules = to_array_pycapsules(py, self.0.field().clone(), &self.0.array(), None)?;
+
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        arro3_mod
+            .getattr(intern!(py, "Scalar"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 }
 
