@@ -14,6 +14,7 @@ use parquet::schema::types::ColumnPath;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::Arro3RecordBatchReader;
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PyTable};
 use pyo3_object_store::PyObjectStore;
@@ -22,7 +23,7 @@ use crate::error::Arro3IoResult;
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
-pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
+pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
     let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
 
     let metadata = builder.schema().metadata().clone();
@@ -40,7 +41,7 @@ pub fn read_parquet(py: Python, file: FileReader) -> PyArrowResult<PyObject> {
     // https://docs.rs/parquet/latest/parquet/arrow/arrow_reader/struct.ParquetRecordBatchReader.html#method.schema
     // https://github.com/apache/arrow-rs/pull/5135
     let iter = Box::new(RecordBatchIterator::new(reader, arrow_schema));
-    Ok(PyRecordBatchReader::new(iter).to_arro3(py)?)
+    Ok(PyRecordBatchReader::new(iter).into())
 }
 
 #[pyfunction]

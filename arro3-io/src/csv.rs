@@ -4,6 +4,7 @@ use arrow_csv::reader::Format;
 use arrow_csv::{ReaderBuilder, WriterBuilder};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3RecordBatchReader, Arro3Schema};
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
@@ -24,7 +25,6 @@ use crate::utils::{FileReader, FileWriter};
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn infer_csv_schema(
-    py: Python,
     file: FileReader,
     has_header: Option<bool>,
     max_records: Option<usize>,
@@ -33,7 +33,7 @@ pub fn infer_csv_schema(
     quote: Option<char>,
     terminator: Option<char>,
     comment: Option<char>,
-) -> PyArrowResult<PyObject> {
+) -> PyArrowResult<Arro3Schema> {
     let mut format = Format::default();
 
     if let Some(has_header) = has_header {
@@ -57,7 +57,7 @@ pub fn infer_csv_schema(
 
     let buf_file = BufReader::new(file);
     let (schema, _records_read) = format.infer_schema(buf_file, max_records)?;
-    Ok(PySchema::new(schema.into()).to_arro3(py)?)
+    Ok(schema.into())
 }
 
 /// Read a CSV file to an Arrow RecordBatchReader
@@ -76,7 +76,6 @@ pub fn infer_csv_schema(
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn read_csv(
-    py: Python,
     file: FileReader,
     schema: PySchema,
     has_header: Option<bool>,
@@ -86,7 +85,7 @@ pub fn read_csv(
     quote: Option<char>,
     terminator: Option<char>,
     comment: Option<char>,
-) -> PyArrowResult<PyObject> {
+) -> PyArrowResult<Arro3RecordBatchReader> {
     let mut builder = ReaderBuilder::new(schema.into());
 
     if let Some(has_header) = has_header {
@@ -112,7 +111,7 @@ pub fn read_csv(
     }
 
     let reader = builder.build(file)?;
-    Ok(PyRecordBatchReader::new(Box::new(reader)).to_arro3(py)?)
+    Ok(PyRecordBatchReader::new(Box::new(reader)).into())
 }
 
 /// Write an Arrow Table or stream to a CSV file

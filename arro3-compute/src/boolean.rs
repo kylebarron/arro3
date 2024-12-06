@@ -13,7 +13,9 @@ pub fn is_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
     match input {
         AnyArray::Array(input) => {
             let out = arrow::compute::is_null(input.as_ref())?;
-            Ok(PyArray::from_array_ref(Arc::new(out)).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(Arc::new(out))
+                .to_arro3(py)?
+                .unbind())
         }
         AnyArray::Stream(input) => {
             let input = input.into_reader()?;
@@ -25,7 +27,8 @@ pub fn is_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             });
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }
@@ -36,7 +39,9 @@ pub fn is_not_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
     match input {
         AnyArray::Array(input) => {
             let out = arrow::compute::is_not_null(input.as_ref())?;
-            Ok(PyArray::from_array_ref(Arc::new(out)).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(Arc::new(out))
+                .to_arro3(py)?
+                .unbind())
         }
         AnyArray::Stream(input) => {
             let input = input.into_reader()?;
@@ -48,7 +53,8 @@ pub fn is_not_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             });
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }

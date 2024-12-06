@@ -17,7 +17,7 @@ pub fn cast(py: Python, input: AnyArray, to_type: PyField) -> PyArrowResult<PyOb
         AnyArray::Array(arr) => {
             let new_field = to_type.into_inner();
             let out = arrow_cast::cast(arr.as_ref(), new_field.data_type())?;
-            Ok(PyArray::new(out, new_field).to_arro3(py)?)
+            Ok(PyArray::new(out, new_field).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -36,7 +36,11 @@ pub fn cast(py: Python, input: AnyArray, to_type: PyField) -> PyArrowResult<PyOb
             let iter = reader
                 .into_iter()
                 .map(move |array| arrow_cast::cast(&array?, &to_type));
-            Ok(PyArrayReader::new(Box::new(ArrayIterator::new(iter, new_field))).to_arro3(py)?)
+            Ok(
+                PyArrayReader::new(Box::new(ArrayIterator::new(iter, new_field)))
+                    .to_arro3(py)?
+                    .unbind(),
+            )
         }
     }
 }

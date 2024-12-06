@@ -20,7 +20,7 @@ pub(crate) fn dictionary_encode(py: Python, array: AnyArray) -> PyArrowResult<Py
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let output_array = dictionary_encode_array(array)?;
-            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -37,7 +37,8 @@ pub(crate) fn dictionary_encode(py: Python, array: AnyArray) -> PyArrowResult<Py
                 .map(move |array| dictionary_encode_array(array?));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }

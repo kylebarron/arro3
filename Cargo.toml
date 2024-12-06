@@ -35,8 +35,8 @@ numpy = "0.23"
 object_store = "0.11"
 parquet = "53"
 pyo3 = { version = "0.23", features = ["macros", "indexmap"] }
-pyo3-arrow = "0.6"
-# pyo3-arrow = { path = "./pyo3-arrow" }
+# pyo3-arrow = "0.6"
+pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }
 pyo3-file = "0.10"
 pyo3-object_store = { git = "https://github.com/developmentseed/object-store-rs", rev = "bad34862a92849dd7b69c28cd4c225446d3d15ab" }

@@ -20,6 +20,7 @@ use pyo3::{intern, IntoPyObjectExt};
 #[cfg(feature = "buffer_protocol")]
 use crate::buffer::AnyBufferProtocol;
 use crate::error::PyArrowResult;
+use crate::export::{Arro3Array, Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
@@ -38,6 +39,7 @@ use crate::{PyDataType, PyField};
 /// Field](https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html#arrow_c_array__).
 /// In particular, storing a [FieldRef] is required to persist Arrow extension metadata through the
 /// C Data Interface.
+#[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "Array", subclass)]
 pub struct PyArray {
     array: ArrayRef,
@@ -98,29 +100,28 @@ impl PyArray {
     /// Export to an arro3.core.Array.
     ///
     /// This requires that you depend on arro3-core from your Python package.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
+        arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
-        )?;
-        core_obj.into_py_any(py)
+        )
     }
 
     /// Export this to a Python `nanoarrow.Array`.
-    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)
     }
 
     /// Export to a pyarrow.Array
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn to_pyarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        let cloned = Self::new(self.array.clone(), self.field.clone());
+        pyarrow_mod
             .getattr(intern!(py, "array"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![cloned.into_pyobject(py)?])?)
     }
 }
 
@@ -240,12 +241,12 @@ impl PyArray {
 
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    fn __array__(
-        &self,
-        py: Python,
-        dtype: Option<PyObject>,
-        copy: Option<PyObject>,
-    ) -> PyResult<PyObject> {
+    fn __array__<'py>(
+        &'py self,
+        py: Python<'py>,
+        dtype: Option<Bound<'py, PyAny>>,
+        copy: Option<Bound<'py, PyAny>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         to_numpy(py, &self.array)
     }
 
@@ -255,7 +256,7 @@ impl PyArray {
         &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
-    ) -> PyArrowResult<Bound<PyTuple>> {
+    ) -> PyArrowResult<Bound<'py, PyTuple>> {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
@@ -345,16 +346,16 @@ impl PyArray {
         Ok(Self::from_array_ref(arrow_array))
     }
 
-    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+    fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Array> {
         let new_field = target_type.into_inner();
         let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
-        Ok(PyArray::new(new_array, new_field).to_arro3(py)?)
+        Ok(PyArray::new(new_array, new_field).into())
     }
 
     #[getter]
     #[pyo3(name = "field")]
-    fn py_field(&self, py: Python) -> PyResult<PyObject> {
-        PyField::new(self.field.clone()).to_arro3(py)
+    fn py_field(&self) -> Arro3Field {
+        PyField::new(self.field.clone()).into()
     }
 
     #[getter]
@@ -368,18 +369,18 @@ impl PyArray {
     }
 
     #[pyo3(signature = (offset=0, length=None))]
-    fn slice(&self, py: Python, offset: usize, length: Option<usize>) -> PyResult<PyObject> {
+    fn slice(&self, offset: usize, length: Option<usize>) -> Arro3Array {
         let length = length.unwrap_or_else(|| self.array.len() - offset);
         let new_array = self.array.slice(offset, length);
-        PyArray::new(new_array, self.field().clone()).to_arro3(py)
+        PyArray::new(new_array, self.field().clone()).into()
     }
 
-    fn take(&self, py: Python, indices: PyArray) -> PyArrowResult<PyObject> {
+    fn take(&self, indices: PyArray) -> PyArrowResult<Arro3Array> {
         let new_array = arrow::compute::take(self.as_ref(), indices.as_ref(), None)?;
-        Ok(PyArray::new(new_array, self.field.clone()).to_arro3(py)?)
+        Ok(PyArray::new(new_array, self.field.clone()).into())
     }
 
-    fn to_numpy(&self, py: Python) -> PyResult<PyObject> {
+    fn to_numpy<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.__array__(py, None, None)
     }
 
@@ -394,7 +395,7 @@ impl PyArray {
     }
 
     #[getter]
-    fn r#type(&self, py: Python) -> PyResult<PyObject> {
-        PyDataType::new(self.field.data_type().clone()).to_arro3(py)
+    fn r#type(&self) -> Arro3DataType {
+        PyDataType::new(self.field.data_type().clone()).into()
     }
 }

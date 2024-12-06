@@ -9,6 +9,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
@@ -80,19 +81,18 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
-    pub fn to_arro3(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod
+        arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
                 PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
-            )?;
-        core_obj.into_py_any(py)
+            )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    pub fn to_nanoarrow(&mut self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
@@ -107,6 +107,25 @@ impl PyRecordBatchReader {
             PyTuple::new(py, vec![self.into_pyobject(py)?])?,
         )?;
         pyarrow_obj.into_py_any(py)
+    }
+
+    pub(crate) fn to_stream_pycapsule<'py>(
+        py: Python<'py>,
+        reader: Box<dyn RecordBatchReader + Send>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        let schema = reader.schema().clone();
+        let array_reader = reader.into_iter().map(|maybe_batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(maybe_batch?));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", schema.fields().clone(), false)
+                .with_metadata(schema.metadata.clone())
+                .into(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
     }
 }
 
@@ -147,29 +166,17 @@ impl PyRecordBatchReader {
             .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
-
-        let schema = reader.schema().clone();
-        let array_reader = reader.into_iter().map(|maybe_batch| {
-            let arr: ArrayRef = Arc::new(StructArray::from(maybe_batch?));
-            Ok(arr)
-        });
-        let array_reader = Box::new(ArrayIterator::new(
-            array_reader,
-            Field::new_struct("", schema.fields().clone(), false)
-                .with_metadata(schema.metadata.clone())
-                .into(),
-        ));
-        to_stream_pycapsule(py, array_reader, requested_schema)
+        Self::to_stream_pycapsule(py, reader, requested_schema)
     }
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__(&mut self, py: Python) -> PyResult<PyObject> {
+    fn __iter__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.to_arro3(py)
     }
 
-    fn __next__(&mut self, py: Python) -> PyArrowResult<PyObject> {
-        self.read_next_batch(py)
+    fn __next__(&mut self) -> PyArrowResult<Arro3RecordBatch> {
+        self.read_next_batch()
     }
 
     fn __repr__(&self) -> String {
@@ -210,7 +217,7 @@ impl PyRecordBatchReader {
         self.0.lock().unwrap().is_none()
     }
 
-    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self) -> PyArrowResult<Arro3Table> {
         let stream = self
             .0
             .lock()
@@ -222,24 +229,24 @@ impl PyRecordBatchReader {
         for batch in stream {
             batches.push(batch?);
         }
-        Ok(PyTable::try_new(batches, schema)?.to_arro3(py)?)
+        Ok(PyTable::try_new(batches, schema)?.into())
     }
 
-    fn read_next_batch(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_batch(&mut self) -> PyArrowResult<Arro3RecordBatch> {
         let mut inner = self.0.lock().unwrap();
         let stream = inner
             .as_mut()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 
         if let Some(next_batch) = stream.next() {
-            Ok(PyRecordBatch::new(next_batch?).to_arro3(py)?)
+            Ok(next_batch?.into())
         } else {
             Err(PyStopIteration::new_err("").into())
         }
     }
 
     #[getter]
-    fn schema(&self, py: Python) -> PyResult<PyObject> {
-        PySchema::new(self.schema_ref()?.clone()).to_arro3(py)
+    fn schema(&self) -> PyResult<Arro3Schema> {
+        Ok(PySchema::new(self.schema_ref()?.clone()).into())
     }
 }

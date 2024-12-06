@@ -9,6 +9,7 @@ use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
+use crate::export::{Arro3DataType, Arro3Field, Arro3Schema, Arro3Table};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
@@ -18,6 +19,7 @@ use crate::{PyDataType, PyField, PyTable};
 /// A Python-facing Arrow schema.
 ///
 /// This is a wrapper around a [SchemaRef].
+#[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "Schema", subclass)]
 pub struct PySchema(SchemaRef);
 
@@ -41,17 +43,16 @@ impl PySchema {
     }
 
     /// Export this to a Python `arro3.core.Schema`.
-    pub fn to_arro3(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let core_obj = arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
+        arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
-        )?;
-        core_obj.into_py_any(py)
+        )
     }
 
     /// Export this to a Python `nanoarrow.Schema`.
-    pub fn to_nanoarrow(&self, py: Python) -> PyResult<PyObject> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
     }
 
@@ -134,8 +135,8 @@ impl PySchema {
         self.0 == other.0
     }
 
-    fn __getitem__(&self, py: Python, key: FieldIndexInput) -> PyArrowResult<PyObject> {
-        self.field(py, key)
+    fn __getitem__(&self, key: FieldIndexInput) -> PyArrowResult<Arro3Field> {
+        self.field(key)
     }
 
     fn __len__(&self) -> usize {
@@ -157,25 +158,23 @@ impl PySchema {
         Self::from_arrow_pycapsule(capsule)
     }
 
-    fn append(&self, py: Python, field: PyField) -> PyResult<PyObject> {
+    fn append(&self, field: PyField) -> Arro3Schema {
         let mut fields = self.0.fields().to_vec();
         fields.push(field.into_inner());
-        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
-        PySchema::new(schema.into()).to_arro3(py)
+        Schema::new_with_metadata(fields, self.0.metadata().clone()).into()
     }
 
-    fn empty_table(&self, py: Python) -> PyResult<PyObject> {
-        PyTable::try_new(vec![], self.into())?.to_arro3(py)
+    fn empty_table(&self) -> PyResult<Arro3Table> {
+        Ok(PyTable::try_new(vec![], self.into())?.into())
     }
 
     fn equals(&self, other: PySchema) -> bool {
         self.0 == other.0
     }
 
-    fn field(&self, py: Python, i: FieldIndexInput) -> PyArrowResult<PyObject> {
+    fn field(&self, i: FieldIndexInput) -> PyArrowResult<Arro3Field> {
         let index = i.into_position(&self.0)?;
-        let field = self.0.field(index);
-        Ok(PyField::new(field.clone().into()).to_arro3(py)?)
+        Ok(self.0.field(index).into())
     }
 
     fn get_all_field_indices(&self, name: String) -> Vec<usize> {
@@ -207,11 +206,10 @@ impl PySchema {
         }
     }
 
-    fn insert(&self, py: Python, i: usize, field: PyField) -> PyResult<PyObject> {
+    fn insert(&self, i: usize, field: PyField) -> Arro3Schema {
         let mut fields = self.0.fields().to_vec();
         fields.insert(i, field.into_inner());
-        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
-        PySchema::new(schema.into()).to_arro3(py)
+        Schema::new_with_metadata(fields, self.0.metadata().clone()).into()
     }
 
     // Note: we can't return HashMap<Vec<u8>, Vec<u8>> because that will coerce keys and values to
@@ -238,47 +236,41 @@ impl PySchema {
         self.0.fields().iter().map(|f| f.name().clone()).collect()
     }
 
-    fn remove(&self, py: Python, i: usize) -> PyResult<PyObject> {
+    fn remove(&self, i: usize) -> Arro3Schema {
         let mut fields = self.0.fields().to_vec();
         fields.remove(i);
-        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
-        PySchema::new(schema.into()).to_arro3(py)
+        Schema::new_with_metadata(fields, self.0.metadata().clone()).into()
     }
 
-    fn remove_metadata(&self, py: Python) -> PyResult<PyObject> {
-        PySchema::new(
-            self.0
-                .as_ref()
-                .clone()
-                .with_metadata(Default::default())
-                .into(),
-        )
-        .to_arro3(py)
+    fn remove_metadata(&self) -> Arro3Schema {
+        self.0
+            .as_ref()
+            .clone()
+            .with_metadata(Default::default())
+            .into()
     }
 
-    fn set(&self, py: Python, i: usize, field: PyField) -> PyResult<PyObject> {
+    fn set(&self, i: usize, field: PyField) -> Arro3Schema {
         let mut fields = self.0.fields().to_vec();
         fields[i] = field.into_inner();
-        let schema = Schema::new_with_metadata(fields, self.0.metadata().clone());
-        PySchema::new(schema.into()).to_arro3(py)
+        Schema::new_with_metadata(fields, self.0.metadata().clone()).into()
     }
 
     #[getter]
-    fn types(&self, py: Python) -> PyArrowResult<Vec<PyObject>> {
-        Ok(self
-            .0
+    fn types(&self) -> Vec<Arro3DataType> {
+        self.0
             .fields()
             .iter()
-            .map(|f| PyDataType::new(f.data_type().clone()).to_arro3(py))
-            .collect::<PyResult<_>>()?)
+            .map(|f| PyDataType::new(f.data_type().clone()).into())
+            .collect()
     }
 
-    fn with_metadata(&self, py: Python, metadata: MetadataInput) -> PyResult<PyObject> {
+    fn with_metadata(&self, metadata: MetadataInput) -> PyResult<Arro3Schema> {
         let schema = self
             .0
             .as_ref()
             .clone()
             .with_metadata(metadata.into_string_hashmap()?);
-        PySchema::new(schema.into()).to_arro3(py)
+        Ok(schema.into())
     }
 }

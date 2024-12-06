@@ -261,7 +261,6 @@ impl AnyBufferProtocol {
     /// - This assumes that the Python buffer is immutable. Immutability is not guaranteed by the
     ///   Python buffer protocol, so the end user must uphold this. Mutating a Python buffer could
     ///   lead to undefined behavior.
-
     // Note: in the future, maybe you should check item alignment as well?
     // https://github.com/PyO3/pyo3/blob/ce18f79d71f4d3eac54f55f7633cf08d2f57b64e/src/buffer.rs#L217-L221
     pub fn into_arrow_array(self) -> PyArrowResult<ArrayRef> {
