@@ -240,12 +240,12 @@ impl PyArray {
 
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
-    fn __array__(
-        &self,
-        py: Python,
-        dtype: Option<PyObject>,
-        copy: Option<PyObject>,
-    ) -> PyResult<PyObject> {
+    fn __array__<'py>(
+        &'py self,
+        py: Python<'py>,
+        dtype: Option<Bound<'py, PyAny>>,
+        copy: Option<Bound<'py, PyAny>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         to_numpy(py, &self.array)
     }
 
