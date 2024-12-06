@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
-use crate::export::Arro3Field;
+use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3Field};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
@@ -140,8 +140,8 @@ impl PyArrayReader {
         self.to_arro3(py)
     }
 
-    fn __next__(&mut self, py: Python) -> PyArrowResult<PyObject> {
-        self.read_next_array(py)
+    fn __next__(&mut self) -> PyArrowResult<Arro3Array> {
+        self.read_next_array()
     }
 
     fn __repr__(&self) -> String {
@@ -190,7 +190,7 @@ impl PyArrayReader {
         Ok(PyField::new(self.field_ref()?).into())
     }
 
-    fn read_all(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_all(&mut self) -> PyArrowResult<Arro3ChunkedArray> {
         let stream = self
             .0
             .lock()
@@ -202,20 +202,17 @@ impl PyArrayReader {
         for array in stream {
             arrays.push(array?);
         }
-        Ok(PyChunkedArray::try_new(arrays, field)?.to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(arrays, field)?.into())
     }
 
-    fn read_next_array(&mut self, py: Python) -> PyArrowResult<PyObject> {
+    fn read_next_array(&mut self) -> PyArrowResult<Arro3Array> {
         let mut inner = self.0.lock().unwrap();
         let stream = inner
             .as_mut()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 
         if let Some(next_batch) = stream.next() {
-            Ok(PyArray::new(next_batch?, stream.field())
-                .to_arro3(py)?
-                .into_any()
-                .unbind())
+            Ok(PyArray::new(next_batch?, stream.field()).into())
         } else {
             Err(PyStopIteration::new_err("").into())
         }

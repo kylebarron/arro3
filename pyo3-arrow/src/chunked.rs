@@ -10,7 +10,7 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
-use crate::export::{Arro3Array, Arro3DataType, Arro3Field};
+use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
@@ -357,14 +357,14 @@ impl PyChunkedArray {
         Self::from_arrow_pycapsule(capsule)
     }
 
-    fn cast(&self, py: Python, target_type: PyField) -> PyArrowResult<PyObject> {
+    fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3ChunkedArray> {
         let new_field = target_type.into_inner();
         let new_chunks = self
             .chunks
             .iter()
             .map(|chunk| arrow::compute::cast(&chunk, new_field.data_type()))
             .collect::<Result<Vec<_>, ArrowError>>()?;
-        Ok(PyChunkedArray::try_new(new_chunks, new_field)?.to_arro3(py)?)
+        Ok(PyChunkedArray::try_new(new_chunks, new_field)?.into())
     }
 
     fn chunk(&self, i: usize) -> PyResult<Arro3Array> {
@@ -428,7 +428,7 @@ impl PyChunkedArray {
 
     #[pyo3(signature = (*, max_chunksize=None))]
     #[pyo3(name = "rechunk")]
-    fn rechunk_py(&self, py: Python, max_chunksize: Option<usize>) -> PyArrowResult<PyObject> {
+    fn rechunk_py(&self, max_chunksize: Option<usize>) -> PyArrowResult<Arro3ChunkedArray> {
         let max_chunksize = max_chunksize.unwrap_or(self.len());
         let mut chunk_lengths = vec![];
         let mut offset = 0;
@@ -437,20 +437,14 @@ impl PyChunkedArray {
             offset += chunk_length;
             chunk_lengths.push(chunk_length);
         }
-        Ok(self.rechunk(chunk_lengths)?.to_arro3(py)?)
+        Ok(self.rechunk(chunk_lengths)?.into())
     }
 
     #[pyo3(signature = (offset=0, length=None))]
     #[pyo3(name = "slice")]
-    fn slice_py(
-        &self,
-        py: Python,
-        offset: usize,
-        length: Option<usize>,
-    ) -> PyArrowResult<PyObject> {
+    fn slice_py(&self, offset: usize, length: Option<usize>) -> PyArrowResult<Arro3ChunkedArray> {
         let length = length.unwrap_or_else(|| self.len() - offset);
-        let sliced_chunked_array = self.slice(offset, length)?;
-        Ok(sliced_chunked_array.to_arro3(py)?)
+        Ok(self.slice(offset, length)?.into())
     }
 
     fn to_numpy<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
