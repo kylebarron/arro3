@@ -13,16 +13,17 @@ use arrow_schema::{ArrowError, DataType};
 use arrow_select::concat;
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::Arro3Scalar;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::PyScalar;
 
 #[pyfunction]
-pub fn max(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
+pub fn max(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
     match input {
         AnyArray::Array(array) => {
             let (array, field) = array.into_inner();
             let result = max_array(array)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -43,7 +44,7 @@ pub fn max(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
 
             // Call max_array on intermediate outputs
             let result = max_array(concatted)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
     }
 }
@@ -112,12 +113,12 @@ fn max_boolean(array: &BooleanArray) -> ArrayRef {
 }
 
 #[pyfunction]
-pub fn min(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
+pub fn min(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
     match input {
         AnyArray::Array(array) => {
             let (array, field) = array.into_inner();
             let result = min_array(array)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -138,7 +139,7 @@ pub fn min(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
 
             // Call min_array on intermediate outputs
             let result = min_array(concatted)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
     }
 }
@@ -207,12 +208,12 @@ fn min_boolean(array: &BooleanArray) -> ArrayRef {
 }
 
 #[pyfunction]
-pub fn sum(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
+pub fn sum(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
     match input {
         AnyArray::Array(array) => {
             let (array, field) = array.into_inner();
             let result = sum_array(array)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -233,7 +234,7 @@ pub fn sum(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
 
             // Call sum_array on intermediate outputs
             let result = sum_array(concatted)?;
-            Ok(PyScalar::try_new(result, field)?.to_arro3(py)?)
+            Ok(PyScalar::try_new(result, field)?.into())
         }
     }
 }

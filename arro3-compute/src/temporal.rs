@@ -86,7 +86,7 @@ pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<P
     match input {
         AnyArray::Array(input) => {
             let out = arrow::compute::date_part(input.as_ref(), part.into())?;
-            Ok(PyArray::from_array_ref(out).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(out).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -98,7 +98,8 @@ pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<P
                 .map(move |array| arrow::compute::date_part(array?.as_ref(), part));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }

@@ -17,7 +17,7 @@ pub fn list_offsets(py: Python, input: AnyArray, logical: bool) -> PyArrowResult
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let offsets = _list_offsets(array, logical)?;
-            Ok(PyArray::from_array_ref(offsets).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(offsets).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -36,7 +36,8 @@ pub fn list_offsets(py: Python, input: AnyArray, logical: bool) -> PyArrowResult
                 .map(move |array| _list_offsets(array?, logical));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }

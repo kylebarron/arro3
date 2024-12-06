@@ -13,7 +13,7 @@ pub(crate) fn dictionary_indices(py: Python, array: AnyArray) -> PyArrowResult<P
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let output_array = _dictionary_indices(array)?;
-            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -34,7 +34,8 @@ pub(crate) fn dictionary_indices(py: Python, array: AnyArray) -> PyArrowResult<P
                 .map(move |array| _dictionary_indices(array?));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }
@@ -49,7 +50,7 @@ pub(crate) fn dictionary_dictionary(py: Python, array: AnyArray) -> PyArrowResul
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let output_array = _dictionary_dictionary(array)?;
-            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?)
+            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -70,7 +71,8 @@ pub(crate) fn dictionary_dictionary(py: Python, array: AnyArray) -> PyArrowResul
                 .map(move |array| _dictionary_dictionary(array?));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }

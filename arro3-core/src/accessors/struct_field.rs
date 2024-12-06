@@ -40,7 +40,8 @@ pub(crate) fn struct_field(
         array_ref.slice(orig_array.offset(), orig_array.len()),
         field_ref.clone(),
     )
-    .to_arro3(py)?)
+    .to_arro3(py)?
+    .unbind())
 }
 
 fn get_child(array: &ArrayRef, i: usize) -> Result<(&ArrayRef, &FieldRef), ArrowError> {

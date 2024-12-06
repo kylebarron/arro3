@@ -20,7 +20,7 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                 ))?;
 
             let filtered = arrow::compute::filter(values.as_ref(), predicate)?;
-            Ok(PyArray::new(filtered, values_field).to_arro3(py)?)
+            Ok(PyArray::new(filtered, values_field).to_arro3(py)?.unbind())
         }
         (AnyArray::Stream(values), AnyArray::Stream(predicate)) => {
             let values = values.into_reader()?;
@@ -47,7 +47,8 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                 });
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, values_field)))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
         _ => Err(PyValueError::new_err("Unsupported combination of array and stream").into()),

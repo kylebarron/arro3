@@ -14,7 +14,7 @@ pub fn list_flatten(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             let (array, field) = array.into_inner();
             let flat_array = flatten_array(array)?;
             let flat_field = flatten_field(field)?;
-            Ok(PyArray::new(flat_array, flat_field).to_arro3(py)?)
+            Ok(PyArray::new(flat_array, flat_field).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -26,7 +26,8 @@ pub fn list_flatten(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             });
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, flatten_field)))
-                    .to_arro3(py)?,
+                    .to_arro3(py)?
+                    .unbind(),
             )
         }
     }
