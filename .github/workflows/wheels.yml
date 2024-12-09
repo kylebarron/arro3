@@ -132,15 +132,17 @@ jobs:
           version: "0.4.x"
 
       - name: Install Python versions
-        # Note: we exclude 3.13 from Windows, because it failed with a link error
-        # https://github.com/kylebarron/arro3/actions/runs/11957080778/job/33333367496
-        run: uv python install 3.9 3.10 3.11 3.12 pypy3.10
+        run: uv python install pypy3.10
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
