@@ -4,9 +4,9 @@
 rm -rf .venv
 uv sync
 # Note: need to install core first because others depend on core
-uv run maturin develop -m arro3-core/Cargo.toml
-uv run maturin develop -m arro3-compute/Cargo.toml
-uv run maturin develop -m arro3-io/Cargo.toml
+uv run maturin dev -m arro3-core/Cargo.toml
+uv run maturin dev -m arro3-compute/Cargo.toml
+uv run maturin dev -m arro3-io/Cargo.toml
 uv run mkdocs serve
 ```
 

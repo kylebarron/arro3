@@ -45,9 +45,9 @@ jobs:
       - name: Build python packages
         run: |
           # arro3-core needs to be first
-          uv run maturin develop -m arro3-core/Cargo.toml
-          uv run maturin develop -m arro3-compute/Cargo.toml
-          uv run maturin develop -m arro3-io/Cargo.toml
+          uv run maturin dev -m arro3-core/Cargo.toml
+          uv run maturin dev -m arro3-compute/Cargo.toml
+          uv run maturin dev -m arro3-io/Cargo.toml
 
       - name: Deploy docs
         env:

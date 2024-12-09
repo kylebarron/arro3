@@ -10,10 +10,17 @@ def test_table_getitem():
     a = pa.chunked_array([[1, 2, 3, 4]])
     b = pa.chunked_array([["a", "b", "c", "d"]])
     table = Table.from_pydict({"a": a, "b": b})
+
     assert a == pa.chunked_array(table["a"])
     assert b == pa.chunked_array(table["b"])
     assert a == pa.chunked_array(table[0])
     assert b == pa.chunked_array(table[1])
+
+    with pytest.raises(KeyError):
+        table["foo"]
+
+    with pytest.raises(IndexError):
+        table[10]
 
 
 def test_table_from_arrays():

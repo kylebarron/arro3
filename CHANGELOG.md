@@ -2,6 +2,12 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.4] - 2024-12-09
+
+### Bug fixes :bug:
+
+- Raise IndexError and KeyError for invalid column access https://github.com/kylebarron/arro3/pull/272
+
 ## [0.4.3] - 2024-11-21
 
 ### What's Changed
