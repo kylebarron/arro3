@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use arrow_array::{Datum, RecordBatchIterator, RecordBatchReader};
 use arrow_schema::{ArrowError, Field, FieldRef, Fields, Schema, SchemaRef};
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyIndexError, PyKeyError, PyValueError};
 use pyo3::prelude::*;
 
 use crate::array_reader::PyArrayReader;
@@ -162,10 +162,21 @@ pub(crate) enum FieldIndexInput {
 }
 
 impl FieldIndexInput {
-    pub fn into_position(self, schema: &Schema) -> PyArrowResult<usize> {
+    /// This will additionally check that the input is valid against the given schema.
+    ///
+    /// This will raise a KeyError if the provided name does not exist, or an IndexError if the
+    /// provided integer index is out of bounds.
+    pub fn into_position(self, schema: &Schema) -> PyResult<usize> {
         match self {
-            Self::Name(name) => Ok(schema.index_of(name.as_ref())?),
-            Self::Position(position) => Ok(position),
+            Self::Name(name) => schema
+                .index_of(name.as_ref())
+                .map_err(|err| PyKeyError::new_err(err.to_string())),
+            Self::Position(position) => {
+                if position >= schema.fields().len() {
+                    return Err(PyIndexError::new_err("Index out of range").into());
+                }
+                Ok(position)
+            }
         }
     }
 }
