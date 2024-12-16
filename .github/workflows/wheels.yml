@@ -58,14 +58,6 @@ jobs:
       - name: Install Python versions
         run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
 
-      - name: Add aarch64
-        if: ${{ matrix.platform.target == 'aarch64' }}
-        run: |
-          sudo apt-get install musl-tools clang llvm -y
-          echo CC_aarch64_unknown_linux_musl=clang >> $GITHUB_ENV
-          echo AR_aarch64_unknown_linux_musl=llvm-ar >> $GITHUB_ENV
-          echo 'CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Clink-self-contained=yes -Clinker=rust-lld"' >> $GITHUB_ENV
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
