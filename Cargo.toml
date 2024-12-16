@@ -31,7 +31,8 @@ arrow-select = "53"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2"
-numpy = "0.23"
+# numpy = "0.23"
+numpy = { git = "https://github.com/davidhewitt/rust-numpy.git", branch = "free-threading" }
 object_store = "0.11"
 parquet = "53"
 pyo3 = { version = "0.23", features = ["macros", "indexmap"] }
