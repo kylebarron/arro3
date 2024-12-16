@@ -53,7 +53,7 @@ jobs:
         run: uv python install 3.9 3.10 3.11 3.12 3.13 pypy3.10
 
       - name: Add aarch64
-        if: ${{ matrix.platform.target }} == "aarch64"
+        if: ${{ matrix.platform.target == 'aarch64' }}
         run: |
           sudo apt-get install musl-tools clang llvm -y
           echo CC_aarch64_unknown_linux_musl=clang >> $GITHUB_ENV
