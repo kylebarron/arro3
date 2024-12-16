@@ -2,6 +2,12 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.5] - 2024-12-16
+
+### Bug fixes :bug:
+
+- Build wheels for linux aarch64. https://github.com/kylebarron/arro3/pull/277
+
 ## [0.4.4] - 2024-12-09
 
 ### Bug fixes :bug:
