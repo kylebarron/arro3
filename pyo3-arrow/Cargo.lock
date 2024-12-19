@@ -707,9 +707,8 @@ dependencies = [
 
 [[package]]
 name = "numpy"
-version = "0.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b94caae805f998a07d33af06e6a3891e38556051b8045c615470a71590e13e78"
+version = "0.23.0-dev"
+source = "git+https://github.com/davidhewitt/rust-numpy.git?branch=free-threading#2b364d319059923f0d94cc705f35e77680c55ccb"
 dependencies = [
  "half",
  "libc",
@@ -931,9 +930,9 @@ checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
 
 [[package]]
 name = "rustc-hash"
-version = "2.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "583034fd73374156e66797ed8e5b0d5690409c9226b22d87cb7f19821c05d152"
+checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc_version"
