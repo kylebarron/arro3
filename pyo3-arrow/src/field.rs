@@ -20,7 +20,7 @@ use crate::PyDataType;
 ///
 /// This is a wrapper around a [FieldRef].
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Field", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Field", subclass, frozen)]
 pub struct PyField(FieldRef);
 
 impl PyField {
