@@ -20,7 +20,7 @@ use crate::{PyDataType, PyField, PyTable};
 ///
 /// This is a wrapper around a [SchemaRef].
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Schema", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Schema", subclass, frozen)]
 pub struct PySchema(SchemaRef);
 
 impl PySchema {

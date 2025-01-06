@@ -32,7 +32,7 @@ impl<'a> FromPyObject<'a> for PyTimeUnit {
 
 /// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
-#[pyclass(module = "arro3.core._core", name = "DataType", subclass)]
+#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {

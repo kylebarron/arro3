@@ -25,7 +25,7 @@ use crate::{PyArray, PyDataType, PyField, PyScalar};
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass, frozen)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,

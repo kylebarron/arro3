@@ -40,7 +40,7 @@ use crate::{PyDataType, PyField};
 /// In particular, storing a [FieldRef] is required to persist Arrow extension metadata through the
 /// C Data Interface.
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Array", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Array", subclass, frozen)]
 pub struct PyArray {
     array: ArrayRef,
     field: FieldRef,

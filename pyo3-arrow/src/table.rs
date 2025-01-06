@@ -32,7 +32,7 @@ use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchem
 /// A Python-facing Arrow table.
 ///
 /// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
-#[pyclass(module = "arro3.core._core", name = "Table", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Table", subclass, frozen)]
 #[derive(Debug)]
 pub struct PyTable {
     batches: Vec<RecordBatch>,

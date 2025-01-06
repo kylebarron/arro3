@@ -22,7 +22,12 @@ use crate::{PyRecordBatch, PySchema, PyTable};
 /// A Python-facing Arrow record batch reader.
 ///
 /// This is a wrapper around a [RecordBatchReader].
-#[pyclass(module = "arro3.core._core", name = "RecordBatchReader", subclass)]
+#[pyclass(
+    module = "arro3.core._core",
+    name = "RecordBatchReader",
+    subclass,
+    frozen
+)]
 pub struct PyRecordBatchReader(pub(crate) Mutex<Option<Box<dyn RecordBatchReader + Send>>>);
 
 impl PyRecordBatchReader {
@@ -81,7 +86,7 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `arro3.core.RecordBatchReader`.
-    pub fn to_arro3<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
@@ -92,7 +97,7 @@ impl PyRecordBatchReader {
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    pub fn to_nanoarrow<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 
@@ -155,7 +160,7 @@ impl PyRecordBatchReader {
 
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
-        &'py mut self,
+        &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -170,11 +175,11 @@ impl PyRecordBatchReader {
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    fn __iter__<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         self.to_arro3(py)
     }
 
-    fn __next__(&mut self) -> PyArrowResult<Arro3RecordBatch> {
+    fn __next__(&self) -> PyArrowResult<Arro3RecordBatch> {
         self.read_next_batch()
     }
 
@@ -216,7 +221,7 @@ impl PyRecordBatchReader {
         self.0.lock().unwrap().is_none()
     }
 
-    fn read_all(&mut self) -> PyArrowResult<Arro3Table> {
+    fn read_all(&self) -> PyArrowResult<Arro3Table> {
         let stream = self
             .0
             .lock()
@@ -231,7 +236,7 @@ impl PyRecordBatchReader {
         Ok(PyTable::try_new(batches, schema)?.into())
     }
 
-    fn read_next_batch(&mut self) -> PyArrowResult<Arro3RecordBatch> {
+    fn read_next_batch(&self) -> PyArrowResult<Arro3RecordBatch> {
         let mut inner = self.0.lock().unwrap();
         let stream = inner
             .as_mut()

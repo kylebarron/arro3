@@ -19,7 +19,7 @@ use crate::{PyArray, PyField};
 
 /// A Python-facing Arrow scalar
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Scalar", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Scalar", subclass, frozen)]
 pub struct PyScalar {
     array: ArrayRef,
     field: FieldRef,
