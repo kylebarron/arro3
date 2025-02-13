@@ -19,18 +19,21 @@ default = ["buffer_protocol"]
 buffer_protocol = []
 
 [dependencies]
-arrow-array = "53"
-arrow-buffer = "53"
-arrow-schema = "53"
-arrow = { version = "53", features = ["ffi", "chrono-tz"] }
-pyo3 = { version = "0.23", features = ["chrono", "indexmap"] }
+chrono = "0.4.39"
+
+arrow-array = "54"
+arrow-buffer = "54"
+arrow-schema = "54"
+arrow = { version = "54", features = ["ffi", "chrono-tz"] }
+# Breaking change in 0.23.4: https://github.com/PyO3/pyo3/issues/4909
+pyo3 = { version = "=0.23.3", features = ["chrono", "indexmap"] }
 half = "2"
 indexmap = "2"
 numpy = { version = "0.23", features = ["half"] }
 thiserror = "1"
 
 [dev-dependencies]
-arrow-select = "53"
+arrow-select = "54"
 
 [lib]
 crate-type = ["rlib"]

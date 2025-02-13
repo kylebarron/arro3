@@ -173,7 +173,7 @@ impl FieldIndexInput {
                 .map_err(|err| PyKeyError::new_err(err.to_string())),
             Self::Position(position) => {
                 if position >= schema.fields().len() {
-                    return Err(PyIndexError::new_err("Index out of range").into());
+                    return Err(PyIndexError::new_err("Index out of range"));
                 }
                 Ok(position)
             }
