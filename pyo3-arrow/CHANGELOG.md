@@ -1,8 +1,16 @@
 # Changelog
 
+## [0.7.1] - 2025-02-21
+
+### What's Changed
+
+- Bump to pyo3 0.23.4 https://github.com/kylebarron/arro3/pull/287
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.7.0...pyo3-arrow-v0.7.1
+
 ## [0.7.0] - 2025-02-13
 
-## What's Changed
+### What's Changed
 
 - Add frozen parameter to pyclass macro by @kylebarron in https://github.com/kylebarron/arro3/pull/282
 - Avoid returning `PyObject` and add wrapper types for arro3 export by @kylebarron in https://github.com/kylebarron/arro3/pull/269

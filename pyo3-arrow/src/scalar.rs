@@ -196,18 +196,22 @@ impl PyScalar {
                         TimeUnit::Second => arr
                             .as_primitive::<TimestampSecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Millisecond => arr
                             .as_primitive::<TimestampMillisecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Microsecond => arr
                             .as_primitive::<TimestampMicrosecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Nanosecond => arr
                             .as_primitive::<TimestampNanosecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                     }
                 } else {
