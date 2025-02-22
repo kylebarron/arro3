@@ -108,6 +108,17 @@ impl PyArray {
         )
     }
 
+    /// Export to an arro3.core.Array.
+    ///
+    /// This requires that you depend on arro3-core from your Python package.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let array_capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        arro3_mod
+            .getattr(intern!(py, "Array"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), array_capsules)
+    }
+
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)

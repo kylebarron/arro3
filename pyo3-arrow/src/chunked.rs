@@ -197,6 +197,17 @@ impl PyChunkedArray {
             )
     }
 
+    /// Export this to a Python `arro3.core.ChunkedArray`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = Self::to_stream_pycapsule(py, self.chunks.clone(), self.field.clone(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "ChunkedArray"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![capsule])?,
+            )
+    }
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
