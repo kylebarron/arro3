@@ -90,6 +90,15 @@ impl PyRecordBatch {
         )
     }
 
+    /// Export this to a Python `arro3.core.RecordBatch`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsules = Self::to_array_pycapsules(py, self.0.clone(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatch"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
+    }
+
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)

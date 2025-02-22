@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.2] - 2025-02-22
+
+### What's Changed
+
+- Add `into_arro3` method https://github.com/kylebarron/arro3/pull/289
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.7.1...pyo3-arrow-v0.7.2
+
 ## [0.7.1] - 2025-02-21
 
 ### What's Changed

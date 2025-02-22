@@ -96,6 +96,24 @@ impl PyRecordBatchReader {
             )
     }
 
+    /// Export this to a Python `arro3.core.RecordBatchReader`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let reader = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
+        let capsule = Self::to_stream_pycapsule(py, reader, None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatchReader"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![capsule])?,
+            )
+    }
+
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
@@ -175,8 +193,8 @@ impl PyRecordBatchReader {
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        self.to_arro3(py)
+    fn __iter__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
     fn __next__(&self) -> PyArrowResult<Arro3RecordBatch> {

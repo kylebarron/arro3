@@ -63,6 +63,16 @@ impl PyDataType {
         )
     }
 
+    /// Export this to a Python `arro3.core.DataType`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_schema_pycapsule(py, &self.0)?;
+        arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![capsule])?,
+        )
+    }
+
     /// Export this to a Python `nanoarrow.Schema`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)

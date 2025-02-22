@@ -94,6 +94,17 @@ impl PyScalar {
             self.__arrow_c_array__(py, None)?,
         )
     }
+
+    /// Export to an arro3.core.Scalar.
+    ///
+    /// This requires that you depend on arro3-core from your Python package.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        arro3_mod
+            .getattr(intern!(py, "Scalar"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
+    }
 }
 
 impl Display for PyScalar {

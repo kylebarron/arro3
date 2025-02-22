@@ -78,7 +78,6 @@ impl PyArrayReader {
     }
 
     /// Export this to a Python `arro3.core.ArrayReader`.
-    #[allow(clippy::wrong_self_convention)]
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
@@ -87,8 +86,23 @@ impl PyArrayReader {
         )
     }
 
+    /// Export this to a Python `arro3.core.ArrayReader`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let array_reader = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
+        let stream_pycapsule = to_stream_pycapsule(py, array_reader, None)?;
+        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![stream_pycapsule])?,
+        )
+    }
+
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    #[allow(clippy::wrong_self_convention)]
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
@@ -135,8 +149,8 @@ impl PyArrayReader {
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        self.to_arro3(py)
+    fn __iter__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
     fn __next__(&self) -> PyArrowResult<Arro3Array> {
