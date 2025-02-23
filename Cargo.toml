@@ -32,10 +32,10 @@ bytes = "1.7.0"
 half = "2"
 indexmap = "2"
 # numpy = "0.23"
-numpy = { git = "https://github.com/davidhewitt/rust-numpy.git", branch = "free-threading" }
+numpy = { git = "https://github.com/PyO3/rust-numpy.git", rev = "8dd4f8e2934126a8323b8c8f00e69b0182b8ecee" }
 object_store = "0.11"
 parquet = "53"
-pyo3 = { version = "0.23", features = ["macros", "indexmap"] }
+pyo3 = { version = "0.23.4", features = ["macros", "indexmap"] }
 # pyo3-arrow = "0.6"
 pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }

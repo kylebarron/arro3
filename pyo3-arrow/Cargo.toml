@@ -23,11 +23,11 @@ arrow-array = "53"
 arrow-buffer = "53"
 arrow-schema = "53"
 arrow = { version = "53", features = ["ffi", "chrono-tz"] }
-pyo3 = { version = "0.23", features = ["chrono", "indexmap"] }
+pyo3 = { version = "0.23.4", features = ["chrono", "indexmap"] }
 half = "2"
 indexmap = "2"
 # numpy = { version = "0.23", features = ["half"] }
-numpy = { git = "https://github.com/davidhewitt/rust-numpy.git", branch = "free-threading", features = ["half"] }
+numpy = { git = "https://github.com/PyO3/rust-numpy.git", rev = "8dd4f8e2934126a8323b8c8f00e69b0182b8ecee", features = ["half"] }
 thiserror = "1"
 
 [dev-dependencies]
