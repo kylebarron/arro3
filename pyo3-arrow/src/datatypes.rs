@@ -32,7 +32,7 @@ impl<'a> FromPyObject<'a> for PyTimeUnit {
 
 /// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
-#[pyclass(module = "arro3.core._core", name = "DataType", subclass)]
+#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {
@@ -60,6 +60,16 @@ impl PyDataType {
         arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
+        )
+    }
+
+    /// Export this to a Python `arro3.core.DataType`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_schema_pycapsule(py, &self.0)?;
+        arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![capsule])?,
         )
     }
 

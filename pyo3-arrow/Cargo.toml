@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-arrow"
-version = "0.6.0"
+version = "0.7.2"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Arrow integration for pyo3."
@@ -19,11 +19,13 @@ default = ["buffer_protocol"]
 buffer_protocol = []
 
 [dependencies]
-arrow-array = "53"
-arrow-buffer = "53"
-arrow-schema = "53"
-arrow = { version = "53", features = ["ffi", "chrono-tz"] }
-pyo3 = { version = "0.23.4", features = ["chrono", "indexmap"] }
+chrono = "0.4.39"
+
+arrow-array = "54"
+arrow-buffer = "54"
+arrow-schema = "54"
+arrow = { version = "54", features = ["ffi", "chrono-tz"] }
+pyo3 = { version = "0.23.4", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
 # numpy = { version = "0.23", features = ["half"] }
@@ -31,7 +33,7 @@ numpy = { git = "https://github.com/PyO3/rust-numpy.git", rev = "8dd4f8e2934126a
 thiserror = "1"
 
 [dev-dependencies]
-arrow-select = "53"
+arrow-select = "54"
 
 [lib]
 crate-type = ["rlib"]

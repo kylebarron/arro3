@@ -167,7 +167,8 @@ pub(crate) fn write_parquet(
     column_compression: Option<HashMap<PyColumnPath, PyCompression>>,
     column_dictionary_enabled: Option<HashMap<PyColumnPath, bool>>,
     column_encoding: Option<HashMap<PyColumnPath, PyEncoding>>,
-    column_max_statistics_size: Option<HashMap<PyColumnPath, usize>>,
+    // TODO: remove in next breaking release
+    #[allow(unused_variables)] column_max_statistics_size: Option<HashMap<PyColumnPath, usize>>,
     compression: Option<PyCompression>,
     created_by: Option<String>,
     data_page_row_count_limit: Option<usize>,
@@ -177,7 +178,8 @@ pub(crate) fn write_parquet(
     encoding: Option<PyEncoding>,
     key_value_metadata: Option<HashMap<String, String>>,
     max_row_group_size: Option<usize>,
-    max_statistics_size: Option<usize>,
+    // TODO: remove in next breaking release
+    #[allow(unused_variables)] max_statistics_size: Option<usize>,
     skip_arrow_metadata: bool,
     write_batch_size: Option<usize>,
     writer_version: Option<PyWriterVersion>,
@@ -219,9 +221,6 @@ pub(crate) fn write_parquet(
     if let Some(dictionary_enabled) = dictionary_enabled {
         props = props.set_dictionary_enabled(dictionary_enabled);
     }
-    if let Some(max_statistics_size) = max_statistics_size {
-        props = props.set_max_statistics_size(max_statistics_size);
-    }
     if let Some(bloom_filter_enabled) = bloom_filter_enabled {
         props = props.set_bloom_filter_enabled(bloom_filter_enabled);
     }
@@ -247,11 +246,6 @@ pub(crate) fn write_parquet(
     if let Some(column_dictionary_enabled) = column_dictionary_enabled {
         for (column_path, dictionary_enabled) in column_dictionary_enabled.into_iter() {
             props = props.set_column_dictionary_enabled(column_path.0, dictionary_enabled);
-        }
-    }
-    if let Some(column_max_statistics_size) = column_max_statistics_size {
-        for (column_path, max_statistics_size) in column_max_statistics_size.into_iter() {
-            props = props.set_column_max_statistics_size(column_path.0, max_statistics_size);
         }
     }
 

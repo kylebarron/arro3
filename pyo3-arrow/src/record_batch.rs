@@ -24,7 +24,7 @@ use crate::{PyArray, PyField, PySchema};
 /// A Python-facing Arrow record batch.
 ///
 /// This is a wrapper around a [RecordBatch].
-#[pyclass(module = "arro3.core._core", name = "RecordBatch", subclass)]
+#[pyclass(module = "arro3.core._core", name = "RecordBatch", subclass, frozen)]
 #[derive(Debug)]
 pub struct PyRecordBatch(RecordBatch);
 
@@ -88,6 +88,15 @@ impl PyRecordBatch {
             intern!(py, "from_arrow_pycapsule"),
             self.__arrow_c_array__(py, None)?,
         )
+    }
+
+    /// Export this to a Python `arro3.core.RecordBatch`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsules = Self::to_array_pycapsules(py, self.0.clone(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatch"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 
     /// Export this to a Python `nanoarrow.Array`.
@@ -173,7 +182,6 @@ impl PyRecordBatch {
         }
     }
 
-    #[allow(unused_variables)]
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_array__<'py>(
         &'py self,

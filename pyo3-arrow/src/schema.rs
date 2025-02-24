@@ -20,7 +20,7 @@ use crate::{PyDataType, PyField, PyTable};
 ///
 /// This is a wrapper around a [SchemaRef].
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Schema", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Schema", subclass, frozen)]
 pub struct PySchema(SchemaRef);
 
 impl PySchema {
@@ -48,6 +48,16 @@ impl PySchema {
         arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
+        )
+    }
+
+    /// Export this to a Python `arro3.core.Schema`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_schema_pycapsule(py, self.0.as_ref())?;
+        arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![capsule])?,
         )
     }
 

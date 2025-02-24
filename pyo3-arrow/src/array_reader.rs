@@ -20,7 +20,7 @@ use crate::{PyArray, PyChunkedArray, PyField};
 /// A Python-facing Arrow array reader.
 ///
 /// This is a wrapper around a [ArrayReader].
-#[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ArrayReader", subclass, frozen)]
 pub struct PyArrayReader(pub(crate) Mutex<Option<Box<dyn ArrayReader + Send>>>);
 
 impl PyArrayReader {
@@ -78,8 +78,7 @@ impl PyArrayReader {
     }
 
     /// Export this to a Python `arro3.core.ArrayReader`.
-    #[allow(clippy::wrong_self_convention)]
-    pub fn to_arro3<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -87,9 +86,24 @@ impl PyArrayReader {
         )
     }
 
+    /// Export this to a Python `arro3.core.ArrayReader`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let array_reader = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
+            .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
+        let stream_pycapsule = to_stream_pycapsule(py, array_reader, None)?;
+        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![stream_pycapsule])?,
+        )
+    }
+
     /// Export this to a Python `nanoarrow.ArrayStream`.
-    #[allow(clippy::wrong_self_convention)]
-    pub fn to_nanoarrow<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
     }
 }
@@ -118,10 +132,9 @@ impl PyArrayReader {
         to_schema_pycapsule(py, self.field_ref()?.as_ref())
     }
 
-    #[allow(unused_variables)]
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
-        &'py mut self,
+        &'py self,
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -136,11 +149,11 @@ impl PyArrayReader {
 
     // Return self
     // https://stackoverflow.com/a/52056290
-    fn __iter__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        self.to_arro3(py)
+    fn __iter__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
-    fn __next__(&mut self) -> PyArrowResult<Arro3Array> {
+    fn __next__(&self) -> PyArrowResult<Arro3Array> {
         self.read_next_array()
     }
 
@@ -190,7 +203,7 @@ impl PyArrayReader {
         Ok(PyField::new(self.field_ref()?).into())
     }
 
-    fn read_all(&mut self) -> PyArrowResult<Arro3ChunkedArray> {
+    fn read_all(&self) -> PyArrowResult<Arro3ChunkedArray> {
         let stream = self
             .0
             .lock()
@@ -205,7 +218,7 @@ impl PyArrayReader {
         Ok(PyChunkedArray::try_new(arrays, field)?.into())
     }
 
-    fn read_next_array(&mut self) -> PyArrowResult<Arro3Array> {
+    fn read_next_array(&self) -> PyArrowResult<Arro3Array> {
         let mut inner = self.0.lock().unwrap();
         let stream = inner
             .as_mut()

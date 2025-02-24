@@ -32,7 +32,7 @@ use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchem
 /// A Python-facing Arrow table.
 ///
 /// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
-#[pyclass(module = "arro3.core._core", name = "Table", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Table", subclass, frozen)]
 #[derive(Debug)]
 pub struct PyTable {
     batches: Vec<RecordBatch>,
@@ -84,6 +84,17 @@ impl PyTable {
         arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
+        )
+    }
+
+    /// Export this to a Python `arro3.core.Table`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule =
+            Self::to_stream_pycapsule(py, self.batches.clone(), self.schema.clone(), None)?;
+        arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![capsule])?,
         )
     }
 
@@ -229,7 +240,6 @@ impl PyTable {
         to_schema_pycapsule(py, self.schema.as_ref())
     }
 
-    #[allow(unused_variables)]
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
         &'py self,

@@ -19,7 +19,7 @@ use crate::{PyArray, PyField};
 
 /// A Python-facing Arrow scalar
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "Scalar", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Scalar", subclass, frozen)]
 pub struct PyScalar {
     array: ArrayRef,
     field: FieldRef,
@@ -94,6 +94,17 @@ impl PyScalar {
             self.__arrow_c_array__(py, None)?,
         )
     }
+
+    /// Export to an arro3.core.Scalar.
+    ///
+    /// This requires that you depend on arro3-core from your Python package.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        arro3_mod
+            .getattr(intern!(py, "Scalar"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
+    }
 }
 
 impl Display for PyScalar {
@@ -126,7 +137,6 @@ impl PyScalar {
         Self::try_new(array, field)
     }
 
-    #[allow(unused_variables)]
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_array__<'py>(
         &'py self,
@@ -197,18 +207,22 @@ impl PyScalar {
                         TimeUnit::Second => arr
                             .as_primitive::<TimestampSecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Millisecond => arr
                             .as_primitive::<TimestampMillisecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Microsecond => arr
                             .as_primitive::<TimestampMicrosecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                         TimeUnit::Nanosecond => arr
                             .as_primitive::<TimestampNanosecondType>()
                             .value_as_datetime_with_tz(0, tz)
+                            .map(|dt| dt.fixed_offset())
                             .into_py_any(py)?,
                     }
                 } else {

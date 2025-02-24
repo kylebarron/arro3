@@ -41,7 +41,7 @@ use crate::PyArray;
 /// The Python buffer protocol is implemented on this buffer to enable zero-copy data transfer of
 /// the core buffer into Python. This allows for zero-copy data sharing with numpy via
 /// `numpy.frombuffer`.
-#[pyclass(module = "arro3.core._core", name = "Buffer", subclass)]
+#[pyclass(module = "arro3.core._core", name = "Buffer", subclass, frozen)]
 pub struct PyArrowBuffer(Buffer);
 
 impl AsRef<Buffer> for PyArrowBuffer {
@@ -87,7 +87,7 @@ impl PyArrowBuffer {
     /// This is taken from opendal:
     /// https://github.com/apache/opendal/blob/d001321b0f9834bc1e2e7d463bcfdc3683e968c9/bindings/python/src/utils.rs#L51-L72
     unsafe fn __getbuffer__(
-        slf: PyRefMut<Self>,
+        slf: PyRef<Self>,
         view: *mut ffi::Py_buffer,
         flags: c_int,
     ) -> PyResult<()> {

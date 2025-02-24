@@ -9,7 +9,7 @@ resolver = "2"
 
 [workspace.package]
 # Package version for arro3-*, not for pyo3-arrow
-version = "0.4.4"
+version = "0.4.5"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 homepage = "https://kylebarron.dev/arro3"
@@ -20,22 +20,22 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow = { version = "53", features = ["ffi"] }
-arrow-array = "53"
-arrow-buffer = "53"
-arrow-cast = "53"
-arrow-csv = "53"
-arrow-ipc = { version = "53", features = ["lz4", "zstd"] }
-arrow-schema = "53"
-arrow-select = "53"
+arrow = { version = "54", features = ["ffi"] }
+arrow-array = "54"
+arrow-buffer = "54"
+arrow-cast = "54"
+arrow-csv = "54"
+arrow-ipc = { version = "54", features = ["lz4", "zstd"] }
+arrow-schema = "54"
+arrow-select = "54"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2"
 # numpy = "0.23"
 numpy = { git = "https://github.com/PyO3/rust-numpy.git", rev = "8dd4f8e2934126a8323b8c8f00e69b0182b8ecee" }
 object_store = "0.11"
-parquet = "53"
-pyo3 = { version = "0.23.4", features = ["macros", "indexmap"] }
+parquet = "54"
+pyo3 = { version = "0.23", features = ["macros", "indexmap"] }
 # pyo3-arrow = "0.6"
 pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }

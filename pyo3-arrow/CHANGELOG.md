@@ -1,13 +1,39 @@
 # Changelog
 
+## [0.7.2] - 2025-02-22
+
+### What's Changed
+
+- Add `into_arro3` method https://github.com/kylebarron/arro3/pull/289
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.7.1...pyo3-arrow-v0.7.2
+
+## [0.7.1] - 2025-02-21
+
+### What's Changed
+
+- Bump to pyo3 0.23.4 https://github.com/kylebarron/arro3/pull/287
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.7.0...pyo3-arrow-v0.7.1
+
+## [0.7.0] - 2025-02-13
+
+### What's Changed
+
+- Add frozen parameter to pyclass macro by @kylebarron in https://github.com/kylebarron/arro3/pull/282
+- Avoid returning `PyObject` and add wrapper types for arro3 export by @kylebarron in https://github.com/kylebarron/arro3/pull/269
+- Bump to arrow 54 by @kylebarron in https://github.com/kylebarron/arro3/pull/285
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.6.0...pyo3-arrow-v0.7.0
+
 ## [0.6.0] - 2024-12-04
 
 ### What's Changed
 
-* Bump pyo3-arrow to pyo3 0.23 by @kylebarron in https://github.com/kylebarron/arro3/pull/265
-* Add test for segmentation fault when converting arro3.core.Array to pyarrow.Array at interpreter exit by @3ok in https://github.com/kylebarron/arro3/pull/236
-* Implement FromPyObject for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/241
-* rust constructor for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/242
+- Bump pyo3-arrow to pyo3 0.23 by @kylebarron in https://github.com/kylebarron/arro3/pull/265
+- Add test for segmentation fault when converting arro3.core.Array to pyarrow.Array at interpreter exit by @3ok in https://github.com/kylebarron/arro3/pull/236
+- Implement FromPyObject for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/241
+- rust constructor for PyArrowBuffer by @kylebarron in https://github.com/kylebarron/arro3/pull/242
 
 ### New Contributors
 

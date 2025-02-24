@@ -25,7 +25,7 @@ use crate::{PyArray, PyDataType, PyField, PyScalar};
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
 #[derive(Debug)]
-#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass)]
+#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass, frozen)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,
@@ -197,6 +197,17 @@ impl PyChunkedArray {
             )
     }
 
+    /// Export this to a Python `arro3.core.ChunkedArray`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = Self::to_stream_pycapsule(py, self.chunks.clone(), self.field.clone(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "ChunkedArray"))?
+            .call_method1(
+                intern!(py, "from_arrow_pycapsule"),
+                PyTuple::new(py, vec![capsule])?,
+            )
+    }
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
@@ -306,7 +317,6 @@ impl PyChunkedArray {
         to_schema_pycapsule(py, self.field.as_ref())
     }
 
-    #[allow(unused_variables)]
     #[pyo3(signature = (requested_schema=None))]
     fn __arrow_c_stream__<'py>(
         &'py self,
