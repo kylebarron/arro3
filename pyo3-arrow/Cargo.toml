@@ -21,10 +21,10 @@ buffer_protocol = []
 [dependencies]
 chrono = "0.4.39"
 
-arrow-array = "54"
-arrow-buffer = "54"
-arrow-schema = "54"
-arrow = { version = "54", features = ["ffi", "chrono-tz"] }
+arrow-array = "54.2.1"
+arrow-buffer = "54.2.1"
+arrow-schema = "54.2.1"
+arrow = { version = "54.2.1", features = ["ffi", "chrono-tz"] }
 pyo3 = { version = "0.23.4", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
@@ -32,7 +32,7 @@ numpy = { version = "0.23", features = ["half"] }
 thiserror = "1"
 
 [dev-dependencies]
-arrow-select = "54"
+arrow-select = "54.2.1"
 
 [lib]
 crate-type = ["rlib"]
