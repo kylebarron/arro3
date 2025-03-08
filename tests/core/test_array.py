@@ -23,6 +23,26 @@ def test_constructor():
     # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
 
 
+def test_constructor_null():
+    arr = Array([1, None, 3], DataType.int16())
+    assert pa.array(arr) == pa.array([1, None, 3], pa.int16())
+
+    arr = Array((1, None, 3), DataType.int16())
+    assert pa.array(arr) == pa.array([1, None, 3], pa.int16())
+
+    arr = Array([1, None, 3], DataType.float64())
+    assert pa.array(arr) == pa.array([1, None, 3], pa.float64())
+
+    arr = Array(["1", None, "3"], DataType.string())
+    assert pa.array(arr) == pa.array(["1", None, "3"], pa.string())
+
+    arr = Array([b"1", None, b"3"], DataType.binary())
+    assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary())
+
+    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
+    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+
+
 def test_from_numpy():
     arr = np.array([1, 2, 3, 4], dtype=np.uint8)
     assert Array.from_numpy(arr).type == DataType.uint8()
