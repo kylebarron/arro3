@@ -2,6 +2,16 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.4.6] - 2025-03-10
+
+### Bug fixes :bug:
+
+- Use 2_24 for aarch64 wheels by @kylebarron in https://github.com/kylebarron/arro3/pull/279
+- Allow None as input into Array constructor by @kylebarron in https://github.com/kylebarron/arro3/pull/294
+- Fix rendering `__init__` in docs by @kylebarron in https://github.com/kylebarron/arro3/pull/295
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.5...py-v0.4.6
+
 ## [0.4.5] - 2024-12-16
 
 ### Bug fixes :bug:
