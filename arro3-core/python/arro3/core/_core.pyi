@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Iterable, Literal, Sequence, overload
 
 import numpy as np
@@ -10,6 +11,11 @@ from .types import (
     ArrowStreamExportable,
     BufferProtocolExportable,
 )
+
+if sys.version_info >= (3, 12):
+    from collections.abc import Buffer as _Buffer
+else:
+    from typing_extensions import Buffer as _Buffer
 
 class Array:
     """An Arrow Array."""
@@ -206,7 +212,7 @@ class ArrayReader:
     def field(self) -> Field:
         """Access the field of this reader."""
 
-class Buffer:
+class Buffer(_Buffer):
     """An Arrow Buffer"""
     def __init__(self, buffer) -> None: ...
     def __buffer__(self, flags: int) -> memoryview: ...
