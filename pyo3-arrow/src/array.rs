@@ -121,7 +121,7 @@ impl PyArray {
 
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)
+        to_nanoarrow_array(py, self.__arrow_c_array__(py, None)?)
     }
 
     /// Export to a pyarrow.Array

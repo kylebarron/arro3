@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0] - 2025-03-17
+
+### What's Changed
+
+- Bump to pyo3 0.24.
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.7.2...pyo3-arrow-v0.8.0
+
 ## [0.7.2] - 2025-02-22
 
 ### What's Changed
