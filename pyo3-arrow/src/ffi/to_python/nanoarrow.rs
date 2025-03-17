@@ -14,7 +14,7 @@ pub fn to_nanoarrow_schema<'py>(
 
 pub fn to_nanoarrow_array<'py>(
     py: Python<'py>,
-    capsules: &Bound<'py, PyTuple>,
+    capsules: Bound<'py, PyTuple>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let na_mod = py.import(intern!(py, "nanoarrow"))?;
     na_mod.getattr(intern!(py, "Array"))?.call1(capsules)

@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-arrow"
-version = "0.7.2"
+version = "0.8.0"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Arrow integration for pyo3."
@@ -25,10 +25,10 @@ arrow-array = "54"
 arrow-buffer = "54"
 arrow-schema = "54"
 arrow = { version = "54", features = ["ffi", "chrono-tz"] }
-pyo3 = { version = "0.23.4", features = ["chrono", "chrono-tz", "indexmap"] }
+pyo3 = { version = "0.24", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
-numpy = { version = "0.23", features = ["half"] }
+numpy = { version = "0.24", features = ["half"] }
 thiserror = "1"
 
 [dev-dependencies]
