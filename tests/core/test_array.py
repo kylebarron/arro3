@@ -24,7 +24,7 @@ def test_constructor():
     # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
 
 
-@pytest.skip(
+@pytest.mark.skip(
     "Arro3 currently uses published instead of relative path pyo3-arrow, and arro3 hasn't been bumped to pyo3 0.24 yet. This should be un-skipped before the next arro3 release"
 )
 def test_constructor_null():
