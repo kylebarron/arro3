@@ -5,6 +5,11 @@ import mmap
 import sys
 from typing import TYPE_CHECKING, Protocol, Tuple, Union
 
+if sys.version_info >= (3, 12):
+    from collections.abc import Buffer as _Buffer
+else:
+    from typing_extensions import Buffer as _Buffer
+
 if TYPE_CHECKING:
     import numpy as np
 
@@ -75,12 +80,6 @@ class ArrowStreamExportable(Protocol):
     def __arrow_c_stream__(self, requested_schema: object | None = None) -> object: ...
 
 
-class BufferProtocolExportable(Protocol):
-    """A python object that implements the Buffer Protocol"""
-
-    def __buffer__(self, flags: int) -> memoryview: ...
-
-
 # From numpy
 # https://github.com/numpy/numpy/blob/961b70f6aaeed67147245b56ddb3f12ed1a050b5/numpy/__init__.pyi#L1772C1-L1785C1
 if sys.version_info >= (3, 12):
@@ -93,12 +92,12 @@ else:
         _array.array,
         mmap.mmap,
         "np.ndarray",
-        BufferProtocolExportable,
+        _Buffer,
     ]
 
 
 # Numpy arrays don't yet declare `__buffer__` (or maybe just on a very recent version)
-ArrayInput = Union[ArrowArrayExportable, BufferProtocolExportable, _SupportsBuffer]
+ArrayInput = Union[ArrowArrayExportable, _SupportsBuffer]
 """Accepted input as an Arrow array.
 
 Buffer protocol input (such as numpy arrays) will be interpreted zero-copy except in the
