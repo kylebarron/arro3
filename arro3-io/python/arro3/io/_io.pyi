@@ -61,7 +61,7 @@ def read_csv(
         file: The input CSV path or buffer.
         schema: The Arrow schema for this CSV file. Use
             [infer_csv_schema][arro3.io.infer_csv_schema] to infer an Arrow schema if
-        needed.
+            needed.
         has_header: Set whether the CSV file has a header. Defaults to None.
         batch_size: Set the batch size (number of records to load at one time).
             Defaults to None.
@@ -281,7 +281,7 @@ async def read_parquet_async(path: str, *, store: ObjectStore) -> core.Table:
     """Read a Parquet file to an Arrow Table in an async fashion
 
     Args:
-        file: The path to the Parquet file in the given store
+        path: The path to the Parquet file in the given store
 
     Returns:
         The loaded Arrow data.
