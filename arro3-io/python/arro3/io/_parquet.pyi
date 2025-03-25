@@ -1,5 +1,6 @@
+import sys
 from pathlib import Path
-from typing import IO, Literal, Sequence
+from typing import IO, Literal, Sequence, TypedDict
 
 # Note: importing with
 # `from arro3.core import Array`
@@ -8,6 +9,12 @@ import arro3.core as core
 import arro3.core.types as types
 
 from ._pyo3_object_store import ObjectStore
+from ._stream import RecordBatchStream
+
+if sys.version_info >= (3, 11):
+    from typing import Unpack
+else:
+    from typing_extensions import Unpack
 
 ParquetColumnPath = str | Sequence[str]
 """Allowed types to refer to a Parquet Column."""
@@ -50,6 +57,50 @@ async def read_parquet_async(path: str, *, store: ObjectStore) -> core.Table:
     Returns:
         The loaded Arrow data.
     """
+
+class ParquetReadOptions(TypedDict, total=False):
+    batch_size: int | None
+    row_groups: Sequence[int] | None
+    columns: Sequence[str] | None
+    limit: int | None
+    offset: int | None
+
+class ParquetFile:
+    @property
+    def num_row_groups(self) -> int:
+        """Return the number of row groups in the Parquet file."""
+
+    def read(self, **kwargs: Unpack[ParquetReadOptions]) -> core.RecordBatchReader:
+        """Read the Parquet file to an Arrow RecordBatchReader.
+
+        Keyword Args:
+            batch_size: The number of rows to read in each batch.
+            row_groups: The row groups to read.
+            columns: The columns to read.
+            limit: The number of rows to read.
+            offset: The number of rows to skip.
+
+        Returns:
+            The loaded Arrow data.
+        """
+    async def read_async(
+        self, **kwargs: Unpack[ParquetReadOptions]
+    ) -> RecordBatchStream:
+        """Read the Parquet file to an Arrow async RecordBatchStream.
+
+        Keyword Args:
+            batch_size: The number of rows to read in each batch.
+            row_groups: The row groups to read.
+            columns: The columns to read.
+            limit: The number of rows to read.
+            offset: The number of rows to skip.
+
+        Returns:
+            The loaded Arrow data.
+        """
+    @property
+    def schema_arrow(self) -> core.Schema:
+        """Return the Arrow schema of the Parquet file."""
 
 def write_parquet(
     data: types.ArrowStreamExportable | types.ArrowArrayExportable,
