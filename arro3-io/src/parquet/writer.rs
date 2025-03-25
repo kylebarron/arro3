@@ -13,7 +13,7 @@ use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyRecordBatch;
 
-use crate::utils::FileWriter;
+use crate::source::FileWriter;
 
 pub(crate) struct PyWriterVersion(WriterVersion);
 

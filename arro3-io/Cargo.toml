@@ -47,3 +47,4 @@ pyo3-async-runtimes = { workspace = true, features = [
 pyo3-file = { workspace = true }
 pyo3-object_store = { workspace = true, optional = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }

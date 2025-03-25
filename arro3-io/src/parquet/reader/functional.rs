@@ -10,10 +10,10 @@ use pyo3_arrow::{PyRecordBatchReader, PyTable};
 use pyo3_object_store::PyObjectStore;
 
 use crate::error::Arro3IoResult;
-use crate::utils::FileReader;
+use crate::source::SyncReader;
 
 #[pyfunction]
-pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
+pub fn read_parquet(file: SyncReader) -> PyArrowResult<Arro3RecordBatchReader> {
     let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
 
     let metadata = builder.schema().metadata().clone();
