@@ -35,7 +35,11 @@ nav:
           - api/core/accessors.md
           - api/core/types.md
       - api/compute.md
-      - api/io.md
+      - arro3.io:
+          - api/io/arrow-ipc.md
+          - api/io/csv.md
+          - api/io/json.md
+          - api/io/parquet.md
 
 watch:
   - arro3-compute/python
@@ -84,7 +88,8 @@ theme:
 
 plugins:
   - search
-  - social
+  - social:
+      enabled: !ENV [CI, false]
   - mike:
       alias_type: "copy"
       canonical_version: "latest"
@@ -109,12 +114,15 @@ plugins:
             extensions:
               - griffe_inherited_docstrings
 
-          import:
+          inventories:
             - https://arrow.apache.org/docs/objects.inv
             - https://docs.python.org/3/objects.inv
             - https://numpy.org/doc/stable/objects.inv
             - https://pandas.pydata.org/pandas-docs/stable/objects.inv
             - https://pola-rs.github.io/polars/py-polars/html/objects.inv
+  - redirects:
+      redirect_maps:
+        "api/io.md": "api/io/parquet.md"
 
 # https://github.com/developmentseed/titiler/blob/50934c929cca2fa8d3c408d239015f8da429c6a8/docs/mkdocs.yml#L115-L140
 markdown_extensions:
