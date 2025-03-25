@@ -1,9 +1,15 @@
 # arro3
 
-[![PyPI][pypi_arro3_core]][pypi_link_arro3_core]
+[![PyPI][pypi_badge]][pypi_link]
+[![Conda Version][conda_version_badge]][conda_version]
+[![PyPI - Downloads][pypi-img]][pypi-link]
 
-[pypi_arro3_core]: https://badge.fury.io/py/arro3-core.svg
-[pypi_link_arro3_core]: https://pypi.org/project/arro3-core/
+[pypi_badge]: https://badge.fury.io/py/arro3-core.svg
+[pypi_link]: https://pypi.org/project/arro3-core/
+[conda_version_badge]: https://img.shields.io/conda/vn/conda-forge/arro3-core.svg
+[conda_version]: https://prefix.dev/channels/conda-forge/packages/arro3-core
+[pypi-img]: https://img.shields.io/pypi/dm/arro3-core
+[pypi-link]: https://pypi.org/project/arro3-core/
 
 A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs).
 

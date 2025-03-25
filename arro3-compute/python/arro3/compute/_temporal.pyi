@@ -47,7 +47,7 @@ def date_part(
     error.
 
     Args:
-        array: Argument to compute function.
+        input: Argument to compute function.
 
     Returns:
         The extracted date part.

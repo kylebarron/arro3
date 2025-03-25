@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Iterable, Literal, Sequence, overload
 
 import numpy as np
@@ -10,6 +11,11 @@ from .types import (
     ArrowStreamExportable,
     BufferProtocolExportable,
 )
+
+if sys.version_info >= (3, 12):
+    from collections.abc import Buffer as _Buffer
+else:
+    from typing_extensions import Buffer as _Buffer
 
 class Array:
     """An Arrow Array."""
@@ -192,7 +198,7 @@ class ArrayReader:
         """Construct this from an existing Arrow object.
 
         This is an alias of and has the same behavior as
-        [`from_arrow`][arro3.ArrayReader.from_arrow], but is included for parity
+        [`from_arrow`][arro3.core.ArrayReader.from_arrow], but is included for parity
         with [`pyarrow.RecordBatchReader`][pyarrow.RecordBatchReader].
         """
     @property
@@ -206,7 +212,7 @@ class ArrayReader:
     def field(self) -> Field:
         """Access the field of this reader."""
 
-class Buffer:
+class Buffer(_Buffer):
     """An Arrow Buffer"""
     def __init__(self, buffer) -> None: ...
     def __buffer__(self, flags: int) -> memoryview: ...
@@ -1617,14 +1623,11 @@ class Table:
             Self
         """
     @classmethod
-    def from_arrow_pycapsule(cls, capsule) -> Table:
+    def from_arrow_pycapsule(cls, capsule: object) -> Table:
         """Construct this object from a bare Arrow PyCapsule
 
         Args:
-            capsule: _description_
-
-        Returns:
-            _description_
+            capsule: raw Arrow PyCapsule.
         """
     @classmethod
     def from_batches(
@@ -1927,7 +1930,7 @@ def list_flatten(
         input: Input data.
 
     Raises:
-        Exception if not a list-typed array.
+        Exception: if not a list-typed array.
 
     Returns:
         The flattened Arrow data.
@@ -1948,10 +1951,10 @@ def list_offsets(
 
     Args:
         input: _description_
-        physical: If False, return the physical (unsliced) offsets of the provided list array. If True, adjust the list offsets for the current array slicing. Defaults to `True`.
+        logical: If `False`, return the physical (unsliced) offsets of the provided list array. If `True`, adjust the list offsets for the current array slicing. Defaults to `True`.
 
     Raises:
-        Exception if not a list-typed array.
+        Exception: if not a list-typed array.
 
     Returns:
         _description_
@@ -1969,7 +1972,7 @@ def struct_field(
         indices: List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.
 
     Raises:
-        Exception if not a struct-typed array.
+        Exception: if not a struct-typed array.
 
     Returns:
         _description_

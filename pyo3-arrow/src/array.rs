@@ -121,7 +121,7 @@ impl PyArray {
 
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array(py, &self.__arrow_c_array__(py, None)?)
+        to_nanoarrow_array(py, self.__arrow_c_array__(py, None)?)
     }
 
     /// Export to a pyarrow.Array
@@ -174,7 +174,7 @@ impl PyArray {
 
         macro_rules! impl_primitive {
             ($rust_type:ty, $arrow_type:ty) => {{
-                let values: Vec<$rust_type> = obj.extract()?;
+                let values: Vec<Option<$rust_type>> = obj.extract()?;
                 Arc::new(PrimitiveArray::<$arrow_type>::from(values))
             }};
         }
@@ -196,34 +196,43 @@ impl PyArray {
             DataType::Int32 => impl_primitive!(i32, Int32Type),
             DataType::Int64 => impl_primitive!(i64, Int64Type),
             DataType::Boolean => {
-                let values: Vec<bool> = obj.extract()?;
+                let values: Vec<Option<bool>> = obj.extract()?;
                 Arc::new(BooleanArray::from(values))
             }
             DataType::Binary => {
-                let values: Vec<Vec<u8>> = obj.extract()?;
-                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .collect::<Vec<_>>();
                 Arc::new(BinaryArray::from(slices))
             }
             DataType::LargeBinary => {
-                let values: Vec<Vec<u8>> = obj.extract()?;
-                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .collect::<Vec<_>>();
                 Arc::new(LargeBinaryArray::from(slices))
             }
             DataType::BinaryView => {
-                let values: Vec<Vec<u8>> = obj.extract()?;
-                let slices = values.iter().map(|x| x.as_slice()).collect::<Vec<_>>();
+                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .collect::<Vec<_>>();
                 Arc::new(BinaryViewArray::from(slices))
             }
             DataType::Utf8 => {
-                let values: Vec<String> = obj.extract()?;
+                let values: Vec<Option<String>> = obj.extract()?;
                 Arc::new(StringArray::from(values))
             }
             DataType::LargeUtf8 => {
-                let values: Vec<String> = obj.extract()?;
+                let values: Vec<Option<String>> = obj.extract()?;
                 Arc::new(LargeStringArray::from(values))
             }
             DataType::Utf8View => {
-                let values: Vec<String> = obj.extract()?;
+                let values: Vec<Option<String>> = obj.extract()?;
                 Arc::new(StringViewArray::from(values))
             }
             dt => {
