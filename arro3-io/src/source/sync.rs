@@ -1,4 +1,8 @@
 use bytes::Bytes;
+use futures::future::BoxFuture;
+use futures::FutureExt;
+use parquet::arrow::async_reader::AsyncFileReader;
+use parquet::file::metadata::{ParquetMetaData, ParquetMetaDataReader};
 use parquet::file::reader::{ChunkReader, Length};
 use pyo3_file::PyFileLikeObject;
 
@@ -6,6 +10,7 @@ use pyo3::prelude::*;
 use std::fs::File;
 use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Represents either a path `File` or a file-like object `FileLike`
 #[derive(Debug)]
@@ -102,6 +107,28 @@ impl ChunkReader for SyncReader {
             )));
         }
         Ok(buffer.into())
+    }
+}
+
+// This impl allows us to use SyncReader in `ParquetFile::read_async`
+impl AsyncFileReader for SyncReader {
+    fn get_bytes(
+        &mut self,
+        range: std::ops::Range<usize>,
+    ) -> BoxFuture<'_, parquet::errors::Result<Bytes>> {
+        async move { ChunkReader::get_bytes(self, range.start as u64, range.end - range.start) }
+            .boxed()
+    }
+
+    fn get_metadata(&mut self) -> BoxFuture<'_, parquet::errors::Result<Arc<ParquetMetaData>>> {
+        async move {
+            let metadata = ParquetMetaDataReader::new()
+                .with_column_indexes(true)
+                .with_offset_indexes(true)
+                .parse_and_finish(self)?;
+            Ok(Arc::new(metadata))
+        }
+        .boxed()
     }
 }
 

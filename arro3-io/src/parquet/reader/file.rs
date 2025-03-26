@@ -37,22 +37,22 @@ impl ParquetFile {
         let options = kwargs.unwrap_or_default();
         match &self.source {
             ParquetSource::Sync(sync_source) => {
-                let reader_builder = ParquetRecordBatchReaderBuilder::new_with_metadata(
+                let sync_reader_builder = ParquetRecordBatchReaderBuilder::new_with_metadata(
                     sync_source.try_clone()?,
                     self.parquet_meta.clone(),
                 );
                 let record_batch_reader = options
-                    .apply_to_reader_builder(reader_builder, &self.parquet_meta)
+                    .apply_to_reader_builder(sync_reader_builder, &self.parquet_meta)
                     .build()?;
                 Ok(PyRecordBatchReader::new(Box::new(record_batch_reader)).into())
             }
             ParquetSource::Async(async_source) => {
-                let reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
+                let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
                     async_source.clone(),
                     self.parquet_meta.clone(),
                 );
                 let record_batch_stream = options
-                    .apply_to_reader_builder(reader_builder, &self.parquet_meta)
+                    .apply_to_reader_builder(async_reader_builder, &self.parquet_meta)
                     .build()?;
                 let blocking_record_batch_reader = BlockingAsyncParquetReader(record_batch_stream);
                 Ok(PyRecordBatchReader::new(Box::new(blocking_record_batch_reader)).into())
@@ -64,23 +64,22 @@ impl ParquetFile {
         let options = kwargs.unwrap_or_default();
         match &self.source {
             ParquetSource::Sync(sync_source) => {
-                todo!("implement AsyncFileReader for SyncReader");
-                // let reader_builder = ParquetRecordBatchReaderBuilder::new_with_metadata(
-                //     sync_source.try_clone()?,
-                //     self.parquet_meta.clone(),
-                // );
-                // let record_batch_reader = options
-                //     .apply_to_reader_builder(reader_builder, &self.parquet_meta)
-                //     .build()?;
-                // Ok(PyRecordBatchReader::new(Box::new(record_batch_reader)).into())
+                let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
+                    Box::new(sync_source.try_clone()?) as _,
+                    self.parquet_meta.clone(),
+                );
+                let record_batch_stream = options
+                    .apply_to_reader_builder(async_reader_builder, &self.parquet_meta)
+                    .build()?;
+                Ok(PyRecordBatchStream::new(record_batch_stream))
             }
             ParquetSource::Async(async_source) => {
-                let reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
+                let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
                     Box::new(async_source.clone()) as _,
                     self.parquet_meta.clone(),
                 );
                 let record_batch_stream = options
-                    .apply_to_reader_builder(reader_builder, &self.parquet_meta)
+                    .apply_to_reader_builder(async_reader_builder, &self.parquet_meta)
                     .build()?;
                 Ok(PyRecordBatchStream::new(record_batch_stream))
             }
