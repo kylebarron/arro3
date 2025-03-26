@@ -100,7 +100,7 @@ pub(crate) struct PyParquetOptions {
     batch_size: Option<usize>,
     row_groups: Option<Vec<usize>>,
     columns: Option<PyProjectionMask>,
-    filter: Option<Vec<PyInputPredicate>>,
+    filters: Option<Vec<PyInputPredicate>>,
     // selection: Option<RowSelection>,
     limit: Option<usize>,
     offset: Option<usize>,
@@ -113,7 +113,7 @@ impl<'py> FromPyObject<'py> for PyParquetOptions {
         let mut batch_size = None;
         let mut row_groups = None;
         let mut columns = None;
-        let mut filter = None;
+        let mut filters = None;
         let mut limit = None;
         let mut offset = None;
         if let Ok(val) = ob.get_item(intern!(py, "batch_size")) {
@@ -125,20 +125,20 @@ impl<'py> FromPyObject<'py> for PyParquetOptions {
         if let Ok(val) = ob.get_item(intern!(py, "columns")) {
             columns = Some(val.extract()?);
         }
-        if let Ok(val) = ob.get_item(intern!(py, "filter")) {
+        if let Ok(val) = ob.get_item(intern!(py, "filters")) {
             // Can either be a sequence of filters or a single filter
-            let mut filters = vec![];
+            let mut local_filters = vec![];
             match val.try_iter() {
                 Ok(iter) => {
                     for item in iter {
-                        filters.push(item?.extract()?);
+                        local_filters.push(item?.extract()?);
                     }
                 }
                 Err(_) => {
-                    filters.push(val.extract()?);
+                    local_filters.push(val.extract()?);
                 }
             }
-            filter = Some(filters);
+            filters = Some(local_filters);
         }
         if let Ok(val) = ob.get_item(intern!(py, "limit")) {
             limit = Some(val.extract()?);
@@ -151,7 +151,7 @@ impl<'py> FromPyObject<'py> for PyParquetOptions {
             batch_size,
             row_groups,
             columns,
-            filter,
+            filters,
             limit,
             offset,
         })
@@ -173,7 +173,7 @@ impl PyParquetOptions {
         if let Some(columns) = self.columns {
             builder = builder.with_projection(columns.resolve(metadata.parquet_schema()));
         }
-        if let Some(filters) = self.filter {
+        if let Some(filters) = self.filters {
             let predicates = filters
                 .into_iter()
                 .map(|predicate| predicate.into_arrow_predicate(metadata.parquet_schema()))

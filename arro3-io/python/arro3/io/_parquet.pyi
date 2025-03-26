@@ -72,7 +72,7 @@ class ParquetReadOptions(TypedDict, total=False):
     batch_size: int | None
     row_groups: Sequence[int] | None
     columns: Sequence[str] | None
-    filter: ParquetPredicate | Sequence[ParquetPredicate] | None
+    filters: ParquetPredicate | Sequence[ParquetPredicate] | None
     limit: int | None
     offset: int | None
 
