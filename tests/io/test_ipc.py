@@ -4,6 +4,8 @@ from pathlib import Path
 import pyarrow as pa
 from arro3.io import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
 
+from . import pytestmark  # noqa: F401
+
 
 def test_ipc_round_trip_string():
     table = pa.table({"a": [1, 2, 3, 4]})

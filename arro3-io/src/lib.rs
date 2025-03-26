@@ -33,7 +33,7 @@ fn check_debug_build(py: Python) -> PyResult<()> {
     Ok(())
 }
 
-#[pymodule(gil_used = false)]
+#[pymodule]
 fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     check_debug_build(py)?;
 

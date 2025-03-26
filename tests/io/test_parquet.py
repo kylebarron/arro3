@@ -4,6 +4,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from arro3.io import read_parquet, write_parquet
 
+from . import pytestmark  # noqa: F401
+
 
 def test_parquet_round_trip():
     table = pa.table({"a": [1, 2, 3, 4]})
