@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import IO, Literal, Sequence, TypedDict
+from typing import IO, Literal, Protocol, Sequence, TypedDict
 
 # Note: importing with
 # `from arro3.core import Array`
@@ -58,10 +58,21 @@ async def read_parquet_async(path: str, *, store: ObjectStore) -> core.Table:
         The loaded Arrow data.
     """
 
+class ParquetPredicate(Protocol):
+    @property
+    def projection(self) -> Sequence[str]:
+        """Return the projected columns."""
+    def evaluate(self, batch: core.RecordBatch) -> types.ArrowArrayExportable:
+        """Evaluate the predicate on a RecordBatch.
+
+        Must return a boolean-typed array.
+        """
+
 class ParquetReadOptions(TypedDict, total=False):
     batch_size: int | None
     row_groups: Sequence[int] | None
     columns: Sequence[str] | None
+    filter: ParquetPredicate | Sequence[ParquetPredicate] | None
     limit: int | None
     offset: int | None
 
