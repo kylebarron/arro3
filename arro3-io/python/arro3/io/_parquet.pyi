@@ -7,6 +7,7 @@ from typing import IO, Literal, Protocol, Sequence, TypedDict
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from obstore.store import ObjectStore as ObstoreStore
 
 from ._pyo3_object_store import ObjectStore
 from ._stream import RecordBatchStream
@@ -77,6 +78,30 @@ class ParquetReadOptions(TypedDict, total=False):
     offset: int | None
 
 class ParquetFile:
+    @classmethod
+    def open(
+        cls,
+        file: IO[bytes] | Path | str,
+        *,
+        store: ObjectStore | ObstoreStore | None = None,
+        skip_arrow_metadata: bool = False,
+        schema: core.Schema | None = None,
+        page_index: bool = False,
+    ) -> ParquetFile:
+        """Open a Parquet file."""
+
+    @classmethod
+    async def open_async(
+        cls,
+        file: IO[bytes] | Path | str,
+        *,
+        store: ObjectStore | ObstoreStore | None = None,
+        skip_arrow_metadata: bool = False,
+        schema: core.Schema | None = None,
+        page_index: bool = False,
+    ) -> ParquetFile:
+        """Open a Parquet file."""
+
     @property
     def num_row_groups(self) -> int:
         """Return the number of row groups in the Parquet file."""

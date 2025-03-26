@@ -4,6 +4,8 @@ use futures::FutureExt;
 use parquet::arrow::async_reader::AsyncFileReader;
 use parquet::file::metadata::{ParquetMetaData, ParquetMetaDataReader};
 use parquet::file::reader::{ChunkReader, Length};
+use pyo3::exceptions::PyTypeError;
+use pyo3::intern;
 use pyo3_file::PyFileLikeObject;
 
 use pyo3::prelude::*;
@@ -30,11 +32,12 @@ impl SyncReader {
 
 impl<'py> FromPyObject<'py> for SyncReader {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let py = ob.py();
         if let Ok(path) = ob.extract::<PathBuf>() {
             Ok(Self::File(File::open(path)?))
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::open(path)?))
-        } else {
+        } else if ob.hasattr(intern!(py, "read"))? && ob.hasattr(intern!(py, "seek"))? {
             Ok(Self::FileLike(PyFileLikeObject::with_requirements(
                 ob.clone().unbind(),
                 true,
@@ -42,6 +45,10 @@ impl<'py> FromPyObject<'py> for SyncReader {
                 true,
                 false,
             )?))
+        } else {
+            Err(PyTypeError::new_err(
+                "Expected a file path or a file-like object",
+            ))
         }
     }
 }
