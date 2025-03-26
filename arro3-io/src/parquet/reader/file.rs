@@ -161,6 +161,7 @@ impl ParquetFile {
         self.meta.metadata().num_row_groups()
     }
 
+    #[pyo3(signature = (**kwargs))]
     fn read(&self, kwargs: Option<PyParquetOptions>) -> Arro3IoResult<Arro3RecordBatchReader> {
         let options = kwargs.unwrap_or_default();
         match &self.source {
@@ -188,6 +189,7 @@ impl ParquetFile {
         }
     }
 
+    #[pyo3(signature = (**kwargs))]
     fn read_async(&self, kwargs: Option<PyParquetOptions>) -> Arro3IoResult<PyRecordBatchStream> {
         let options = kwargs.unwrap_or_default();
         match &self.source {

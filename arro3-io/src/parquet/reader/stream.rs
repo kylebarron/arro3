@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 
 use crate::error::Arro3IoError;
 
-#[pyclass(name = "RecordBatchStream")]
+#[pyclass(name = "RecordBatchStream", frozen)]
 pub(crate) struct PyRecordBatchStream {
     stream: Arc<Mutex<ParquetRecordBatchStream<Box<dyn AsyncFileReader + 'static>>>>,
     schema: SchemaRef,
@@ -35,7 +35,7 @@ impl PyRecordBatchStream {
         slf
     }
 
-    fn __anext__<'py>(&'py mut self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+    fn __anext__<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let stream = self.stream.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, next_stream(stream, false))
     }

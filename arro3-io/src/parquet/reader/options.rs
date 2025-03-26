@@ -40,7 +40,7 @@ impl PyInputPredicate {
 impl<'py> FromPyObject<'py> for PyInputPredicate {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         let py = ob.py();
-        let projection = ob.getattr(intern!(py, "projection"))?.extract()?;
+        let columns = ob.getattr(intern!(py, "columns"))?.extract()?;
 
         let evaluate_callback = ob.getattr(intern!(py, "evaluate"))?;
 
@@ -54,7 +54,7 @@ impl<'py> FromPyObject<'py> for PyInputPredicate {
         }
 
         Ok(Self {
-            projection,
+            projection: columns,
             evaluate: evaluate_callback.unbind(),
         })
     }

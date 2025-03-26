@@ -24,6 +24,7 @@ dev = [
     { name = "black" },
     { name = "boto3" },
     { name = "geoarrow-types" },
+    { name = "griffe" },
     { name = "griffe-inherited-docstrings" },
     { name = "ipykernel" },
     { name = "maturin" },
@@ -31,7 +32,8 @@ dev = [
     { name = "mkdocs" },
     { name = "mkdocs-material", extra = ["imaging"] },
     { name = "mkdocs-redirects" },
-    { name = "mkdocstrings", extra = ["python"] },
+    { name = "mkdocstrings" },
+    { name = "mkdocstrings-python" },
     { name = "obstore" },
     { name = "pandas" },
     { name = "pip" },
@@ -46,6 +48,7 @@ dev = [
     { name = "black", specifier = ">=24.10.0" },
     { name = "boto3", specifier = ">=1.35.38" },
     { name = "geoarrow-types", specifier = ">=0.2.0" },
+    { name = "griffe", specifier = ">=1.6.0" },
     { name = "griffe-inherited-docstrings", specifier = ">=1.0.1" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "maturin", specifier = ">=1.7.4" },
@@ -53,7 +56,8 @@ dev = [
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", extras = ["imaging"], specifier = ">=9.6.7" },
     { name = "mkdocs-redirects", specifier = ">=1.2.2" },
-    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.28.3" },
+    { name = "mkdocstrings", specifier = ">=0.27.0" },
+    { name = "mkdocstrings-python", specifier = ">=1.13.0" },
     { name = "obstore", specifier = ">=0.6.0" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pip", specifier = ">=24.2" },
@@ -810,11 +814,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8e/4d/a9484dc5d926295bdf308f1f6c4f07fcc99735b970591edc414d401fcc91/mkdocstrings-0.29.0.tar.gz", hash = "sha256:3657be1384543ce0ee82112c3e521bbf48e41303aa0c229b9ffcccba057d922e", size = 1212185 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/15/47/eb876dfd84e48f31ff60897d161b309cf6a04ca270155b0662aae562b3fb/mkdocstrings-0.29.0-py3-none-any.whl", hash = "sha256:8ea98358d2006f60befa940fdebbbc88a26b37ecbcded10be726ba359284f73d", size = 1630824 },
-]
-
-[package.optional-dependencies]
-python = [
-    { name = "mkdocstrings-python" },
 ]
 
 [[package]]
