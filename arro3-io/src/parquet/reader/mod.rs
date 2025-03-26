@@ -1,5 +1,6 @@
 mod file;
 mod functional;
+mod options;
 mod stream;
 
 pub(crate) use file::ParquetFile;
