@@ -1,9 +1,10 @@
+import tempfile
 from io import BytesIO
 from pathlib import Path
-import tempfile
 
 import pyarrow as pa
 from arro3.io import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
+
 
 def test_ipc_round_trip_string():
     table = pa.table({"a": [1, 2, 3, 4]})
