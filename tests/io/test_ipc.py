@@ -1,32 +1,38 @@
 from io import BytesIO
 from pathlib import Path
+import tempfile
 
 import pyarrow as pa
 from arro3.io import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
 
-from . import pytestmark  # noqa: F401
-
-
 def test_ipc_round_trip_string():
     table = pa.table({"a": [1, 2, 3, 4]})
-    write_ipc(table, "test.arrow")
-    table_retour = pa.table(read_ipc("test.arrow"))
-    assert table == table_retour
+    with tempfile.TemporaryDirectory() as dir:
+        ipc_path = f"{dir}/test.arrow"
+        ipc_stream_path = f"{dir}/test.arrows"
 
-    write_ipc_stream(table, "test.arrows")
-    table_retour = pa.table(read_ipc_stream("test.arrows"))
-    assert table == table_retour
+        write_ipc(table, ipc_path)
+        table_retour = pa.table(read_ipc(ipc_path))
+        assert table == table_retour
+
+        write_ipc_stream(table, ipc_stream_path)
+        table_retour = pa.table(read_ipc_stream(ipc_stream_path))
+        assert table == table_retour
 
 
 def test_ipc_round_trip_path():
     table = pa.table({"a": [1, 2, 3, 4]})
-    write_ipc(table, Path("test.arrow"))
-    table_retour = pa.table(read_ipc(Path("test.arrow")))
-    assert table == table_retour
+    with tempfile.TemporaryDirectory() as dir:
+        ipc_path = Path(dir) / "test.arrow"
+        ipc_stream_path = Path(dir) / "test.arrows"
 
-    write_ipc_stream(table, Path("test.arrows"))
-    table_retour = pa.table(read_ipc_stream(Path("test.arrows")))
-    assert table == table_retour
+        write_ipc(table, ipc_path)
+        table_retour = pa.table(read_ipc(ipc_path))
+        assert table == table_retour
+
+        write_ipc_stream(table, ipc_stream_path)
+        table_retour = pa.table(read_ipc_stream(ipc_stream_path))
+        assert table == table_retour
 
 
 def test_ipc_round_trip_buffer():
@@ -45,16 +51,18 @@ def test_ipc_round_trip_buffer():
 
 def test_ipc_round_trip_compression():
     table = pa.table({"a": [1, 2, 3, 4]})
-    write_ipc(table, "test.arrow", compression="lz4")
-    table_retour = pa.table(read_ipc("test.arrow"))
-    assert table == table_retour
+    with tempfile.TemporaryDirectory() as dir:
+        tmp_path = f"{dir}/tset.arrow"
+        write_ipc(table, tmp_path, compression="lz4")
+        table_retour = pa.table(read_ipc(tmp_path))
+        assert table == table_retour
 
-    table = pa.table({"a": [1, 2, 3, 4]})
-    write_ipc(table, "test.arrow", compression="zstd")
-    table_retour = pa.table(read_ipc("test.arrow"))
-    assert table == table_retour
+        table = pa.table({"a": [1, 2, 3, 4]})
+        write_ipc(table, tmp_path, compression="zstd")
+        table_retour = pa.table(read_ipc(tmp_path))
+        assert table == table_retour
 
-    table = pa.table({"a": [1, 2, 3, 4]})
-    write_ipc(table, "test.arrow", compression=None)
-    table_retour = pa.table(read_ipc("test.arrow"))
-    assert table == table_retour
+        table = pa.table({"a": [1, 2, 3, 4]})
+        write_ipc(table, tmp_path, compression=None)
+        table_retour = pa.table(read_ipc(tmp_path))
+        assert table == table_retour
