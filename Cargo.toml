@@ -20,20 +20,25 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow = { version = "54", features = ["ffi"] }
-arrow-array = "54"
-arrow-buffer = "54"
-arrow-cast = "54"
-arrow-csv = "54"
-arrow-ipc = { version = "54", features = ["lz4", "zstd"] }
-arrow-schema = "54"
-arrow-select = "54"
+arrow = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4", features = [
+    "ffi",
+] }
+arrow-array = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
+arrow-buffer = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
+arrow-cast = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
+arrow-csv = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
+arrow-ipc = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4", features = [
+    "lz4",
+    "zstd",
+] }
+arrow-schema = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
+arrow-select = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
 bytes = "1.7.0"
 half = "2"
 indexmap = "2"
 numpy = "0.24"
 object_store = "0.11"
-parquet = "54"
+parquet = { git = "https://github.com/apache/arrow-rs", rev = "5b44d6702984fbac8a0faa93b85ec4c1120decd4" }
 pyo3 = { version = "0.24", features = ["macros", "indexmap"] }
 # pyo3-arrow = "0.8"
 pyo3-arrow = { path = "./pyo3-arrow" }

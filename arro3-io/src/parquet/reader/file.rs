@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use arrow_array::{RecordBatch, RecordBatchReader};
 use arrow_schema::ArrowError;
 use futures::StreamExt;
@@ -10,7 +12,6 @@ use parquet::arrow::async_reader::{
 };
 use parquet::arrow::ParquetRecordBatchStreamBuilder;
 use pyo3::prelude::*;
-use pyo3::pybacked::PyBackedStr;
 use pyo3::types::PyType;
 use pyo3::IntoPyObjectExt;
 use pyo3_arrow::export::{Arro3RecordBatchReader, Arro3Schema};
@@ -18,7 +19,7 @@ use pyo3_arrow::{PyRecordBatchReader, PySchema};
 use pyo3_async_runtimes::tokio::future_into_py;
 use pyo3_object_store::AnyObjectStore;
 
-use crate::error::{Arro3IoError, Arro3IoResult};
+use crate::error::Arro3IoResult;
 use crate::parquet::reader::options::PyParquetOptions;
 use crate::parquet::reader::stream::PyRecordBatchStream;
 use crate::runtime::get_runtime;
@@ -27,6 +28,17 @@ use crate::source::{AsyncReader, SyncReader};
 enum ParquetSource {
     Sync(SyncReader),
     Async(AsyncReader),
+}
+
+impl ParquetSource {
+    fn new(store: Option<Arc<dyn ObjectStore>>, file: Bound<PyAny>) -> Arro3IoResult<Self> {
+        if let Some(store) = store {
+            let reader = ParquetObjectReader::new(store, file.extract::<&str>()?.into());
+            Ok(ParquetSource::Async(AsyncReader::ObjectStore(reader)))
+        } else {
+            Ok(ParquetSource::Sync(file.extract()?))
+        }
+    }
 }
 
 impl From<SyncReader> for ParquetSource {
@@ -101,16 +113,7 @@ impl ParquetFile {
 
         let runtime = get_runtime(py)?;
 
-        let mut source = if let Some(store) = store {
-            let store = store.into_dyn();
-            let path = object_store::path::Path::from(file.extract::<PyBackedStr>()?.as_ref());
-            let meta = runtime.block_on(store.head(&path))?;
-            let reader = ParquetObjectReader::new(store, meta);
-            ParquetSource::Async(AsyncReader::ObjectStore(reader))
-        } else {
-            ParquetSource::Sync(file.extract()?)
-        };
-
+        let mut source = ParquetSource::new(store.map(|s| s.into()), file)?;
         let meta = runtime.block_on(source.open_parquet(options))?;
         Ok(Self { meta, source })
     }
@@ -135,10 +138,11 @@ impl ParquetFile {
 
         if let Some(store) = store {
             let store = store.into_dyn();
-            let path = object_store::path::Path::from(file.extract::<PyBackedStr>()?.as_ref());
+            let mut reader = AsyncReader::ObjectStore(ParquetObjectReader::new(
+                store,
+                file.extract::<&str>()?.into(),
+            ));
             future_into_py(py, async move {
-                let meta = store.head(&path).await.map_err(Arro3IoError::from)?;
-                let mut reader = AsyncReader::ObjectStore(ParquetObjectReader::new(store, meta));
                 let meta = reader.open_parquet(options).await?;
                 Ok(Self {
                     meta,

@@ -55,9 +55,7 @@ async fn read_parquet_async_inner(
     use futures::TryStreamExt;
     use parquet::arrow::ParquetRecordBatchStreamBuilder;
 
-    let meta = store.head(&path.into()).await?;
-
-    let object_reader = ParquetObjectReader::new(store, meta);
+    let object_reader = ParquetObjectReader::new(store, path.into());
     let builder = ParquetRecordBatchStreamBuilder::new(object_reader).await?;
 
     let metadata = builder.schema().metadata().clone();
