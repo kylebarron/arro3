@@ -38,8 +38,8 @@ impl<'py> FromPyObject<'py> for SyncReader {
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::open(path)?))
         } else if ob.hasattr(intern!(py, "read"))? && ob.hasattr(intern!(py, "seek"))? {
-            Ok(Self::FileLike(PyFileLikeObject::with_requirements(
-                ob.clone().unbind(),
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                ob.clone(),
                 true,
                 false,
                 true,
