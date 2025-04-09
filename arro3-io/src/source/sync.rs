@@ -1,21 +1,28 @@
 use bytes::Bytes;
+use futures::future::BoxFuture;
+use futures::FutureExt;
+use parquet::arrow::async_reader::AsyncFileReader;
+use parquet::file::metadata::{ParquetMetaData, ParquetMetaDataReader};
 use parquet::file::reader::{ChunkReader, Length};
+use pyo3::exceptions::PyTypeError;
+use pyo3::intern;
 use pyo3_file::PyFileLikeObject;
 
 use pyo3::prelude::*;
 use std::fs::File;
 use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Represents either a path `File` or a file-like object `FileLike`
 #[derive(Debug)]
-pub enum FileReader {
+pub enum SyncReader {
     File(File),
     FileLike(PyFileLikeObject),
 }
 
-impl FileReader {
-    fn try_clone(&self) -> std::io::Result<Self> {
+impl SyncReader {
+    pub(crate) fn try_clone(&self) -> std::io::Result<Self> {
         match self {
             Self::File(f) => Ok(Self::File(f.try_clone()?)),
             Self::FileLike(f) => Ok(Self::FileLike(f.clone())),
@@ -23,13 +30,14 @@ impl FileReader {
     }
 }
 
-impl<'py> FromPyObject<'py> for FileReader {
+impl<'py> FromPyObject<'py> for SyncReader {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
+        let py = ob.py();
         if let Ok(path) = ob.extract::<PathBuf>() {
             Ok(Self::File(File::open(path)?))
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::open(path)?))
-        } else {
+        } else if ob.hasattr(intern!(py, "read"))? && ob.hasattr(intern!(py, "seek"))? {
             Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
                 ob.clone(),
                 true,
@@ -37,11 +45,15 @@ impl<'py> FromPyObject<'py> for FileReader {
                 true,
                 false,
             )?))
+        } else {
+            Err(PyTypeError::new_err(
+                "Expected a file path or a file-like object",
+            ))
         }
     }
 }
 
-impl Read for FileReader {
+impl Read for SyncReader {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
         match self {
             Self::File(f) => f.read(buf),
@@ -50,7 +62,7 @@ impl Read for FileReader {
     }
 }
 
-impl Seek for FileReader {
+impl Seek for SyncReader {
     fn seek(&mut self, pos: std::io::SeekFrom) -> std::io::Result<u64> {
         match self {
             Self::File(f) => f.seek(pos),
@@ -59,7 +71,7 @@ impl Seek for FileReader {
     }
 }
 
-impl Length for FileReader {
+impl Length for SyncReader {
     fn len(&self) -> u64 {
         match self {
             Self::File(f) => f.len(),
@@ -80,8 +92,8 @@ impl Length for FileReader {
     }
 }
 
-impl ChunkReader for FileReader {
-    type T = BufReader<FileReader>;
+impl ChunkReader for SyncReader {
+    type T = BufReader<SyncReader>;
 
     fn get_read(&self, start: u64) -> parquet::errors::Result<Self::T> {
         let mut reader = self.try_clone()?;
@@ -102,6 +114,30 @@ impl ChunkReader for FileReader {
             )));
         }
         Ok(buffer.into())
+    }
+}
+
+// This impl allows us to use SyncReader in `ParquetFile::read_async`
+impl AsyncFileReader for SyncReader {
+    fn get_bytes(
+        &mut self,
+        range: std::ops::Range<u64>,
+    ) -> BoxFuture<'_, parquet::errors::Result<Bytes>> {
+        async move { ChunkReader::get_bytes(self, range.start, (range.end - range.start) as usize) }
+            .boxed()
+    }
+
+    fn get_metadata<'a>(
+        &'a mut self,
+        _options: Option<&'a parquet::arrow::arrow_reader::ArrowReaderOptions>,
+    ) -> BoxFuture<'a, parquet::errors::Result<Arc<ParquetMetaData>>> {
+        async move {
+            let metadata = ParquetMetaDataReader::new()
+                .with_page_indexes(true)
+                .parse_and_finish(self)?;
+            Ok(Arc::new(metadata))
+        }
+        .boxed()
     }
 }
 

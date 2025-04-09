@@ -8,7 +8,7 @@ use pyo3_arrow::export::{Arro3RecordBatchReader, Arro3Schema};
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
-use crate::utils::{FileReader, FileWriter};
+use crate::source::{FileWriter, SyncReader};
 
 /// Infer a JSON file's schema
 #[pyfunction]
@@ -18,7 +18,7 @@ use crate::utils::{FileReader, FileWriter};
     max_records=None,
 ))]
 pub fn infer_json_schema(
-    file: FileReader,
+    file: SyncReader,
     max_records: Option<usize>,
 ) -> PyArrowResult<Arro3Schema> {
     let buf_file = BufReader::new(file);
@@ -35,7 +35,7 @@ pub fn infer_json_schema(
     batch_size=None,
 ))]
 pub fn read_json(
-    file: FileReader,
+    file: SyncReader,
     schema: PySchema,
     batch_size: Option<usize>,
 ) -> PyArrowResult<Arro3RecordBatchReader> {

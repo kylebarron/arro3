@@ -1,6 +1,6 @@
 //! Contains the [`Arro3IoError`], the Error returned by most fallible functions in this crate.
 
-use pyo3::exceptions::{PyException, PyValueError};
+use pyo3::exceptions::{PyException, PyIOError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::DowncastError;
 use thiserror::Error;
@@ -12,6 +12,10 @@ pub enum Arro3IoError {
     /// A wrapped [arrow::error::ArrowError]
     #[error(transparent)]
     ArrowError(#[from] arrow_schema::ArrowError),
+
+    /// A wrapped [std::io::Error]
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
 
     /// A wrapped [object_store::Error]
     #[error(transparent)]
@@ -29,10 +33,11 @@ pub enum Arro3IoError {
 impl From<Arro3IoError> for PyErr {
     fn from(error: Arro3IoError) -> Self {
         match error {
-            Arro3IoError::PyErr(err) => err,
             Arro3IoError::ArrowError(err) => PyException::new_err(err.to_string()),
+            Arro3IoError::IOError(err) => PyIOError::new_err(err.to_string()),
             Arro3IoError::ObjectStoreError(err) => PyException::new_err(err.to_string()),
             Arro3IoError::ParquetError(err) => PyException::new_err(err.to_string()),
+            Arro3IoError::PyErr(err) => err,
         }
     }
 }
