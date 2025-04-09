@@ -45,6 +45,7 @@ pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.24", features = ["tokio-runtime"] }
 pyo3-file = "0.12"
 pyo3-object_store = "0.4"
+rayon = "1.10.0"
 thiserror = "1.0.63"
 tokio = { version = "1.40", features = [
     "macros",

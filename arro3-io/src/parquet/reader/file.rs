@@ -177,7 +177,8 @@ impl ParquetFile {
                 let record_batch_reader = options
                     .apply_to_reader_builder(sync_reader_builder, &self.meta)
                     .build()?;
-                Ok(PyRecordBatchReader::new(Box::new(record_batch_reader)).into())
+                record_batch_reader
+                    .Ok(PyRecordBatchReader::new(Box::new(record_batch_reader)).into())
             }
             ParquetSource::Async(async_source) => {
                 let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
@@ -195,6 +196,36 @@ impl ParquetFile {
 
     #[pyo3(signature = (**kwargs))]
     fn read_async(&self, kwargs: Option<PyParquetOptions>) -> Arro3IoResult<PyRecordBatchStream> {
+        let options = kwargs.unwrap_or_default();
+        match &self.source {
+            ParquetSource::Sync(sync_source) => {
+                let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
+                    Box::new(sync_source.try_clone()?) as _,
+                    self.meta.clone(),
+                );
+                let record_batch_stream = options
+                    .apply_to_reader_builder(async_reader_builder, &self.meta)
+                    .build()?;
+                Ok(PyRecordBatchStream::new(record_batch_stream))
+            }
+            ParquetSource::Async(async_source) => {
+                let async_reader_builder = ParquetRecordBatchStreamBuilder::new_with_metadata(
+                    Box::new(async_source.clone()) as _,
+                    self.meta.clone(),
+                );
+                let record_batch_stream = options
+                    .apply_to_reader_builder(async_reader_builder, &self.meta)
+                    .build()?;
+                Ok(PyRecordBatchStream::new(record_batch_stream))
+            }
+        }
+    }
+
+    #[pyo3(signature = (**kwargs))]
+    fn read_table_async(
+        &self,
+        kwargs: Option<PyParquetOptions>,
+    ) -> Arro3IoResult<PyRecordBatchStream> {
         let options = kwargs.unwrap_or_default();
         match &self.source {
             ParquetSource::Sync(sync_source) => {
