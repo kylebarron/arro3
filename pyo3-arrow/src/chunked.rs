@@ -1,9 +1,10 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat;
 use arrow_array::{Array, ArrayRef};
+use arrow_cast::cast;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_select::concat::concat;
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -382,7 +383,7 @@ impl PyChunkedArray {
         let new_chunks = self
             .chunks
             .iter()
-            .map(|chunk| arrow::compute::cast(&chunk, new_field.data_type()))
+            .map(|chunk| cast(&chunk, new_field.data_type()))
             .collect::<Result<Vec<_>, ArrowError>>()?;
         Ok(PyChunkedArray::try_new(new_chunks, new_field)?.into())
     }

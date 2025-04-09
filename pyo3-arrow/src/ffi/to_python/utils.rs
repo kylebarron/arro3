@@ -1,10 +1,9 @@
 use std::ffi::CString;
 use std::sync::Arc;
 
-use arrow::compute::can_cast_types;
-use arrow::compute::kernels::cast;
-use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
+use arrow_array::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::Array;
+use arrow_cast::{can_cast_types, cast};
 use arrow_schema::{ArrowError, Field, FieldRef};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple};

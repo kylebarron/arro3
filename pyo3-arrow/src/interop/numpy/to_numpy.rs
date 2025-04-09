@@ -1,5 +1,5 @@
-use arrow::array::AsArray;
-use arrow::datatypes::*;
+use arrow_array::cast::AsArray;
+use arrow_array::types::*;
 use arrow_array::Array;
 use arrow_schema::DataType;
 use numpy::ToPyArray;

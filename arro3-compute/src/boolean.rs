@@ -12,7 +12,7 @@ use pyo3_arrow::{PyArray, PyArrayReader};
 pub fn is_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
     match input {
         AnyArray::Array(input) => {
-            let out = arrow::compute::is_null(input.as_ref())?;
+            let out = arrow_arith::boolean::is_null(input.as_ref())?;
             Ok(PyArray::from_array_ref(Arc::new(out))
                 .to_arro3(py)?
                 .unbind())
@@ -22,7 +22,7 @@ pub fn is_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             let out_field = Field::new("", DataType::Boolean, true);
 
             let iter = input.into_iter().map(move |input| {
-                let out = arrow::compute::is_null(&input?)?;
+                let out = arrow_arith::boolean::is_null(&input?)?;
                 Ok(Arc::new(out) as ArrayRef)
             });
             Ok(
@@ -38,7 +38,7 @@ pub fn is_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
 pub fn is_not_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
     match input {
         AnyArray::Array(input) => {
-            let out = arrow::compute::is_not_null(input.as_ref())?;
+            let out = arrow_arith::boolean::is_not_null(input.as_ref())?;
             Ok(PyArray::from_array_ref(Arc::new(out))
                 .to_arro3(py)?
                 .unbind())
@@ -48,7 +48,7 @@ pub fn is_not_null(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
             let out_field = Field::new("", DataType::Boolean, true);
 
             let iter = input.into_iter().map(move |input| {
-                let out = arrow::compute::is_not_null(&input?)?;
+                let out = arrow_arith::boolean::is_not_null(&input?)?;
                 Ok(Arc::new(out) as ArrayRef)
             });
             Ok(

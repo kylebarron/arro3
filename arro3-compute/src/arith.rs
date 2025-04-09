@@ -1,4 +1,4 @@
-use arrow::compute::kernels::numeric;
+use arrow_arith::numeric;
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::input::AnyDatum;

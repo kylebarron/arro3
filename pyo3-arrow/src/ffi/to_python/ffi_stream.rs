@@ -3,7 +3,6 @@
 //! This is derived from
 //! <https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs>
 
-use arrow::ffi_stream::FFI_ArrowArrayStream;
 use std::ptr::addr_of;
 use std::{
     convert::TryFrom,
@@ -11,9 +10,10 @@ use std::{
     os::raw::{c_char, c_int, c_void},
 };
 
-use arrow::array::Array;
-use arrow::error::ArrowError;
-use arrow::ffi::*;
+use arrow_array::ffi::*;
+use arrow_array::ffi_stream::FFI_ArrowArrayStream;
+use arrow_array::Array;
+use arrow_schema::ArrowError;
 
 use crate::ffi::to_python::chunked::ArrayReader;
 

@@ -1,7 +1,7 @@
 use std::io::BufReader;
 
-use arrow::json::writer::{JsonArray, LineDelimited};
-use arrow::json::{ReaderBuilder, WriterBuilder};
+use arrow_json::writer::{JsonArray, LineDelimited};
+use arrow_json::{ReaderBuilder, WriterBuilder};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::{Arro3RecordBatchReader, Arro3Schema};
@@ -22,7 +22,7 @@ pub fn infer_json_schema(
     max_records: Option<usize>,
 ) -> PyArrowResult<Arro3Schema> {
     let buf_file = BufReader::new(file);
-    let (schema, _records_read) = arrow::json::reader::infer_json_schema(buf_file, max_records)?;
+    let (schema, _records_read) = arrow_json::reader::infer_json_schema(buf_file, max_records)?;
     Ok(schema.into())
 }
 

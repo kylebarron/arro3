@@ -11,7 +11,7 @@ use thiserror::Error;
 pub enum Arro3IoError {
     /// A wrapped [arrow::error::ArrowError]
     #[error(transparent)]
-    ArrowError(#[from] arrow::error::ArrowError),
+    ArrowError(#[from] arrow_schema::ArrowError),
 
     /// A wrapped [std::io::Error]
     #[error(transparent)]

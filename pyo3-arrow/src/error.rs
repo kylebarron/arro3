@@ -11,7 +11,7 @@ use thiserror::Error;
 pub enum PyArrowError {
     /// A wrapped [arrow::error::ArrowError]
     #[error(transparent)]
-    ArrowError(#[from] arrow::error::ArrowError),
+    ArrowError(#[from] arrow_schema::ArrowError),
 
     /// A wrapped [PyErr]
     #[error(transparent)]

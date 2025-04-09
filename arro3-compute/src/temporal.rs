@@ -60,23 +60,23 @@ impl<'a> FromPyObject<'a> for DatePart {
     }
 }
 
-impl From<DatePart> for arrow::compute::DatePart {
+impl From<DatePart> for arrow_arith::temporal::DatePart {
     fn from(value: DatePart) -> Self {
         match value {
-            DatePart::Quarter => arrow::compute::DatePart::Quarter,
-            DatePart::Year => arrow::compute::DatePart::Year,
-            DatePart::Month => arrow::compute::DatePart::Month,
-            DatePart::Week => arrow::compute::DatePart::Week,
-            DatePart::Day => arrow::compute::DatePart::Day,
-            DatePart::DayOfWeekSunday0 => arrow::compute::DatePart::DayOfWeekSunday0,
-            DatePart::DayOfWeekMonday0 => arrow::compute::DatePart::DayOfWeekMonday0,
-            DatePart::DayOfYear => arrow::compute::DatePart::DayOfYear,
-            DatePart::Hour => arrow::compute::DatePart::Hour,
-            DatePart::Minute => arrow::compute::DatePart::Minute,
-            DatePart::Second => arrow::compute::DatePart::Second,
-            DatePart::Millisecond => arrow::compute::DatePart::Millisecond,
-            DatePart::Microsecond => arrow::compute::DatePart::Microsecond,
-            DatePart::Nanosecond => arrow::compute::DatePart::Nanosecond,
+            DatePart::Quarter => arrow_arith::temporal::DatePart::Quarter,
+            DatePart::Year => arrow_arith::temporal::DatePart::Year,
+            DatePart::Month => arrow_arith::temporal::DatePart::Month,
+            DatePart::Week => arrow_arith::temporal::DatePart::Week,
+            DatePart::Day => arrow_arith::temporal::DatePart::Day,
+            DatePart::DayOfWeekSunday0 => arrow_arith::temporal::DatePart::DayOfWeekSunday0,
+            DatePart::DayOfWeekMonday0 => arrow_arith::temporal::DatePart::DayOfWeekMonday0,
+            DatePart::DayOfYear => arrow_arith::temporal::DatePart::DayOfYear,
+            DatePart::Hour => arrow_arith::temporal::DatePart::Hour,
+            DatePart::Minute => arrow_arith::temporal::DatePart::Minute,
+            DatePart::Second => arrow_arith::temporal::DatePart::Second,
+            DatePart::Millisecond => arrow_arith::temporal::DatePart::Millisecond,
+            DatePart::Microsecond => arrow_arith::temporal::DatePart::Microsecond,
+            DatePart::Nanosecond => arrow_arith::temporal::DatePart::Nanosecond,
         }
     }
 }
@@ -85,7 +85,7 @@ impl From<DatePart> for arrow::compute::DatePart {
 pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<PyObject> {
     match input {
         AnyArray::Array(input) => {
-            let out = arrow::compute::date_part(input.as_ref(), part.into())?;
+            let out = arrow_arith::temporal::date_part(input.as_ref(), part.into())?;
             Ok(PyArray::from_array_ref(out).to_arro3(py)?.unbind())
         }
         AnyArray::Stream(stream) => {
@@ -95,7 +95,7 @@ pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<P
 
             let iter = reader
                 .into_iter()
-                .map(move |array| arrow::compute::date_part(array?.as_ref(), part));
+                .map(move |array| arrow_arith::temporal::date_part(array?.as_ref(), part));
             Ok(
                 PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
                     .to_arro3(py)?

@@ -1,4 +1,4 @@
-use arrow::array::AsArray;
+use arrow_array::cast::AsArray;
 use arrow_schema::{ArrowError, DataType};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -19,7 +19,7 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                     "Expected boolean array for predicate".to_string(),
                 ))?;
 
-            let filtered = arrow::compute::filter(values.as_ref(), predicate)?;
+            let filtered = arrow_select::filter::filter(values.as_ref(), predicate)?;
             Ok(PyArray::new(filtered, values_field).to_arro3(py)?.unbind())
         }
         (AnyArray::Stream(values), AnyArray::Stream(predicate)) => {
@@ -42,7 +42,7 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                 .map(move |(values, predicate)| {
                     let predicate_arr = predicate?;
                     let filtered =
-                        arrow::compute::filter(values?.as_ref(), predicate_arr.as_boolean())?;
+                        arrow_select::filter::filter(values?.as_ref(), predicate_arr.as_boolean())?;
                     Ok(filtered)
                 });
             Ok(
