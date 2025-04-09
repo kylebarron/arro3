@@ -1,10 +1,11 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::array::AsArray;
-use arrow::compute::{concat_batches, take_record_batch};
+use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
+use arrow_select::concat::concat_batches;
+use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;

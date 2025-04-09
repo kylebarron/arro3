@@ -21,10 +21,12 @@ buffer_protocol = []
 [dependencies]
 chrono = "0.4.39"
 
-arrow-array = "54"
+arrow-array = { version = "54", features = ["chrono-tz", "ffi"] }
 arrow-buffer = "54"
+arrow-cast = "54"
+arrow-data = "54"
 arrow-schema = "54"
-arrow = { version = "54", features = ["ffi", "chrono-tz"] }
+arrow-select = "54"
 pyo3 = { version = "0.24", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"

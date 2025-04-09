@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
-use arrow::array::ArrayData;
-use arrow::datatypes::Field;
-use arrow::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
-use arrow::ffi_stream::FFI_ArrowArrayStream;
+use arrow_array::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
+use arrow_array::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::{make_array, Array, ArrayRef, StructArray};
-use arrow_schema::DataType;
+use arrow_data::ArrayData;
+use arrow_schema::{DataType, Field};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple};
@@ -131,7 +130,7 @@ pub(crate) fn import_array_pycapsules(
     let schema_ptr = unsafe { schema_capsule.reference::<FFI_ArrowSchema>() };
     let array = unsafe { FFI_ArrowArray::from_raw(array_capsule.pointer() as _) };
 
-    let array_data = unsafe { arrow::ffi::from_ffi(array, schema_ptr) }
+    let array_data = unsafe { arrow_array::ffi::from_ffi(array, schema_ptr) }
         .map_err(|err| PyTypeError::new_err(err.to_string()))?;
     let field = Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
     let (array, data_len) = our_make_array(array_data);

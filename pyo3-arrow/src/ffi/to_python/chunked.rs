@@ -1,6 +1,5 @@
-use arrow::datatypes::FieldRef;
-use arrow::error::ArrowError;
 use arrow_array::ArrayRef;
+use arrow_schema::{ArrowError, FieldRef};
 
 /// Trait for types that can read `ArrayRef`'s.
 ///
