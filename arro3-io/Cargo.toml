@@ -46,5 +46,6 @@ pyo3-async-runtimes = { workspace = true, features = [
 ], optional = true }
 pyo3-file = { workspace = true }
 pyo3-object_store = { workspace = true, optional = true }
+rayon = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

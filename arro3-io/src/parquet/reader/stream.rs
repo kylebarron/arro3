@@ -7,9 +7,12 @@ use pyo3::exceptions::{PyStopAsyncIteration, PyStopIteration};
 use pyo3::prelude::*;
 use pyo3_arrow::export::{Arro3RecordBatch, Arro3Table};
 use pyo3_arrow::PyTable;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::ThreadPool;
 use tokio::sync::Mutex;
 
 use crate::error::Arro3IoError;
+use crate::parquet::reader::thread_pool::get_default_pool;
 
 #[pyclass(name = "RecordBatchStream", frozen)]
 pub(crate) struct PyRecordBatchStream {
@@ -41,8 +44,12 @@ impl PyRecordBatchStream {
     }
 
     fn collect_async<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        let pool = get_default_pool(py)?.clone();
         let stream = self.stream.clone();
-        pyo3_async_runtimes::tokio::future_into_py(py, collect_stream(stream, self.schema.clone()))
+        pyo3_async_runtimes::tokio::future_into_py(
+            py,
+            collect_stream(stream, self.schema.clone(), pool),
+        )
     }
 }
 
@@ -69,16 +76,30 @@ async fn next_stream(
 async fn collect_stream(
     stream: Arc<Mutex<ParquetRecordBatchStream<Box<dyn AsyncFileReader + 'static>>>>,
     schema: SchemaRef,
+    pool: Arc<ThreadPool>,
 ) -> PyResult<Arro3Table> {
     let mut stream = stream.lock().await;
-    let mut batches: Vec<_> = vec![];
-    loop {
-        match stream.next().await {
-            Some(Ok(batch)) => {
-                batches.push(batch);
-            }
-            Some(Err(err)) => return Err(Arro3IoError::ParquetError(err).into()),
-            None => return Ok(PyTable::try_new(batches, schema)?.into()),
-        };
+
+    let mut readers = vec![];
+    while let Some(reader) = stream
+        .next_row_group()
+        .await
+        .map_err(Arro3IoError::ParquetError)?
+    {
+        readers.push(reader);
     }
+
+    let batches = pool.install(|| {
+        let batches = readers
+            .into_par_iter()
+            .map(|r| r.collect::<Result<Vec<_>, _>>())
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(Arro3IoError::ArrowError)?
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>();
+        Ok::<_, PyErr>(batches)
+    })?;
+
+    Ok(PyTable::try_new(batches, schema)?.into())
 }
