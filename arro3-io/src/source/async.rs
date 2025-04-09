@@ -48,7 +48,7 @@ pub(crate) enum AsyncReader {
 }
 
 impl parquet::arrow::async_reader::AsyncFileReader for AsyncReader {
-    fn get_bytes(&mut self, range: Range<usize>) -> BoxFuture<'_, parquet::errors::Result<Bytes>> {
+    fn get_bytes(&mut self, range: Range<u64>) -> BoxFuture<'_, parquet::errors::Result<Bytes>> {
         match self {
             // Self::Python(reader) => reader.get_bytes(range),
             Self::ObjectStore(reader) => reader.get_bytes(range),
@@ -57,7 +57,7 @@ impl parquet::arrow::async_reader::AsyncFileReader for AsyncReader {
 
     fn get_byte_ranges(
         &mut self,
-        ranges: Vec<Range<usize>>,
+        ranges: Vec<Range<u64>>,
     ) -> BoxFuture<'_, parquet::errors::Result<Vec<Bytes>>> {
         match self {
             // Self::Python(reader) => reader.get_byte_ranges(ranges),
@@ -65,10 +65,13 @@ impl parquet::arrow::async_reader::AsyncFileReader for AsyncReader {
         }
     }
 
-    fn get_metadata(&mut self) -> BoxFuture<'_, parquet::errors::Result<Arc<ParquetMetaData>>> {
+    fn get_metadata<'a>(
+        &'a mut self,
+        options: Option<&'a parquet::arrow::arrow_reader::ArrowReaderOptions>,
+    ) -> BoxFuture<'a, parquet::errors::Result<Arc<ParquetMetaData>>> {
         match self {
             // Self::Python(reader) => reader.get_metadata(),
-            Self::ObjectStore(reader) => reader.get_metadata(),
+            Self::ObjectStore(reader) => reader.get_metadata(options),
         }
     }
 }

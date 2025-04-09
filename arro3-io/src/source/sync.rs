@@ -121,17 +121,19 @@ impl ChunkReader for SyncReader {
 impl AsyncFileReader for SyncReader {
     fn get_bytes(
         &mut self,
-        range: std::ops::Range<usize>,
+        range: std::ops::Range<u64>,
     ) -> BoxFuture<'_, parquet::errors::Result<Bytes>> {
-        async move { ChunkReader::get_bytes(self, range.start as u64, range.end - range.start) }
+        async move { ChunkReader::get_bytes(self, range.start, (range.end - range.start) as usize) }
             .boxed()
     }
 
-    fn get_metadata(&mut self) -> BoxFuture<'_, parquet::errors::Result<Arc<ParquetMetaData>>> {
+    fn get_metadata<'a>(
+        &'a mut self,
+        _options: Option<&'a parquet::arrow::arrow_reader::ArrowReaderOptions>,
+    ) -> BoxFuture<'a, parquet::errors::Result<Arc<ParquetMetaData>>> {
         async move {
             let metadata = ParquetMetaDataReader::new()
-                .with_column_indexes(true)
-                .with_offset_indexes(true)
+                .with_page_indexes(true)
                 .parse_and_finish(self)?;
             Ok(Arc::new(metadata))
         }
