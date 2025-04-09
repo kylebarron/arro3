@@ -20,12 +20,13 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow = { version = "54", features = ["ffi"] }
-arrow-array = "54"
+arrow-arith = "54"
+arrow-array = { version = "54", features = ["ffi"] }
 arrow-buffer = "54"
 arrow-cast = "54"
 arrow-csv = "54"
 arrow-ipc = { version = "54", features = ["lz4", "zstd"] }
+arrow-json = "54"
 arrow-schema = "54"
 arrow-select = "54"
 bytes = "1.7.0"

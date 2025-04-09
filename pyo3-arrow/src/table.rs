@@ -1,11 +1,11 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat_batches;
-use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
+use arrow_array::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
 use arrow_array::{RecordBatch, RecordBatchIterator};
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
+use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;

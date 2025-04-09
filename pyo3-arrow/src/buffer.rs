@@ -6,7 +6,7 @@ use std::os::raw::c_int;
 use std::ptr::NonNull;
 use std::sync::Arc;
 
-use arrow::array::BooleanBuilder;
+use arrow_array::builder::BooleanBuilder;
 use arrow_array::{
     ArrayRef, FixedSizeListArray, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array,
     Int8Array, UInt16Array, UInt32Array, UInt64Array, UInt8Array,

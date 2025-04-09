@@ -2,11 +2,12 @@ use std::fmt::Display;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use arrow::array::AsArray;
-use arrow::datatypes::*;
+use arrow_array::cast::AsArray;
 use arrow_array::timezone::Tz;
+use arrow_array::types::*;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
-use arrow_schema::{ArrowError, DataType, FieldRef};
+use arrow_cast::cast;
+use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
@@ -407,7 +408,7 @@ impl PyScalar {
 
     fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Scalar> {
         let new_field = target_type.into_inner();
-        let new_array = arrow::compute::cast(&self.array, new_field.data_type())?;
+        let new_array = cast(&self.array, new_field.data_type())?;
         Ok(PyScalar::try_new(new_array, new_field).unwrap().into())
     }
 

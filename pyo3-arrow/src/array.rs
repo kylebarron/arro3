@@ -1,8 +1,7 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat;
-use arrow::datatypes::{
+use arrow_array::types::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
     UInt64Type, UInt8Type,
 };
@@ -10,7 +9,10 @@ use arrow_array::{
     Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
+use arrow_cast::cast;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_select::concat::concat;
+use arrow_select::take::take;
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::prelude::*;
@@ -246,7 +248,7 @@ impl PyArray {
 
     #[cfg(feature = "buffer_protocol")]
     fn buffer(&self) -> crate::buffer::PyArrowBuffer {
-        use arrow::array::AsArray;
+        use arrow_array::cast::AsArray;
 
         match self.array.data_type() {
             DataType::Int64 => {
@@ -367,7 +369,7 @@ impl PyArray {
 
     fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Array> {
         let new_field = target_type.into_inner();
-        let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
+        let new_array = cast(self.as_ref(), new_field.data_type())?;
         Ok(PyArray::new(new_array, new_field).into())
     }
 
@@ -395,7 +397,7 @@ impl PyArray {
     }
 
     fn take(&self, indices: PyArray) -> PyArrowResult<Arro3Array> {
-        let new_array = arrow::compute::take(self.as_ref(), indices.as_ref(), None)?;
+        let new_array = take(self.as_ref(), indices.as_ref(), None)?;
         Ok(PyArray::new(new_array, self.field.clone()).into())
     }
 

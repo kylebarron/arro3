@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
-use arrow::array::{AsArray, GenericByteDictionaryBuilder, PrimitiveDictionaryBuilder};
-use arrow::datatypes::{
+use arrow_array::builder::{GenericByteDictionaryBuilder, PrimitiveDictionaryBuilder};
+use arrow_array::cast::AsArray;
+use arrow_array::downcast_primitive_array;
+use arrow_array::types::{
     BinaryType, ByteArrayType, Int32Type, LargeBinaryType, LargeUtf8Type, Utf8Type,
 };
-use arrow::downcast_primitive_array;
 use arrow_array::{ArrayRef, ArrowPrimitiveType, GenericByteArray, PrimitiveArray};
 use arrow_schema::{ArrowError, DataType, Field};
 use pyo3::prelude::*;

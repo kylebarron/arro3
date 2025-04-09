@@ -1,8 +1,7 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::datatypes::DataType;
-use arrow_schema::{Field, IntervalUnit, TimeUnit};
+use arrow_schema::{DataType, Field, IntervalUnit, TimeUnit};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
