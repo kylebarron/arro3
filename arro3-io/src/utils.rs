@@ -30,8 +30,8 @@ impl<'py> FromPyObject<'py> for FileReader {
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::open(path)?))
         } else {
-            Ok(Self::FileLike(PyFileLikeObject::with_requirements(
-                ob.clone().unbind(),
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                ob.clone(),
                 true,
                 false,
                 true,
@@ -119,8 +119,8 @@ impl<'py> FromPyObject<'py> for FileWriter {
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::create(path)?))
         } else {
-            Ok(Self::FileLike(PyFileLikeObject::with_requirements(
-                ob.clone().unbind(),
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                ob.clone(),
                 false,
                 true,
                 true,
