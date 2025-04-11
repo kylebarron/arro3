@@ -19,15 +19,12 @@ default = ["buffer_protocol"]
 buffer_protocol = []
 
 [dependencies]
-arrow-array = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26", features = [
-    "chrono-tz",
-    "ffi",
-] }
-arrow-buffer = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26" }
-arrow-cast = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26" }
-arrow-data = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26" }
-arrow-schema = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26" }
-arrow-select = { git = "https://github.com/apache/arrow-rs", rev = "9322547590ab32efeff8c0486e4a3a2cb5887a26" }
+arrow-array = { version = "55", features = ["chrono-tz", "ffi"] }
+arrow-buffer = "55"
+arrow-cast = "55"
+arrow-data = "55"
+arrow-schema = "55"
+arrow-select = "55"
 pyo3 = { version = "0.24", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
