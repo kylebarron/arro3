@@ -645,7 +645,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-arrow"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",

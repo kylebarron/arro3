@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.0] - 2025-04-11
+
+- Bump to arrow 55.
+- Minimize arrow crate dependency surface (#318). Don't depend on `arrow`; instead depend on individual arrow crates for a smaller dependency tree and faster compile times.
+
 ## [0.8.0] - 2025-03-17
 
 ### What's Changed
