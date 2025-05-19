@@ -57,7 +57,7 @@ impl PyRecordBatch {
                 let columns = struct_array.columns().to_vec();
 
                 // Special cast to handle zero-column RecordBatches with positive length
-                let batch = if array.len() == 0 && data_len > 0 {
+                let batch = if array.is_empty() && data_len > 0 {
                     RecordBatch::try_new_with_options(
                         Arc::new(schema),
                         columns,

@@ -36,8 +36,8 @@ numpy = "0.24"
 object_store = "0.12"
 parquet = "55"
 pyo3 = { version = "0.24", features = ["macros", "indexmap"] }
-# pyo3-arrow = "0.8"
-pyo3-arrow = { path = "./pyo3-arrow" }
+pyo3-arrow = "0.9"
+# pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.24", features = ["tokio-runtime"] }
 pyo3-file = "0.12"
 pyo3-object_store = "0.2"
