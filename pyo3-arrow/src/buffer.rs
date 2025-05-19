@@ -556,14 +556,18 @@ impl AnyBufferProtocol {
             return Err(PyValueError::new_err("Buffer is not C contiguous").into());
         }
 
-        if self.shape()?.iter().any(|s| *s == 0) {
+        if self.shape()?.contains(&0) {
             return Err(
                 PyValueError::new_err("0-length dimension not currently supported.").into(),
             );
         }
 
-        if self.strides()?.iter().any(|s| *s == 0) {
-            return Err(PyValueError::new_err("Non-zero strides not currently supported.").into());
+        if self.strides()?.iter().any(|s| *s != 1) {
+            return Err(PyValueError::new_err(format!(
+                "strides other than 1 not supported, got: {:?} ",
+                self.strides()
+            ))
+            .into());
         }
 
         Ok(())
