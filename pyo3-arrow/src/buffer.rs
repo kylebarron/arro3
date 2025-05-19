@@ -535,22 +535,6 @@ impl AnyBufferProtocol {
         Ok(out)
     }
 
-    fn strides(&self) -> PyResult<&[isize]> {
-        let out = match self {
-            Self::UInt8(buf) => buf.inner()?.strides(),
-            Self::UInt16(buf) => buf.inner()?.strides(),
-            Self::UInt32(buf) => buf.inner()?.strides(),
-            Self::UInt64(buf) => buf.inner()?.strides(),
-            Self::Int8(buf) => buf.inner()?.strides(),
-            Self::Int16(buf) => buf.inner()?.strides(),
-            Self::Int32(buf) => buf.inner()?.strides(),
-            Self::Int64(buf) => buf.inner()?.strides(),
-            Self::Float32(buf) => buf.inner()?.strides(),
-            Self::Float64(buf) => buf.inner()?.strides(),
-        };
-        Ok(out)
-    }
-
     fn validate_buffer(&self) -> PyArrowResult<()> {
         if !self.is_c_contiguous()? {
             return Err(PyValueError::new_err("Buffer is not C contiguous").into());
@@ -562,13 +546,8 @@ impl AnyBufferProtocol {
             );
         }
 
-        if self.strides()?.iter().any(|s| *s != 1) {
-            return Err(PyValueError::new_err(format!(
-                "strides other than 1 not supported, got: {:?} ",
-                self.strides()
-            ))
-            .into());
-        }
+        // Note: since we already checked for C-contiguous, we don't need to check for strides to
+        // be contiguous.
 
         Ok(())
     }

@@ -1,10 +1,7 @@
-use std::sync::Arc;
-
 use arrow_array::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
 use arrow_array::ffi_stream::FFI_ArrowArrayStream;
-use arrow_array::{make_array, Array, ArrayRef, StructArray};
-use arrow_data::ArrayData;
-use arrow_schema::{DataType, Field};
+use arrow_array::{make_array, ArrayRef};
+use arrow_schema::Field;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple};
@@ -72,58 +69,10 @@ pub(crate) fn call_arrow_c_array<'py>(
     Ok((schema_capsule, array_capsule))
 }
 
-/// A custom implementation of ArrayData -> StructArray to work around the upstream bug:
-/// https://github.com/apache/arrow-rs/issues/6151
-///
-/// We return `(StructArray, length of ArrayData)` because we want to handle the edge case of a
-/// RecordBatch with zero columns but positive length.
-fn make_struct(data: ArrayData) -> (StructArray, usize) {
-    let arrays: Vec<ArrayRef> = data
-        .child_data()
-        .iter()
-        .map(|cd| our_make_array(cd.clone()).0)
-        .collect();
-    let data_type = data.data_type().clone();
-    let nulls = data.nulls().cloned();
-
-    let struct_fields = match data_type {
-        DataType::Struct(struct_fields) => struct_fields,
-        _ => panic!(),
-    };
-
-    let struct_array = StructArray::new(struct_fields, arrays, nulls);
-
-    if struct_array.len() == 0 && !data.is_empty() {
-        // This is a RecordBatch with no columns but positive length
-        // slicing will not work on this, with an error of
-        // `the length + offset of the sliced StructArray cannot exceed the existing length`
-        (struct_array, data.len())
-    } else {
-        // We _always_ need to slice the incoming struct array, not just when the offset is positive,
-        // because the array length is otherwise also lost.
-        // https://github.com/apache/arrow-rs/issues/6151#issuecomment-2256749153
-        (struct_array.slice(data.offset(), data.len()), data.len())
-    }
-}
-
-fn our_make_array(data: ArrayData) -> (ArrayRef, usize) {
-    match data.data_type() {
-        DataType::Struct(_) => {
-            let (arr, data_len) = make_struct(data);
-            (Arc::new(arr), data_len)
-        }
-        _ => {
-            let arr = make_array(data);
-            let len = arr.len();
-            (arr, len)
-        }
-    }
-}
-
 pub(crate) fn import_array_pycapsules(
     schema_capsule: &Bound<PyCapsule>,
     array_capsule: &Bound<PyCapsule>,
-) -> PyResult<(ArrayRef, Field, usize)> {
+) -> PyResult<(ArrayRef, Field)> {
     validate_pycapsule_name(schema_capsule, "arrow_schema")?;
     validate_pycapsule_name(array_capsule, "arrow_array")?;
 
@@ -133,8 +82,8 @@ pub(crate) fn import_array_pycapsules(
     let array_data = unsafe { arrow_array::ffi::from_ffi(array, schema_ptr) }
         .map_err(|err| PyTypeError::new_err(err.to_string()))?;
     let field = Field::try_from(schema_ptr).map_err(|err| PyTypeError::new_err(err.to_string()))?;
-    let (array, data_len) = our_make_array(array_data);
-    Ok((array, field, data_len))
+    let array = make_array(array_data);
+    Ok((array, field))
 }
 
 /// Import `__arrow_c_stream__` across Python boundary.
