@@ -487,22 +487,6 @@ impl AnyBufferProtocol {
         Ok(out)
     }
 
-    fn item_size(&self) -> PyResult<usize> {
-        let out = match self {
-            Self::UInt8(buf) => buf.inner()?.item_size(),
-            Self::UInt16(buf) => buf.inner()?.item_size(),
-            Self::UInt32(buf) => buf.inner()?.item_size(),
-            Self::UInt64(buf) => buf.inner()?.item_size(),
-            Self::Int8(buf) => buf.inner()?.item_size(),
-            Self::Int16(buf) => buf.inner()?.item_size(),
-            Self::Int32(buf) => buf.inner()?.item_size(),
-            Self::Int64(buf) => buf.inner()?.item_size(),
-            Self::Float32(buf) => buf.inner()?.item_size(),
-            Self::Float64(buf) => buf.inner()?.item_size(),
-        };
-        Ok(out)
-    }
-
     fn is_c_contiguous(&self) -> PyResult<bool> {
         let out = match self {
             Self::UInt8(buf) => buf.inner()?.is_c_contiguous(),
@@ -551,22 +535,6 @@ impl AnyBufferProtocol {
         Ok(out)
     }
 
-    fn strides(&self) -> PyResult<&[isize]> {
-        let out = match self {
-            Self::UInt8(buf) => buf.inner()?.strides(),
-            Self::UInt16(buf) => buf.inner()?.strides(),
-            Self::UInt32(buf) => buf.inner()?.strides(),
-            Self::UInt64(buf) => buf.inner()?.strides(),
-            Self::Int8(buf) => buf.inner()?.strides(),
-            Self::Int16(buf) => buf.inner()?.strides(),
-            Self::Int32(buf) => buf.inner()?.strides(),
-            Self::Int64(buf) => buf.inner()?.strides(),
-            Self::Float32(buf) => buf.inner()?.strides(),
-            Self::Float64(buf) => buf.inner()?.strides(),
-        };
-        Ok(out)
-    }
-
     fn validate_buffer(&self) -> PyArrowResult<()> {
         if !self.is_c_contiguous()? {
             return Err(PyValueError::new_err("Buffer is not C contiguous").into());
@@ -578,15 +546,8 @@ impl AnyBufferProtocol {
             );
         }
 
-        let item_size = self.item_size()? as isize;
-        if self.strides()?.iter().any(|s| *s != item_size) {
-            return Err(PyValueError::new_err(format!(
-                "strides other than the item size ({}) not supported, got: {:?} ",
-                self.item_size()?,
-                self.strides()?
-            ))
-            .into());
-        }
+        // Note: since we already checked for C-contiguous, we don't need to check for strides to
+        // be contiguous.
 
         Ok(())
     }
