@@ -40,7 +40,7 @@ impl PyRecordBatch {
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field, data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
 
         match field.data_type() {
             DataType::Struct(fields) => {
@@ -56,18 +56,12 @@ impl PyRecordBatch {
 
                 let columns = struct_array.columns().to_vec();
 
-                // Special cast to handle zero-column RecordBatches with positive length
-                let batch = if array.is_empty() && data_len > 0 {
-                    RecordBatch::try_new_with_options(
-                        Arc::new(schema),
-                        columns,
-                        &RecordBatchOptions::new().with_row_count(Some(data_len)),
-                    )
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?
-                } else {
-                    RecordBatch::try_new(Arc::new(schema), columns)
-                        .map_err(|err| PyValueError::new_err(err.to_string()))?
-                };
+                let batch = RecordBatch::try_new_with_options(
+                    Arc::new(schema),
+                    columns,
+                    &RecordBatchOptions::new().with_row_count(Some(array.len())),
+                )
+                .map_err(|err| PyValueError::new_err(err.to_string()))?;
                 Ok(Self::new(batch))
             }
             dt => Err(PyValueError::new_err(format!(
