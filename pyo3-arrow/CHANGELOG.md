@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.10.1] - 2025-05-19
+
+- Remove erroneous checking for array stride when interpreting a Numpy array as an Arrow array.
+
 ## [0.10.0] - 2025-05-19
 
 - Bump to pyo3 0.25.
