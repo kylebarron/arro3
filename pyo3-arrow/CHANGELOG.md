@@ -2,7 +2,8 @@
 
 ## [0.10.1] - 2025-05-19
 
-- Remove erroneous checking for array stride when interpreting a Numpy array as an Arrow array.
+- Fix pyo3-arrow error when importing buffer protocol object. We were incorrectly validating the stride. But since we already checked the buffer to be C-contiguous, we don't need to check for strides again. (Part of #328).
+- Make a workaround to the upstream regression/change in https://github.com/apache/arrow-rs/pull/7247 that caused the test that checks we can import a zero-length record batch to fail. This also makes my code cleaner by utilizing the upstream `make_array` now that we have a fix to https://github.com/apache/arrow-rs/issues/6151 (Part of #328).
 
 ## [0.10.0] - 2025-05-19
 
