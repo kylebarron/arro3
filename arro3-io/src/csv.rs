@@ -8,7 +8,7 @@ use pyo3_arrow::export::{Arro3RecordBatchReader, Arro3Schema};
 use pyo3_arrow::input::AnyRecordBatch;
 use pyo3_arrow::{PyRecordBatchReader, PySchema};
 
-use crate::utils::{FileReader, FileWriter};
+use crate::source::{FileWriter, SyncReader};
 
 /// Infer a CSV file's schema
 #[pyfunction]
@@ -25,7 +25,7 @@ use crate::utils::{FileReader, FileWriter};
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn infer_csv_schema(
-    file: FileReader,
+    file: SyncReader,
     has_header: Option<bool>,
     max_records: Option<usize>,
     delimiter: Option<char>,
@@ -76,7 +76,7 @@ pub fn infer_csv_schema(
 ))]
 #[allow(clippy::too_many_arguments)]
 pub fn read_csv(
-    file: FileReader,
+    file: SyncReader,
     schema: PySchema,
     has_header: Option<bool>,
     batch_size: Option<usize>,

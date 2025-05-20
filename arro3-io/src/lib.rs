@@ -8,7 +8,8 @@ mod error;
 mod ipc;
 mod json;
 mod parquet;
-mod utils;
+mod runtime;
+mod source;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -56,9 +57,10 @@ fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc))?;
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
 
-    m.add_wrapped(wrap_pyfunction!(parquet::read_parquet))?;
-    m.add_wrapped(wrap_pyfunction!(parquet::read_parquet_async))?;
-    m.add_wrapped(wrap_pyfunction!(parquet::write_parquet))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::reader::read_parquet))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::reader::read_parquet_async))?;
+    m.add_wrapped(wrap_pyfunction!(parquet::writer::write_parquet))?;
+    m.add_class::<parquet::reader::ParquetFile>()?;
 
     Ok(())
 }
