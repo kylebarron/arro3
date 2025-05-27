@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
-use crate::export::Arro3DataType;
+use crate::export::{Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_schema_pycapsule;
@@ -260,6 +260,33 @@ impl PyDataType {
             DataType::Dictionary(_key_type, value_type) => {
                 Some(PyDataType::new(*value_type.clone()).into())
             }
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn value_field(&self) -> Option<Arro3Field> {
+        match &self.0 {
+            DataType::FixedSizeList(value_field, _)
+            | DataType::List(value_field)
+            | DataType::LargeList(value_field)
+            | DataType::ListView(value_field)
+            | DataType::LargeListView(value_field) => {
+                Some(PyField::new(value_field.clone()).into())
+            }
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn fields(&self) -> Option<Vec<Arro3Field>> {
+        match &self.0 {
+            DataType::Struct(fields) => Some(
+                fields
+                    .into_iter()
+                    .map(|f| PyField::new(f.clone()).into())
+                    .collect::<Vec<_>>(),
+            ),
             _ => None,
         }
     }

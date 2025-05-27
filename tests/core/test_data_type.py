@@ -8,6 +8,23 @@ def test_value_type_fixed_size_list_type():
     assert list_dt.value_type == value_type
 
 
+def test_value_field_list_type():
+    value_type = DataType.int8()
+    value_field = Field("inner", value_type, nullable=True)
+    list_dt = DataType.list(
+        value_field,
+        2,
+    )
+    assert list_dt.value_field == value_field
+
+
+def test_fields_struct_type():
+    field_foo = Field("foo", DataType.int8(), nullable=True)
+    field_bar = Field("bar", DataType.string(), nullable=False)
+    struct_type = DataType.struct([field_foo, field_bar])
+    assert struct_type.fields == [field_foo, field_bar]
+
+
 @pytest.mark.xfail
 def test_list_data_type_construction_with_dt():
     _ = DataType.list(DataType.int16())

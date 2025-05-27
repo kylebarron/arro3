@@ -1,5 +1,6 @@
 from typing import Literal, Sequence
 
+from ._field import Field
 from .types import ArrowSchemaExportable
 
 class DataType:
@@ -73,6 +74,15 @@ class DataType:
     @property
     def value_type(self) -> DataType | None:
         """The child type, if it exists."""
+
+    @property
+    def value_field(self) -> Field | None:
+        """The child field, if it exists. Only applicable to list types."""
+
+    @property
+    def fields(self) -> Sequence[Field]:
+        """The inner fields, if they exists. Only applicable to Struct type."""
+
     #################
     #### Constructors
     #################
