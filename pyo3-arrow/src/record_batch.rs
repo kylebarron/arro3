@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
+use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
 use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
@@ -19,7 +20,7 @@ use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
-use crate::schema::display_schema;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyField, PySchema};
 
 /// A Python-facing Arrow record batch.
@@ -142,8 +143,14 @@ impl AsRef<RecordBatch> for PyRecordBatch {
 impl Display for PyRecordBatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "arro3.core.RecordBatch")?;
-        writeln!(f, "-----------------")?;
-        display_schema(&self.0.schema(), f)
+        pretty_format_batches_with_options(
+            &[self.0.slice(0, 10.min(self.0.num_rows()))],
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
+        Ok(())
     }
 }
 

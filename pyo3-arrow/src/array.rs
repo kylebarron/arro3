@@ -10,6 +10,7 @@ use arrow_array::{
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_cast::cast;
+use arrow_cast::pretty::pretty_format_columns_with_options;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use arrow_select::concat::concat;
 use arrow_select::take::take;
@@ -30,6 +31,7 @@ use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::scalar::PyScalar;
+use crate::utils::default_repr_options;
 use crate::{PyDataType, PyField};
 
 /// A Python-facing Arrow array.
@@ -155,6 +157,15 @@ impl Display for PyArray {
         write!(f, "arro3.core.Array<")?;
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        pretty_format_columns_with_options(
+            self.field.name(),
+            &[self.array.slice(0, 10.min(self.array.len()))],
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
         Ok(())
     }
 }

@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use arrow_array::{Array, ArrayRef};
 use arrow_cast::cast;
+use arrow_cast::pretty::pretty_format_columns_with_options;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use arrow_select::concat::concat;
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
@@ -20,6 +21,7 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyDataType, PyField, PyScalar};
 
 /// A Python-facing Arrow chunked array.
@@ -255,6 +257,22 @@ impl Display for PyChunkedArray {
         write!(f, "arro3.core.ChunkedArray<")?;
         self.field.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        let head = self
+            .slice(0, 10.min(self.len()))
+            .map_err(|_| std::fmt::Error)?
+            .combine_chunks()
+            .map_err(|_| std::fmt::Error)?
+            .into_inner();
+
+        pretty_format_columns_with_options(
+            self.field.name(),
+            &[head.into_inner().0],
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
         Ok(())
     }
 }

@@ -19,6 +19,7 @@ dev-dependencies = [
     "mkdocs-redirects>=1.2.2",
     "mkdocs>=1.6.1",
     "mkdocstrings[python]>=0.28.3",
+    "pandas-stubs>=2.2.3.250527",
     "pandas>=2.2.3",
     "pip>=24.2",
     "pyarrow>=17.0.0",

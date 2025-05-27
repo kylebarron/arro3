@@ -1,3 +1,4 @@
+use arrow_cast::display::FormatOptions;
 use arrow_schema::Schema;
 
 /// Check whether two schemas are equal
@@ -14,4 +15,11 @@ pub(crate) fn schema_equals(left: &Schema, right: &Schema) -> bool {
                     .data_type()
                     .equals_datatype(right_field.data_type())
         })
+}
+
+pub(crate) fn default_repr_options<'a>() -> FormatOptions<'a> {
+    FormatOptions::new()
+        .with_display_error(true)
+        .with_null("null")
+        .with_types_info(true)
 }
