@@ -2,6 +2,28 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.5.0] - 2025-05-27
+
+### New features :sparkles:
+
+- feat: access value_fields and inner fields by @ion-elgreco in https://github.com/kylebarron/arro3/pull/334
+- feat(arro3-core): Basic data rendering in `__repr__` by @kylebarron in https://github.com/kylebarron/arro3/pull/335
+
+### Bug fixes :bug:
+
+- feat(arro3-core): Make `DataType` hashable by @kylebarron in https://github.com/kylebarron/arro3/pull/336
+- test(arro3-core): Check that `Schema` is iterable by @kylebarron in https://github.com/kylebarron/arro3/pull/338
+
+### Documentation updates :memo:
+
+- Add sphinx interlinking for `ArrowStreamExportable` by @kylebarron in https://github.com/kylebarron/arro3/pull/339
+
+### New Contributors
+
+- @ion-elgreco made their first contribution in https://github.com/kylebarron/arro3/pull/334
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.4.6...py-v0.5.0
+
 ## [0.4.6] - 2025-03-10
 
 ### Bug fixes :bug:
