@@ -20,6 +20,7 @@ crate-type = ["cdylib"]
 [dependencies]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
+arrow-cast = { workspace = true, features = ["prettyprint"] }
 arrow-schema = { workspace = true }
 pyo3-arrow = { workspace = true }
 pyo3 = { workspace = true }

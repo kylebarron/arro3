@@ -54,6 +54,12 @@ impl From<PyArray> for Arro3Array {
     }
 }
 
+impl Arro3Array {
+    pub(crate) fn into_inner(self) -> PyArray {
+        self.0
+    }
+}
+
 impl<'py> IntoPyObject<'py> for Arro3Array {
     type Target = PyAny;
     type Output = Bound<'py, PyAny>;
@@ -325,6 +331,12 @@ impl<'py> IntoPyObject<'py> for Arro3Schema {
 /// `arro3.core.Table` and not the one statically linked from Rust.
 #[derive(Debug)]
 pub struct Arro3Table(PyTable);
+
+impl Arro3Table {
+    pub(crate) fn into_inner(self) -> PyTable {
+        self.0
+    }
+}
 
 impl From<PyTable> for Arro3Table {
     fn from(value: PyTable) -> Self {

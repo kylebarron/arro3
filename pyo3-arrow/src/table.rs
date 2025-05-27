@@ -4,6 +4,7 @@ use std::sync::Arc;
 use arrow_array::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
 use arrow_array::{RecordBatch, RecordBatchIterator};
+use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
@@ -25,8 +26,7 @@ use crate::ffi::to_schema_pycapsule;
 use crate::input::{
     AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
 };
-use crate::schema::display_schema;
-use crate::utils::schema_equals;
+use crate::utils::{default_repr_options, schema_equals};
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
 /// A Python-facing Arrow table.
@@ -206,8 +206,20 @@ impl PyTable {
 impl Display for PyTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "arro3.core.Table")?;
-        writeln!(f, "-----------")?;
-        display_schema(&self.schema, f)
+        let head_table = self
+            .slice(0, 10.min(self.num_rows()))
+            .map_err(|_| std::fmt::Error)?
+            .combine_chunks()
+            .map_err(|_| std::fmt::Error)?;
+
+        pretty_format_batches_with_options(
+            &head_table.into_inner().batches,
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
+        Ok(())
     }
 }
 

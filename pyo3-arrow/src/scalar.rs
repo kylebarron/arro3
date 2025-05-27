@@ -7,6 +7,7 @@ use arrow_array::timezone::Tz;
 use arrow_array::types::*;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_cast::cast;
+use arrow_cast::pretty::pretty_format_columns_with_options;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
@@ -16,6 +17,7 @@ use pyo3::{intern, IntoPyObjectExt};
 use crate::error::PyArrowResult;
 use crate::export::{Arro3DataType, Arro3Field, Arro3Scalar};
 use crate::ffi::to_array_pycapsules;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyField};
 
 /// A Python-facing Arrow scalar
@@ -113,6 +115,15 @@ impl Display for PyScalar {
         write!(f, "arro3.core.Scalar<")?;
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        pretty_format_columns_with_options(
+            self.field.name(),
+            &[self.array.clone()],
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
         Ok(())
     }
 }

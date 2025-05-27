@@ -21,7 +21,7 @@ buffer_protocol = []
 [dependencies]
 arrow-array = { version = "55.1", features = ["chrono-tz", "ffi"] }
 arrow-buffer = "55.1"
-arrow-cast = "55.1"
+arrow-cast = { version = "55.1", features = ["prettyprint"] }
 arrow-data = "55.1"
 arrow-schema = "55.1"
 arrow-select = "55.1"
