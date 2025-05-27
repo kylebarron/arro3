@@ -28,3 +28,13 @@ def test_fields_struct_type():
 @pytest.mark.xfail
 def test_list_data_type_construction_with_dt():
     _ = DataType.list(DataType.int16())
+
+
+def test_hashable():
+    # We should be able to use DataType as a key in a dict
+    _dtype_map = {
+        DataType.uint8(): DataType.int8(),
+        DataType.uint16(): DataType.int16(),
+        DataType.uint32(): DataType.int32(),
+        DataType.uint64(): DataType.int64(),
+    }

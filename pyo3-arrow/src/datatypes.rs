@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
 
 use arrow_schema::{DataType, Field, IntervalUnit, TimeUnit};
@@ -138,6 +139,12 @@ impl PyDataType {
 
     fn __eq__(&self, other: PyDataType) -> bool {
         self.equals(other, false)
+    }
+
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.0.hash(&mut hasher);
+        hasher.finish()
     }
 
     fn __repr__(&self) -> String {
