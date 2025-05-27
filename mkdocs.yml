@@ -48,6 +48,7 @@ watch:
   - docs
 
 theme:
+  language: en
   name: material
   palette:
     # Palette toggle for automatic mode

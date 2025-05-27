@@ -116,6 +116,7 @@ dependencies = [
  "pyo3-file",
  "pyo3-object_store",
  "thiserror 1.0.69",
+ "tokio",
 ]
 
 [[package]]
