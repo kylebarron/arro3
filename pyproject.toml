@@ -24,6 +24,7 @@ dev-dependencies = [
     "pip>=24.2",
     "pyarrow>=17.0.0",
     "pytest>=8.3.3",
+    "mypy>=1.15.0",
 ]
 
 [tool.ruff]
@@ -42,3 +43,9 @@ select = [
     "F401", # Allow unused imports in __init__.py files
     "F403", # unable to detect undefined names
 ]
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = ["pyarrow.*"]
+ignore_missing_imports = true
