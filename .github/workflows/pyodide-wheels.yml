@@ -62,6 +62,7 @@ jobs:
           ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
           source emsdk_env.sh
           cd ..
+          DEFAULT_CROSS_BUILD_ENV_URL="https://github.com/pyodide/pyodide/releases/download/0.28.0a3/xbuildenv-0.28.0a3.tar.bz2" pyodide build
           RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
 
       - name: Get info from built wheel file
