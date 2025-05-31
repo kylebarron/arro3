@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use arrow_array::{Array, ArrayRef};
 use arrow_cast::cast;
-use arrow_cast::pretty::pretty_format_columns_with_options;
+use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use arrow_select::concat::concat;
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
@@ -258,20 +258,20 @@ impl Display for PyChunkedArray {
         self.field.data_type().fmt(f)?;
         writeln!(f, ">")?;
 
-        let head = self
-            .slice(0, 10.min(self.len()))
-            .map_err(|_| std::fmt::Error)?
-            .combine_chunks()
-            .map_err(|_| std::fmt::Error)?
-            .into_inner();
+        let options = default_repr_options();
 
-        pretty_format_columns_with_options(
-            self.field.name(),
-            &[head.into_inner().0],
-            &default_repr_options(),
-        )
-        .map_err(|_| std::fmt::Error)?
-        .fmt(f)?;
+        writeln!(f, "[")?;
+        for chunk in self.chunks.iter().take(5) {
+            writeln!(f, "  [")?;
+            let formatter =
+                ArrayFormatter::try_new(chunk, &options).map_err(|_| std::fmt::Error)?;
+            for i in 0..chunk.len().min(10) {
+                let row = formatter.value(i);
+                writeln!(f, "    {},", row.to_string())?;
+            }
+            writeln!(f, "  ]")?;
+        }
+        writeln!(f, "]")?;
 
         Ok(())
     }

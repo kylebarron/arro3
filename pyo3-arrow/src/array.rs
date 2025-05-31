@@ -10,7 +10,7 @@ use arrow_array::{
     LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_cast::cast;
-use arrow_cast::pretty::pretty_format_columns_with_options;
+use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use arrow_select::concat::concat;
 use arrow_select::take::take;
@@ -158,13 +158,16 @@ impl Display for PyArray {
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
 
-        pretty_format_columns_with_options(
-            self.field.name(),
-            &[self.array.slice(0, 10.min(self.array.len()))],
-            &default_repr_options(),
-        )
-        .map_err(|_| std::fmt::Error)?
-        .fmt(f)?;
+        let options = default_repr_options();
+        let formatter =
+            ArrayFormatter::try_new(self.array.as_ref(), &options).map_err(|_| std::fmt::Error)?;
+
+        writeln!(f, "[")?;
+        for i in 0..self.array.len().min(10) {
+            let row = formatter.value(i);
+            writeln!(f, "  {},", row.to_string())?;
+        }
+        writeln!(f, "]")?;
 
         Ok(())
     }
