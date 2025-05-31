@@ -39,7 +39,9 @@ fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
     m.add_wrapped(wrap_pyfunction!(___version))?;
 
+    #[cfg(feature = "async")]
     pyo3_object_store::register_store_module(py, m, "arro3.io", "store")?;
+    #[cfg(feature = "async")]
     pyo3_object_store::register_exceptions_module(py, m, "arro3.io", "exceptions")?;
 
     m.add_wrapped(wrap_pyfunction!(csv::infer_csv_schema))?;
@@ -57,6 +59,7 @@ fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(ipc::write_ipc_stream))?;
 
     m.add_wrapped(wrap_pyfunction!(parquet::read_parquet))?;
+    #[cfg(feature = "async")]
     m.add_wrapped(wrap_pyfunction!(parquet::read_parquet_async))?;
     m.add_wrapped(wrap_pyfunction!(parquet::write_parquet))?;
 

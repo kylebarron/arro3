@@ -23,6 +23,7 @@ dev-dependencies = [
     "pandas>=2.2.3",
     "pip>=24.2",
     "pyarrow>=17.0.0",
+    "pyodide-build>=0.25.1",
     "pytest>=8.3.3",
 ]
 

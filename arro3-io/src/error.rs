@@ -14,6 +14,7 @@ pub enum Arro3IoError {
     ArrowError(#[from] arrow_schema::ArrowError),
 
     /// A wrapped [object_store::Error]
+    #[cfg(feature = "async")]
     #[error(transparent)]
     ObjectStoreError(#[from] object_store::Error),
 
@@ -31,6 +32,7 @@ impl From<Arro3IoError> for PyErr {
         match error {
             Arro3IoError::PyErr(err) => err,
             Arro3IoError::ArrowError(err) => PyException::new_err(err.to_string()),
+            #[cfg(feature = "async")]
             Arro3IoError::ObjectStoreError(err) => PyException::new_err(err.to_string()),
             Arro3IoError::ParquetError(err) => PyException::new_err(err.to_string()),
         }

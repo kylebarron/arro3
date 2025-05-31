@@ -9,13 +9,13 @@ on:
       python:
         description: "Python version"
         required: true
-        default: "3.12"
+        default: "3.13"
         type: choice
         options:
-          - 3.12
-          - 3.13
-          - 3.14
-          - 3.15
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "3.15"
       pyodide:
         description: "New Pyodide version to build for"
         required: true
@@ -62,7 +62,7 @@ jobs:
           ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
           source emsdk_env.sh
           cd ..
-          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          RUSTUP_TOOLCHAIN=nightly maturin build --release -o dist --target wasm32-unknown-emscripten -i python${{ inputs.python  }} --manifest-path ${{ matrix.module }}/Cargo.toml --no-default-features
 
       - name: Get info from built wheel file
         run: |
