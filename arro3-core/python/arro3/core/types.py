@@ -3,14 +3,14 @@ from __future__ import annotations
 import array as _array
 import mmap
 import sys
-from typing import TYPE_CHECKING, Protocol, Tuple, Union
-
-if sys.version_info >= (3, 12):
-    from collections.abc import Buffer as _Buffer
-else:
-    from typing_extensions import Buffer as _Buffer
+from typing import TYPE_CHECKING, Any, Protocol, Tuple, Union
 
 if TYPE_CHECKING:
+    if sys.version_info >= (3, 12):
+        from collections.abc import Buffer as _Buffer
+    else:
+        from typing_extensions import Buffer as _Buffer
+
     import numpy as np
 
 
@@ -87,10 +87,10 @@ else:
         bytes,
         bytearray,
         memoryview,
-        _array.array,
+        "_array.array[Any]",
         mmap.mmap,
-        "np.ndarray",
-        _Buffer,
+        "np.ndarray[Any, Any]",
+        "_Buffer",
     ]
 
 
