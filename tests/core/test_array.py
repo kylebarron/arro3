@@ -1,3 +1,6 @@
+from datetime import date, datetime
+from textwrap import dedent
+
 import pyarrow as pa
 from arro3.core import Array, DataType, Table
 
@@ -66,3 +69,77 @@ def test_string_view():
     assert Array(arr)[2].as_py() == "baz"
     assert Array(arr)[3].as_py() == "foooooobarrrrrrbazzzzzzzz"
     assert pa.array(Array(arr)) == arr
+
+
+def test_repr():
+    arr = Array([1, 2, 3], DataType.int16())
+    expected = """\
+        arro3.core.Array<Int16>
+        [
+          1,
+          2,
+          3,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array([1.0, 2.0, 3.0], DataType.float64())
+    expected = """\
+        arro3.core.Array<Float64>
+        [
+          1.0,
+          2.0,
+          3.0,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array(["foo", "bar", "baz"], DataType.string())
+    expected = """\
+        arro3.core.Array<Utf8>
+        [
+          foo,
+          bar,
+          baz,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array([b"foo", b"bar", b"baz"], DataType.binary())
+    expected = """\
+        arro3.core.Array<Binary>
+        [
+          666f6f,
+          626172,
+          62617a,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = pa.array(
+        [datetime(2020, 1, 1), datetime(2020, 1, 2)],
+        type=pa.timestamp("us", tz="UTC"),
+    )
+    arr2 = Array.from_arrow(arr)
+    expected = """\
+        arro3.core.Array<Timestamp(Microsecond, Some("UTC"))>
+        [
+          2020-01-01T00:00:00Z,
+          2020-01-02T00:00:00Z,
+        ]
+        """
+    assert repr(arr2) == dedent(expected)
+
+    arr = pa.array(
+        [date(2020, 1, 1), date(2020, 1, 2)],
+        type=pa.date32(),
+    )
+    arr2 = Array.from_arrow(arr)
+    expected = """\
+        arro3.core.Array<Date32>
+        [
+          2020-01-01,
+          2020-01-02,
+        ]
+        """
+    assert repr(arr2) == dedent(expected)
