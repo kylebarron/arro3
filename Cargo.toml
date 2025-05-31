@@ -9,7 +9,7 @@ resolver = "2"
 
 [workspace.package]
 # Package version for arro3-*, not for pyo3-arrow
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 homepage = "https://kylebarron.dev/arro3"

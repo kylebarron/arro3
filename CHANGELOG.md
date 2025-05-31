@@ -2,6 +2,18 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.5.1] - 2025-05-31
+
+### What's Changed
+
+* chore: Use released pyo3-file by @kylebarron in https://github.com/kylebarron/arro3/pull/341
+* feat: Support serializing binary view and string view array types to numpy by @kylebarron in https://github.com/kylebarron/arro3/pull/348
+* fix(arro3-core): Add typing-extensions as a dependency for arro3-core by @kylebarron in https://github.com/kylebarron/arro3/pull/350
+* feat(arro3-core): Improved repr for Array and ChunkedArray by @kylebarron in https://github.com/kylebarron/arro3/pull/351
+* chore: bump dev versions for geoarrow-types and pyarrow by @kylebarron in https://github.com/kylebarron/arro3/pull/352
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.5.0...py-v0.5.1
+
 ## [0.5.0] - 2025-05-27
 
 ### New features :sparkles:
