@@ -54,12 +54,6 @@ impl From<PyArray> for Arro3Array {
     }
 }
 
-impl Arro3Array {
-    pub(crate) fn into_inner(self) -> PyArray {
-        self.0
-    }
-}
-
 impl<'py> IntoPyObject<'py> for Arro3Array {
     type Target = PyAny;
     type Output = Bound<'py, PyAny>;
