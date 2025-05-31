@@ -1,4 +1,3 @@
-import numpy as np
 import pyarrow as pa
 from arro3.core import Array, DataType, Table
 
@@ -41,17 +40,6 @@ def test_constructor_null():
 
     # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
     # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
-
-
-def test_from_numpy():
-    arr = np.array([1, 2, 3, 4], dtype=np.uint8)
-    assert Array.from_numpy(arr).type == DataType.uint8()
-
-    arr = np.array([1, 2, 3, 4], dtype=np.float64)
-    assert Array.from_numpy(arr).type == DataType.float64()
-
-    # arr = np.array([b"1", b"2", b"3"], np.object_)
-    # Array.from_numpy(arr)
 
 
 def test_extension_array_meta_persists():

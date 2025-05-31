@@ -1,6 +1,6 @@
 use arrow_array::cast::AsArray;
 use arrow_array::types::*;
-use arrow_array::Array;
+use arrow_array::{Array, BinaryArrayType, StringArrayType};
 use arrow_schema::DataType;
 use numpy::ToPyArray;
 use pyo3::exceptions::{PyNotImplementedError, PyValueError};
@@ -42,66 +42,12 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
         }
         // For other data types we create Python objects and then create an object-typed numpy
         // array
-        DataType::Binary => {
-            let mut py_bytes = Vec::with_capacity(arr.len());
-            arr.as_binary::<i32>()
-                .iter()
-                .for_each(|x| py_bytes.push(PyBytes::new(py, x.unwrap())));
-            let py_list = PyList::new(py, py_bytes)?;
-            let numpy_mod = py.import(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            numpy_mod.call_method(
-                intern!(py, "array"),
-                PyTuple::new(py, vec![py_list])?,
-                Some(&kwargs),
-            )?
-        }
-        DataType::LargeBinary => {
-            let mut py_bytes = Vec::with_capacity(arr.len());
-            arr.as_binary::<i64>()
-                .iter()
-                .for_each(|x| py_bytes.push(PyBytes::new(py, x.unwrap())));
-            let py_list = PyList::new(py, py_bytes)?;
-            let numpy_mod = py.import(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            numpy_mod.call_method(
-                intern!(py, "array"),
-                PyTuple::new(py, vec![py_list])?,
-                Some(&kwargs),
-            )?
-        }
-        DataType::Utf8 => {
-            let mut py_bytes = Vec::with_capacity(arr.len());
-            arr.as_string::<i32>()
-                .iter()
-                .for_each(|x| py_bytes.push(PyString::new(py, x.unwrap())));
-            let py_list = PyList::new(py, py_bytes)?;
-            let numpy_mod = py.import(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            numpy_mod.call_method(
-                intern!(py, "array"),
-                PyTuple::new(py, vec![py_list])?,
-                Some(&kwargs),
-            )?
-        }
-        DataType::LargeUtf8 => {
-            let mut py_bytes = Vec::with_capacity(arr.len());
-            arr.as_string::<i64>()
-                .iter()
-                .for_each(|x| py_bytes.push(PyString::new(py, x.unwrap())));
-            let py_list = PyList::new(py, py_bytes)?;
-            let numpy_mod = py.import(intern!(py, "numpy"))?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
-            numpy_mod.call_method(
-                intern!(py, "array"),
-                PyTuple::new(py, vec![py_list])?,
-                Some(&kwargs),
-            )?
-        }
+        DataType::Binary => binary_to_numpy(py, arr.as_binary::<i32>())?,
+        DataType::LargeBinary => binary_to_numpy(py, arr.as_binary::<i64>())?,
+        DataType::BinaryView => binary_to_numpy(py, arr.as_binary_view())?,
+        DataType::Utf8 => string_to_numpy(py, arr.as_string::<i32>())?,
+        DataType::LargeUtf8 => string_to_numpy(py, arr.as_string::<i64>())?,
+        DataType::Utf8View => string_to_numpy(py, arr.as_string_view())?,
         dt => {
             return Err(PyNotImplementedError::new_err(format!(
                 "Unsupported type in to_numpy {dt}"
@@ -109,6 +55,42 @@ pub fn to_numpy<'py>(py: Python<'py>, arr: &'py dyn Array) -> PyResult<Bound<'py
         }
     };
     Ok(result)
+}
+
+fn binary_to_numpy<'a>(
+    py: Python<'a>,
+    arr: impl BinaryArrayType<'a>,
+) -> PyResult<Bound<'a, PyAny>> {
+    let mut py_bytes = Vec::with_capacity(arr.len());
+    arr.iter()
+        .for_each(|x| py_bytes.push(PyBytes::new(py, x.unwrap())));
+    let py_list = PyList::new(py, py_bytes)?;
+    let numpy_mod = py.import(intern!(py, "numpy"))?;
+    let kwargs = PyDict::new(py);
+    kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+    numpy_mod.call_method(
+        intern!(py, "array"),
+        PyTuple::new(py, vec![py_list])?,
+        Some(&kwargs),
+    )
+}
+
+fn string_to_numpy<'a>(
+    py: Python<'a>,
+    arr: impl StringArrayType<'a>,
+) -> PyResult<Bound<'a, PyAny>> {
+    let mut py_bytes = Vec::with_capacity(arr.len());
+    arr.iter()
+        .for_each(|x| py_bytes.push(PyString::new(py, x.unwrap())));
+    let py_list = PyList::new(py, py_bytes)?;
+    let numpy_mod = py.import(intern!(py, "numpy"))?;
+    let kwargs = PyDict::new(py);
+    kwargs.set_item("dtype", numpy_mod.getattr(intern!(py, "object_"))?)?;
+    numpy_mod.call_method(
+        intern!(py, "array"),
+        PyTuple::new(py, vec![py_list])?,
+        Some(&kwargs),
+    )
 }
 
 pub fn chunked_to_numpy<'py>(
