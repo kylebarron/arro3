@@ -41,6 +41,18 @@ impl PyArrayReader {
     ///
     /// The reader can only be consumed once. Calling `into_reader`
     pub fn into_reader(self) -> PyResult<Box<dyn ArrayReader + Send>> {
+        self.to_reader()
+    }
+
+    /// Consume this reader and create a [PyChunkedArray] object
+    pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
+        self.to_chunked_array()
+    }
+
+    /// Consume this reader and convert into a [ArrayReader].
+    ///
+    /// The reader can only be consumed once. Calling `into_reader`
+    pub fn to_reader(&self) -> PyResult<Box<dyn ArrayReader + Send>> {
         let stream = self
             .0
             .lock()
@@ -51,7 +63,7 @@ impl PyArrayReader {
     }
 
     /// Consume this reader and create a [PyChunkedArray] object
-    pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
+    pub fn to_chunked_array(&self) -> PyArrowResult<PyChunkedArray> {
         let stream = self
             .0
             .lock()
@@ -105,6 +117,12 @@ impl PyArrayReader {
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
+    }
+}
+
+impl AsRef<Mutex<Option<Box<dyn ArrayReader + Send>>>> for PyArrayReader {
+    fn as_ref(&self) -> &Mutex<Option<Box<dyn ArrayReader + Send>>> {
+        &self.0
     }
 }
 

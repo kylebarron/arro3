@@ -34,10 +34,10 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 
-use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule};
 use crate::{
-    PyArray, PyChunkedArray, PyDataType, PyField, PyRecordBatch, PyRecordBatchReader, PyScalar,
-    PySchema, PyTable,
+    PyArray, PyArrayReader, PyChunkedArray, PyDataType, PyField, PyRecordBatch,
+    PyRecordBatchReader, PyScalar, PySchema, PyTable,
 };
 
 /// A wrapper around a [PyArray] that implements [IntoPyObject] to convert to a runtime-available
@@ -64,6 +64,35 @@ impl<'py> IntoPyObject<'py> for Arro3Array {
         arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             to_array_pycapsules(py, self.0.field().clone(), &self.0.array(), None)?,
+        )
+    }
+}
+
+/// A wrapper around a [PyArrayReader] that implements [IntoPyObject] to convert to a
+/// runtime-available `arro3.core.ArrayReader`.
+///
+/// This ensures that we return data with the **user's** runtime-provided (dynamically-linked)
+/// `arro3.core.ArrayReader` and not the one statically linked from Rust.
+pub struct Arro3ArrayReader(PyArrayReader);
+
+impl From<PyArrayReader> for Arro3ArrayReader {
+    fn from(value: PyArrayReader) -> Self {
+        Self(value)
+    }
+}
+
+impl<'py> IntoPyObject<'py> for Arro3ArrayReader {
+    type Target = PyAny;
+    type Output = Bound<'py, PyAny>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_stream_pycapsule(py, self.0.into_reader()?, None)?;
+
+        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, [capsule])?,
         )
     }
 }
