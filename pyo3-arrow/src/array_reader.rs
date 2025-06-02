@@ -120,6 +120,12 @@ impl PyArrayReader {
     }
 }
 
+impl AsRef<Mutex<Option<Box<dyn ArrayReader + Send>>>> for PyArrayReader {
+    fn as_ref(&self) -> &Mutex<Option<Box<dyn ArrayReader + Send>>> {
+        &self.0
+    }
+}
+
 impl From<Box<dyn ArrayReader + Send>> for PyArrayReader {
     fn from(value: Box<dyn ArrayReader + Send>) -> Self {
         Self::new(value)
