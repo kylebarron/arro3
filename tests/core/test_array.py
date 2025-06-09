@@ -2,6 +2,7 @@ from datetime import date, datetime
 from textwrap import dedent
 
 import pyarrow as pa
+import pytest
 from arro3.core import Array, DataType, Table
 
 
@@ -21,8 +22,8 @@ def test_constructor():
     arr = Array([b"1", b"2", b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+    arr = Array([b"1", b"2", b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
 
 
 def test_constructor_null():
@@ -41,8 +42,8 @@ def test_constructor_null():
     arr = Array([b"1", None, b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+    arr = Array([b"1", None, b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary(1))
 
 
 def test_extension_array_meta_persists():
@@ -143,3 +144,18 @@ def test_repr():
         ]
         """
     assert repr(arr2) == dedent(expected)
+
+
+def test_fixed_size_binary():
+    values = [b"foo", None, b"bar", None, b"baz"]
+    arr = Array(values, DataType.binary(3))
+    assert arr.type == DataType.binary(3)
+    assert arr[0].as_py() == b"foo"
+    assert arr[1].as_py() is None
+    assert arr[2].as_py() == b"bar"
+
+
+def test_fixed_size_binary_invalid_length():
+    values = [b"foo", None, b"barbaz"]
+    with pytest.raises(Exception):
+        Array(values, DataType.binary(3))

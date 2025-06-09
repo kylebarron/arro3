@@ -6,8 +6,8 @@ use arrow_array::types::{
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
-    LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, FixedSizeBinaryArray,
+    LargeBinaryArray, LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
 use arrow_cast::cast;
 use arrow_cast::display::ArrayFormatter;
@@ -17,6 +17,7 @@ use arrow_select::take::take;
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::pybacked::{PyBackedBytes, PyBackedStr};
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 use pyo3::{intern, IntoPyObjectExt};
 
@@ -183,7 +184,7 @@ impl Datum for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
+    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
         if let Ok(data) = obj.extract::<PyArray>() {
             return Ok(data);
         }
@@ -216,45 +217,67 @@ impl PyArray {
                 Arc::new(BooleanArray::from(values))
             }
             DataType::Binary => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(BinaryArray::from(slices))
             }
             DataType::LargeBinary => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(LargeBinaryArray::from(slices))
             }
             DataType::BinaryView => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(BinaryViewArray::from(slices))
             }
+            DataType::FixedSizeBinary(size) => {
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
+                Arc::new(FixedSizeBinaryArray::try_from_sparse_iter_with_size(
+                    values
+                        .iter()
+                        .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref())),
+                    *size,
+                )?)
+            }
             DataType::Utf8 => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(StringArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(StringArray::from(slices))
             }
             DataType::LargeUtf8 => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(LargeStringArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(LargeStringArray::from(slices))
             }
             DataType::Utf8View => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(StringViewArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(StringViewArray::from(slices))
             }
             dt => {
                 return Err(PyNotImplementedError::new_err(format!(
                     "Array constructor for {dt} not yet implemented."
-                )))
+                ))
+                .into())
             }
         };
         Ok(Self::new(array, field))
