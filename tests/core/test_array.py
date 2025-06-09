@@ -22,8 +22,8 @@ def test_constructor():
     arr = Array([b"1", b"2", b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+    arr = Array([b"1", b"2", b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
 
 
 def test_constructor_null():
@@ -42,8 +42,8 @@ def test_constructor_null():
     arr = Array([b"1", None, b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+    arr = Array([b"1", None, b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary(1))
 
 
 def test_extension_array_meta_persists():
