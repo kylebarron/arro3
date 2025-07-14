@@ -40,8 +40,7 @@ impl From<Arro3IoError> for PyErr {
 impl<'a, 'py> From<DowncastError<'a, 'py>> for Arro3IoError {
     fn from(other: DowncastError<'a, 'py>) -> Self {
         Self::PyErr(PyValueError::new_err(format!(
-            "Could not downcast: {}",
-            other
+            "Could not downcast: {other}"
         )))
     }
 }
