@@ -11,23 +11,32 @@
 [pypi-img]: https://img.shields.io/pypi/dm/arro3-core
 [pypi-link]: https://pypi.org/project/arro3-core/
 
-A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs).
+A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs) using [`pyo3`](https://github.com/PyO3/pyo3). (So arro3 is "oxidized Arrow".)
 
-arro3 features:
+arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
 
-- Classes to manage and operate on Arrow data.
+### arro3-core
+
+- Classes to manage and operate on Arrow data: including `Table`, `RecordBatch`, `Array`, `ChunkedArray`, `RecordBatchReader`, `ArrayReader`, `Schema`, `Field`, and `DataType`.
+- This attempts to largely match the `pyarrow` API.
+
+### arro3-io
+
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
-- Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files
+
+### arro3-compute
+
+- Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files.
 
 ## Install
 
-arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
+arro3 is available on PyPI and can be installed with pip:
 
 ```
 pip install arro3-core arro3-io arro3-compute
 ```
 
-arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi)
+arro3 is also on Conda-Forge and can be installed with [pixi](https://github.com/prefix-dev/pixi)
 
 ```
 pixi add arro3-core arro3-io arro3-compute
