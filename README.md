@@ -11,7 +11,7 @@
 [pypi-img]: https://img.shields.io/pypi/dm/arro3-core
 [pypi-link]: https://pypi.org/project/arro3-core/
 
-A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs) using [`pyo3`](https://github.com/PyO3/pyo3). (So arro3 is "oxidized Arrow".)
+A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs) using [`pyo3`](https://github.com/PyO3/pyo3). (`arro3` means _oxidized Arrow_.)
 
 arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
 
