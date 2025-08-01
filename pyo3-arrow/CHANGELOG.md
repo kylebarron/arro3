@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.11.0] - 2025-08-01
+
+- Bump to `arrow` 56.
+- Improved array formatting of `PyArray`, `PyChunkedArray`, `PyRecordBatch`, `PyScalar`, and `PyTable` in the `__repr__` exposed to Python if you re-export these types in your Python library #335.
+
 ## [0.10.1] - 2025-05-19
 
 - Fix pyo3-arrow error when importing buffer protocol object. We were incorrectly validating the stride. But since we already checked the buffer to be C-contiguous, we don't need to check for strides again. (Part of #328).
