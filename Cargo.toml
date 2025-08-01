@@ -20,25 +20,24 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow-arith = "55.1"
-arrow-array = { version = "55.1", features = ["ffi"] }
-arrow-buffer = "55.1"
-arrow-cast = "55.1"
-arrow-csv = "55.1"
-arrow-ipc = { version = "55.1", features = ["lz4", "zstd"] }
-arrow-json = "55.1"
-arrow-schema = "55.1"
-arrow-select = "55.1"
+arrow-arith = "56"
+arrow-array = { version = "56", features = ["ffi"] }
+arrow-buffer = "56"
+arrow-cast = "56"
+arrow-csv = "56"
+arrow-ipc = { version = "56", features = ["lz4", "zstd"] }
+arrow-json = "56"
+arrow-schema = "56"
+arrow-select = "56"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2"
 numpy = "0.25"
 object_store = "0.12.1"
-parquet = "55.1"
+parquet = "56"
 pyo3 = { version = "0.25", features = ["macros", "indexmap"] }
-pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "42827fb68c6f83a136ae1ac8779983138116db01" }
-# pyo3-arrow = "0.10.1"
-# pyo3-arrow = { path = "./pyo3-arrow" }
+# pyo3-arrow = "0.11.0"
+pyo3-arrow = { path = "./pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.25", features = ["tokio-runtime"] }
 pyo3-file = "0.13.0"
 pyo3-object_store = "0.5"
