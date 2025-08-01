@@ -4,6 +4,20 @@ import pandas as pd
 import pyarrow as pa
 import pytest
 from arro3.core import Array, ChunkedArray, DataType, Field, Table
+import polars as pl
+
+
+def test_empty_list_str():
+    df = pl.DataFrame(
+        {
+            "bar": [[]],
+        }, schema={"bar": pl.List(pl.String)}
+    )
+    arro3_table = Table(df)
+    pa_table = pa.table(df)
+    print(pa_table)
+    print(arro3_table)
+    assert pa.table(arro3_table) == pa_table
 
 
 def test_table_getitem():

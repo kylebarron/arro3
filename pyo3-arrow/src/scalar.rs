@@ -386,6 +386,12 @@ impl PyScalar {
             // If value is a tuple, it should have three components, a sign (0 for positive or 1
             // for negative), a tuple of digits, and an integer exponent. For example, Decimal((0,
             // (1, 4, 1, 4), -3)) returns Decimal('1.414').
+            DataType::Decimal32(_, _) => {
+                todo!()
+            }
+            DataType::Decimal64(_, _) => {
+                todo!()
+            }
             DataType::Decimal128(_, _) => {
                 // let array = arr.as_primitive::<Decimal128Type>();
                 todo!()

@@ -24,6 +24,7 @@ dev-dependencies = [
     "pip>=24.2",
     "pyarrow>=20.0.0",
     "pytest>=8.3.3",
+    "polars>=1.32.0",
 ]
 
 [tool.ruff]
