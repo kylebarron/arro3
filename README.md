@@ -2,14 +2,11 @@
 
 [![PyPI][pypi_badge]][pypi_link]
 [![Conda Version][conda_version_badge]][conda_version]
-[![PyPI - Downloads][pypi-img]][pypi-link]
 
 [pypi_badge]: https://badge.fury.io/py/arro3-core.svg
 [pypi_link]: https://pypi.org/project/arro3-core/
 [conda_version_badge]: https://img.shields.io/conda/vn/conda-forge/arro3-core.svg
 [conda_version]: https://prefix.dev/channels/conda-forge/packages/arro3-core
-[pypi-img]: https://img.shields.io/pypi/dm/arro3-core
-[pypi-link]: https://pypi.org/project/arro3-core/
 
 A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs) using [`pyo3`](https://github.com/PyO3/pyo3). (`arro3` means _oxidized Arrow_.)
 
@@ -17,16 +14,33 @@ arro3 is distributed with [namespace packaging](https://packaging.python.org/en/
 
 ### arro3-core
 
+[![PyPI - Downloads][core-pypi-img]][core-pypi-link]
+
+[core-pypi-img]: https://static.pepy.tech/badge/arro3-core/month
+[core-pypi-link]: https://pypi.org/project/arro3-core/
+
 - Classes to manage and operate on Arrow data: including `Table`, `RecordBatch`, `Array`, `ChunkedArray`, `RecordBatchReader`, `ArrayReader`, `Schema`, `Field`, and `DataType`.
 - This attempts to largely match the `pyarrow` API.
+- Intends to be as stable as possible.
 
 ### arro3-io
+
+[![PyPI - Downloads][io-pypi-img]][io-pypi-link]
+
+[io-pypi-img]: https://static.pepy.tech/badge/arro3-io/month
+[io-pypi-link]: https://pypi.org/project/arro3-io/
 
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
 
 ### arro3-compute
 
+[![PyPI - Downloads][compute-pypi-img]][compute-pypi-link]
+
+[compute-pypi-img]: https://static.pepy.tech/badge/arro3-compute/month
+[compute-pypi-link]: https://pypi.org/project/arro3-compute/
+
 - Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files.
+- If there are compute functions from the [`arrow` crate](https://docs.rs/arrow/latest/arrow/compute/index.html) you'd like to see in arro3-compute, please [open an issue](https://github.com/kylebarron/arro3/issues/new/choose).
 
 ## Install
 
