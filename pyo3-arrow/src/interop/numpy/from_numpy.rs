@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use arrow_array::builder::{
-    Date32Builder, DurationMicrosecondBuilder, DurationMillisecondBuilder,
-    DurationNanosecondBuilder, DurationSecondBuilder, TimestampMicrosecondBuilder,
+    BinaryBuilder, Date32Builder, DurationMicrosecondBuilder, DurationMillisecondBuilder,
+    DurationNanosecondBuilder, DurationSecondBuilder, StringBuilder, TimestampMicrosecondBuilder,
     TimestampMillisecondBuilder, TimestampNanosecondBuilder, TimestampSecondBuilder,
 };
 use arrow_array::types::{
@@ -17,7 +17,9 @@ use numpy::{
     PyUntypedArrayMethods,
 };
 use pyo3::exceptions::PyValueError;
+use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::pybacked::{PyBackedBytes, PyBackedStr};
 
 use crate::error::PyArrowResult;
 
@@ -151,6 +153,8 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
+    } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
+        try_import_object_array(py, array)
     } else {
         Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
     }
@@ -258,4 +262,99 @@ fn nanoseconds_to_duration_array<'a>(
         builder.append_value((*val).into());
     }
     Ok(Arc::new(builder.finish()))
+}
+
+fn try_import_object_array(
+    py: Python,
+    array: &Bound<PyArray1<PyObject>>,
+) -> PyArrowResult<ArrayRef> {
+    let np_readonly_arr = array.try_readonly()?;
+    if let Some(first_element) = np_readonly_arr.get(0) {
+        if first_element.extract::<PyBackedStr>(py).is_ok() {
+            if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+                try_import_object_array_as_string(
+                    py,
+                    np_contiguous_arr.iter(),
+                    np_contiguous_arr.len(),
+                )
+            } else {
+                try_import_object_array_as_string(
+                    py,
+                    np_readonly_arr.to_owned_array().iter(),
+                    np_readonly_arr.len(),
+                )
+            }
+        } else if first_element.extract::<PyBackedBytes>(py).is_ok() {
+            if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+                try_import_object_array_as_binary(
+                    py,
+                    np_contiguous_arr.iter(),
+                    np_contiguous_arr.len(),
+                )
+            } else {
+                try_import_object_array_as_binary(
+                    py,
+                    np_readonly_arr.to_owned_array().iter(),
+                    np_readonly_arr.len(),
+                )
+            }
+        } else {
+            Err(PyValueError::new_err(format!(
+                "Only arrays of bytes or strings are supported for object dtype, got a '{}' object",
+                type_repr(py, first_element)?
+            ))
+            .into())
+        }
+    } else {
+        Err(PyValueError::new_err("Cannot import empty numpy array of type np.object_").into())
+    }
+}
+
+fn try_import_object_array_as_string<'a>(
+    py: Python,
+    vals: impl Iterator<Item = &'a PyObject>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = StringBuilder::with_capacity(capacity, 0);
+    for val in vals {
+        if let Ok(s) = val.extract::<PyBackedStr>(py) {
+            builder.append_value(s);
+        } else {
+            return Err(PyValueError::new_err(format!(
+                "Expected string, got a '{}' object",
+                type_repr(py, val)?
+            ))
+            .into());
+        }
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn try_import_object_array_as_binary<'a>(
+    py: Python,
+    vals: impl Iterator<Item = &'a PyObject>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = BinaryBuilder::with_capacity(capacity, 0);
+    for val in vals {
+        if let Ok(s) = val.extract::<PyBackedBytes>(py) {
+            builder.append_value(s);
+        } else {
+            return Err(PyValueError::new_err(format!(
+                "Expected bytes, got a '{}' object",
+                type_repr(py, val)?
+            ))
+            .into());
+        }
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn type_repr(py: Python, obj: &PyObject) -> PyResult<String> {
+    let builtins = py.import(intern!(py, "builtins"))?;
+    let type_fn = builtins.getattr(intern!(py, "type"))?;
+    type_fn
+        .call1((obj,))?
+        .getattr(intern!(py, "__name__"))?
+        .extract()
 }

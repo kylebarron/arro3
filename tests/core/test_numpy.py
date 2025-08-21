@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pyarrow as pa
+import pytest
 from arro3.core import Array, DataType
 
 
@@ -308,3 +309,69 @@ def test_nanosecond_duration_from_numpy_non_contiguous():
     )
     assert arr.type == DataType.duration("ns")
     # We can't go through Python datetime because it doesn't support nanoseconds
+
+
+def test_string_object_array():
+    string_list = ["a", "b", "c"]
+    data = np.array(string_list, dtype=np.object_)
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.string()
+    assert arr[0].as_py() == string_list[0]
+    assert arr[1].as_py() == string_list[1]
+    assert arr[2].as_py() == string_list[2]
+
+
+def test_string_object_array_non_contiguous():
+    string_list = ["a", "b", "c", "d", "e"]
+    data = np.array(string_list, dtype=np.object_)[::2]
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.string()
+    assert arr[0].as_py() == string_list[0]
+    assert arr[1].as_py() == string_list[2]
+    assert arr[2].as_py() == string_list[4]
+
+
+def test_string_object_array_changed_type():
+    string_list = ["a", 2]
+    data = np.array(string_list, dtype=np.object_)
+    with pytest.raises(ValueError, match="Expected string, got a 'int' object"):
+        Array.from_numpy(data)
+
+
+def test_bytes_object_array():
+    bytes_list = [b"a", b"b", b"c"]
+    data = np.array(bytes_list, dtype=np.object_)
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.binary()
+    assert arr[0].as_py() == bytes_list[0]
+    assert arr[1].as_py() == bytes_list[1]
+    assert arr[2].as_py() == bytes_list[2]
+
+
+def test_bytes_object_array_non_contiguous():
+    bytes_list = [b"a", b"b", b"c", b"d", b"e"]
+    data = np.array(bytes_list, dtype=np.object_)[::2]
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.binary()
+    assert arr[0].as_py() == bytes_list[0]
+    assert arr[1].as_py() == bytes_list[2]
+    assert arr[2].as_py() == bytes_list[4]
+
+
+def test_bytes_object_array_changed_type():
+    bytes_list = [b"a", 2]
+    data = np.array(bytes_list, dtype=np.object_)
+    with pytest.raises(ValueError, match="Expected bytes, got a 'int' object"):
+        Array.from_numpy(data)
