@@ -164,8 +164,8 @@ impl PyRecordBatch {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        if let Ok(data) = data.extract::<PyRecordBatch>() {
-            Ok(data)
+        if data.hasattr(intern!(py, "__arrow_c_array__"))? {
+            Ok(data.extract::<PyRecordBatch>()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type::<PyRecordBatch>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {

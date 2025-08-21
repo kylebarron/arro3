@@ -5,7 +5,7 @@ use arrow_schema::Field;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple};
-use pyo3::{PyAny, PyResult};
+use pyo3::{intern, PyAny, PyResult};
 
 /// Validate PyCapsule has provided name
 pub fn validate_pycapsule_name(capsule: &Bound<PyCapsule>, expected_name: &str) -> PyResult<()> {
@@ -29,13 +29,14 @@ pub fn validate_pycapsule_name(capsule: &Bound<PyCapsule>, expected_name: &str) 
 
 /// Import `__arrow_c_schema__` across Python boundary
 pub(crate) fn call_arrow_c_schema<'py>(ob: &'py Bound<PyAny>) -> PyResult<Bound<'py, PyCapsule>> {
-    if !ob.hasattr("__arrow_c_schema__")? {
+    let py_str = intern!(ob.py(), "__arrow_c_schema__");
+    if !ob.hasattr(py_str)? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_schema__",
         ));
     }
 
-    Ok(ob.getattr("__arrow_c_schema__")?.call0()?.downcast_into()?)
+    Ok(ob.getattr(py_str)?.call0()?.downcast_into()?)
 }
 
 pub(crate) fn import_schema_pycapsule<'py>(
@@ -51,13 +52,14 @@ pub(crate) fn import_schema_pycapsule<'py>(
 pub(crate) fn call_arrow_c_array<'py>(
     ob: &'py Bound<PyAny>,
 ) -> PyResult<(Bound<'py, PyCapsule>, Bound<'py, PyCapsule>)> {
-    if !ob.hasattr("__arrow_c_array__")? {
+    let py_str = intern!(ob.py(), "__arrow_c_array__");
+    if !ob.hasattr(py_str)? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_array__",
         ));
     }
 
-    let tuple = ob.getattr("__arrow_c_array__")?.call0()?;
+    let tuple = ob.getattr(py_str)?.call0()?;
     if !tuple.is_instance_of::<PyTuple>() {
         return Err(PyTypeError::new_err(
             "Expected __arrow_c_array__ to return a tuple.",
@@ -88,13 +90,14 @@ pub(crate) fn import_array_pycapsules(
 
 /// Import `__arrow_c_stream__` across Python boundary.
 pub(crate) fn call_arrow_c_stream<'py>(ob: &'py Bound<PyAny>) -> PyResult<Bound<'py, PyCapsule>> {
-    if !ob.hasattr("__arrow_c_stream__")? {
+    let py_str = intern!(ob.py(), "__arrow_c_stream__");
+    if !ob.hasattr(py_str)? {
         return Err(PyValueError::new_err(
             "Expected an object with dunder __arrow_c_stream__",
         ));
     }
 
-    let capsule = ob.getattr("__arrow_c_stream__")?.call0()?.downcast_into()?;
+    let capsule = ob.getattr(py_str)?.call0()?.downcast_into()?;
     Ok(capsule)
 }
 

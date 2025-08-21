@@ -234,8 +234,10 @@ impl PyTable {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        if let Ok(data) = data.extract::<AnyRecordBatch>() {
-            Ok(data.into_table()?)
+        if data.hasattr(intern!(py, "__arrow_c_array__"))?
+            || data.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            Ok(data.extract::<AnyRecordBatch>()?.into_table()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
             Self::from_pydict(&py.get_type::<PyTable>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {

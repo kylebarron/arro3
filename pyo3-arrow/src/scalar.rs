@@ -139,12 +139,14 @@ impl PyScalar {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
     fn init(py: Python, obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        if let Ok(data) = obj.extract::<PyScalar>() {
-            return Ok(data);
+        if obj.hasattr(intern!(py, "__arrow_c_array__"))?
+            || obj.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            return Ok(obj.extract::<PyScalar>()?);
         }
 
         let obj = PyList::new(py, vec![obj])?;
-        let array = PyArray::init(&obj, r#type)?;
+        let array = PyArray::init(py, &obj, r#type)?;
         let (array, field) = array.into_inner();
         Self::try_new(array, field)
     }

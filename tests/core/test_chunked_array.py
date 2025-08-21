@@ -1,6 +1,7 @@
 from textwrap import dedent
 
 import pyarrow as pa
+import pytest
 from arro3.core import Array, ChunkedArray, DataType
 
 
@@ -71,3 +72,35 @@ def test_repr():
         ]
         """
     assert repr(ca) == dedent(expected)
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCStreamFails:
+    def __arrow_c_stream__(self, requested_schema=None):
+        raise CustomException
+
+
+class ArrowCArrayFails:
+    def __arrow_c_array__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_chunked_array_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCStreamFails()
+    with pytest.raises(CustomException):
+        ChunkedArray.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        ChunkedArray(c_stream_obj)
+
+    c_array_obj = ArrowCArrayFails()
+    with pytest.raises(CustomException):
+        ChunkedArray.from_arrow(c_array_obj)
+
+    with pytest.raises(CustomException):
+        ChunkedArray(c_array_obj)

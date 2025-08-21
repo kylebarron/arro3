@@ -281,8 +281,12 @@ impl Display for PyChunkedArray {
 impl PyChunkedArray {
     #[new]
     #[pyo3(signature = (arrays, r#type=None))]
-    fn init(arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        if let Ok(data) = arrays.extract::<AnyArray>() {
+    fn init(py: Python, arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        if arrays.hasattr(intern!(py, "__arrow_c_array__"))?
+            || arrays.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            Ok(arrays.extract::<AnyArray>()?.into_chunked_array()?)
+        } else if let Ok(data) = arrays.extract::<AnyArray>() {
             Ok(data.into_chunked_array()?)
         } else if let Ok(arrays) = arrays.extract::<Vec<PyArray>>() {
             // TODO: move this into from_arrays?

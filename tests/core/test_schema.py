@@ -1,5 +1,6 @@
 import pyarrow as pa
-from arro3.core import Field, Table
+import pytest
+from arro3.core import Field, Schema, Table
 
 
 def test_schema_iterable():
@@ -10,3 +11,20 @@ def test_schema_iterable():
     for field in schema:
         assert isinstance(field, Field)
         assert field.name in ["a", "b"]
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCSchemaFails:
+    def __arrow_c_schema__(self):
+        raise CustomException
+
+
+def test_schema_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCSchemaFails()
+    with pytest.raises(CustomException):
+        Schema.from_arrow(c_stream_obj)
