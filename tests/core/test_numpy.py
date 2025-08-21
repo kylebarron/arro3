@@ -375,3 +375,60 @@ def test_bytes_object_array_changed_type():
     data = np.array(bytes_list, dtype=np.object_)
     with pytest.raises(ValueError, match="Expected bytes, got a 'int' object"):
         Array.from_numpy(data)
+
+
+def test_fixed_size_string():
+    s = ["a", "b", "c"]
+    data = np.array(s, dtype="U1")
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.string()
+    assert arr[0].as_py() == s[0]
+
+
+def test_fixed_size_string_varying_sizes():
+    s = ["a", "b2c", "cd"]
+    data = np.array(s, dtype="U3")
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+
+
+def test_fixed_size_string_non_contiguous():
+    s = ["a", "b", "c", "d"]
+    data = np.array(s, dtype="U1")[::2]
+    arr = Array.from_numpy(data)
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.string()
+    assert arr[0].as_py() == s[0]
+    assert arr[1].as_py() == s[2]
+
+
+def test_fixed_size_binary():
+    bytes_list = [b"a", b"b", b"c"]
+    data = np.array(bytes_list, dtype="|S1")
+    arr = Array.from_numpy(data)
+
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.binary()
+    assert arr[0].as_py() == bytes_list[0]
+
+
+def test_fixed_size_binary_non_contiguous():
+    bytes_list = [b"a", b"b", b"c", b"d"]
+    data = np.array(bytes_list, dtype="|S1")[::2]
+    arr = Array.from_numpy(data)
+
+    assert arr == Array(pa.array(data)), (
+        "Our numpy import should match pyarrow's import."
+    )
+    assert arr.type == DataType.binary()
+    assert arr[0].as_py() == bytes_list[0]
+    assert arr[1].as_py() == bytes_list[2]
