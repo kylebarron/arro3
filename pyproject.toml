@@ -26,7 +26,7 @@ dev-dependencies = [
     "pytest>=8.3.3",
 ]
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
     # Pyflakes
     "F",
@@ -37,7 +37,7 @@ select = [
     "I",
 ]
 
-[tool.ruff.extend-per-file-ignores]
+[tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = [
     "F401", # Allow unused imports in __init__.py files
     "F403", # unable to detect undefined names
