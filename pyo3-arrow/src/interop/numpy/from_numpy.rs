@@ -153,6 +153,10 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
+    } else if dtype.char() == b'U' {
+        import_fixed_width_string_array(array)
+    } else if dtype.char() == b'S' {
+        import_fixed_width_binary_array(array)
     } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
         try_import_object_array(py, array)
     } else {
@@ -260,6 +264,22 @@ fn nanoseconds_to_duration_array<'a>(
     let mut builder = DurationNanosecondBuilder::with_capacity(capacity);
     for val in vals {
         builder.append_value((*val).into());
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn import_fixed_width_string_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
+    let mut builder = StringBuilder::with_capacity(array.len(), 0);
+    for item in array.try_iter()? {
+        builder.append_value(item?.extract::<PyBackedStr>()?);
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn import_fixed_width_binary_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
+    let mut builder = BinaryBuilder::with_capacity(array.len(), 0);
+    for item in array.try_iter()? {
+        builder.append_value(item?.extract::<PyBackedBytes>()?);
     }
     Ok(Arc::new(builder.finish()))
 }
