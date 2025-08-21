@@ -1,5 +1,6 @@
 //! Contains the [`PyArrowError`], the Error returned by most fallible functions in this crate.
 
+use numpy::BorrowError;
 use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
 use pyo3::DowncastError;
@@ -16,6 +17,10 @@ pub enum PyArrowError {
     /// A wrapped [PyErr]
     #[error(transparent)]
     PyErr(#[from] PyErr),
+
+    /// Indicates why borrowing an array failed.
+    #[error(transparent)]
+    NumpyBorrowError(#[from] BorrowError),
 }
 
 impl From<PyArrowError> for PyErr {
@@ -23,6 +28,7 @@ impl From<PyArrowError> for PyErr {
         match error {
             PyArrowError::PyErr(err) => err,
             PyArrowError::ArrowError(err) => PyException::new_err(err.to_string()),
+            PyArrowError::NumpyBorrowError(err) => PyException::new_err(err.to_string()),
         }
     }
 }

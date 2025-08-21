@@ -25,6 +25,7 @@ arrow-cast = { version = "56", features = ["prettyprint"] }
 arrow-data = "56"
 arrow-schema = "56"
 arrow-select = "56"
+chrono = { version = "0.4", default-features = false }
 pyo3 = { version = "0.25", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
