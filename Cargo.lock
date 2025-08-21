@@ -1731,6 +1731,7 @@ dependencies = [
  "arrow-data",
  "arrow-schema",
  "arrow-select",
+ "chrono",
  "half",
  "indexmap",
  "numpy",
