@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use arrow_array::builder::{
-    Date64Builder, DurationMicrosecondBuilder, DurationMillisecondBuilder,
+    Date32Builder, DurationMicrosecondBuilder, DurationMillisecondBuilder,
     DurationNanosecondBuilder, DurationSecondBuilder, TimestampMicrosecondBuilder,
     TimestampMillisecondBuilder, TimestampNanosecondBuilder, TimestampSecondBuilder,
 };
@@ -10,7 +10,6 @@ use arrow_array::types::{
     UInt32Type, UInt64Type, UInt8Type,
 };
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
-use chrono::NaiveDate;
 use numpy::datetime::units::{Days, Microseconds, Milliseconds, Nanoseconds, Seconds};
 use numpy::datetime::{Datetime, Timedelta};
 use numpy::{
@@ -165,20 +164,9 @@ fn days_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Days>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
-    let mut builder = Date64Builder::with_capacity(capacity);
-
-    let chrono_epoch = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
+    let mut builder = Date32Builder::with_capacity(capacity);
     for val in vals {
-        let day_delta = chrono::Days::new(i64::from(*val).try_into().unwrap());
-        let date = chrono_epoch
-            .checked_add_days(day_delta)
-            .ok_or(PyValueError::new_err(
-                "Days out of bounds for Arrow Date64Array",
-            ))?;
-
-        let datetime = date.and_hms_opt(0, 0, 0).unwrap();
-        let millis = datetime.and_utc().timestamp_millis();
-        builder.append_value(millis);
+        builder.append_value(i64::from(*val).try_into().unwrap());
     }
 
     Ok(Arc::new(builder.finish()))
@@ -190,8 +178,7 @@ fn seconds_to_timestamp_array<'a>(
 ) -> PyArrowResult<ArrayRef> {
     let mut builder = TimestampSecondBuilder::with_capacity(capacity);
     for val in vals {
-        let millis = (*val).into();
-        builder.append_value(millis);
+        builder.append_value((*val).into());
     }
     Ok(Arc::new(builder.finish()))
 }

@@ -51,7 +51,7 @@ def test_date_from_numpy():
     assert arr == Array(pa.array(data)), (
         "Our numpy import should match pyarrow's import."
     )
-    assert arr.type == DataType.date64()
+    assert arr.type == DataType.date32()
     assert arr[0].as_py() == dates[0]
     assert arr[1].as_py() == dates[1]
 
@@ -67,7 +67,7 @@ def test_date_from_numpy_non_contiguous():
     assert arr == Array(pa.array(data)), (
         "Our numpy import should match pyarrow's import."
     )
-    assert arr.type == DataType.date64()
+    assert arr.type == DataType.date32()
     assert arr[0].as_py() == dates[0]
     assert arr[1].as_py() == dates[2]
 
