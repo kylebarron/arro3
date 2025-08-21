@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use arrow_array::builder::{
-    Date64Builder, TimestampMicrosecondBuilder, TimestampMillisecondBuilder,
-    TimestampNanosecondBuilder, TimestampSecondBuilder,
+    Date64Builder, DurationMicrosecondBuilder, DurationMillisecondBuilder,
+    DurationNanosecondBuilder, DurationSecondBuilder, TimestampMicrosecondBuilder,
+    TimestampMillisecondBuilder, TimestampNanosecondBuilder, TimestampSecondBuilder,
 };
 use arrow_array::types::{
     Float16Type, Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
@@ -11,7 +12,7 @@ use arrow_array::types::{
 use arrow_array::{ArrayRef, BooleanArray, PrimitiveArray};
 use chrono::NaiveDate;
 use numpy::datetime::units::{Days, Microseconds, Milliseconds, Nanoseconds, Seconds};
-use numpy::datetime::Datetime;
+use numpy::datetime::{Datetime, Timedelta};
 use numpy::{
     PyArray1, PyArrayDescr, PyArrayDescrMethods, PyArrayMethods, PyUntypedArray,
     PyUntypedArrayMethods,
@@ -64,9 +65,9 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Days>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
-            days_to_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+            days_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
         } else {
-            days_to_array(
+            days_to_timestamp_array(
                 np_readonly_arr.to_owned_array().iter(),
                 np_readonly_arr.len(),
             )
@@ -74,9 +75,9 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Seconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
-            seconds_to_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+            seconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
         } else {
-            seconds_to_array(
+            seconds_to_timestamp_array(
                 np_readonly_arr.to_owned_array().iter(),
                 np_readonly_arr.len(),
             )
@@ -84,9 +85,9 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Milliseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
-            milliseconds_to_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+            milliseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
         } else {
-            milliseconds_to_array(
+            milliseconds_to_timestamp_array(
                 np_readonly_arr.to_owned_array().iter(),
                 np_readonly_arr.len(),
             )
@@ -94,9 +95,9 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Microseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
-            microseconds_to_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+            microseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
         } else {
-            microseconds_to_array(
+            microseconds_to_timestamp_array(
                 np_readonly_arr.to_owned_array().iter(),
                 np_readonly_arr.len(),
             )
@@ -104,9 +105,49 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Nanoseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
-            nanoseconds_to_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+            nanoseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
         } else {
-            nanoseconds_to_array(
+            nanoseconds_to_timestamp_array(
+                np_readonly_arr.to_owned_array().iter(),
+                np_readonly_arr.len(),
+            )
+        }
+    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Seconds>>>() {
+        let np_readonly_arr = array.try_readonly()?;
+        if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+            seconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+        } else {
+            seconds_to_duration_array(
+                np_readonly_arr.to_owned_array().iter(),
+                np_readonly_arr.len(),
+            )
+        }
+    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Milliseconds>>>() {
+        let np_readonly_arr = array.try_readonly()?;
+        if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+            milliseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+        } else {
+            milliseconds_to_duration_array(
+                np_readonly_arr.to_owned_array().iter(),
+                np_readonly_arr.len(),
+            )
+        }
+    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Microseconds>>>() {
+        let np_readonly_arr = array.try_readonly()?;
+        if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+            microseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+        } else {
+            microseconds_to_duration_array(
+                np_readonly_arr.to_owned_array().iter(),
+                np_readonly_arr.len(),
+            )
+        }
+    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Nanoseconds>>>() {
+        let np_readonly_arr = array.try_readonly()?;
+        if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
+            nanoseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
+        } else {
+            nanoseconds_to_duration_array(
                 np_readonly_arr.to_owned_array().iter(),
                 np_readonly_arr.len(),
             )
@@ -120,7 +161,7 @@ fn is_type<T: numpy::Element>(py: Python, dtype: &Bound<PyArrayDescr>) -> bool {
     dtype.is_equiv_to(&numpy::dtype::<T>(py))
 }
 
-fn days_to_array<'a>(
+fn days_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Days>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
@@ -143,7 +184,7 @@ fn days_to_array<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn seconds_to_array<'a>(
+fn seconds_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Seconds>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
@@ -155,7 +196,7 @@ fn seconds_to_array<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn milliseconds_to_array<'a>(
+fn milliseconds_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Milliseconds>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
@@ -166,7 +207,7 @@ fn milliseconds_to_array<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn microseconds_to_array<'a>(
+fn microseconds_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Microseconds>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
@@ -177,11 +218,55 @@ fn microseconds_to_array<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn nanoseconds_to_array<'a>(
+fn nanoseconds_to_timestamp_array<'a>(
     vals: impl Iterator<Item = &'a Datetime<Nanoseconds>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
     let mut builder = TimestampNanosecondBuilder::with_capacity(capacity);
+    for val in vals {
+        builder.append_value((*val).into());
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn seconds_to_duration_array<'a>(
+    vals: impl Iterator<Item = &'a Timedelta<Seconds>>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = DurationSecondBuilder::with_capacity(capacity);
+    for val in vals {
+        builder.append_value((*val).into());
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn milliseconds_to_duration_array<'a>(
+    vals: impl Iterator<Item = &'a Timedelta<Milliseconds>>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = DurationMillisecondBuilder::with_capacity(capacity);
+    for val in vals {
+        builder.append_value((*val).into());
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn microseconds_to_duration_array<'a>(
+    vals: impl Iterator<Item = &'a Timedelta<Microseconds>>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = DurationMicrosecondBuilder::with_capacity(capacity);
+    for val in vals {
+        builder.append_value((*val).into());
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+fn nanoseconds_to_duration_array<'a>(
+    vals: impl Iterator<Item = &'a Timedelta<Nanoseconds>>,
+    capacity: usize,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = DurationNanosecondBuilder::with_capacity(capacity);
     for val in vals {
         builder.append_value((*val).into());
     }
