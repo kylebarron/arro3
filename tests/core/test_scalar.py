@@ -10,6 +10,7 @@ from arro3.core import (
     Array,
     DataType,
     Field,
+    Scalar,
     fixed_size_list_array,
     list_array,
     struct_array,
@@ -173,3 +174,23 @@ def test_eq():
 
     # This fails because `b"1"` is interpreted as a buffer protocol object.
     # assert bytes_arr[0] == b"1"
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCArrayFails:
+    def __arrow_c_array__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_scalar_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCArrayFails()
+    with pytest.raises(CustomException):
+        Scalar.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        Scalar(c_stream_obj)

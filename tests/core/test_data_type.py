@@ -38,3 +38,20 @@ def test_hashable():
         DataType.uint32(): DataType.int32(),
         DataType.uint64(): DataType.int64(),
     }
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCSchemaFails:
+    def __arrow_c_schema__(self):
+        raise CustomException
+
+
+def test_schema_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCSchemaFails()
+    with pytest.raises(CustomException):
+        DataType.from_arrow(c_stream_obj)

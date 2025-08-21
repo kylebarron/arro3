@@ -111,3 +111,23 @@ def test_nonempty_table_no_columns():
     arro3_table = Table.from_arrow(table)
     retour = pa.table(arro3_table)
     assert table == retour
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCStreamFails:
+    def __arrow_c_stream__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_table_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCStreamFails()
+    with pytest.raises(CustomException):
+        Table.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        Table(c_stream_obj)

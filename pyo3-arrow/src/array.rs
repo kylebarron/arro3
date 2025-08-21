@@ -184,9 +184,13 @@ impl Datum for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        if let Ok(data) = obj.extract::<PyArray>() {
-            return Ok(data);
+    pub(crate) fn init(
+        py: Python,
+        obj: &Bound<PyAny>,
+        r#type: Option<PyField>,
+    ) -> PyArrowResult<Self> {
+        if obj.hasattr(intern!(py, "__arrow_c_array__"))? {
+            return Ok(obj.extract::<PyArray>()?);
         }
 
         macro_rules! impl_primitive {

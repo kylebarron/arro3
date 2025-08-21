@@ -159,3 +159,23 @@ def test_fixed_size_binary_invalid_length():
     values = [b"foo", None, b"barbaz"]
     with pytest.raises(Exception):
         Array(values, DataType.binary(3))
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCArrayFails:
+    def __arrow_c_array__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_array_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCArrayFails()
+    with pytest.raises(CustomException):
+        Array.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        Array(c_stream_obj)
