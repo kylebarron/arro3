@@ -118,7 +118,7 @@ impl Display for PyScalar {
 
         pretty_format_columns_with_options(
             self.field.name(),
-            &[self.array.clone()],
+            std::slice::from_ref(&self.array),
             &default_repr_options(),
         )
         .map_err(|_| std::fmt::Error)?

@@ -166,7 +166,7 @@ impl Display for PyArray {
         writeln!(f, "[")?;
         for i in 0..self.array.len().min(10) {
             let row = formatter.value(i);
-            writeln!(f, "  {},", row.to_string())?;
+            writeln!(f, "  {},", row)?;
         }
         writeln!(f, "]")?;
 

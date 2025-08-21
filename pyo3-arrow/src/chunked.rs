@@ -267,7 +267,7 @@ impl Display for PyChunkedArray {
                 ArrayFormatter::try_new(chunk, &options).map_err(|_| std::fmt::Error)?;
             for i in 0..chunk.len().min(10) {
                 let row = formatter.value(i);
-                writeln!(f, "    {},", row.to_string())?;
+                writeln!(f, "    {},", row)?;
             }
             writeln!(f, "  ]")?;
         }
