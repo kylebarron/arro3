@@ -189,8 +189,15 @@ impl PyArray {
         obj: &Bound<PyAny>,
         r#type: Option<PyField>,
     ) -> PyArrowResult<Self> {
+        // Need to check first if the object has the __arrow_c_array__ method, so that we can
+        // preserve any error upon calling it.
+        // Then we also need to check if we can extract a PyArray, since we also support buffer
+        // protocol input there.
         if obj.hasattr(intern!(py, "__arrow_c_array__"))? {
             return Ok(obj.extract::<PyArray>()?);
+        }
+        if let Ok(data) = obj.extract::<PyArray>() {
+            return Ok(data);
         }
 
         macro_rules! impl_primitive {
