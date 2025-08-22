@@ -146,6 +146,7 @@ def fixed_size_list_array(
     list_size: int,
     *,
     type: ArrowSchemaExportable | None = None,
+    mask: ArrowArrayExportable | None = None,
 ) -> Array:
     """Construct a new fixed size list array
 
@@ -155,6 +156,7 @@ def fixed_size_list_array(
 
     Keyword Args:
         type: the type of output array. This must have fixed size list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
+        mask: Indicate which values are null (`True`) or not null (`False`).
 
     Returns:
         a new Array with fixed size list type
@@ -165,6 +167,7 @@ def list_array(
     values: ArrayInput,
     *,
     type: ArrowSchemaExportable | None = None,
+    mask: ArrowArrayExportable | None = None,
 ) -> Array:
     """Construct a new list array
 
@@ -174,6 +177,7 @@ def list_array(
 
     Keyword Args:
         type: the type of output array. This must have list or large list type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.
+        mask: Indicate which values are null (`True`) or not null (`False`).
 
     Returns:
         a new Array with list or large list type
@@ -184,6 +188,7 @@ def struct_array(
     *,
     fields: Sequence[ArrowSchemaExportable],
     type: ArrowSchemaExportable | None = None,
+    mask: ArrowArrayExportable | None = None,
 ) -> Array:
     """Construct a new struct array
 
@@ -193,6 +198,7 @@ def struct_array(
     Keyword Args:
         fields: a sequence of fields that represent each of the struct children
         type: the type of output array. This must have struct type. You may pass a `Field` into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .
+        mask: Indicate which values are null (`True`) or not null (`False`).
 
 
     Returns:
