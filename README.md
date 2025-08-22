@@ -12,6 +12,8 @@ A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.
 
 arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
 
+Consult the documentation: <https://kylebarron.dev/arro3>.
+
 ### arro3-core
 
 [![PyPI - Downloads][core-pypi-img]][core-pypi-link]
