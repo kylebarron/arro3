@@ -160,7 +160,10 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
         try_import_object_array(py, array)
     } else if dtype.char() == b'T' {
-        import_variable_width_string_array(array, &dtype.getattr(intern!(py, "na_object"))?)
+        import_variable_width_string_array(
+            array,
+            dtype.getattr(intern!(py, "na_object")).ok().as_ref(),
+        )
     } else {
         Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
     }
@@ -293,12 +296,12 @@ fn import_fixed_width_binary_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrow
 /// string data
 fn import_variable_width_string_array<'a>(
     array: &Bound<PyUntypedArray>,
-    na_object: &Bound<PyAny>,
+    na_object: Option<&Bound<PyAny>>,
 ) -> PyArrowResult<ArrayRef> {
     let mut builder = StringBuilder::with_capacity(array.len(), 0);
     for item in array.try_iter()? {
         let item = item?;
-        if item.is(na_object) {
+        if na_object.is_some_and(|x| item.is(x)) {
             builder.append_null();
         } else {
             builder.append_value(item.extract::<PyBackedStr>()?);
