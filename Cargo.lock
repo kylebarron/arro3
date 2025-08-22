@@ -122,7 +122,7 @@ dependencies = [
 [[package]]
 name = "arrow-arith"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -135,7 +135,7 @@ dependencies = [
 [[package]]
 name = "arrow-array"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "ahash",
  "arrow-buffer",
@@ -151,7 +151,7 @@ dependencies = [
 [[package]]
 name = "arrow-buffer"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "bytes",
  "half",
@@ -161,7 +161,7 @@ dependencies = [
 [[package]]
 name = "arrow-cast"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -181,7 +181,7 @@ dependencies = [
 [[package]]
 name = "arrow-csv"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-array",
  "arrow-cast",
@@ -207,7 +207,7 @@ dependencies = [
 [[package]]
 name = "arrow-data"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-buffer",
  "arrow-schema",
@@ -218,7 +218,7 @@ dependencies = [
 [[package]]
 name = "arrow-ipc"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -233,7 +233,7 @@ dependencies = [
 [[package]]
 name = "arrow-json"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -254,7 +254,7 @@ dependencies = [
 [[package]]
 name = "arrow-schema"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "bitflags",
 ]
@@ -262,7 +262,7 @@ dependencies = [
 [[package]]
 name = "arrow-select"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "ahash",
  "arrow-array",
@@ -1537,7 +1537,7 @@ dependencies = [
 [[package]]
 name = "parquet"
 version = "56.1.0"
-source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
+source = "git+https://github.com/jhorstmann/arrow-rs?rev=e6ba0869949806f420b94d7cf7b8228ce6d5a369#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
 dependencies = [
  "ahash",
  "arrow-array",
