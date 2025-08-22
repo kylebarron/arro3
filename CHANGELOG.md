@@ -2,15 +2,40 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.6.0] - 2025-08-21
+
+### `arro3-core`
+
+#### Breaking Changes :wrench:
+
+No breaking changes.
+
+#### New features :sparkles:
+
+- Expanded dtype support in `Array.from_numpy`. It now additionally supports `datetime64`, `timedelta64`, [fixed-width strings and bytes](https://numpy.org/devdocs/user/basics.strings.html#fixed-width-data-types), [variable-width strings](https://numpy.org/doc/stable/user/basics.strings.html#variable-width-strings), and `object` dtypes that contain `str` or `bytes`.
+- Support FixedSizeBinary in Array constructor by @kylebarron in https://github.com/kylebarron/arro3/pull/358
+- Add mask parameter to list/struct constructors by @kylebarron in https://github.com/kylebarron/arro3/pull/382
+
+
+#### Bug fixes :bug:
+
+- Preserve exceptions when Arrow PyCapsule dunder method fails by @kylebarron in https://github.com/kylebarron/arro3/pull/374
+
+#### Updated dependencies :arrow_up:
+
+- Use Rust `arrow` 56 by @kylebarron in https://github.com/kylebarron/arro3/pull/368. This includes all changes in the [upstream Changelog](https://github.com/apache/arrow-rs/blob/56.0.0/CHANGELOG.md).
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.5.1...py-v0.6.0
+
 ## [0.5.1] - 2025-05-31
 
 ### What's Changed
 
-* chore: Use released pyo3-file by @kylebarron in https://github.com/kylebarron/arro3/pull/341
-* feat: Support serializing binary view and string view array types to numpy by @kylebarron in https://github.com/kylebarron/arro3/pull/348
-* fix(arro3-core): Add typing-extensions as a dependency for arro3-core by @kylebarron in https://github.com/kylebarron/arro3/pull/350
-* feat(arro3-core): Improved repr for Array and ChunkedArray by @kylebarron in https://github.com/kylebarron/arro3/pull/351
-* chore: bump dev versions for geoarrow-types and pyarrow by @kylebarron in https://github.com/kylebarron/arro3/pull/352
+- chore: Use released pyo3-file by @kylebarron in https://github.com/kylebarron/arro3/pull/341
+- feat: Support serializing binary view and string view array types to numpy by @kylebarron in https://github.com/kylebarron/arro3/pull/348
+- fix(arro3-core): Add typing-extensions as a dependency for arro3-core by @kylebarron in https://github.com/kylebarron/arro3/pull/350
+- feat(arro3-core): Improved repr for Array and ChunkedArray by @kylebarron in https://github.com/kylebarron/arro3/pull/351
+- chore: bump dev versions for geoarrow-types and pyarrow by @kylebarron in https://github.com/kylebarron/arro3/pull/352
 
 **Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.5.0...py-v0.5.1
 
