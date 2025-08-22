@@ -12,13 +12,13 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/constructors/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/accessors/">
       
       
-        <link rel="prev" href="../table/">
+        <link rel="prev" href="../constructors/">
       
       
-        <link rel="next" href="../accessors/">
+        <link rel="next" href="../types/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Constructors - arro3</title>
+        <title>Accessors - arro3</title>
       
     
     
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Constructors - arro3" >
+        <meta  property="og:title"  content="Accessors - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/accessors.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/constructors/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/accessors/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Constructors - arro3" >
+        <meta  name="twitter:title"  content="Accessors - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/accessors.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#constructors" class="md-skip">
+        <a href="#accessors" class="md-skip">
           Skip to content
         </a>
       
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Constructors
+              Accessors
             
           </span>
         </div>
@@ -656,6 +656,28 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../constructors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constructors
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -672,7 +694,7 @@
           
   
   <span class="md-ellipsis">
-    Constructors
+    Accessors
     
   </span>
   
@@ -684,7 +706,7 @@
         
   
   <span class="md-ellipsis">
-    Constructors
+    Accessors
     
   </span>
   
@@ -717,27 +739,45 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
+  <a href="#arro3.core.dictionary_dictionary" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;dictionary_dictionary
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.list_array" class="md-nav__link">
+  <a href="#arro3.core.dictionary_indices" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;dictionary_indices
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.struct_array" class="md-nav__link">
+  <a href="#arro3.core.list_flatten" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_flatten
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.list_offsets" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_offsets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.struct_field" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_field
     </span>
   </a>
   
@@ -752,28 +792,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../accessors/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Accessors
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -1017,27 +1035,45 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
+  <a href="#arro3.core.dictionary_dictionary" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;dictionary_dictionary
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.list_array" class="md-nav__link">
+  <a href="#arro3.core.dictionary_indices" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;dictionary_indices
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.struct_array" class="md-nav__link">
+  <a href="#arro3.core.list_flatten" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_flatten
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.list_offsets" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_offsets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.struct_field" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_field
     </span>
   </a>
   
@@ -1067,7 +1103,7 @@
   
 
 
-<h1 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h1>
+<h1 id="accessors">Accessors<a class="headerlink" href="#accessors" title="Permanent link">&para;</a></h1>
 
 
 <div class="doc doc-object doc-module">
@@ -1103,72 +1139,35 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.fixed_size_list_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">fixed_size_list_array</span>
+<h3 id="arro3.core.dictionary_dictionary" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">dictionary_dictionary</span>
 
 
-<a href="#arro3.core.fixed_size_list_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">fixed_size_list_array</span><span class="p">(</span>
-    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="n">list_size</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.dictionary_dictionary" class="headerlink" title="Permanent link">&para;</a></h3>
+          <div class="doc-overloads">
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_dictionary</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div><div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_dictionary</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>          </div>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_dictionary</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new fixed size list array</p>
+        <p>Access the <code>dictionary</code> of a dictionary array.</p>
+<p>This is equivalent to the <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.DictionaryArray.html#pyarrow.DictionaryArray.dictionary"><code>.dictionary</code></a>
+attribute on a PyArrow <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.DictionaryArray.html#pyarrow.DictionaryArray">DictionaryArray</a>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-            <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+            <b><code>array</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
           –
           <div class="doc-md-description">
-            <p>the values of the new fixed size list array</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-            <b><code>list_size</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>the number of elements in each item of the list.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Other Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>the type of output array. This must have fixed size list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
+            <p>Argument to compute function.</p>
           </div>
         </li>
     </ul>
@@ -1177,10 +1176,10 @@
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
+              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
           –
           <div class="doc-md-description">
-            <p>a new Array with fixed size list type</p>
+            <p>The keys of a dictionary-encoded array.</p>
           </div>
         </li>
     </ul>
@@ -1193,82 +1192,35 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.list_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">list_array</span>
+<h3 id="arro3.core.dictionary_indices" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">dictionary_indices</span>
 
 
-<a href="#arro3.core.list_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_array</span><span class="p">(</span>
-    <span class="n">offsets</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.dictionary_indices" class="headerlink" title="Permanent link">&para;</a></h3>
+          <div class="doc-overloads">
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_indices</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div><div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_indices</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>          </div>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">dictionary_indices</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new list array</p>
+        <p>Access the indices of a dictionary array.</p>
+<p>This is equivalent to the <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.DictionaryArray.html#pyarrow.DictionaryArray.indices"><code>.indices</code></a>
+attribute on a PyArrow <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.DictionaryArray.html#pyarrow.DictionaryArray">DictionaryArray</a>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-            <b><code>offsets</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+            <b><code>array</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
           –
           <div class="doc-md-description">
-            <p>the offsets for the output list array. This array must have type int32 or int64, depending on whether you wish to create a list array or large list array.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-            <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>the values for the output list array.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Other Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>the type of output array. This must have list or large list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
+            <p>Argument to compute function.</p>
           </div>
         </li>
     </ul>
@@ -1277,10 +1229,10 @@
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
+              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
           –
           <div class="doc-md-description">
-            <p>a new Array with list or large list type</p>
+            <p>The indices of a dictionary-encoded array.</p>
           </div>
         </li>
     </ul>
@@ -1293,72 +1245,187 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.struct_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">struct_array</span>
+<h3 id="arro3.core.list_flatten" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">list_flatten</span>
 
 
-<a href="#arro3.core.struct_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">struct_array</span><span class="p">(</span>
-    <span class="n">arrays</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">],</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">fields</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">],</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.list_flatten" class="headerlink" title="Permanent link">&para;</a></h3>
+          <div class="doc-overloads">
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_flatten</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div><div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_flatten</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>          </div>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_flatten</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new struct array</p>
+        <p>Unnest this ListArray, LargeListArray or FixedSizeListArray.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-            <b><code>arrays</code></b>
-              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a>]</code>)
+            <b><code>input</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
           –
           <div class="doc-md-description">
-            <p>a sequence of arrays for the struct children</p>
+            <p>Input data.</p>
           </div>
         </li>
     </ul>
 
 
-<p><span class="doc-section-title">Other Parameters:</span></p>
+<p><span class="doc-section-title">Raises:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-          <b><code>fields</code></b>
-              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a>]</code>)
+              <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#Exception">Exception</a></code>
+            –
+          <div class="doc-md-description">
+            <p>if not a list-typed array.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
           –
           <div class="doc-md-description">
-            <p>a sequence of fields that represent each of the struct children</p>
+            <p>The flattened Arrow data.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.list_offsets" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">list_offsets</span>
+
+
+<a href="#arro3.core.list_offsets" class="headerlink" title="Permanent link">&para;</a></h3>
+          <div class="doc-overloads">
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_offsets</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">logical</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div><div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_offsets</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">logical</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>          </div>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_offsets</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">logical</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Access the offsets of this ListArray or LargeListArray</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>input</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | <a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></code>)
+          –
+          <div class="doc-md-description">
+            <p><em>description</em></p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
+            <b><code>logical</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>, default:
+                  <code>True</code>
+)
           –
           <div class="doc-md-description">
-            <p>the type of output array. This must have struct type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .</p>
+            <p>If <code>False</code>, return the physical (unsliced) offsets of the provided list array. If <code>True</code>, adjust the list offsets for the current array slicing. Defaults to <code>True</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#Exception">Exception</a></code>
+            –
+          <div class="doc-md-description">
+            <p>if not a list-typed array.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a> | <a class="autorefs autorefs-internal" title="arro3.core.ArrayReader (arro3.core._array_reader.ArrayReader)" href="../array-reader/#arro3.core.ArrayReader">ArrayReader</a></code>
+          –
+          <div class="doc-md-description">
+            <p><em>description</em></p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.struct_field" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">struct_field</span>
+
+
+<a href="#arro3.core.struct_field" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">struct_field</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Access a column within a StructArray by index</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>values</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>Argument to compute function.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
+            <b><code>indices</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a> | <a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>]</code>)
           –
           <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
+            <p>List of indices for chained field lookup, for example [4, 1] will look up the second nested field in the fifth outer field.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#Exception">Exception</a></code>
+            –
+          <div class="doc-md-description">
+            <p>if not a struct-typed array.</p>
           </div>
         </li>
     </ul>
@@ -1370,7 +1437,7 @@
               <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
           –
           <div class="doc-md-description">
-            <p>a new Array with struct type</p>
+            <p><em>description</em></p>
           </div>
         </li>
     </ul>

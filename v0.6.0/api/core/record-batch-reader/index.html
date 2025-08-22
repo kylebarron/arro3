@@ -12,13 +12,13 @@
         <meta name="author" content="Kyle Barron">
       
       
-        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/constructors/">
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/api/core/record-batch-reader/">
       
       
-        <link rel="prev" href="../table/">
+        <link rel="prev" href="../record-batch/">
       
       
-        <link rel="next" href="../accessors/">
+        <link rel="next" href="../scalar/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Constructors - arro3</title>
+        <title>RecordBatchReader - arro3</title>
       
     
     
@@ -63,11 +63,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Constructors - arro3" >
+        <meta  property="og:title"  content="RecordBatchReader - arro3" >
       
         <meta  property="og:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
+        <meta  property="og:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/record-batch-reader.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -75,15 +75,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/constructors/" >
+        <meta  property="og:url"  content="https://kylebarron.dev/arro3/latest/api/core/record-batch-reader/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Constructors - arro3" >
+        <meta  name="twitter:title"  content="RecordBatchReader - arro3" >
       
         <meta  name="twitter:description"  content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." >
       
-        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/constructors.png" >
+        <meta  name="twitter:image"  content="https://kylebarron.dev/arro3/latest/assets/images/social/api/core/record-batch-reader.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#constructors" class="md-skip">
+        <a href="#recordbatchreader" class="md-skip">
           Skip to content
         </a>
       
@@ -146,7 +146,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Constructors
+              RecordBatchReader
             
           </span>
         </div>
@@ -568,10 +568,31 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../record-batch-reader/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    RecordBatchReader
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -581,6 +602,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;RecordBatchReader
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label=" RecordBatchReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.closed" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.__arrow_c_schema__" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.__arrow_c_stream__" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_arrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_batches" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_batches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.read_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.read_next_batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_batch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -656,31 +802,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Constructors
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../constructors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -690,68 +815,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#arro3.core" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;core
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" core">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.list_array" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#arro3.core.struct_array" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1007,37 +1070,100 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#arro3.core" class="md-nav__link">
+  <a href="#arro3.core.RecordBatchReader" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;core
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;RecordBatchReader
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" core">
+    <nav class="md-nav" aria-label=" RecordBatchReader">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#arro3.core.fixed_size_list_array" class="md-nav__link">
+  <a href="#arro3.core.RecordBatchReader.closed" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;fixed_size_list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;closed
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.list_array" class="md-nav__link">
+  <a href="#arro3.core.RecordBatchReader.schema" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;list_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;schema
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arro3.core.struct_array" class="md-nav__link">
+  <a href="#arro3.core.RecordBatchReader.__arrow_c_schema__" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;struct_array
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_schema__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.__arrow_c_stream__" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;__arrow_c_stream__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_arrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_arrow_pycapsule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_arrow_pycapsule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_batches" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_batches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.from_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;from_stream
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.read_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_all
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arro3.core.RecordBatchReader.read_next_batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;read_next_batch
     </span>
   </a>
   
@@ -1067,20 +1193,26 @@
   
 
 
-<h1 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h1>
+<h1 id="recordbatchreader">RecordBatchReader<a class="headerlink" href="#recordbatchreader" title="Permanent link">&para;</a></h1>
 
 
-<div class="doc doc-object doc-module">
+<div class="doc doc-object doc-class">
 
 
 
-<h2 id="arro3.core" class="doc doc-heading">
-            <span class="doc doc-object-name doc-module-name">arro3.core</span>
+<h2 id="arro3.core.RecordBatchReader" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">arro3.core.RecordBatchReader</span>
 
 
-<a href="#arro3.core" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#arro3.core.RecordBatchReader" class="headerlink" title="Permanent link">&para;</a></h2>
+
 
     <div class="doc doc-contents first">
+
+
+        <p>An Arrow RecordBatchReader.</p>
+<p>A RecordBatchReader holds a stream of <a class="autorefs autorefs-internal" title="arro3.core.RecordBatch" href="../record-batch/#arro3.core.RecordBatch"><code>RecordBatch</code></a>.</p>
+
 
 
 
@@ -1098,89 +1230,201 @@
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="arro3.core.RecordBatchReader.closed" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">closed</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#arro3.core.RecordBatchReader.closed" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">closed</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns <code>true</code> if this reader has already been consumed.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="arro3.core.RecordBatchReader.schema" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">schema</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#arro3.core.RecordBatchReader.schema" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="n">schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Schema (arro3.core._schema.Schema)" href="../schema/#arro3.core.Schema">Schema</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Access the schema of this table.</p>
+
+    </div>
+
+</div>
+
 
 
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.fixed_size_list_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">fixed_size_list_array</span>
+<h3 id="arro3.core.RecordBatchReader.__arrow_c_schema__" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">__arrow_c_schema__</span>
 
 
-<a href="#arro3.core.fixed_size_list_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">fixed_size_list_array</span><span class="p">(</span>
-    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="n">list_size</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.RecordBatchReader.__arrow_c_schema__" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_schema__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new fixed size list array</p>
+        <p>An implementation of the <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
+Interface</a>.
+This dunder method should not be called directly, but enables zero-copy data
+transfer to other Python libraries that understand Arrow memory.</p>
+<p>This allows Arrow consumers to inspect the data type of this RecordBatchReader.
+Then the consumer can ask the producer (in <code>__arrow_c_stream__</code>) to cast the
+exported data to a supported data type.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.RecordBatchReader.__arrow_c_stream__" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">__arrow_c_stream__</span>
+
+
+<a href="#arro3.core.RecordBatchReader.__arrow_c_stream__" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">__arrow_c_stream__</span><span class="p">(</span><span class="n">requested_schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>An implementation of the <a href="https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html">Arrow PyCapsule
+Interface</a>.
+This dunder method should not be called directly, but enables zero-copy data
+transfer to other Python libraries that understand Arrow memory.</p>
+<p>For example, you can call
+<a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatchReader.html#pyarrow.RecordBatchReader.from_stream"><code>pyarrow.RecordBatchReader.from_stream</code></a>
+to convert this stream to a pyarrow <code>RecordBatchReader</code>. Alternatively, you can
+call <a class="autorefs autorefs-external" href="https://arrow.apache.org/docs/python/generated/pyarrow.table.html#pyarrow.table"><code>pyarrow.table()</code></a> to consume this stream to a pyarrow
+table or <a class="autorefs autorefs-internal" title="arro3.core.Table" href="../table/#arro3.core.Table"><code>Table.from_arrow()</code></a> to consume this stream to an
+arro3 Table.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.RecordBatchReader.from_arrow" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.RecordBatchReader.from_arrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.RecordBatchReader (arro3.core._record_batch_reader.RecordBatchReader)" href="#arro3.core.RecordBatchReader">RecordBatchReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct this from an existing Arrow object.</p>
+<p>It can be called on anything that exports the Arrow stream interface
+(has an <code>__arrow_c_stream__</code> method), such as a <code>Table</code> or <code>RecordBatchReader</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.RecordBatchReader.from_arrow_pycapsule" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_arrow_pycapsule</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.RecordBatchReader.from_arrow_pycapsule" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_arrow_pycapsule</span><span class="p">(</span><span class="n">capsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.RecordBatchReader (arro3.core._record_batch_reader.RecordBatchReader)" href="#arro3.core.RecordBatchReader">RecordBatchReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct this object from a bare Arrow PyCapsule</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="arro3.core.RecordBatchReader.from_batches" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_batches</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#arro3.core.RecordBatchReader.from_batches" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_batches</span><span class="p">(</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">,</span> <span class="n">batches</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.RecordBatchReader (arro3.core._record_batch_reader.RecordBatchReader)" href="#arro3.core.RecordBatchReader">RecordBatchReader</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct a new RecordBatchReader from existing data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-            <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
+            <b><code>schema</code></b>
+              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></code>)
           –
           <div class="doc-md-description">
-            <p>the values of the new fixed size list array</p>
+            <p>The schema of the Arrow batches.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-            <b><code>list_size</code></b>
-              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>)
+            <b><code>batches</code></b>
+              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a>]</code>)
           –
           <div class="doc-md-description">
-            <p>the number of elements in each item of the list.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Other Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>the type of output array. This must have fixed size list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p>a new Array with fixed size list type</p>
+            <p>The existing batches.</p>
           </div>
         </li>
     </ul>
@@ -1193,97 +1437,21 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.list_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">list_array</span>
+<h3 id="arro3.core.RecordBatchReader.from_stream" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">from_stream</span>
 
 
-<a href="#arro3.core.list_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">list_array</span><span class="p">(</span>
-    <span class="n">offsets</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
 
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="n">values</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.RecordBatchReader.from_stream" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">from_stream</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowStreamExportable (arro3.core.types.ArrowStreamExportable)" href="../types/#arro3.core.types.ArrowStreamExportable">ArrowStreamExportable</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.RecordBatchReader (arro3.core._record_batch_reader.RecordBatchReader)" href="#arro3.core.RecordBatchReader">RecordBatchReader</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new list array</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-            <b><code>offsets</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>the offsets for the output list array. This array must have type int32 or int64, depending on whether you wish to create a list array or large list array.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-            <b><code>values</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>the values for the output list array.</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Other Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>the type of output array. This must have list or large list type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
-          </div>
-        </li>
-    </ul>
-
-
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p>a new Array with list or large list type</p>
-          </div>
-        </li>
-    </ul>
+        <p>Import a RecordBatchReader from an object that exports an Arrow C Stream.</p>
 
 
     </div>
@@ -1293,87 +1461,37 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="arro3.core.struct_array" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">struct_array</span>
+<h3 id="arro3.core.RecordBatchReader.read_all" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_all</span>
 
 
-<a href="#arro3.core.struct_array" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">struct_array</span><span class="p">(</span>
-    <span class="n">arrays</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="ArrayInput
-
-
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a></span><span class="p">],</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">fields</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span><span class="p">],</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></span>
+<a href="#arro3.core.RecordBatchReader.read_all" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_all</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.Table (arro3.core._table.Table)" href="../table/#arro3.core.Table">Table</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Construct a new struct array</p>
+        <p>Read all batches into a Table.</p>
 
 
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-            <b><code>arrays</code></b>
-              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="ArrayInput
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
 
 
-  
-      module-attribute
-   (arro3.core.types.ArrayInput)" href="../types/#arro3.core.types.ArrayInput">ArrayInput</a>]</code>)
-          –
-          <div class="doc-md-description">
-            <p>a sequence of arrays for the struct children</p>
-          </div>
-        </li>
-    </ul>
+<h3 id="arro3.core.RecordBatchReader.read_next_batch" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_next_batch</span>
 
 
-<p><span class="doc-section-title">Other Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-          <b><code>fields</code></b>
-              (<code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a>]</code>)
-          –
-          <div class="doc-md-description">
-            <p>a sequence of fields that represent each of the struct children</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>type</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowSchemaExportable (arro3.core.types.ArrowSchemaExportable)" href="../types/#arro3.core.types.ArrowSchemaExportable">ArrowSchemaExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>the type of output array. This must have struct type. You may pass a <code>Field</code> into this parameter to associate extension metadata with the created array. Defaults to None, in which case it is inferred .</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-          <b><code>mask</code></b>
-              (<code><a class="autorefs autorefs-internal" title="ArrowArrayExportable (arro3.core.types.ArrowArrayExportable)" href="../types/#arro3.core.types.ArrowArrayExportable">ArrowArrayExportable</a> | None</code>)
-          –
-          <div class="doc-md-description">
-            <p>Indicate which values are null (<code>True</code>) or not null (<code>False</code>).</p>
-          </div>
-        </li>
-    </ul>
+<a href="#arro3.core.RecordBatchReader.read_next_batch" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">read_next_batch</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="arro3.core.RecordBatch (arro3.core._record_batch.RecordBatch)" href="../record-batch/#arro3.core.RecordBatch">RecordBatch</a></span>
+</code></pre></div>
 
+    <div class="doc doc-contents ">
 
-<p><span class="doc-section-title">Returns:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-              <code><a class="autorefs autorefs-internal" title="arro3.core.Array (arro3.core._array.Array)" href="../array/#arro3.core.Array">Array</a></code>
-          –
-          <div class="doc-md-description">
-            <p>a new Array with struct type</p>
-          </div>
-        </li>
-    </ul>
+        <p>Read the next batch in the stream.</p>
 
 
     </div>
