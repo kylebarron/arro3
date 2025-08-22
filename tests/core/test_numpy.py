@@ -452,3 +452,16 @@ def test_numpy_v2_string_non_contiguous():
     assert arr[1].as_py() == strings[2]
 
     # pyarrow doesn't yet support numpy v2 strings, so we can't compare against it
+
+
+def test_numpy_v2_string_nulls():
+    strings = ["short", np.nan, "mid", "extra"]
+    data = np.array(strings, dtype=StringDType(na_object=np.nan))
+    arr = Array.from_numpy(data)
+
+    assert arr[0].as_py() == strings[0]
+    assert arr[1].is_valid is False
+    assert arr[2].as_py() == strings[2]
+    assert arr[3].as_py() == strings[3]
+
+    # pyarrow doesn't yet support numpy v2 strings, so we can't compare against it
