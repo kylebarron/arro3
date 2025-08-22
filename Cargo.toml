@@ -43,6 +43,18 @@ pyo3-file = "0.13.0"
 pyo3-object_store = "0.5"
 thiserror = "1.0.63"
 
+[patch.crates-io]
+arrow-arith = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-array = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-buffer = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-cast = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-csv = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-ipc = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-json = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-schema = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+arrow-select = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+parquet = { git = "https://github.com/jhorstmann/arrow-rs", rev = "e6ba0869949806f420b94d7cf7b8228ce6d5a369" }
+
 [profile.release]
 lto = true
 codegen-units = 1
