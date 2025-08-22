@@ -162,7 +162,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if dtype.char() == b'T' {
         import_variable_width_string_array(
             array,
-            dtype.getattr(intern!(py, "na_object")).ok().as_ref(),
+            dtype.getattr_opt(intern!(py, "na_object"))?.as_ref(),
         )
     } else {
         Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
