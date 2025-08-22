@@ -160,11 +160,10 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
         try_import_object_array(py, array)
     } else if dtype.char() == b'T' {
-        // For now we import Numpy v2 string arrays through Python string objects
-        // This is less performant than accessing the numpy string data directly,
-        // but the `numpy` crate as of v0.25 doesn't have a safe way to access the underlying
-        // string data
-        import_fixed_width_string_array(array)
+        import_variable_width_string_array(
+            array,
+            dtype.getattr_opt(intern!(py, "na_object"))?.as_ref(),
+        )
     } else {
         Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
     }
@@ -286,6 +285,27 @@ fn import_fixed_width_binary_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrow
     let mut builder = BinaryBuilder::with_capacity(array.len(), 0);
     for item in array.try_iter()? {
         builder.append_value(item?.extract::<PyBackedBytes>()?);
+    }
+    Ok(Arc::new(builder.finish()))
+}
+
+/// For now we import Numpy v2 string arrays through Python string objects.
+///
+/// This is less performant than accessing the numpy string data directly,
+/// but the `numpy` crate as of v0.25 doesn't have a safe way to access the underlying
+/// string data
+fn import_variable_width_string_array<'a>(
+    array: &Bound<PyUntypedArray>,
+    na_object: Option<&Bound<PyAny>>,
+) -> PyArrowResult<ArrayRef> {
+    let mut builder = StringBuilder::with_capacity(array.len(), 0);
+    for item in array.try_iter()? {
+        let item = item?;
+        if na_object.is_some_and(|x| item.is(x)) {
+            builder.append_null();
+        } else {
+            builder.append_value(item.extract::<PyBackedStr>()?);
+        }
     }
     Ok(Arc::new(builder.finish()))
 }
