@@ -44,6 +44,15 @@ pyo3-object_store = "0.5"
 thiserror = "1.0.63"
 
 [patch.crates-io]
+arrow-arith = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-array = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-buffer = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-cast = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-csv = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-ipc = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-json = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-schema = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+arrow-select = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
 parquet = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
 
 [profile.release]
