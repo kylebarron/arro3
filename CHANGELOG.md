@@ -2,6 +2,14 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.6.1] - 2025-08-22
+
+### `arro3-core`
+
+#### Bug fixes :bug:
+
+- fix(arro3-io): use patched `parquet` crate to fix building `arro3-io` for s390x architectures. #388. This also updates `arrow` crates to 56.1.0.
+
 ## [0.6.0] - 2025-08-21
 
 ### `arro3-core`
@@ -15,7 +23,6 @@ No breaking changes.
 - Expanded dtype support in `Array.from_numpy`. It now additionally supports `datetime64`, `timedelta64`, [fixed-width strings and bytes](https://numpy.org/devdocs/user/basics.strings.html#fixed-width-data-types), [variable-width strings](https://numpy.org/doc/stable/user/basics.strings.html#variable-width-strings), and `object` dtypes that contain `str` or `bytes`.
 - Support FixedSizeBinary in Array constructor by @kylebarron in https://github.com/kylebarron/arro3/pull/358
 - Add mask parameter to list/struct constructors by @kylebarron in https://github.com/kylebarron/arro3/pull/382
-
 
 #### Bug fixes :bug:
 
