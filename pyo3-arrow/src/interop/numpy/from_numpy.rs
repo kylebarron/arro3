@@ -159,6 +159,12 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
         import_fixed_width_binary_array(array)
     } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
         try_import_object_array(py, array)
+    } else if dtype.char() == b'T' {
+        // For now we import Numpy v2 string arrays through Python string objects
+        // This is less performant than accessing the numpy string data directly,
+        // but the `numpy` crate as of v0.25 doesn't have a safe way to access the underlying
+        // string data
+        import_fixed_width_string_array(array)
     } else {
         Err(PyValueError::new_err(format!("Unsupported data type {}", dtype)).into())
     }

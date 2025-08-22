@@ -4,6 +4,7 @@ import numpy as np
 import pyarrow as pa
 import pytest
 from arro3.core import Array, DataType
+from numpy.dtypes import StringDType
 
 
 def test_from_numpy():
@@ -432,3 +433,22 @@ def test_fixed_size_binary_non_contiguous():
     assert arr.type == DataType.binary()
     assert arr[0].as_py() == bytes_list[0]
     assert arr[1].as_py() == bytes_list[2]
+
+
+def test_numpy_v2_string():
+    strings = ["short", "a much longer string", "mid"]
+    data = np.array(strings, dtype=StringDType())
+    arr = Array.from_numpy(data)
+    assert arr[0].as_py() == strings[0]
+    assert arr[1].as_py() == strings[1]
+    assert arr[2].as_py() == strings[2]
+
+
+def test_numpy_v2_string_non_contiguous():
+    strings = ["short", "a much longer string", "mid", "extra"]
+    data = np.array(strings, dtype=StringDType())[::2]
+    arr = Array.from_numpy(data)
+    assert arr[0].as_py() == strings[0]
+    assert arr[1].as_py() == strings[2]
+
+    # pyarrow doesn't yet support numpy v2 strings, so we can't compare against it
