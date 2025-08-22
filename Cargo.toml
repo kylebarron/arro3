@@ -43,6 +43,9 @@ pyo3-file = "0.13.0"
 pyo3-object_store = "0.5"
 thiserror = "1.0.63"
 
+[patch.crates-io]
+parquet = { git = "https://github.com/jhorstmann/arrow-rs", branch = "fix-bloom-filter-big-endian" }
+
 [profile.release]
 lto = true
 codegen-units = 1

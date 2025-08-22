@@ -3134,3 +3134,8 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "parquet"
+version = "56.1.0"
+source = "git+https://github.com/jhorstmann/arrow-rs?branch=fix-bloom-filter-big-endian#e6ba0869949806f420b94d7cf7b8228ce6d5a369"
