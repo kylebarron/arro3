@@ -69,12 +69,11 @@ impl PySchema {
     /// Export to a pyarrow.Schema
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        pyarrow_mod
             .getattr(intern!(py, "schema"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 }
 

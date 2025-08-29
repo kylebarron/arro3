@@ -81,16 +81,12 @@ impl PyDataType {
     /// Export to a pyarrow.DataType
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_field = pyarrow_mod
             .getattr(intern!(py, "field"))?
             .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        Ok(pyarrow_field
-            .getattr(intern!(py, "type"))?
-            .into_pyobject(py)?
-            .into_any()
-            .unbind())
+        pyarrow_field.getattr(intern!(py, "type"))
     }
 }
 
