@@ -157,7 +157,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
         import_fixed_width_string_array(array)
     } else if dtype.char() == b'S' {
         import_fixed_width_binary_array(array)
-    } else if let Ok(array) = array.downcast::<PyArray1<PyObject>>() {
+    } else if let Ok(array) = array.downcast::<PyArray1<Py<PyAny>>>() {
         try_import_object_array(py, array)
     } else if dtype.char() == b'T' {
         import_variable_width_string_array(
@@ -312,7 +312,7 @@ fn import_variable_width_string_array(
 
 fn try_import_object_array(
     py: Python,
-    array: &Bound<PyArray1<PyObject>>,
+    array: &Bound<PyArray1<Py<PyAny>>>,
 ) -> PyArrowResult<ArrayRef> {
     let np_readonly_arr = array.try_readonly()?;
     if let Some(first_element) = np_readonly_arr.get(0) {
@@ -358,7 +358,7 @@ fn try_import_object_array(
 
 fn try_import_object_array_as_string<'a>(
     py: Python,
-    vals: impl Iterator<Item = &'a PyObject>,
+    vals: impl Iterator<Item = &'a Py<PyAny>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
     let mut builder = StringBuilder::with_capacity(capacity, 0);
@@ -378,7 +378,7 @@ fn try_import_object_array_as_string<'a>(
 
 fn try_import_object_array_as_binary<'a>(
     py: Python,
-    vals: impl Iterator<Item = &'a PyObject>,
+    vals: impl Iterator<Item = &'a Py<PyAny>>,
     capacity: usize,
 ) -> PyArrowResult<ArrayRef> {
     let mut builder = BinaryBuilder::with_capacity(capacity, 0);
@@ -396,7 +396,7 @@ fn try_import_object_array_as_binary<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn type_repr(py: Python, obj: &PyObject) -> PyResult<String> {
+fn type_repr(py: Python, obj: &Py<PyAny>) -> PyResult<String> {
     let builtins = py.import(intern!(py, "builtins"))?;
     let type_fn = builtins.getattr(intern!(py, "type"))?;
     type_fn

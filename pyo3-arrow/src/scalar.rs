@@ -160,11 +160,10 @@ impl PyScalar {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
-    fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         if let Ok(other) = other.extract::<PyScalar>() {
             let eq = self.array == other.array && self.field == other.field;
             eq.into_py_any(py)
-            // Ok(eq.into_pyobject(py)?.into_any().unbind())
         } else {
             // If other is not an Arrow scalar, cast self to a Python object, and then call its
             // `__eq__` method.
@@ -192,7 +191,7 @@ impl PyScalar {
         Self::try_from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
-    pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<Py<PyAny>> {
         if self.array.is_null(0) {
             return Ok(py.None());
         }
@@ -344,8 +343,7 @@ impl PyScalar {
             }
             DataType::Struct(inner_fields) => {
                 let struct_array = arr.as_struct();
-                let mut dict_py_objects: IndexMap<&str, PyObject> =
-                    IndexMap::with_capacity(inner_fields.len());
+                let mut dict_py_objects = IndexMap::with_capacity(inner_fields.len());
                 for (inner_field, column) in inner_fields.iter().zip(struct_array.columns()) {
                     let scalar =
                         unsafe { PyScalar::new_unchecked(column.clone(), inner_field.clone()) };
@@ -445,7 +443,7 @@ fn list_values_to_py(
     py: Python,
     inner_array: ArrayRef,
     inner_field: &Arc<Field>,
-) -> PyArrowResult<Vec<PyObject>> {
+) -> PyArrowResult<Vec<Py<PyAny>>> {
     let mut list_py_objects = Vec::with_capacity(inner_array.len());
     for i in 0..inner_array.len() {
         let scalar =

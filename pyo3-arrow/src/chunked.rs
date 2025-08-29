@@ -7,9 +7,9 @@ use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
 use arrow_select::concat::concat;
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field};
@@ -324,8 +324,8 @@ impl PyChunkedArray {
     fn __array__<'py>(
         &'py self,
         py: Python<'py>,
-        dtype: Option<PyObject>,
-        copy: Option<PyObject>,
+        dtype: Option<Bound<PyAny>>,
+        copy: Option<Bound<PyAny>>,
     ) -> PyResult<Bound<'py, PyAny>> {
         let chunk_refs = self
             .chunks
@@ -493,7 +493,7 @@ impl PyChunkedArray {
         self.__array__(py, None, None)
     }
 
-    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+    fn to_pylist(&self, py: Python) -> PyResult<Vec<Py<PyAny>>> {
         let mut scalars = Vec::with_capacity(self.len());
         for chunk in &self.chunks {
             for i in 0..chunk.len() {
@@ -502,7 +502,7 @@ impl PyChunkedArray {
                 scalars.push(scalar.as_py(py)?);
             }
         }
-        scalars.into_py_any(py)
+        Ok(scalars)
     }
 
     #[getter]
