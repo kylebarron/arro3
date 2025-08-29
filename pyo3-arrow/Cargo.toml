@@ -25,11 +25,20 @@ arrow-cast = { version = "56", features = ["prettyprint"] }
 arrow-data = "56"
 arrow-schema = "56"
 arrow-select = "56"
-pyo3 = { version = "0.25", features = ["chrono", "chrono-tz", "indexmap"] }
+pyo3 = { version = "0.26", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
-numpy = { version = "0.25", features = ["half"] }
+# numpy = { version = "0.26", features = ["half"] }
+numpy = { git = "https://github.com/Icxolu/rust-numpy", rev = "2480e2c86f6e91dc815b7f8e473b71bb18486bb1", features = [
+    "half",
+] }
 thiserror = "1"
 
 [lib]
 crate-type = ["rlib"]
+
+[patch.crates-io]
+pyo3 = { version = "0.26.0", features = [
+    "macros",
+], git = "https://github.com/pyo3/pyo3.git", tag = "v0.26.0" }
+numpy = { git = "https://github.com/Icxolu/rust-numpy", rev = "2480e2c86f6e91dc815b7f8e473b71bb18486bb1" }
