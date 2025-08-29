@@ -16,10 +16,10 @@ use arrow_select::concat::concat;
 use arrow_select::take::take;
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::pybacked::{PyBackedBytes, PyBackedStr};
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 #[cfg(feature = "buffer_protocol")]
 use crate::buffer::AnyBufferProtocol;
@@ -453,14 +453,14 @@ impl PyArray {
         self.__array__(py, None, None)
     }
 
-    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+    fn to_pylist(&self, py: Python) -> PyResult<Vec<Py<PyAny>>> {
         let mut scalars = Vec::with_capacity(self.array.len());
         for i in 0..self.array.len() {
             let scalar =
                 unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
             scalars.push(scalar.as_py(py)?);
         }
-        scalars.into_py_any(py)
+        Ok(scalars)
     }
 
     #[getter]

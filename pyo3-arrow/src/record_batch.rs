@@ -9,9 +9,9 @@ use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3Array, Arro3Field, Arro3RecordBatch, Arro3Schema};
@@ -103,12 +103,11 @@ impl PyRecordBatch {
     /// Export to a pyarrow.RecordBatch
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        pyarrow_mod
             .getattr(intern!(py, "record_batch"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 
     pub(crate) fn to_array_pycapsules<'py>(

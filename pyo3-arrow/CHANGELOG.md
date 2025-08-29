@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rename `to_pyarrow` to `into_pyarrow` because it consumes self. #391
+
 ## [0.11.0] - 2025-08-01
 
 - Bump to `arrow` 56.

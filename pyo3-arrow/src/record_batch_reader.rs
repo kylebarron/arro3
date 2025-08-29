@@ -4,9 +4,9 @@ use std::sync::{Arc, Mutex};
 use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
 use arrow_schema::{Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
@@ -122,14 +122,13 @@ impl PyRecordBatchReader {
     /// Export to a pyarrow.RecordBatchReader
     ///
     /// Requires pyarrow >=15
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let record_batch_reader_class = pyarrow_mod.getattr(intern!(py, "RecordBatchReader"))?;
-        let pyarrow_obj = record_batch_reader_class.call_method1(
+        record_batch_reader_class.call_method1(
             intern!(py, "from_stream"),
             PyTuple::new(py, vec![self.into_pyobject(py)?])?,
-        )?;
-        pyarrow_obj.into_py_any(py)
+        )
     }
 
     pub(crate) fn to_stream_pycapsule<'py>(
