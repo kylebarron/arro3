@@ -273,7 +273,7 @@ fn nanoseconds_to_duration_array<'a>(
     Ok(Arc::new(builder.finish()))
 }
 
-fn import_fixed_width_string_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
+fn import_fixed_width_string_array(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
     let mut builder = StringBuilder::with_capacity(array.len(), 0);
     for item in array.try_iter()? {
         builder.append_value(item?.extract::<PyBackedStr>()?);
@@ -281,7 +281,7 @@ fn import_fixed_width_string_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrow
     Ok(Arc::new(builder.finish()))
 }
 
-fn import_fixed_width_binary_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
+fn import_fixed_width_binary_array(array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
     let mut builder = BinaryBuilder::with_capacity(array.len(), 0);
     for item in array.try_iter()? {
         builder.append_value(item?.extract::<PyBackedBytes>()?);
@@ -294,7 +294,7 @@ fn import_fixed_width_binary_array<'a>(array: &Bound<PyUntypedArray>) -> PyArrow
 /// This is less performant than accessing the numpy string data directly,
 /// but the `numpy` crate as of v0.25 doesn't have a safe way to access the underlying
 /// string data
-fn import_variable_width_string_array<'a>(
+fn import_variable_width_string_array(
     array: &Bound<PyUntypedArray>,
     na_object: Option<&Bound<PyAny>>,
 ) -> PyArrowResult<ArrayRef> {

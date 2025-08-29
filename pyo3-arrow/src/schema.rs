@@ -4,9 +4,9 @@ use std::sync::Arc;
 
 use arrow_schema::{Schema, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3DataType, Arro3Field, Arro3Schema, Arro3Table};
