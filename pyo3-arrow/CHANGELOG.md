@@ -2,7 +2,36 @@
 
 ## Unreleased
 
+## [0.12.0] - 2025-09-02
+
+### Breaking :wrench:
+
 - Rename `to_pyarrow` to `into_pyarrow` because it consumes self. #391
+- Support pyo3 0.26 by @kylebarron in https://github.com/kylebarron/arro3/pull/391
+
+### New Features :sparkles:
+
+- Add `export::Arro3ArrayReader` by @kylebarron in https://github.com/kylebarron/arro3/pull/354
+
+### Bug Fixes :bug:
+
+- fix(pyo3-arrow, arro3-core): Preserve exceptions when Arrow dunder method fails by @kylebarron in https://github.com/kylebarron/arro3/pull/374
+
+### Documentation :book:
+
+- Add badges for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/371
+
+### Other
+
+- chore(pyo3-arrow): Fix clippy warnings in pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/376
+- chore: Remove PyBuffer workaround with custom drop implementation by @kylebarron in https://github.com/kylebarron/arro3/pull/392
+- chore: point numpy dependency at released version by @alex in https://github.com/kylebarron/arro3/pull/393
+
+### New Contributors
+
+- @alex made their first contribution in https://github.com/kylebarron/arro3/pull/393
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.11.0...pyo3-arrow-v0.12.0
 
 ## [0.11.0] - 2025-08-01
 
