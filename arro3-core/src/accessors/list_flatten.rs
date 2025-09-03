@@ -2,19 +2,22 @@ use arrow_array::cast::AsArray;
 use arrow_array::ArrayRef;
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::{PyArray, PyArrayReader};
 
 #[pyfunction]
-pub fn list_flatten(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
+pub fn list_flatten<'py>(py: Python<'py>, input: AnyArray) -> PyArrowResult<Bound<'py, PyAny>> {
     match input {
         AnyArray::Array(array) => {
             let (array, field) = array.into_inner();
             let flat_array = flatten_array(array)?;
             let flat_field = flatten_field(field)?;
-            Ok(PyArray::new(flat_array, flat_field).to_arro3(py)?.unbind())
+            let pyarray = PyArray::new(flat_array, flat_field);
+            Ok(Arro3Array::from(pyarray).into_bound_py_any(py)?)
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -24,11 +27,8 @@ pub fn list_flatten(py: Python, input: AnyArray) -> PyArrowResult<PyObject> {
                 let out = flatten_array(array?)?;
                 Ok(out)
             });
-            Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, flatten_field)))
-                    .to_arro3(py)?
-                    .unbind(),
-            )
+            let reader = PyArrayReader::new(Box::new(ArrayIterator::new(iter, flatten_field)));
+            Ok(Arro3ArrayReader::from(reader).into_bound_py_any(py)?)
         }
     }
 }

@@ -1,10 +1,12 @@
 use arrow_schema::{DataType, Field};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
-use pyo3_arrow::{PyArray, PyArrayReader};
+use pyo3_arrow::PyArrayReader;
 
 pub enum DatePart {
     /// Quarter of the year, in range `1..=4`
@@ -82,11 +84,15 @@ impl From<DatePart> for arrow_arith::temporal::DatePart {
 }
 
 #[pyfunction]
-pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<PyObject> {
+pub fn date_part<'py>(
+    py: Python<'py>,
+    input: AnyArray,
+    part: DatePart,
+) -> PyArrowResult<Bound<'py, PyAny>> {
     match input {
         AnyArray::Array(input) => {
             let out = arrow_arith::temporal::date_part(input.as_ref(), part.into())?;
-            Ok(PyArray::from_array_ref(out).to_arro3(py)?.unbind())
+            Ok(Arro3Array::from(out).into_bound_py_any(py)?)
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -97,9 +103,11 @@ pub fn date_part(py: Python, input: AnyArray, part: DatePart) -> PyArrowResult<P
                 .into_iter()
                 .map(move |array| arrow_arith::temporal::date_part(array?.as_ref(), part));
             Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
-                    .to_arro3(py)?
-                    .unbind(),
+                Arro3ArrayReader::from(PyArrayReader::new(Box::new(ArrayIterator::new(
+                    iter,
+                    output_field.into(),
+                ))))
+                .into_bound_py_any(py)?,
             )
         }
     }
