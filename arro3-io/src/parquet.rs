@@ -46,16 +46,16 @@ pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
 
 #[pyfunction]
 #[pyo3(signature = (path, *, store))]
-pub fn read_parquet_async(
-    py: Python,
+pub fn read_parquet_async<'py>(
+    py: Python<'py>,
     path: String,
     store: PyObjectStore,
-) -> PyArrowResult<PyObject> {
+) -> PyArrowResult<Bound<'py, PyAny>> {
     let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
         Ok(read_parquet_async_inner(store.into_inner(), path).await?)
     })?;
 
-    Ok(fut.into())
+    Ok(fut)
 }
 
 async fn read_parquet_async_inner(

@@ -5,19 +5,25 @@ use arrow_array::{ArrayRef, Int32Array, Int64Array, OffsetSizeTrait};
 use arrow_buffer::{OffsetBuffer, ScalarBuffer};
 use arrow_schema::{ArrowError, DataType, Field};
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
-use pyo3_arrow::{PyArray, PyArrayReader};
+use pyo3_arrow::PyArrayReader;
 
 #[pyfunction]
 #[pyo3(signature = (input, *, logical=true))]
-pub fn list_offsets(py: Python, input: AnyArray, logical: bool) -> PyArrowResult<PyObject> {
+pub fn list_offsets<'py>(
+    py: Python<'py>,
+    input: AnyArray,
+    logical: bool,
+) -> PyArrowResult<Bound<'py, PyAny>> {
     match input {
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let offsets = _list_offsets(array, logical)?;
-            Ok(PyArray::from_array_ref(offsets).to_arro3(py)?.unbind())
+            Ok(Arro3Array::from(offsets).into_bound_py_any(py)?)
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -35,9 +41,11 @@ pub fn list_offsets(py: Python, input: AnyArray, logical: bool) -> PyArrowResult
                 .into_iter()
                 .map(move |array| _list_offsets(array?, logical));
             Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, out_field.into())))
-                    .to_arro3(py)?
-                    .unbind(),
+                Arro3ArrayReader::from(PyArrayReader::new(Box::new(ArrayIterator::new(
+                    iter,
+                    out_field.into(),
+                ))))
+                .into_bound_py_any(py)?,
             )
         }
     }

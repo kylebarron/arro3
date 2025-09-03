@@ -28,13 +28,13 @@
 
 use std::sync::Arc;
 
-use arrow_array::{RecordBatch, RecordBatchReader};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchReader};
 use arrow_schema::{DataType, Field, FieldRef, Schema, SchemaRef};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 
-use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule};
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule, ArrayReader};
 use crate::{
     PyArray, PyArrayReader, PyChunkedArray, PyDataType, PyField, PyRecordBatch,
     PyRecordBatchReader, PyScalar, PySchema, PyTable,
@@ -51,6 +51,12 @@ pub struct Arro3Array(PyArray);
 impl From<PyArray> for Arro3Array {
     fn from(value: PyArray) -> Self {
         Self(value)
+    }
+}
+
+impl From<ArrayRef> for Arro3Array {
+    fn from(value: ArrayRef) -> Self {
+        Self(value.into())
     }
 }
 
@@ -78,6 +84,12 @@ pub struct Arro3ArrayReader(PyArrayReader);
 impl From<PyArrayReader> for Arro3ArrayReader {
     fn from(value: PyArrayReader) -> Self {
         Self(value)
+    }
+}
+
+impl From<Box<dyn ArrayReader + Send>> for Arro3ArrayReader {
+    fn from(value: Box<dyn ArrayReader + Send>) -> Self {
+        Self(value.into())
     }
 }
 

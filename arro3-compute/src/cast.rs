@@ -1,9 +1,11 @@
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
-use pyo3_arrow::{PyArray, PyArrayReader, PyDataType, PyField};
+use pyo3_arrow::{PyArrayReader, PyDataType, PyField};
 
 /// Cast `input` to the provided data type and return a new Arrow object with type `to_type`, if
 /// possible.
@@ -12,12 +14,16 @@ use pyo3_arrow::{PyArray, PyArrayReader, PyDataType, PyField};
 ///     input: an Arrow Array, RecordBatch, ChunkedArray, Table, ArrayReader, or RecordBatchReader
 ///     to_type: an Arrow DataType, Field, or Schema describing the output type of the cast.
 #[pyfunction]
-pub fn cast(py: Python, input: AnyArray, to_type: PyField) -> PyArrowResult<PyObject> {
+pub fn cast<'py>(
+    py: Python<'py>,
+    input: AnyArray,
+    to_type: PyField,
+) -> PyArrowResult<Bound<'py, PyAny>> {
     match input {
         AnyArray::Array(arr) => {
             let new_field = to_type.into_inner();
             let out = arrow_cast::cast(arr.as_ref(), new_field.data_type())?;
-            Ok(PyArray::new(out, new_field).to_arro3(py)?.unbind())
+            Ok(Arro3Array::from(out).into_bound_py_any(py)?)
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -37,9 +43,10 @@ pub fn cast(py: Python, input: AnyArray, to_type: PyField) -> PyArrowResult<PyOb
                 .into_iter()
                 .map(move |array| arrow_cast::cast(&array?, &to_type));
             Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, new_field)))
-                    .to_arro3(py)?
-                    .unbind(),
+                Arro3ArrayReader::from(PyArrayReader::new(Box::new(ArrayIterator::new(
+                    iter, new_field,
+                ))))
+                .into_bound_py_any(py)?,
             )
         }
     }
