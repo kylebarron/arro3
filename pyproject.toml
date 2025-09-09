@@ -14,12 +14,12 @@ dev-dependencies = [
     "geoarrow-types>=0.3.0",
     "ipykernel>=6.29.5",
     "maturin>=1.7.4",
-    "pandas-stubs>=2.2.3.250527",
+    "pandas-stubs",
     "pandas>=2.2.3",
     "pip>=24.2",
     "pyarrow>=21.0.0",
     "pytest>=8.3.3",
-    "pytest-freethreaded>=0.1.0",
+    "pytest-freethreaded>=0.1.0;python_version>='3.13'",
     "pre-commit>=4.3.0",
 ]
 
