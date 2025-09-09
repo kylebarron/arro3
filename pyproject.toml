@@ -1,5 +1,7 @@
 [project]
-name = "arro3"
+# This top-level project only manages the dev environment.
+# The real arro3-* libraries are defined in each `arro3-*` directory.
+name = "dev-environment"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -8,23 +10,16 @@ dependencies = []
 
 [tool.uv]
 dev-dependencies = [
-    "black>=24.10.0",
     "boto3>=1.35.38",
     "geoarrow-types>=0.3.0",
-    "griffe-inherited-docstrings>=1.0.1",
     "ipykernel>=6.29.5",
     "maturin>=1.7.4",
-    "mike>=2.1.3",
-    "mkdocs-material[imaging]>=9.6.7",
-    "mkdocs-redirects>=1.2.2",
-    "mkdocs>=1.6.1",
-    "mkdocstrings[python]>=0.28.3",
     "pandas-stubs>=2.2.3.250527",
     "pandas>=2.2.3",
     "pip>=24.2",
     "pyarrow>=21.0.0",
     "pytest>=8.3.3",
-    "pytest-freethreaded>=0.1.0"
+    "pytest-freethreaded>=0.1.0",
 ]
 
 [tool.ruff.lint]
@@ -42,4 +37,18 @@ select = [
 "__init__.py" = [
     "F401", # Allow unused imports in __init__.py files
     "F403", # unable to detect undefined names
+]
+
+[dependency-groups]
+# This is separate from dev deps because mkdocs-material[imaging] doesn't
+# support Python 3.13 free-threaded
+docs = [
+    "black>=24.10.0",
+    "griffe-inherited-docstrings>=1.0.1",
+    "mike>=2.1.3",
+    "mkdocs-material[imaging]>=9.6.7",
+    "mkdocs-redirects>=1.2.2",
+    "mkdocs>=1.6.1",
+    "mkdocs>=1.6.1",
+    "mkdocstrings[python]>=0.28.3",
 ]
