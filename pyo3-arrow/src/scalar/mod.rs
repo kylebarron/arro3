@@ -1,9 +1,10 @@
+mod temporal;
+
 use std::fmt::Display;
 use std::str::FromStr;
 use std::sync::Arc;
 
 use arrow_array::cast::AsArray;
-use arrow_array::timezone::Tz;
 use arrow_array::types::*;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_cast::cast;
@@ -17,6 +18,7 @@ use pyo3::{intern, IntoPyObjectExt};
 use crate::error::PyArrowResult;
 use crate::export::{Arro3DataType, Arro3Field, Arro3Scalar};
 use crate::ffi::to_array_pycapsules;
+use crate::scalar::temporal::{as_datetime_with_timezone, PyArrowTz};
 use crate::utils::default_repr_options;
 use crate::{PyArray, PyField};
 
@@ -215,28 +217,28 @@ impl PyScalar {
             DataType::Float64 => arr.as_primitive::<Float64Type>().value(0).into_py_any(py)?,
             DataType::Timestamp(time_unit, tz) => {
                 if let Some(tz) = tz {
-                    let tz = Tz::from_str(tz)?;
+                    let tz = PyArrowTz::from_str(tz)?;
                     match time_unit {
-                        TimeUnit::Second => arr
-                            .as_primitive::<TimestampSecondType>()
-                            .value_as_datetime_with_tz(0, tz)
-                            .map(|dt| dt.fixed_offset())
-                            .into_py_any(py)?,
-                        TimeUnit::Millisecond => arr
-                            .as_primitive::<TimestampMillisecondType>()
-                            .value_as_datetime_with_tz(0, tz)
-                            .map(|dt| dt.fixed_offset())
-                            .into_py_any(py)?,
-                        TimeUnit::Microsecond => arr
-                            .as_primitive::<TimestampMicrosecondType>()
-                            .value_as_datetime_with_tz(0, tz)
-                            .map(|dt| dt.fixed_offset())
-                            .into_py_any(py)?,
-                        TimeUnit::Nanosecond => arr
-                            .as_primitive::<TimestampNanosecondType>()
-                            .value_as_datetime_with_tz(0, tz)
-                            .map(|dt| dt.fixed_offset())
-                            .into_py_any(py)?,
+                        TimeUnit::Second => {
+                            let value = arr.as_primitive::<TimestampSecondType>().value(0);
+                            as_datetime_with_timezone::<TimestampSecondType>(value, tz)
+                                .into_py_any(py)?
+                        }
+                        TimeUnit::Millisecond => {
+                            let value = arr.as_primitive::<TimestampMillisecondType>().value(0);
+                            as_datetime_with_timezone::<TimestampMillisecondType>(value, tz)
+                                .into_py_any(py)?
+                        }
+                        TimeUnit::Microsecond => {
+                            let value = arr.as_primitive::<TimestampMicrosecondType>().value(0);
+                            as_datetime_with_timezone::<TimestampMicrosecondType>(value, tz)
+                                .into_py_any(py)?
+                        }
+                        TimeUnit::Nanosecond => {
+                            let value = arr.as_primitive::<TimestampNanosecondType>().value(0);
+                            as_datetime_with_timezone::<TimestampNanosecondType>(value, tz)
+                                .into_py_any(py)?
+                        }
                     }
                 } else {
                     match time_unit {
