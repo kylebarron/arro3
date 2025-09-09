@@ -54,7 +54,7 @@ jobs:
           version: "0.8.x"
 
       - name: Set up Python with uv
-        run: /
+        run: |
           uv python install ${{ matrix.python-version }}
 
       - name: Build rust submodules
