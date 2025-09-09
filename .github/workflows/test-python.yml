@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.9", "3.12", "3.13", "3.13t"]
     steps:
       - uses: actions/checkout@v4
 
@@ -47,29 +47,33 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install a specific version of uv
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-          version: "0.4.x"
+          version: "0.8.x"
+
+      - name: Set up Python with uv
+        run: |
+          uv python install ${{ matrix.python-version }}
 
       - name: Build rust submodules
         run: |
           # Note: core module must be first, because it's depended on by others
-          uv run maturin dev -m arro3-core/Cargo.toml
-          uv run maturin dev -m arro3-compute/Cargo.toml
-          uv run maturin dev -m arro3-io/Cargo.toml
+          uv run --python ${{ matrix.python-version }} maturin dev -m arro3-core/Cargo.toml
+          uv run --python ${{ matrix.python-version }} maturin dev -m arro3-compute/Cargo.toml
+          uv run --python ${{ matrix.python-version }} maturin dev -m arro3-io/Cargo.toml
 
       - name: Run python tests
+        if: matrix.python-version != '3.13t'
         run: |
-          uv run pytest tests
+          uv run --python ${{ matrix.python-version }} pytest tests
+
+      - name: Run python tests with --require-gil-disabled
+        if: matrix.python-version == '3.13t'
+        run: |
+          uv run --python ${{ matrix.python-version }} pytest tests --require-gil-disabled
 
       # Ensure docs build without warnings
       - name: Check docs
-        run: uv run mkdocs build --strict
+        run: uv run --group docs mkdocs build --strict
