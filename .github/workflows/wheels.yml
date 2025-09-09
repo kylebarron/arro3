@@ -198,6 +198,9 @@ jobs:
         with:
           command: sdist
           args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
+      - name: Test sdist
+        run: |
+          python -m pip install dist/*.tar.gz
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
