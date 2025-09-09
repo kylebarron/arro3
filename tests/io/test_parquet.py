@@ -1,6 +1,6 @@
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from io import BytesIO
 
 import pyarrow as pa
 import pyarrow.parquet as pq

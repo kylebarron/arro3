@@ -20,6 +20,7 @@ dev-dependencies = [
     "pyarrow>=21.0.0",
     "pytest>=8.3.3",
     "pytest-freethreaded>=0.1.0",
+    "pre-commit>=4.3.0",
 ]
 
 [tool.ruff.lint]
