@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.9", "3.12", "3.13", "3.13t"]
     steps:
       - uses: actions/checkout@v4
 
@@ -70,6 +70,11 @@ jobs:
         run: |
           uv run pytest tests
 
+      - name: Run python tests with --require-gil-disabled
+        if: matrix.python-version == '3.13t'
+        run: |
+          uv run pytest --require-gil-disabled
+
       # Ensure docs build without warnings
       - name: Check docs
-        run: uv run mkdocs build --strict
+        run: uv run --group docs mkdocs build --strict

@@ -50,6 +50,5 @@ docs = [
     "mkdocs-material[imaging]>=9.6.7",
     "mkdocs-redirects>=1.2.2",
     "mkdocs>=1.6.1",
-    "mkdocs>=1.6.1",
     "mkdocstrings[python]>=0.28.3",
 ]
