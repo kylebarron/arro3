@@ -1,21 +1,25 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat;
-use arrow::datatypes::{
+use arrow_array::types::{
     Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
     UInt64Type, UInt8Type,
 };
 use arrow_array::{
-    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, LargeBinaryArray,
-    LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
+    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, FixedSizeBinaryArray,
+    LargeBinaryArray, LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
 };
+use arrow_cast::cast;
+use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_select::concat::concat;
+use arrow_select::take::take;
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::pybacked::{PyBackedBytes, PyBackedStr};
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 #[cfg(feature = "buffer_protocol")]
 use crate::buffer::AnyBufferProtocol;
@@ -28,6 +32,7 @@ use crate::input::AnyArray;
 use crate::interop::numpy::from_numpy::from_numpy;
 use crate::interop::numpy::to_numpy::to_numpy;
 use crate::scalar::PyScalar;
+use crate::utils::default_repr_options;
 use crate::{PyDataType, PyField};
 
 /// A Python-facing Arrow array.
@@ -78,7 +83,7 @@ impl PyArray {
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field, _data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
         Ok(Self::new(array, Arc::new(field)))
     }
 
@@ -153,6 +158,18 @@ impl Display for PyArray {
         write!(f, "arro3.core.Array<")?;
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        let options = default_repr_options();
+        let formatter =
+            ArrayFormatter::try_new(self.array.as_ref(), &options).map_err(|_| std::fmt::Error)?;
+
+        writeln!(f, "[")?;
+        for i in 0..self.array.len().min(10) {
+            let row = formatter.value(i);
+            writeln!(f, "  {},", row)?;
+        }
+        writeln!(f, "]")?;
+
         Ok(())
     }
 }
@@ -167,7 +184,18 @@ impl Datum for PyArray {
 impl PyArray {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
-    pub(crate) fn init(obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyResult<Self> {
+    pub(crate) fn init(
+        py: Python,
+        obj: &Bound<PyAny>,
+        r#type: Option<PyField>,
+    ) -> PyArrowResult<Self> {
+        // Need to check first if the object has the __arrow_c_array__ method, so that we can
+        // preserve any error upon calling it.
+        // Then we also need to check if we can extract a PyArray, since we also support buffer
+        // protocol input there.
+        if obj.hasattr(intern!(py, "__arrow_c_array__"))? {
+            return Ok(obj.extract::<PyArray>()?);
+        }
         if let Ok(data) = obj.extract::<PyArray>() {
             return Ok(data);
         }
@@ -200,45 +228,67 @@ impl PyArray {
                 Arc::new(BooleanArray::from(values))
             }
             DataType::Binary => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(BinaryArray::from(slices))
             }
             DataType::LargeBinary => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(LargeBinaryArray::from(slices))
             }
             DataType::BinaryView => {
-                let values: Vec<Option<Vec<u8>>> = obj.extract()?;
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
                 let slices = values
                     .iter()
-                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_slice()))
+                    .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(BinaryViewArray::from(slices))
             }
+            DataType::FixedSizeBinary(size) => {
+                let values: Vec<Option<PyBackedBytes>> = obj.extract()?;
+                Arc::new(FixedSizeBinaryArray::try_from_sparse_iter_with_size(
+                    values
+                        .iter()
+                        .map(|maybe_vec| maybe_vec.as_ref().map(|vec| vec.as_ref())),
+                    *size,
+                )?)
+            }
             DataType::Utf8 => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(StringArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(StringArray::from(slices))
             }
             DataType::LargeUtf8 => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(LargeStringArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(LargeStringArray::from(slices))
             }
             DataType::Utf8View => {
-                let values: Vec<Option<String>> = obj.extract()?;
-                Arc::new(StringViewArray::from(values))
+                let values: Vec<Option<PyBackedStr>> = obj.extract()?;
+                let slices = values
+                    .iter()
+                    .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
+                    .collect::<Vec<_>>();
+                Arc::new(StringViewArray::from(slices))
             }
             dt => {
                 return Err(PyNotImplementedError::new_err(format!(
                     "Array constructor for {dt} not yet implemented."
-                )))
+                ))
+                .into())
             }
         };
         Ok(Self::new(array, field))
@@ -246,7 +296,7 @@ impl PyArray {
 
     #[cfg(feature = "buffer_protocol")]
     fn buffer(&self) -> crate::buffer::PyArrowBuffer {
-        use arrow::array::AsArray;
+        use arrow_array::cast::AsArray;
 
         match self.array.data_type() {
             DataType::Int64 => {
@@ -367,7 +417,7 @@ impl PyArray {
 
     fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Array> {
         let new_field = target_type.into_inner();
-        let new_array = arrow::compute::cast(self.as_ref(), new_field.data_type())?;
+        let new_array = cast(self.as_ref(), new_field.data_type())?;
         Ok(PyArray::new(new_array, new_field).into())
     }
 
@@ -395,7 +445,7 @@ impl PyArray {
     }
 
     fn take(&self, indices: PyArray) -> PyArrowResult<Arro3Array> {
-        let new_array = arrow::compute::take(self.as_ref(), indices.as_ref(), None)?;
+        let new_array = take(self.as_ref(), indices.as_ref(), None)?;
         Ok(PyArray::new(new_array, self.field.clone()).into())
     }
 
@@ -403,14 +453,14 @@ impl PyArray {
         self.__array__(py, None, None)
     }
 
-    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+    fn to_pylist(&self, py: Python) -> PyResult<Vec<Py<PyAny>>> {
         let mut scalars = Vec::with_capacity(self.array.len());
         for i in 0..self.array.len() {
             let scalar =
                 unsafe { PyScalar::new_unchecked(self.array.slice(i, 1), self.field.clone()) };
             scalars.push(scalar.as_py(py)?);
         }
-        scalars.into_py_any(py)
+        Ok(scalars)
     }
 
     #[getter]

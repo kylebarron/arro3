@@ -2,11 +2,13 @@ use std::fmt::Display;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use arrow::array::AsArray;
-use arrow::datatypes::*;
+use arrow_array::cast::AsArray;
 use arrow_array::timezone::Tz;
+use arrow_array::types::*;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
-use arrow_schema::{ArrowError, DataType, FieldRef};
+use arrow_cast::cast;
+use arrow_cast::pretty::pretty_format_columns_with_options;
+use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
@@ -15,6 +17,7 @@ use pyo3::{intern, IntoPyObjectExt};
 use crate::error::PyArrowResult;
 use crate::export::{Arro3DataType, Arro3Field, Arro3Scalar};
 use crate::ffi::to_array_pycapsules;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyField};
 
 /// A Python-facing Arrow scalar
@@ -112,6 +115,15 @@ impl Display for PyScalar {
         write!(f, "arro3.core.Scalar<")?;
         self.array.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        pretty_format_columns_with_options(
+            self.field.name(),
+            std::slice::from_ref(&self.array),
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
         Ok(())
     }
 }
@@ -127,12 +139,14 @@ impl PyScalar {
     #[new]
     #[pyo3(signature = (obj, /, r#type = None, *))]
     fn init(py: Python, obj: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        if let Ok(data) = obj.extract::<PyScalar>() {
-            return Ok(data);
+        if obj.hasattr(intern!(py, "__arrow_c_array__"))?
+            || obj.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            return Ok(obj.extract::<PyScalar>()?);
         }
 
         let obj = PyList::new(py, vec![obj])?;
-        let array = PyArray::init(&obj, r#type)?;
+        let array = PyArray::init(py, &obj, r#type)?;
         let (array, field) = array.into_inner();
         Self::try_new(array, field)
     }
@@ -146,11 +160,10 @@ impl PyScalar {
         to_array_pycapsules(py, self.field.clone(), &self.array, requested_schema)
     }
 
-    fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __eq__(&self, py: Python, other: Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         if let Ok(other) = other.extract::<PyScalar>() {
             let eq = self.array == other.array && self.field == other.field;
             eq.into_py_any(py)
-            // Ok(eq.into_pyobject(py)?.into_any().unbind())
         } else {
             // If other is not an Arrow scalar, cast self to a Python object, and then call its
             // `__eq__` method.
@@ -178,7 +191,7 @@ impl PyScalar {
         Self::try_from_arrow_pycapsule(schema_capsule, array_capsule)
     }
 
-    pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<PyObject> {
+    pub(crate) fn as_py(&self, py: Python) -> PyArrowResult<Py<PyAny>> {
         if self.array.is_null(0) {
             return Ok(py.None());
         }
@@ -330,8 +343,7 @@ impl PyScalar {
             }
             DataType::Struct(inner_fields) => {
                 let struct_array = arr.as_struct();
-                let mut dict_py_objects: IndexMap<&str, PyObject> =
-                    IndexMap::with_capacity(inner_fields.len());
+                let mut dict_py_objects = IndexMap::with_capacity(inner_fields.len());
                 for (inner_field, column) in inner_fields.iter().zip(struct_array.columns()) {
                     let scalar =
                         unsafe { PyScalar::new_unchecked(column.clone(), inner_field.clone()) };
@@ -374,12 +386,11 @@ impl PyScalar {
             // If value is a tuple, it should have three components, a sign (0 for positive or 1
             // for negative), a tuple of digits, and an integer exponent. For example, Decimal((0,
             // (1, 4, 1, 4), -3)) returns Decimal('1.414').
-            DataType::Decimal128(_, _) => {
+            DataType::Decimal32(_, _)
+            | DataType::Decimal64(_, _)
+            | DataType::Decimal128(_, _)
+            | DataType::Decimal256(_, _) => {
                 // let array = arr.as_primitive::<Decimal128Type>();
-                todo!()
-            }
-            DataType::Decimal256(_, _) => {
-                // let array = arr.as_primitive::<Decimal256Type>();
                 todo!()
             }
             DataType::Map(_, _) => {
@@ -407,7 +418,7 @@ impl PyScalar {
 
     fn cast(&self, target_type: PyField) -> PyArrowResult<Arro3Scalar> {
         let new_field = target_type.into_inner();
-        let new_array = arrow::compute::cast(&self.array, new_field.data_type())?;
+        let new_array = cast(&self.array, new_field.data_type())?;
         Ok(PyScalar::try_new(new_array, new_field).unwrap().into())
     }
 
@@ -432,7 +443,7 @@ fn list_values_to_py(
     py: Python,
     inner_array: ArrayRef,
     inner_field: &Arc<Field>,
-) -> PyArrowResult<Vec<PyObject>> {
+) -> PyArrowResult<Vec<Py<PyAny>>> {
     let mut list_py_objects = Vec::with_capacity(inner_array.len());
     for i in 0..inner_array.len() {
         let scalar =

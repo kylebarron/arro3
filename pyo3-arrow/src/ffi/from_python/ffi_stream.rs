@@ -7,11 +7,10 @@
 use std::ffi::CStr;
 use std::sync::Arc;
 
-use arrow::datatypes::{Field, FieldRef};
-use arrow::error::ArrowError;
-use arrow::ffi::{from_ffi_and_data_type, FFI_ArrowArray, FFI_ArrowSchema};
-use arrow::ffi_stream::FFI_ArrowArrayStream;
+use arrow_array::ffi::{from_ffi_and_data_type, FFI_ArrowArray, FFI_ArrowSchema};
+use arrow_array::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::{make_array, Array};
+use arrow_schema::{ArrowError, Field, FieldRef};
 
 use crate::ffi::ArrayReader;
 

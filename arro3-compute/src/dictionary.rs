@@ -1,26 +1,32 @@
 use std::sync::Arc;
 
-use arrow::array::{AsArray, GenericByteDictionaryBuilder, PrimitiveDictionaryBuilder};
-use arrow::datatypes::{
+use arrow_array::builder::{GenericByteDictionaryBuilder, PrimitiveDictionaryBuilder};
+use arrow_array::cast::AsArray;
+use arrow_array::downcast_primitive_array;
+use arrow_array::types::{
     BinaryType, ByteArrayType, Int32Type, LargeBinaryType, LargeUtf8Type, Utf8Type,
 };
-use arrow::downcast_primitive_array;
 use arrow_array::{ArrayRef, ArrowPrimitiveType, GenericByteArray, PrimitiveArray};
 use arrow_schema::{ArrowError, DataType, Field};
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
-use pyo3_arrow::{PyArray, PyArrayReader};
+use pyo3_arrow::PyArrayReader;
 
 // Note: for chunked array input, each output chunk will not necessarily have the same dictionary
 #[pyfunction]
-pub(crate) fn dictionary_encode(py: Python, array: AnyArray) -> PyArrowResult<PyObject> {
+pub(crate) fn dictionary_encode<'py>(
+    py: Python<'py>,
+    array: AnyArray,
+) -> PyArrowResult<Bound<'py, PyAny>> {
     match array {
         AnyArray::Array(array) => {
             let (array, _field) = array.into_inner();
             let output_array = dictionary_encode_array(array)?;
-            Ok(PyArray::from_array_ref(output_array).to_arro3(py)?.unbind())
+            Ok(Arro3Array::from(output_array).into_bound_py_any(py)?)
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
@@ -36,9 +42,11 @@ pub(crate) fn dictionary_encode(py: Python, array: AnyArray) -> PyArrowResult<Py
                 .into_iter()
                 .map(move |array| dictionary_encode_array(array?));
             Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, output_field.into())))
-                    .to_arro3(py)?
-                    .unbind(),
+                Arro3ArrayReader::from(PyArrayReader::new(Box::new(ArrayIterator::new(
+                    iter,
+                    output_field.into(),
+                ))))
+                .into_bound_py_any(py)?,
             )
         }
     }

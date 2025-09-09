@@ -185,26 +185,29 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
-  # sdist:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       module:
-  #         - arro3-core
-  #         - arro3-compute
-  #         - arro3-io
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build sdist
-  #       uses: PyO3/maturin-action@v1
-  #       with:
-  #         command: sdist
-  #         args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
-  #     - name: Upload sdist
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wheels-sdist-${{ matrix.module }}
-  #         path: dist
+  sdist:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - arro3-core
+          - arro3-compute
+          - arro3-io
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist --manifest-path ${{ matrix.module }}/Cargo.toml
+      - name: Test sdist
+        run: |
+          python -m pip install dist/*.tar.gz
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist-${{ matrix.module }}
+          path: dist
 
   release:
     runs-on: ubuntu-latest

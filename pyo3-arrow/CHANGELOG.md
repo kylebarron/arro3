@@ -1,5 +1,57 @@
 # Changelog
 
+## Unreleased
+
+## [0.12.0] - 2025-09-02
+
+### Breaking :wrench:
+
+- Rename `to_pyarrow` to `into_pyarrow` because it consumes self. #391
+- Support pyo3 0.26 by @kylebarron in https://github.com/kylebarron/arro3/pull/391
+
+### New Features :sparkles:
+
+- Add `export::Arro3ArrayReader` by @kylebarron in https://github.com/kylebarron/arro3/pull/354
+
+### Bug Fixes :bug:
+
+- fix(pyo3-arrow, arro3-core): Preserve exceptions when Arrow dunder method fails by @kylebarron in https://github.com/kylebarron/arro3/pull/374
+
+### Documentation :book:
+
+- Add badges for pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/371
+
+### Other
+
+- chore(pyo3-arrow): Fix clippy warnings in pyo3-arrow by @kylebarron in https://github.com/kylebarron/arro3/pull/376
+- chore: Remove PyBuffer workaround with custom drop implementation by @kylebarron in https://github.com/kylebarron/arro3/pull/392
+- chore: point numpy dependency at released version by @alex in https://github.com/kylebarron/arro3/pull/393
+
+### New Contributors
+
+- @alex made their first contribution in https://github.com/kylebarron/arro3/pull/393
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/pyo3-arrow-v0.11.0...pyo3-arrow-v0.12.0
+
+## [0.11.0] - 2025-08-01
+
+- Bump to `arrow` 56.
+- Improved array formatting of `PyArray`, `PyChunkedArray`, `PyRecordBatch`, `PyScalar`, and `PyTable` in the `__repr__` exposed to Python if you re-export these types in your Python library #335.
+
+## [0.10.1] - 2025-05-19
+
+- Fix pyo3-arrow error when importing buffer protocol object. We were incorrectly validating the stride. But since we already checked the buffer to be C-contiguous, we don't need to check for strides again. (Part of #328).
+- Make a workaround to the upstream regression/change in https://github.com/apache/arrow-rs/pull/7247 that caused the test that checks we can import a zero-length record batch to fail. This also makes my code cleaner by utilizing the upstream `make_array` now that we have a fix to https://github.com/apache/arrow-rs/issues/6151 (Part of #328).
+
+## [0.10.0] - 2025-05-19
+
+- Bump to pyo3 0.25.
+
+## [0.9.0] - 2025-04-11
+
+- Bump to arrow 55.
+- Minimize arrow crate dependency surface (#318). Don't depend on `arrow`; instead depend on individual arrow crates for a smaller dependency tree and faster compile times.
+
 ## [0.8.0] - 2025-03-17
 
 ### What's Changed

@@ -30,8 +30,8 @@ impl<'py> FromPyObject<'py> for FileReader {
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::open(path)?))
         } else {
-            Ok(Self::FileLike(PyFileLikeObject::with_requirements(
-                ob.clone().unbind(),
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                ob.clone(),
                 true,
                 false,
                 true,
@@ -97,8 +97,7 @@ impl ChunkReader for FileReader {
 
         if read != length {
             return Err(parquet::errors::ParquetError::EOF(format!(
-                "Expected to read {} bytes, read only {}",
-                length, read,
+                "Expected to read {length} bytes, read only {read}"
             )));
         }
         Ok(buffer.into())
@@ -119,8 +118,8 @@ impl<'py> FromPyObject<'py> for FileWriter {
         } else if let Ok(path) = ob.extract::<String>() {
             Ok(Self::File(File::create(path)?))
         } else {
-            Ok(Self::FileLike(PyFileLikeObject::with_requirements(
-                ob.clone().unbind(),
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                ob.clone(),
                 false,
                 true,
                 true,

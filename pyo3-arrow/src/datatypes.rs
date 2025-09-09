@@ -1,15 +1,15 @@
 use std::fmt::Display;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
 
-use arrow::datatypes::DataType;
-use arrow_schema::{Field, IntervalUnit, TimeUnit};
+use arrow_schema::{DataType, Field, IntervalUnit, TimeUnit};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
-use crate::export::Arro3DataType;
+use crate::export::{Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_schema_pycapsule;
@@ -81,16 +81,12 @@ impl PyDataType {
     /// Export to a pyarrow.DataType
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
         let pyarrow_field = pyarrow_mod
             .getattr(intern!(py, "field"))?
             .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        Ok(pyarrow_field
-            .getattr(intern!(py, "type"))?
-            .into_pyobject(py)?
-            .into_any()
-            .unbind())
+        pyarrow_field.getattr(intern!(py, "type"))
     }
 }
 
@@ -139,6 +135,12 @@ impl PyDataType {
 
     fn __eq__(&self, other: PyDataType) -> bool {
         self.equals(other, false)
+    }
+
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.0.hash(&mut hasher);
+        hasher.finish()
     }
 
     fn __repr__(&self) -> String {
@@ -209,6 +211,8 @@ impl PyDataType {
             | DataType::Utf8
             | DataType::LargeUtf8
             | DataType::Utf8View
+            | DataType::Decimal32(_, _)
+            | DataType::Decimal64(_, _)
             | DataType::Decimal128(_, _)
             | DataType::Decimal256(_, _) => 0,
             DataType::List(_)
@@ -261,6 +265,33 @@ impl PyDataType {
             DataType::Dictionary(_key_type, value_type) => {
                 Some(PyDataType::new(*value_type.clone()).into())
             }
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn value_field(&self) -> Option<Arro3Field> {
+        match &self.0 {
+            DataType::FixedSizeList(value_field, _)
+            | DataType::List(value_field)
+            | DataType::LargeList(value_field)
+            | DataType::ListView(value_field)
+            | DataType::LargeListView(value_field) => {
+                Some(PyField::new(value_field.clone()).into())
+            }
+            _ => None,
+        }
+    }
+
+    #[getter]
+    fn fields(&self) -> Option<Vec<Arro3Field>> {
+        match &self.0 {
+            DataType::Struct(fields) => Some(
+                fields
+                    .into_iter()
+                    .map(|f| PyField::new(f.clone()).into())
+                    .collect::<Vec<_>>(),
+            ),
             _ => None,
         }
     }

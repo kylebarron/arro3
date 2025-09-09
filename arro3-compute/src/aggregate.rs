@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
-use arrow::array::{
-    AsArray, BinaryViewBuilder, BooleanBuilder, GenericBinaryBuilder, GenericStringBuilder,
+use arrow_arith::aggregate as compute;
+use arrow_array::builder::{
+    BinaryViewBuilder, BooleanBuilder, GenericBinaryBuilder, GenericStringBuilder,
     PrimitiveBuilder, StringViewBuilder,
 };
-use arrow::{compute, downcast_primitive_array};
+use arrow_array::cast::AsArray;
 use arrow_array::{
-    Array, ArrayRef, ArrowPrimitiveType, BinaryViewArray, BooleanArray, GenericBinaryArray,
-    GenericStringArray, OffsetSizeTrait, PrimitiveArray, StringViewArray,
+    downcast_primitive_array, Array, ArrayRef, ArrowPrimitiveType, BinaryViewArray, BooleanArray,
+    GenericBinaryArray, GenericStringArray, OffsetSizeTrait, PrimitiveArray, StringViewArray,
 };
 use arrow_schema::{ArrowError, DataType};
 use arrow_select::concat;

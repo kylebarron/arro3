@@ -68,13 +68,13 @@ def test_table_append_array_extension_type():
     assert meta[b"ARROW:extension:name"] == b"geoarrow.point"
 
 
-@pytest.mark.xfail
-# from_batches fails on empty column with positive length
 def test_table_from_batches_empty_columns_with_len():
     df = pd.DataFrame({"a": [1, 2, 3]})
     no_columns = df[[]]
     pa_table = pa.Table.from_pandas(no_columns)
-    _table = Table.from_batches(pa_table.to_batches())
+    table = Table.from_batches(pa_table.to_batches())
+    assert table.num_columns == 0
+    assert table.num_rows == 3
 
 
 def test_rechunk():
@@ -111,3 +111,23 @@ def test_nonempty_table_no_columns():
     arro3_table = Table.from_arrow(table)
     retour = pa.table(arro3_table)
     assert table == retour
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCStreamFails:
+    def __arrow_c_stream__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_table_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCStreamFails()
+    with pytest.raises(CustomException):
+        Table.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        Table(c_stream_obj)

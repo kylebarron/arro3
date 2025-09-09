@@ -1,5 +1,8 @@
-import numpy as np
+from datetime import date, datetime
+from textwrap import dedent
+
 import pyarrow as pa
+import pytest
 from arro3.core import Array, DataType, Table
 
 
@@ -19,8 +22,8 @@ def test_constructor():
     arr = Array([b"1", b"2", b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
+    arr = Array([b"1", b"2", b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
 
 
 def test_constructor_null():
@@ -39,19 +42,8 @@ def test_constructor_null():
     arr = Array([b"1", None, b"3"], DataType.binary())
     assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary())
 
-    # arr = Array([b"1", b"2", b"3"], DataType.binary(1))
-    # assert pa.array(arr) == pa.array([b"1", b"2", b"3"], pa.binary(1))
-
-
-def test_from_numpy():
-    arr = np.array([1, 2, 3, 4], dtype=np.uint8)
-    assert Array.from_numpy(arr).type == DataType.uint8()
-
-    arr = np.array([1, 2, 3, 4], dtype=np.float64)
-    assert Array.from_numpy(arr).type == DataType.float64()
-
-    # arr = np.array([b"1", b"2", b"3"], np.object_)
-    # Array.from_numpy(arr)
+    arr = Array([b"1", None, b"3"], DataType.binary(1))
+    assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary(1))
 
 
 def test_extension_array_meta_persists():
@@ -78,3 +70,112 @@ def test_string_view():
     assert Array(arr)[2].as_py() == "baz"
     assert Array(arr)[3].as_py() == "foooooobarrrrrrbazzzzzzzz"
     assert pa.array(Array(arr)) == arr
+
+
+def test_repr():
+    arr = Array([1, 2, 3], DataType.int16())
+    expected = """\
+        arro3.core.Array<Int16>
+        [
+          1,
+          2,
+          3,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array([1.0, 2.0, 3.0], DataType.float64())
+    expected = """\
+        arro3.core.Array<Float64>
+        [
+          1.0,
+          2.0,
+          3.0,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array(["foo", "bar", "baz"], DataType.string())
+    expected = """\
+        arro3.core.Array<Utf8>
+        [
+          foo,
+          bar,
+          baz,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = Array([b"foo", b"bar", b"baz"], DataType.binary())
+    expected = """\
+        arro3.core.Array<Binary>
+        [
+          666f6f,
+          626172,
+          62617a,
+        ]
+        """
+    assert repr(arr) == dedent(expected)
+
+    arr = pa.array(
+        [datetime(2020, 1, 1), datetime(2020, 1, 2)],
+        type=pa.timestamp("us", tz="UTC"),
+    )
+    arr2 = Array.from_arrow(arr)
+    expected = """\
+        arro3.core.Array<Timestamp(Microsecond, Some("UTC"))>
+        [
+          2020-01-01T00:00:00Z,
+          2020-01-02T00:00:00Z,
+        ]
+        """
+    assert repr(arr2) == dedent(expected)
+
+    arr = pa.array(
+        [date(2020, 1, 1), date(2020, 1, 2)],
+        type=pa.date32(),
+    )
+    arr2 = Array.from_arrow(arr)
+    expected = """\
+        arro3.core.Array<Date32>
+        [
+          2020-01-01,
+          2020-01-02,
+        ]
+        """
+    assert repr(arr2) == dedent(expected)
+
+
+def test_fixed_size_binary():
+    values = [b"foo", None, b"bar", None, b"baz"]
+    arr = Array(values, DataType.binary(3))
+    assert arr.type == DataType.binary(3)
+    assert arr[0].as_py() == b"foo"
+    assert arr[1].as_py() is None
+    assert arr[2].as_py() == b"bar"
+
+
+def test_fixed_size_binary_invalid_length():
+    values = [b"foo", None, b"barbaz"]
+    with pytest.raises(Exception):
+        Array(values, DataType.binary(3))
+
+
+class CustomException(Exception):
+    pass
+
+
+class ArrowCArrayFails:
+    def __arrow_c_array__(self, requested_schema=None):
+        raise CustomException
+
+
+def test_array_import_preserve_exception():
+    """https://github.com/kylebarron/arro3/issues/325"""
+
+    c_stream_obj = ArrowCArrayFails()
+    with pytest.raises(CustomException):
+        Array.from_arrow(c_stream_obj)
+
+    with pytest.raises(CustomException):
+        Array(c_stream_obj)

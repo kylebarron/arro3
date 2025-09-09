@@ -1,16 +1,17 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat_batches;
-use arrow::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
+use arrow_array::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
 use arrow_array::{RecordBatch, RecordBatchIterator};
+use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
+use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::export::{
@@ -25,8 +26,7 @@ use crate::ffi::to_schema_pycapsule;
 use crate::input::{
     AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
 };
-use crate::schema::display_schema;
-use crate::utils::schema_equals;
+use crate::utils::{default_repr_options, schema_equals};
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
 
 /// A Python-facing Arrow table.
@@ -106,12 +106,11 @@ impl PyTable {
     /// Export to a pyarrow.Table
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        pyarrow_mod
             .getattr(intern!(py, "table"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 
     pub(crate) fn to_stream_pycapsule<'py>(
@@ -206,8 +205,20 @@ impl PyTable {
 impl Display for PyTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "arro3.core.Table")?;
-        writeln!(f, "-----------")?;
-        display_schema(&self.schema, f)
+        let head_table = self
+            .slice(0, 10.min(self.num_rows()))
+            .map_err(|_| std::fmt::Error)?
+            .combine_chunks()
+            .map_err(|_| std::fmt::Error)?;
+
+        pretty_format_batches_with_options(
+            &head_table.into_inner().batches,
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
+        Ok(())
     }
 }
 
@@ -222,8 +233,10 @@ impl PyTable {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        if let Ok(data) = data.extract::<AnyRecordBatch>() {
-            Ok(data.into_table()?)
+        if data.hasattr(intern!(py, "__arrow_c_array__"))?
+            || data.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            Ok(data.extract::<AnyRecordBatch>()?.into_table()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
             Self::from_pydict(&py.get_type::<PyTable>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {

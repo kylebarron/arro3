@@ -11,7 +11,7 @@ use thiserror::Error;
 pub enum Arro3IoError {
     /// A wrapped [arrow::error::ArrowError]
     #[error(transparent)]
-    ArrowError(#[from] arrow::error::ArrowError),
+    ArrowError(#[from] arrow_schema::ArrowError),
 
     /// A wrapped [object_store::Error]
     #[error(transparent)]
@@ -40,8 +40,7 @@ impl From<Arro3IoError> for PyErr {
 impl<'a, 'py> From<DowncastError<'a, 'py>> for Arro3IoError {
     fn from(other: DowncastError<'a, 'py>) -> Self {
         Self::PyErr(PyValueError::new_err(format!(
-            "Could not downcast: {}",
-            other
+            "Could not downcast: {other}"
         )))
     }
 }

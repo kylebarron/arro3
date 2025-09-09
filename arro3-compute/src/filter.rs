@@ -1,14 +1,20 @@
-use arrow::array::AsArray;
+use arrow_array::cast::AsArray;
 use arrow_schema::{ArrowError, DataType};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
 use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::{PyArray, PyArrayReader};
 
 #[pyfunction]
-pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResult<PyObject> {
+pub fn filter<'py>(
+    py: Python<'py>,
+    values: AnyArray,
+    predicate: AnyArray,
+) -> PyArrowResult<Bound<'py, PyAny>> {
     match (values, predicate) {
         (AnyArray::Array(values), AnyArray::Array(predicate)) => {
             let (values, values_field) = values.into_inner();
@@ -19,8 +25,9 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                     "Expected boolean array for predicate".to_string(),
                 ))?;
 
-            let filtered = arrow::compute::filter(values.as_ref(), predicate)?;
-            Ok(PyArray::new(filtered, values_field).to_arro3(py)?.unbind())
+            let filtered = arrow_select::filter::filter(values.as_ref(), predicate)?;
+            let pyarray = PyArray::new(filtered, values_field);
+            Ok(Arro3Array::from(pyarray).into_bound_py_any(py)?)
         }
         (AnyArray::Stream(values), AnyArray::Stream(predicate)) => {
             let values = values.into_reader()?;
@@ -42,13 +49,15 @@ pub fn filter(py: Python, values: AnyArray, predicate: AnyArray) -> PyArrowResul
                 .map(move |(values, predicate)| {
                     let predicate_arr = predicate?;
                     let filtered =
-                        arrow::compute::filter(values?.as_ref(), predicate_arr.as_boolean())?;
+                        arrow_select::filter::filter(values?.as_ref(), predicate_arr.as_boolean())?;
                     Ok(filtered)
                 });
             Ok(
-                PyArrayReader::new(Box::new(ArrayIterator::new(iter, values_field)))
-                    .to_arro3(py)?
-                    .unbind(),
+                Arro3ArrayReader::from(PyArrayReader::new(Box::new(ArrayIterator::new(
+                    iter,
+                    values_field,
+                ))))
+                .into_bound_py_any(py)?,
             )
         }
         _ => Err(PyValueError::new_err("Unsupported combination of array and stream").into()),

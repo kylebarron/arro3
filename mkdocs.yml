@@ -116,10 +116,11 @@ plugins:
 
           inventories:
             - https://arrow.apache.org/docs/objects.inv
+            - https://docs.pola.rs/api/python/stable/objects.inv
             - https://docs.python.org/3/objects.inv
+            - https://duckdb.org/docs/stable/clients/python/reference/objects.inv
             - https://numpy.org/doc/stable/objects.inv
             - https://pandas.pydata.org/pandas-docs/stable/objects.inv
-            - https://pola-rs.github.io/polars/py-polars/html/objects.inv
   - redirects:
       redirect_maps:
         "api/io.md": "api/io/parquet.md"

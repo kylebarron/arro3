@@ -1,13 +1,15 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::compute::concat;
 use arrow_array::{Array, ArrayRef};
+use arrow_cast::cast;
+use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_select::concat::concat;
 use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field};
@@ -19,6 +21,7 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyDataType, PyField, PyScalar};
 
 /// A Python-facing Arrow chunked array.
@@ -216,12 +219,11 @@ impl PyChunkedArray {
     /// Export to a pyarrow.ChunkedArray
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        pyarrow_mod
             .getattr(intern!(py, "chunked_array"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 
     pub(crate) fn to_stream_pycapsule<'py>(
@@ -254,6 +256,22 @@ impl Display for PyChunkedArray {
         write!(f, "arro3.core.ChunkedArray<")?;
         self.field.data_type().fmt(f)?;
         writeln!(f, ">")?;
+
+        let options = default_repr_options();
+
+        writeln!(f, "[")?;
+        for chunk in self.chunks.iter().take(5) {
+            writeln!(f, "  [")?;
+            let formatter =
+                ArrayFormatter::try_new(chunk, &options).map_err(|_| std::fmt::Error)?;
+            for i in 0..chunk.len().min(10) {
+                let row = formatter.value(i);
+                writeln!(f, "    {},", row)?;
+            }
+            writeln!(f, "  ]")?;
+        }
+        writeln!(f, "]")?;
+
         Ok(())
     }
 }
@@ -262,8 +280,12 @@ impl Display for PyChunkedArray {
 impl PyChunkedArray {
     #[new]
     #[pyo3(signature = (arrays, r#type=None))]
-    fn init(arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
-        if let Ok(data) = arrays.extract::<AnyArray>() {
+    fn init(py: Python, arrays: &Bound<PyAny>, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        if arrays.hasattr(intern!(py, "__arrow_c_array__"))?
+            || arrays.hasattr(intern!(py, "__arrow_c_stream__"))?
+        {
+            Ok(arrays.extract::<AnyArray>()?.into_chunked_array()?)
+        } else if let Ok(data) = arrays.extract::<AnyArray>() {
             Ok(data.into_chunked_array()?)
         } else if let Ok(arrays) = arrays.extract::<Vec<PyArray>>() {
             // TODO: move this into from_arrays?
@@ -302,8 +324,8 @@ impl PyChunkedArray {
     fn __array__<'py>(
         &'py self,
         py: Python<'py>,
-        dtype: Option<PyObject>,
-        copy: Option<PyObject>,
+        dtype: Option<Bound<PyAny>>,
+        copy: Option<Bound<PyAny>>,
     ) -> PyResult<Bound<'py, PyAny>> {
         let chunk_refs = self
             .chunks
@@ -382,7 +404,7 @@ impl PyChunkedArray {
         let new_chunks = self
             .chunks
             .iter()
-            .map(|chunk| arrow::compute::cast(&chunk, new_field.data_type()))
+            .map(|chunk| cast(&chunk, new_field.data_type()))
             .collect::<Result<Vec<_>, ArrowError>>()?;
         Ok(PyChunkedArray::try_new(new_chunks, new_field)?.into())
     }
@@ -471,7 +493,7 @@ impl PyChunkedArray {
         self.__array__(py, None, None)
     }
 
-    fn to_pylist(&self, py: Python) -> PyResult<PyObject> {
+    fn to_pylist(&self, py: Python) -> PyResult<Vec<Py<PyAny>>> {
         let mut scalars = Vec::with_capacity(self.len());
         for chunk in &self.chunks {
             for i in 0..chunk.len() {
@@ -480,7 +502,7 @@ impl PyChunkedArray {
                 scalars.push(scalar.as_py(py)?);
             }
         }
-        scalars.into_py_any(py)
+        Ok(scalars)
     }
 
     #[getter]

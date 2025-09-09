@@ -3,6 +3,7 @@ use arrow_array::ArrayRef;
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use pyo3::prelude::*;
 use pyo3_arrow::error::PyArrowResult;
+use pyo3_arrow::export::Arro3Array;
 use pyo3_arrow::PyArray;
 
 #[derive(FromPyObject)]
@@ -22,11 +23,7 @@ impl StructIndex {
 
 #[pyfunction]
 #[pyo3(signature=(values, /, indices, * ))]
-pub(crate) fn struct_field(
-    py: Python,
-    values: PyArray,
-    indices: StructIndex,
-) -> PyArrowResult<PyObject> {
+pub(crate) fn struct_field(values: PyArray, indices: StructIndex) -> PyArrowResult<Arro3Array> {
     let (orig_array, field) = values.into_inner();
     let indices = indices.into_list();
 
@@ -40,8 +37,7 @@ pub(crate) fn struct_field(
         array_ref.slice(orig_array.offset(), orig_array.len()),
         field_ref.clone(),
     )
-    .to_arro3(py)?
-    .unbind())
+    .into())
 }
 
 fn get_child(array: &ArrayRef, i: usize) -> Result<(&ArrayRef, &FieldRef), ArrowError> {

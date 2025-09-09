@@ -2,32 +2,70 @@
 
 [![PyPI][pypi_badge]][pypi_link]
 [![Conda Version][conda_version_badge]][conda_version]
-[![PyPI - Downloads][pypi-img]][pypi-link]
 
 [pypi_badge]: https://badge.fury.io/py/arro3-core.svg
 [pypi_link]: https://pypi.org/project/arro3-core/
 [conda_version_badge]: https://img.shields.io/conda/vn/conda-forge/arro3-core.svg
 [conda_version]: https://prefix.dev/channels/conda-forge/packages/arro3-core
-[pypi-img]: https://img.shields.io/pypi/dm/arro3-core
-[pypi-link]: https://pypi.org/project/arro3-core/
 
-A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs).
+A minimal Python library for [Apache Arrow](https://arrow.apache.org/docs/index.html), binding to the [Rust Arrow implementation](https://github.com/apache/arrow-rs) using [`pyo3`](https://github.com/PyO3/pyo3). (`arro3` means _oxidized Arrow_.)
 
-arro3 features:
+arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
 
-- Classes to manage and operate on Arrow data.
+Consult the documentation: <https://kylebarron.dev/arro3>.
+
+### arro3-core
+
+[![PyPI - Downloads][core-pypi-img]][core-pypi-link]
+
+[core-pypi-img]: https://static.pepy.tech/badge/arro3-core/month
+[core-pypi-link]: https://pypi.org/project/arro3-core/
+
+- Classes to manage and operate on Arrow data: including `Table`, `RecordBatch`, `Array`, `ChunkedArray`, `RecordBatchReader`, `ArrayReader`, `Schema`, `Field`, and `DataType`.
+- This attempts to largely match the `pyarrow` API.
+- Intends to be as stable as possible.
+
+### arro3-io
+
+[![PyPI - Downloads][io-pypi-img]][io-pypi-link]
+
+[io-pypi-img]: https://static.pepy.tech/badge/arro3-io/month
+[io-pypi-link]: https://pypi.org/project/arro3-io/
+
 - Streaming-capable readers and writers for Parquet, Arrow IPC, JSON, and CSV.
-- Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files
+
+### arro3-compute
+
+[![PyPI - Downloads][compute-pypi-img]][compute-pypi-link]
+
+[compute-pypi-img]: https://static.pepy.tech/badge/arro3-compute/month
+[compute-pypi-link]: https://pypi.org/project/arro3-compute/
+
+- Streaming compute functions. All relevant compute functions accept streams of input data and return a stream of output data. This means you can transform larger-than-memory data files.
+- If there are compute functions from the [`arrow` crate](https://docs.rs/arrow/latest/arrow/compute/index.html) you'd like to see in arro3-compute, please [open an issue](https://github.com/kylebarron/arro3/issues/new/choose).
+
+### pyo3-arrow
+
+[![Crates.io Total Downloads][pyo3-arrow-img]][pyo3-arrow-crates]
+[![Crates.io](https://img.shields.io/crates/v/geoarrow)][pyo3-arrow-crates]
+[![docs.rs](https://img.shields.io/docsrs/geoarrow?label=docs.rs)][pyo3-arrow-docs]
+
+
+While `arro3-*` modules above are intended for use by _Python_ users, [`pyo3-arrow`][pyo3-arrow-crates] is intended for _Rust_ users building their own pyo3-based Python libraries who want to pass Arrow data between Rust and Python. Refer to [the `pyo3-arrow` documentation][pyo3-arrow-docs].
+
+[pyo3-arrow-img]: https://img.shields.io/crates/d/pyo3-arrow
+[pyo3-arrow-crates]: https://crates.io/crates/pyo3-arrow
+[pyo3-arrow-docs]: https://docs.rs/pyo3-arrow
 
 ## Install
 
-arro3 is distributed with [namespace packaging](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/), meaning that individual submodules are distributed separately to PyPI and can be used in isolation.
+arro3 is available on PyPI and can be installed with pip:
 
 ```
 pip install arro3-core arro3-io arro3-compute
 ```
 
-arro3 is also on Conda and can be installed with [pixi](https://github.com/prefix-dev/pixi)
+arro3 is also on Conda-Forge and can be installed with [pixi](https://github.com/prefix-dev/pixi)
 
 ```
 pixi add arro3-core arro3-io arro3-compute
@@ -65,7 +103,3 @@ Consult the [documentation](https://kylebarron.dev/arro3/latest/).
 In general, arro3 wraps what already exists in arrow-rs. This ensures that arro3 has a reasonable maintenance burden.
 
 arro3 shies away from implementing complete conversion of arbitrary Python objects (or pandas DataFrames) to Arrow. This is complex and well served by other libraries (e.g. pyarrow). But arro3 should provide a minimal and efficient toolbox for to interoperate with other Arrow-compatible libraries.
-
-## Using from Rust
-
-You can use [pyo3-arrow](https://crates.io/crates/pyo3-arrow) to simplify passing Arrow data between Rust and Python. Refer to [its documentation](https://docs.rs/pyo3-arrow).

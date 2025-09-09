@@ -1,15 +1,17 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow::array::AsArray;
-use arrow::compute::{concat_batches, take_record_batch};
+use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
+use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
+use arrow_select::concat::concat_batches;
+use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
 use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3Array, Arro3Field, Arro3RecordBatch, Arro3Schema};
@@ -18,7 +20,7 @@ use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
-use crate::schema::display_schema;
+use crate::utils::default_repr_options;
 use crate::{PyArray, PyField, PySchema};
 
 /// A Python-facing Arrow record batch.
@@ -39,7 +41,7 @@ impl PyRecordBatch {
         schema_capsule: &Bound<PyCapsule>,
         array_capsule: &Bound<PyCapsule>,
     ) -> PyResult<Self> {
-        let (array, field, data_len) = import_array_pycapsules(schema_capsule, array_capsule)?;
+        let (array, field) = import_array_pycapsules(schema_capsule, array_capsule)?;
 
         match field.data_type() {
             DataType::Struct(fields) => {
@@ -55,18 +57,12 @@ impl PyRecordBatch {
 
                 let columns = struct_array.columns().to_vec();
 
-                // Special cast to handle zero-column RecordBatches with positive length
-                let batch = if array.len() == 0 && data_len > 0 {
-                    RecordBatch::try_new_with_options(
-                        Arc::new(schema),
-                        columns,
-                        &RecordBatchOptions::new().with_row_count(Some(data_len)),
-                    )
-                    .map_err(|err| PyValueError::new_err(err.to_string()))?
-                } else {
-                    RecordBatch::try_new(Arc::new(schema), columns)
-                        .map_err(|err| PyValueError::new_err(err.to_string()))?
-                };
+                let batch = RecordBatch::try_new_with_options(
+                    Arc::new(schema),
+                    columns,
+                    &RecordBatchOptions::new().with_row_count(Some(array.len())),
+                )
+                .map_err(|err| PyValueError::new_err(err.to_string()))?;
                 Ok(Self::new(batch))
             }
             dt => Err(PyValueError::new_err(format!(
@@ -107,12 +103,11 @@ impl PyRecordBatch {
     /// Export to a pyarrow.RecordBatch
     ///
     /// Requires pyarrow >=14
-    pub fn to_pyarrow(self, py: Python) -> PyResult<PyObject> {
+    pub fn into_pyarrow(self, py: Python) -> PyResult<Bound<PyAny>> {
         let pyarrow_mod = py.import(intern!(py, "pyarrow"))?;
-        let pyarrow_obj = pyarrow_mod
+        pyarrow_mod
             .getattr(intern!(py, "record_batch"))?
-            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)?;
-        pyarrow_obj.into_py_any(py)
+            .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 
     pub(crate) fn to_array_pycapsules<'py>(
@@ -147,8 +142,14 @@ impl AsRef<RecordBatch> for PyRecordBatch {
 impl Display for PyRecordBatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "arro3.core.RecordBatch")?;
-        writeln!(f, "-----------------")?;
-        display_schema(&self.0.schema(), f)
+        pretty_format_batches_with_options(
+            &[self.0.slice(0, 10.min(self.0.num_rows()))],
+            &default_repr_options(),
+        )
+        .map_err(|_| std::fmt::Error)?
+        .fmt(f)?;
+
+        Ok(())
     }
 }
 
@@ -162,8 +163,8 @@ impl PyRecordBatch {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        if let Ok(data) = data.extract::<PyRecordBatch>() {
-            Ok(data)
+        if data.hasattr(intern!(py, "__arrow_c_array__"))? {
+            Ok(data.extract::<PyRecordBatch>()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type::<PyRecordBatch>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
