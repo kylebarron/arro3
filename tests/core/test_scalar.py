@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from datetime import date, datetime
 from time import sleep
+from zoneinfo import ZoneInfo
 
 import pyarrow as pa
 import pytest
@@ -51,18 +52,52 @@ def test_as_py():
 
 
 time_units = ["s", "ms", "us", "ns"]
-time_zones = [None, "UTC", "America/New_York"]
+
+
+@pytest.mark.parametrize("time_unit", (time_units))
+def test_as_py_datetime_no_tz(time_unit: str):
+    now = datetime.now()
+
+    pa_arr = pa.array([now], type=pa.timestamp(time_unit, None))
+    arro3_arr = Array(pa_arr)
+    dt_from_arro3: datetime = arro3_arr[0].as_py()
+    dt_from_pyarrow: datetime = pa_arr[0].as_py()
+
+    assert dt_from_arro3 == dt_from_pyarrow, "Datetimes should match"
+    assert dt_from_arro3.tzinfo is None
+    assert dt_from_pyarrow.tzinfo is None
+
+
+@pytest.mark.parametrize("time_unit", (time_units))
+def test_as_py_datetime_fixed_offset(time_unit: str):
+    dt = datetime.fromisoformat("2024-09-09T12:00:00+05:30")
+
+    pa_arr = pa.array([dt], type=pa.timestamp(time_unit, "+05:30"))
+    arro3_arr = Array(pa_arr)
+    dt_from_arro3: datetime = arro3_arr[0].as_py()
+    dt_from_pyarrow: datetime = pa_arr[0].as_py()
+
+    assert dt == dt_from_arro3 == dt_from_pyarrow, "Datetimes should match"
+    assert dt.tzinfo == dt_from_arro3.tzinfo
+    # PyArrow uses pytz to store tzinfo, so we don't compare against that
+
+
+time_zones = ["UTC", "America/New_York"]
 
 
 @pytest.mark.parametrize(
     "time_unit,time_zone", list(itertools.product(time_units, time_zones))
 )
-def test_as_py_datetime(time_unit: str, time_zone: str | None):
+def test_as_py_datetime_with_tz(time_unit: str, time_zone: str):
     now = datetime.now()
 
     pa_arr = pa.array([now], type=pa.timestamp(time_unit, time_zone))
     arro3_arr = Array(pa_arr)
-    assert arro3_arr[0].as_py() == pa_arr[0].as_py()
+    dt_from_arro3: datetime = arro3_arr[0].as_py()
+    dt_from_pyarrow: datetime = pa_arr[0].as_py()
+
+    assert dt_from_arro3 == dt_from_pyarrow, "Datetimes should match"
+    assert dt_from_arro3.tzinfo == ZoneInfo(time_zone), "Timezone should match"
 
 
 def test_as_py_date():
