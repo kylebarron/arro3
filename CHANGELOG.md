@@ -2,6 +2,10 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.6.3] - 2025-09-17
+
+- feature(arro3-core): Maintain timezone info when converting scalar tz to datetime.datetime (#400)
+
 ## [0.6.2] - 2025-09-09
 
 - Enable sdist artifacts #398
