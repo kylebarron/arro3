@@ -2,6 +2,7 @@ from io import BytesIO
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+from arro3.core import Array, DataType, Table
 from arro3.io import read_parquet, write_parquet
 
 
@@ -42,3 +43,15 @@ def test_copy_parquet_kv_metadata():
 
     reader = read_parquet("test.parquet")
     assert reader.schema.metadata[b"hello"] == b"world"
+
+
+def test_string_view():
+    arr = Array(["foo", "bar", "baz"], type=DataType.string_view())
+    table = Table.from_arrays([arr], names=["a"])
+
+    bio = BytesIO()
+    write_parquet(table, bio)
+    bio.seek(0)
+
+    table_retour = read_parquet(bio).read_all()
+    assert table == table_retour
