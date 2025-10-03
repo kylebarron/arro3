@@ -4,6 +4,7 @@ import itertools
 from datetime import date, datetime
 from time import sleep
 from zoneinfo import ZoneInfo
+from decimal import Decimal
 
 import pyarrow as pa
 import pytest
@@ -161,6 +162,20 @@ def test_as_py_dictionary():
     for i in range(len(pa_arr)):
         assert arro3_arr[i].as_py() == pa_arr[i].as_py()
 
+
+def test_as_py_decimal():
+    pa_arr = pa.array(
+        [Decimal("123.45"), Decimal("67.89"), None, Decimal("1000.00")],
+        type=pa.decimal128(precision=10, scale=2)
+    )
+    arro3_arr = Array(pa_arr)
+    arro3_arr[0].as_py()
+    # assert  == pa_arr[i].as_py()
+    # for i in range(len(pa_arr)):
+    #     assert arro3_arr[i].as_py() == pa_arr[i].as_py()
+
+    # for i in range(len(pa_arr)):
+    #     assert pa_arr[i].as_py() == arro3_arr[i].as_py()
 
 def test_map_array():
     # This comes from the MapArray docstring
