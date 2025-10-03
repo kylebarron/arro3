@@ -66,7 +66,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-compute"
-version = "0.6.1"
+version = "0.6.3"
 dependencies = [
  "arrow-arith",
  "arrow-array",
@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-core"
-version = "0.6.1"
+version = "0.6.3"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -93,7 +93,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-io"
-version = "0.6.1"
+version = "0.6.3"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -464,7 +464,8 @@ version = "7.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f8e18d0dca9578507f13f9803add0df13362b02c501c1c17734f0dbb52eaf0b"
 dependencies = [
- "unicode-segmentation",
+ "strum",
+ "strum_macros",
  "unicode-width",
 ]
 
@@ -1700,6 +1701,8 @@ dependencies = [
  "arrow-data 56.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrow-schema",
  "arrow-select",
+ "chrono",
+ "chrono-tz",
  "half",
  "indexmap",
  "numpy",
@@ -2287,6 +2290,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "strum"
+version = "0.26.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+
+[[package]]
+name = "strum_macros"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn",
+]
+
+[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2584,12 +2606,6 @@ name = "unicode-ident"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
-
-[[package]]
-name = "unicode-segmentation"
-version = "1.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6ccf251212114b54433ec949fd6a7841275f9ada20dddd2f29e9ceea4501493"
 
 [[package]]
 name = "unicode-width"
