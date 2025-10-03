@@ -377,23 +377,37 @@ impl PyScalar {
                 let value = array.values().slice(key, 1);
                 PyScalar::try_from_array_ref(value)?.as_py(py)?
             }
+            DataType::Decimal32(precision, scale) => {
+                let decimal_mod = py.import(intern!(py, "decimal"))?;
+                let decimal_class = decimal_mod.getattr(intern!(py, "Decimal"))?;
 
-            // TODO: decimal support.
-            //
-            // We should implement this by constructing a tuple object to pass into the
-            // decimal.Decimal constructor.
-            //
-            // From the docs: https://docs.python.org/3/library/decimal.html#decimal.Decimal
-            //
-            // If value is a tuple, it should have three components, a sign (0 for positive or 1
-            // for negative), a tuple of digits, and an integer exponent. For example, Decimal((0,
-            // (1, 4, 1, 4), -3)) returns Decimal('1.414').
-            DataType::Decimal32(_, _)
-            | DataType::Decimal64(_, _)
-            | DataType::Decimal128(_, _)
-            | DataType::Decimal256(_, _) => {
-                // let array = arr.as_primitive::<Decimal128Type>();
-                todo!()
+                let array = arr.as_primitive::<Decimal32Type>();
+                let s = Decimal32Type::format_decimal(array.value(0), *precision, *scale);
+                decimal_class.call1((s,))?.unbind()
+            }
+            DataType::Decimal64(precision, scale) => {
+                let decimal_mod = py.import(intern!(py, "decimal"))?;
+                let decimal_class = decimal_mod.getattr(intern!(py, "Decimal"))?;
+
+                let array = arr.as_primitive::<Decimal64Type>();
+                let s = Decimal64Type::format_decimal(array.value(0), *precision, *scale);
+                decimal_class.call1((s,))?.unbind()
+            }
+            DataType::Decimal128(precision, scale) => {
+                let decimal_mod = py.import(intern!(py, "decimal"))?;
+                let decimal_class = decimal_mod.getattr(intern!(py, "Decimal"))?;
+
+                let array = arr.as_primitive::<Decimal128Type>();
+                let s = Decimal128Type::format_decimal(array.value(0), *precision, *scale);
+                decimal_class.call1((s,))?.unbind()
+            }
+            DataType::Decimal256(precision, scale) => {
+                let decimal_mod = py.import(intern!(py, "decimal"))?;
+                let decimal_class = decimal_mod.getattr(intern!(py, "Decimal"))?;
+
+                let array = arr.as_primitive::<Decimal256Type>();
+                let s = Decimal256Type::format_decimal(array.value(0), *precision, *scale);
+                decimal_class.call1((s,))?.unbind()
             }
             DataType::Map(_, _) => {
                 let array = arr.as_map();
