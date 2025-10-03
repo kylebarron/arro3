@@ -152,8 +152,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.13t
+            3.9
+            3.10
+            3.11
+            3.12
             3.13
+            3.13t
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
