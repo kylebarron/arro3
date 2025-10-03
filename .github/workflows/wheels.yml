@@ -56,15 +56,23 @@ jobs:
           version: "0.4.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.12 3.13 3.13t pypy3.10
+        run: uv python install 3.9 3.10 3.11 3.13t pypy3.10
 
-      - name: Build wheels
+      - name: Build abi3-py311 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3-py311 --features extension-module --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: ${{ matrix.platform.manylinux }}
+
+      - name: Build version-specific wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
@@ -101,15 +109,26 @@ jobs:
           version: "0.4.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.12 3.13 3.13t pypy3.10
+        run: uv python install 3.9 3.10 3.11 3.13t pypy3.10
 
-      - name: Build wheels
+      - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist --features abi3-py311 --features extension-module --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: musllinux_1_2
+
+      - name: Build version-specific wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
+          # maturin to find the executable. --find-interpreter did not find it.
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: musllinux_1_2
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -133,15 +152,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.13t
+            3.9
+            3.10
+            3.11
+            3.12
             3.13
+            3.13t
 
-      - name: Build wheels
+      - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i 3.13t --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist --features abi3-py311 --features extension-module --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
+
+      - name: Build version-specific wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
+          # maturin to find the executable. --find-interpreter did not find it.
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -173,12 +206,22 @@ jobs:
       - name: Install Python versions
         run: uv python install 3.9 3.10 3.11 3.12 3.13 3.13t pypy3.10
 
-      - name: Build wheels
+      - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.11 -i 3.12 -i 3.13 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist --features abi3-py311 --features extension-module --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
+
+      - name: Build version-specific wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
+          # maturin to find the executable. --find-interpreter did not find it.
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -225,7 +268,7 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [linux, windows, macos]
+    needs: [linux, musllinux, windows, macos]
     steps:
       - uses: actions/download-artifact@v4
         with:
