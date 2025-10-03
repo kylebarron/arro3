@@ -481,7 +481,7 @@ dev = [
     { name = "boto3", specifier = ">=1.35.38" },
     { name = "geoarrow-types", specifier = ">=0.3.0" },
     { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "maturin", specifier = ">=1.7.4" },
+    { name = "maturin", specifier = ">=1.9.4" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pandas-stubs" },
     { name = "pip", specifier = ">=24.2" },
