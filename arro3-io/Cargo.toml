@@ -27,6 +27,8 @@ async = [
     "dep:object_store",
     "dep:futures",
 ]
+abi3-py311 = ["pyo3/abi3-py311"]
+extension-module = ["pyo3/extension-module"]
 
 [dependencies]
 arrow-array = { workspace = true }

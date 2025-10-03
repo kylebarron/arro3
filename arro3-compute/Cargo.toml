@@ -17,6 +17,10 @@ rust-version = { workspace = true }
 name = "_compute"
 crate-type = ["cdylib"]
 
+[features]
+abi3-py311 = ["pyo3/abi3-py311"]
+extension-module = ["pyo3/extension-module"]
+
 [dependencies]
 arrow-arith = { workspace = true }
 arrow-array = { workspace = true }
