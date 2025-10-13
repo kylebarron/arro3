@@ -2,7 +2,11 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
-## [0.6.4] - 2025-09-17
+## [0.6.5] - 2025-10-13
+
+- fix(ci): Ensure we use Python 3.11 interpreter for building abi3 wheels #416
+
+## [0.6.4] - 2025-10-13
 
 ### What's Changed
 
