@@ -1,7 +1,4 @@
-use pyo3::exceptions::PyRuntimeWarning;
-use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::PyTuple;
 
 mod accessors;
 mod constructors;
@@ -15,15 +12,19 @@ fn ___version() -> &'static str {
 
 /// Raise RuntimeWarning for debug builds
 #[pyfunction]
-fn check_debug_build(py: Python) -> PyResult<()> {
+fn check_debug_build(_py: Python) -> PyResult<()> {
     #[cfg(debug_assertions)]
     {
-        let warnings_mod = py.import(intern!(py, "warnings"))?;
+        use pyo3::exceptions::PyRuntimeWarning;
+        use pyo3::intern;
+        use pyo3::types::PyTuple;
+
+        let warnings_mod = _py.import(intern!(_py, "warnings"))?;
         let warning = PyRuntimeWarning::new_err(
             "arro3.core has not been compiled in release mode. Performance will be degraded.",
         );
-        let args = PyTuple::new(py, vec![warning])?;
-        warnings_mod.call_method1(intern!(py, "warn"), args)?;
+        let args = PyTuple::new(_py, vec![warning])?;
+        warnings_mod.call_method1(intern!(_py, "warn"), args)?;
     }
 
     Ok(())
