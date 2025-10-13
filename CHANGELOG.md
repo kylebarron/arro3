@@ -2,6 +2,20 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.6.4] - 2025-09-17
+
+### What's Changed
+
+- feat(arro3): Freethreading - module markers + CI by @H-Plus-Time in https://github.com/kylebarron/arro3/pull/275
+- feat: Add support for Decimal scalar type conversion to Python by @kylebarron in https://github.com/kylebarron/arro3/pull/412
+- ci: Build abi3 wheels where possible, falling back to version-specific wheels by @kylebarron in https://github.com/kylebarron/arro3/pull/408
+
+### New Contributors
+
+- @H-Plus-Time made their first contribution in https://github.com/kylebarron/arro3/pull/275
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.6.3...py-v0.6.4
+
 ## [0.6.3] - 2025-09-17
 
 - feature(arro3-core): Maintain timezone info when converting scalar tz to datetime.datetime (#400)
@@ -9,7 +23,7 @@ This is the changelog for arro3. pyo3-arrow has a separate changelog.
 ## [0.6.2] - 2025-09-09
 
 - Enable sdist artifacts #398
-    - sdist is now pushed to PyPI for all packages
+  - sdist is now pushed to PyPI for all packages
 
 ## [0.6.1] - 2025-08-22
 

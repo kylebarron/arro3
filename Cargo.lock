@@ -66,7 +66,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-compute"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "arrow-arith",
  "arrow-array",
@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-core"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -93,7 +93,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-io"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
