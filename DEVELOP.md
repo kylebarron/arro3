@@ -54,3 +54,23 @@ RUSTUP_TOOLCHAIN=nightly \
     --target wasm32-unknown-emscripten \
     -i python3.11
 ```
+
+## Updating pyo3 version
+
+It takes a few steps to update for a new pyo3 version. We have to do these steps in a specific order because of intertangled dependencies.
+
+arro3 depends on pyo3-arrow and pyo3-object_store. pyo3-object_store itself depends on pyo3-arrow, so we have to wait for a pyo3-arrow release before we can update pyo3-object_store, and then we need a `pyo3-object_store` release before we can update arro3 itself.
+
+1. For simplicity, arro3 often uses the workspace dependency version of `pyo3-arrow`, with `pyo3-arrow = { path = "./pyo3-arrow" }` in `Cargo.toml`. Instead, we need to unlink this so that we can update arro3.
+
+    Change this to use the git dependency instead, pointing to the latest commit hash of `pyo3-arrow` that uses the existing pyo3 version. I.e. something like this
+
+    ```toml
+    pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "e2de4da2f732667dd796335ea7def8b111f79838" }
+    ```
+    Where this `rev` is the current `main`.
+
+2. Update pyo3 version in `pyo3-arrow/Cargo.toml`. Open a PR and release a new version of `pyo3-arrow`. Note that `pyo3-arrow` also depends on `numpy`, so we need to wait for a new release there, but that should be pretty fast.
+3. Ensure `pyo3-async-runtimes` and `pyo3-file` have releases for latest `pyo3`.
+4. Update `pyo3-object-store` to depend on the new `pyo3-arrow` version. Open a PR and release a new version of `pyo3-object-store`.
+5. Finally, update `arro3/Cargo.toml` to depend on the new `pyo3-arrow` and `pyo3-object-store` versions, and update pyo3 version. Open a PR and release a new version of `arro3`.
