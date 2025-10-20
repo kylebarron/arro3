@@ -3,7 +3,7 @@
 use numpy::BorrowError;
 use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
-use pyo3::DowncastError;
+use pyo3::CastError;
 use thiserror::Error;
 
 /// The Error variants returned by this crate.
@@ -33,8 +33,8 @@ impl From<PyArrowError> for PyErr {
     }
 }
 
-impl<'a, 'py> From<DowncastError<'a, 'py>> for PyArrowError {
-    fn from(other: DowncastError<'a, 'py>) -> Self {
+impl<'a, 'py> From<CastError<'a, 'py>> for PyArrowError {
+    fn from(other: CastError<'a, 'py>) -> Self {
         Self::PyErr(PyValueError::new_err(format!(
             "Could not downcast: {}",
             other
