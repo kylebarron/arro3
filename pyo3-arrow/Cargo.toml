@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-arrow"
-version = "0.12.0"
+version = "0.14.0"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Arrow integration for pyo3."
@@ -19,12 +19,12 @@ default = ["buffer_protocol"]
 buffer_protocol = []
 
 [dependencies]
-arrow-array = { version = "56", features = ["chrono-tz", "ffi"] }
-arrow-buffer = "56"
-arrow-cast = { version = "56", features = ["prettyprint"] }
-arrow-data = "56"
-arrow-schema = "56"
-arrow-select = "56"
+arrow-array = { version = "57", features = ["chrono-tz", "ffi"] }
+arrow-buffer = "57"
+arrow-cast = { version = "57", features = ["prettyprint"] }
+arrow-data = "57"
+arrow-schema = "57"
+arrow-select = "57"
 chrono = "0.4"
 chrono-tz = "0.10"
 pyo3 = { version = "0.26", features = ["chrono", "chrono-tz", "indexmap"] }

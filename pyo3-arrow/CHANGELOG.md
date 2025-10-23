@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.14.0] - 2025-10-23
+
+Release with pyo3 0.26 and arrow 57.
+
 ## [0.12.0] - 2025-09-02
 
 ### Breaking :wrench:
