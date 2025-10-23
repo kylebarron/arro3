@@ -8,11 +8,12 @@ use parquet::arrow::arrow_writer::ArrowWriterOptions;
 use parquet::arrow::async_reader::ParquetObjectReader;
 use parquet::arrow::ArrowWriter;
 use parquet::basic::{Compression, Encoding};
+use parquet::file::metadata::KeyValue;
 use parquet::file::properties::{WriterProperties, WriterVersion};
-use parquet::format::KeyValue;
 use parquet::schema::types::ColumnPath;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::pybacked::PyBackedStr;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::Arro3RecordBatchReader;
 use pyo3_arrow::input::AnyRecordBatch;
@@ -79,35 +80,41 @@ async fn read_parquet_async_inner(
 
 pub(crate) struct PyWriterVersion(WriterVersion);
 
-impl<'py> FromPyObject<'py> for PyWriterVersion {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let s: String = ob.extract()?;
-        Ok(Self(
-            WriterVersion::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
-        ))
+impl<'py> FromPyObject<'_, 'py> for PyWriterVersion {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        let s = obj.extract::<PyBackedStr>()?;
+        let version =
+            WriterVersion::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?;
+        Ok(Self(version))
     }
 }
 
 pub(crate) struct PyCompression(Compression);
 
-impl<'py> FromPyObject<'py> for PyCompression {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let s: String = ob.extract()?;
-        Ok(Self(
-            Compression::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
-        ))
+impl<'py> FromPyObject<'_, 'py> for PyCompression {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        let s = obj.extract::<PyBackedStr>()?;
+        let compression =
+            Compression::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?;
+        Ok(Self(compression))
     }
 }
 
 #[derive(Debug)]
 pub(crate) struct PyEncoding(Encoding);
 
-impl<'py> FromPyObject<'py> for PyEncoding {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let s: String = ob.extract()?;
-        Ok(Self(
-            Encoding::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?,
-        ))
+impl<'py> FromPyObject<'_, 'py> for PyEncoding {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        let s = obj.extract::<PyBackedStr>()?;
+        let encoding =
+            Encoding::from_str(&s).map_err(|err| PyValueError::new_err(err.to_string()))?;
+        Ok(Self(encoding))
     }
 }
 
@@ -115,11 +122,13 @@ impl<'py> FromPyObject<'py> for PyEncoding {
 #[allow(dead_code)]
 pub(crate) struct PyColumnPath(ColumnPath);
 
-impl<'py> FromPyObject<'py> for PyColumnPath {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        if let Ok(path) = ob.extract::<String>() {
+impl<'py> FromPyObject<'_, 'py> for PyColumnPath {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(path) = obj.extract::<String>() {
             Ok(Self(path.into()))
-        } else if let Ok(path) = ob.extract::<Vec<String>>() {
+        } else if let Ok(path) = obj.extract::<Vec<String>>() {
             Ok(Self(path.into()))
         } else {
             Err(PyTypeError::new_err(

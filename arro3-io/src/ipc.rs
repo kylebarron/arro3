@@ -33,9 +33,11 @@ pub enum IpcCompression {
     ZSTD,
 }
 
-impl<'py> FromPyObject<'py> for IpcCompression {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let s: String = ob.extract()?;
+impl<'py> FromPyObject<'_, 'py> for IpcCompression {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        let s: String = obj.extract()?;
         match s.to_lowercase().as_str() {
             "lz4" | "lz4_frame" | "lz4frame" => Ok(Self::LZ4),
             "zstd" => Ok(Self::ZSTD),
