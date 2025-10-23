@@ -530,7 +530,8 @@ dependencies = [
 [[package]]
 name = "numpy"
 version = "0.27.0"
-source = "git+https://github.com/Icxolu/rust-numpy?rev=9576a65dcb379718884e9e600cf84db94c24d2bf#9576a65dcb379718884e9e600cf84db94c24d2bf"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fa24ffc88cf9d43f7269d6b6a0d0a00010924a8cc90604a21ef9c433b66998d"
 dependencies = [
  "half",
  "libc",
@@ -613,7 +614,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-arrow"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
