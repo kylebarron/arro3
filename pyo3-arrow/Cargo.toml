@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-arrow"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["Kyle Barron <kylebarron2@gmail.com>"]
 edition = "2021"
 description = "Arrow integration for pyo3."
