@@ -30,10 +30,7 @@ chrono-tz = "0.10"
 pyo3 = { version = "0.27", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
-numpy = { git = "https://github.com/Icxolu/rust-numpy", rev = "9576a65dcb379718884e9e600cf84db94c24d2bf", features = [
-    "half",
-] }
-# numpy = { version = "0.27", features = ["half"] }
+numpy = { version = "0.27", features = ["half"] }
 thiserror = "1"
 
 [lib]
