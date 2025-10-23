@@ -26,7 +26,7 @@ use crate::error::PyArrowResult;
 pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<ArrayRef> {
     macro_rules! primitive_numpy_to_arrow {
         ($rust_type:ty, $arrow_type:ty) => {{
-            let np_arr = array.downcast::<PyArray1<$rust_type>>()?;
+            let np_arr = array.cast::<PyArray1<$rust_type>>()?;
             let np_readonly_arr = np_arr.try_readonly()?;
             let arrow_arr = if let Ok(contiguous_arr) = np_readonly_arr.as_slice() {
                 PrimitiveArray::<$arrow_type>::from_iter_values(contiguous_arr.iter().map(|v| *v))
@@ -61,9 +61,9 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
     } else if is_type::<i64>(py, &dtype) {
         primitive_numpy_to_arrow!(i64, Int64Type)
     } else if is_type::<bool>(py, &dtype) {
-        let arr = array.downcast::<PyArray1<bool>>()?;
+        let arr = array.cast::<PyArray1<bool>>()?;
         Ok(Arc::new(BooleanArray::from(arr.to_owned_array().to_vec())))
-    } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Days>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Datetime<Days>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             days_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -73,7 +73,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Seconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Datetime<Seconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             seconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -83,7 +83,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Milliseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Datetime<Milliseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             milliseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -93,7 +93,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Microseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Datetime<Microseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             microseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -103,7 +103,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Datetime<Nanoseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Datetime<Nanoseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             nanoseconds_to_timestamp_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -113,7 +113,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Seconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Timedelta<Seconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             seconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -123,7 +123,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Milliseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Timedelta<Milliseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             milliseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -133,7 +133,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Microseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Timedelta<Microseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             microseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -143,7 +143,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
                 np_readonly_arr.len(),
             )
         }
-    } else if let Ok(array) = array.downcast::<PyArray1<Timedelta<Nanoseconds>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Timedelta<Nanoseconds>>>() {
         let np_readonly_arr = array.try_readonly()?;
         if let Ok(np_contiguous_arr) = np_readonly_arr.as_slice() {
             nanoseconds_to_duration_array(np_contiguous_arr.iter(), np_contiguous_arr.len())
@@ -157,7 +157,7 @@ pub fn from_numpy(py: Python, array: &Bound<PyUntypedArray>) -> PyArrowResult<Ar
         import_fixed_width_string_array(array)
     } else if dtype.char() == b'S' {
         import_fixed_width_binary_array(array)
-    } else if let Ok(array) = array.downcast::<PyArray1<Py<PyAny>>>() {
+    } else if let Ok(array) = array.cast::<PyArray1<Py<PyAny>>>() {
         try_import_object_array(py, array)
     } else if dtype.char() == b'T' {
         import_variable_width_string_array(

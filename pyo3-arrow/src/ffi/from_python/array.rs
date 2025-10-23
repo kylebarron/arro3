@@ -4,16 +4,18 @@ use crate::buffer::AnyBufferProtocol;
 use crate::ffi::from_python::utils::call_arrow_c_array;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::{intern, PyAny, PyResult};
+use pyo3::{intern, PyAny};
 
-impl<'a> FromPyObject<'a> for PyArray {
-    fn extract_bound(ob: &Bound<'a, PyAny>) -> PyResult<Self> {
-        if ob.hasattr(intern!(ob.py(), "__arrow_c_array__"))? {
-            let (schema_capsule, array_capsule) = call_arrow_c_array(ob)?;
+impl<'py> FromPyObject<'_, 'py> for PyArray {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if obj.hasattr(intern!(obj.py(), "__arrow_c_array__"))? {
+            let (schema_capsule, array_capsule) = call_arrow_c_array(&obj)?;
             Self::from_arrow_pycapsule(&schema_capsule, &array_capsule)
         } else {
             #[cfg(feature = "buffer_protocol")]
-            if let Ok(buf) = ob.extract::<AnyBufferProtocol>() {
+            if let Ok(buf) = obj.extract::<AnyBufferProtocol>() {
                 return Ok(buf.try_into()?);
             }
 
