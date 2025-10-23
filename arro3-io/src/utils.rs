@@ -23,15 +23,17 @@ impl FileReader {
     }
 }
 
-impl<'py> FromPyObject<'py> for FileReader {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        if let Ok(path) = ob.extract::<PathBuf>() {
+impl<'py> FromPyObject<'_, 'py> for FileReader {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(path) = obj.extract::<PathBuf>() {
             Ok(Self::File(File::open(path)?))
-        } else if let Ok(path) = ob.extract::<String>() {
+        } else if let Ok(path) = obj.extract::<String>() {
             Ok(Self::File(File::open(path)?))
         } else {
             Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
-                ob.clone(),
+                obj.as_any().clone(),
                 true,
                 false,
                 true,
@@ -111,15 +113,17 @@ pub enum FileWriter {
     FileLike(PyFileLikeObject),
 }
 
-impl<'py> FromPyObject<'py> for FileWriter {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        if let Ok(path) = ob.extract::<PathBuf>() {
+impl<'py> FromPyObject<'_, 'py> for FileWriter {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(path) = obj.extract::<PathBuf>() {
             Ok(Self::File(File::create(path)?))
-        } else if let Ok(path) = ob.extract::<String>() {
+        } else if let Ok(path) = obj.extract::<String>() {
             Ok(Self::File(File::create(path)?))
         } else {
             Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
-                ob.clone(),
+                obj.as_any().clone(),
                 false,
                 true,
                 true,

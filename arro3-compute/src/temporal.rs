@@ -39,9 +39,11 @@ pub enum DatePart {
     Nanosecond,
 }
 
-impl<'a> FromPyObject<'a> for DatePart {
-    fn extract_bound(ob: &Bound<'a, PyAny>) -> PyResult<Self> {
-        let s: String = ob.extract()?;
+impl<'py> FromPyObject<'_, 'py> for DatePart {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        let s: String = obj.extract()?;
         match s.to_lowercase().as_str() {
             "quarter" => Ok(Self::Quarter),
             "year" => Ok(Self::Year),

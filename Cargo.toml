@@ -20,26 +20,26 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow-arith = "56.2"
-arrow-array = { version = "56.2", features = ["ffi"] }
-arrow-buffer = "56.2"
-arrow-cast = "56.2"
-arrow-csv = "56.2"
-arrow-ipc = { version = "56.2", features = ["lz4", "zstd"] }
-arrow-json = "56.2"
-arrow-schema = "56.2"
-arrow-select = "56.2"
+arrow-arith = "57"
+arrow-array = { version = "57", features = ["ffi"] }
+arrow-buffer = "57"
+arrow-cast = "57"
+arrow-csv = "57"
+arrow-ipc = { version = "57", features = ["lz4", "zstd"] }
+arrow-json = "57"
+arrow-schema = "57"
+arrow-select = "57"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
 numpy = "0.26"
 object_store = "0.12.4"
-parquet = "56.2"
-pyo3 = { version = "0.26", features = ["macros", "indexmap"] }
-pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "e2de4da2f732667dd796335ea7def8b111f79838" }
-pyo3-async-runtimes = { version = "0.26", features = ["tokio-runtime"] }
-pyo3-file = { git = "https://github.com/alex/pyo3-file", rev = "82b96dc188a48b88421f41b24cb13da114fd2fe8" }
-pyo3-object_store = "0.6"
+parquet = "57"
+pyo3 = { version = "0.27", features = ["macros", "indexmap"] }
+pyo3-arrow = "0.15"
+pyo3-async-runtimes = { version = "0.27", features = ["tokio-runtime"] }
+pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "aacc18816591f9987247bac8b7011b452b4eeb3e" }
+pyo3-object_store = "0.7"
 thiserror = "1.0.63"
 
 [profile.release]
