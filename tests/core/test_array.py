@@ -123,7 +123,7 @@ def test_repr():
     )
     arr2 = Array.from_arrow(arr)
     expected = """\
-        arro3.core.Array<Timestamp(Microsecond, Some("UTC"))>
+        arro3.core.Array<Timestamp(µs, "UTC")>
         [
           2020-01-01T00:00:00Z,
           2020-01-02T00:00:00Z,
