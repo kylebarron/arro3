@@ -25,9 +25,8 @@ def test_fields_struct_type():
     assert struct_type.fields == [field_foo, field_bar]
 
 
-@pytest.mark.xfail
 def test_list_data_type_construction_with_dt():
-    _ = DataType.list(DataType.int16())
+    DataType.list(DataType.int16())
 
 
 def test_hashable():
