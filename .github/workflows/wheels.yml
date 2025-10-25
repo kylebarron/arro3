@@ -50,13 +50,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.4.x"
+          version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.13t pypy3.10
+        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -72,7 +72,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
@@ -103,13 +103,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.4.x"
+          version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.13t pypy3.10
+        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -125,7 +125,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: musllinux_1_2
 
@@ -155,9 +155,8 @@ jobs:
             3.9
             3.10
             3.11
-            3.12
-            3.13
             3.13t
+            3.14t
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -172,7 +171,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
@@ -198,13 +197,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.4.x"
+          version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.12 3.13 3.13t pypy3.10
+        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -219,7 +218,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i pypy3.10 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
