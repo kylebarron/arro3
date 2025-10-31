@@ -74,3 +74,10 @@ arro3 depends on pyo3-arrow and pyo3-object_store. pyo3-object_store itself depe
 3. Ensure `pyo3-async-runtimes` and `pyo3-file` have releases for latest `pyo3`.
 4. Update `pyo3-object-store` to depend on the new `pyo3-arrow` version. Open a PR and release a new version of `pyo3-object-store`.
 5. Finally, update `arro3/Cargo.toml` to depend on the new `pyo3-arrow` and `pyo3-object-store` versions, and update pyo3 version. Open a PR and release a new version of `arro3`.
+
+## Publishing to crates.io
+
+To publish to crates.io, we have Github Actions workflows set up to publish when pushing tags with specific formats.
+
+- To publish `pyo3-arrow`, push a tag like `pyo3-arrow-vX.Y.Z` where `X.Y.Z` is the new version.
+- To publish `pyo3-bytes`, push a tag like `pyo3-bytes-vX.Y.Z` where `X.Y.Z` is the new version.
