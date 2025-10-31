@@ -3,11 +3,12 @@ on:
   push:
     # Triggers when pushing tags starting with 'pyo3-bytes-v'
     tags: ["pyo3-bytes-v*"]
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     # Optional: for enhanced security
-    environment: rust-release
+    environment: rust-release-pyo3-bytes
     permissions:
       id-token: write # Required for OIDC token exchange
     steps:

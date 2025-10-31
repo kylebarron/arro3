@@ -7,7 +7,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     # Optional: for enhanced security
-    environment: rust-release
+    environment: rust-release-pyo3-arrow
     permissions:
       id-token: write # Required for OIDC token exchange
     steps:
