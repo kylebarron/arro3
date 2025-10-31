@@ -620,11 +620,12 @@ impl PyTable {
         &self,
         i: usize,
         field: NameOrField,
-        column: PyChunkedArray,
+        column: AnyArray,
     ) -> PyArrowResult<Arro3Table> {
+        let column = column.into_chunked_array()?;
         if self.num_rows() != column.len() {
             return Err(
-                PyValueError::new_err("Number of rows in column does not match table.").into(),
+                PyValueError::new_err("Number of rows in column does not match the table.").into(),
             );
         }
 
