@@ -73,6 +73,7 @@ def test_table_append_column():
     Test that Table.append_column appends columns of different types.
     """
     table = Table.from_arrays([pa.array(["a", "b"])], names=["c0"])
+    expected_num_columns = 4
 
     # PyArray
     c_name, c_value = "c1", [1, 2]
@@ -94,8 +95,55 @@ def test_table_append_column():
     table = table.append_column(c_name, reader)
     assert c_name in table.column_names
     assert table[c_name].to_pylist() == c_value
+    assert len(table.columns) == expected_num_columns
 
-    assert len(table.columns) == 4
+
+def test_table_append_column_chunked():
+    """
+    Test that a column can be appended and behaves correctly when the table
+    is chunked.
+    """
+    rbs = [
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        1,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        2,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+    ]
+
+    table = Table.from_batches(rbs)
+    assert table.chunk_lengths == [1, 1]
+
+    c_name, c_value = "c1", [3, 4]
+    table = table.append_column(c_name, Array(pa.array(c_value)))
+
+    # Chunks should be the same, we only added a column.
+    assert table.chunk_lengths == [1, 1]
+    assert c_name in table.column_names
+    assert table[c_name].to_pylist() == c_value
+
+    table = table.rechunk(max_chunksize=3)
+    # After rechunking _only_ chunk sizes should change.
+    assert table.chunk_lengths == [
+        2,
+    ]
+    assert c_name in table.column_names
+    assert table[c_name].to_pylist() == c_value
 
 
 def test_table_from_batches_empty_columns_with_len():

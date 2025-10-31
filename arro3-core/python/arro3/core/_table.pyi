@@ -1,6 +1,5 @@
 from typing import Sequence, overload
 
-from ._array import Array
 from ._chunked_array import ChunkedArray
 from ._field import Field
 from ._record_batch import RecordBatch
@@ -236,7 +235,9 @@ class Table:
             New table with the passed column added.
         """
     def append_column(
-        self, field: str | ArrowSchemaExportable, column: ArrowStreamExportable | Array
+        self,
+        field: str | ArrowSchemaExportable,
+        column: ArrowStreamExportable | ArrowArrayExportable,
     ) -> Table:
         """Append column at the end of columns.
 
