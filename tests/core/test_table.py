@@ -146,6 +146,85 @@ def test_table_append_column_chunked():
     assert table[c_name].to_pylist() == c_value
 
 
+def test_table_add_column():
+    """
+    Test that Table.add_column appends columns of different types at the
+    given index.
+    """
+    table = Table.from_arrays([pa.array(["a", "b"])], names=["c0"])
+    col_id = 0
+    expected_num_columns = 4
+
+    # PyArray
+    c_name, c_value = "c1", [1, 2]
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    # PyChunkedArray
+    c_name, c_value = "c2", [3, 4]
+    table = table.add_column(col_id, c_name, ChunkedArray(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    # PyArrayReader
+    c_name, c_value = "c3", [5, 6]
+    reader = ArrayReader.from_arrays(
+        pa.field("_", pa.int64()), arrays=[pa.array(c_value)]
+    )
+    table = table.add_column(col_id, c_name, reader)
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+    assert len(table.columns) == expected_num_columns
+
+    # Just in case, let's test an index different of 0.
+    table = table.add_column(col_id + 1, c_name + "extra", Array(pa.array(c_value)))
+    assert table.column(col_id).to_pylist() == c_value
+
+
+def test_table_add_column_chunked():
+    """Test that a table is correctly added in a chunked table."""
+    rbs = [
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        1,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        2,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+    ]
+
+    table = Table.from_batches(rbs)
+    assert table.chunk_lengths == [1, 1]
+
+    c_name, c_value, col_id = "c1", [3, 4], 0
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    table = table.rechunk(max_chunksize=10)
+
+    c_name, c_value, col_id = "c2", [5, 6], 1  # <- different id
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+    assert table.chunk_lengths == [2]
+
+
 def test_table_from_batches_empty_columns_with_len():
     df = pd.DataFrame({"a": [1, 2, 3]})
     no_columns = df[[]]
