@@ -220,7 +220,10 @@ class Table:
             new table
         """
     def add_column(
-        self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
+        self,
+        i: int,
+        field: str | ArrowSchemaExportable,
+        column: ArrowStreamExportable | ArrowArrayExportable,
     ) -> Table:
         """Add column to Table at position.
 
@@ -349,8 +352,12 @@ class Table:
         Returns:
             _description_
         """
+
     def set_column(
-        self, i: int, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
+        self,
+        i: int,
+        field: str | ArrowSchemaExportable,
+        column: ArrowStreamExportable | ArrowArrayExportable,
     ) -> Table:
         """Replace column in Table at position.
 

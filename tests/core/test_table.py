@@ -146,6 +146,163 @@ def test_table_append_column_chunked():
     assert table[c_name].to_pylist() == c_value
 
 
+def test_table_add_column():
+    """
+    Test that Table.add_column appends columns of different types at the
+    given index.
+    """
+    table = Table.from_arrays([pa.array(["a", "b"])], names=["c0"])
+    col_id = 0
+    expected_num_columns = 4
+
+    # PyArray
+    c_name, c_value = "c1", [1, 2]
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    # PyChunkedArray
+    c_name, c_value = "c2", [3, 4]
+    table = table.add_column(col_id, c_name, ChunkedArray(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    # PyArrayReader
+    c_name, c_value = "c3", [5, 6]
+    reader = ArrayReader.from_arrays(
+        pa.field("_", pa.int64()), arrays=[pa.array(c_value)]
+    )
+    table = table.add_column(col_id, c_name, reader)
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+    assert len(table.columns) == expected_num_columns
+
+    # Just in case, let's test an index different of 0.
+    table = table.add_column(col_id + 1, c_name + "extra", Array(pa.array(c_value)))
+    assert table.column(col_id).to_pylist() == c_value
+
+
+def test_table_add_column_chunked():
+    """Test that a table is correctly added in a chunked table."""
+    rbs = [
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        1,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        2,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+    ]
+
+    table = Table.from_batches(rbs)
+    assert table.chunk_lengths == [1, 1]
+
+    c_name, c_value, col_id = "c1", [3, 4], 0
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+
+    table = table.rechunk(max_chunksize=10)
+
+    c_name, c_value, col_id = "c2", [5, 6], 1  # <- different id
+    table = table.add_column(col_id, c_name, Array(pa.array(c_value)))
+    assert c_name in table.column_names
+    assert table.column(col_id).to_pylist() == c_value
+    assert table.chunk_lengths == [2]
+
+
+def test_table_set_column():
+    """
+    Test that we can set a column from other types like Array, ChunkedArray, and ArrayReader
+    :return:
+    """
+    table = Table.from_arrays([pa.array([1, 2])], names=["c0"])
+
+    c_value, c_name, c_index = [3, 4], "c1", 0
+    table = table.set_column(c_index, c_name, Array(pa.array(c_value)))
+    assert table.column(c_index).to_pylist() == c_value
+    assert c_name in table.column_names
+    assert (
+        table.column(c_index).field.name == c_name
+    )  # check that the rename was effective.
+
+    c_value, c_name, c_index = [4, 5], "c2", 0
+    table = table.set_column(c_index, c_name, ChunkedArray(pa.array(c_value)))
+    assert table.column(c_index).to_pylist() == c_value
+    assert c_name in table.column_names
+    assert table.column(c_index).field.name == c_name
+
+    c_value, c_name, c_index = [6, 7], "c3", 0
+    reader = ArrayReader.from_arrays(
+        pa.field("_", pa.int64()), arrays=[pa.array(c_value)]
+    )
+    table = table.set_column(c_index, c_name, reader)
+    assert table.column(c_index).to_pylist() == c_value
+    assert c_name in table.column_names
+    assert table.column(c_index).field.name == c_name
+
+
+def test_table_set_column_chunked():
+    """
+    Test that a table's column can be set as an array when it's chunked, and after it's
+    rechunked.
+    """
+
+    rbs = [
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        1,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+        pa.record_batch(
+            [
+                pa.array(
+                    [
+                        2,
+                    ]
+                ),
+            ],
+            names=["c0"],
+        ),
+    ]
+    table = Table.from_batches(rbs)
+
+    c_value, c_name, c_index = [3, 4], "c0", 0
+    table = table.set_column(c_index, c_name, Array(pa.array(c_value)))
+    assert table.column(c_index).to_pylist() == c_value
+    assert c_name in table.column_names
+    assert table.chunk_lengths == [1, 1]
+
+    table = table.rechunk(max_chunksize=10)
+    assert table.chunk_lengths == [2]
+
+    # Can it be set again after a rechunk?
+    c_value, c_name, c_index = [5, 6], "c0", 0  # Different column name on purpose.
+    table = table.set_column(c_index, c_name, Array(pa.array(c_value)))
+    assert table.column(c_index).to_pylist() == c_value
+    assert c_name in table.column_names
+    assert table.chunk_lengths == [2]
+
+
 def test_table_from_batches_empty_columns_with_len():
     df = pd.DataFrame({"a": [1, 2, 3]})
     no_columns = df[[]]
