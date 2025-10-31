@@ -235,13 +235,15 @@ class Table:
             New table with the passed column added.
         """
     def append_column(
-        self, field: str | ArrowSchemaExportable, column: ArrowStreamExportable
+        self,
+        field: str | ArrowSchemaExportable,
+        column: ArrowStreamExportable | ArrowArrayExportable,
     ) -> Table:
-        """Append column at end of columns.
+        """Append column at the end of columns.
 
         Args:
             field: _description_
-            column: Column data.
+            column: Column data. It Can be either an Array, ChunkedArray or ArrayReader.
 
         Returns:
             New table or record batch with the passed column added.

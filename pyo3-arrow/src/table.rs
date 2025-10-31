@@ -428,7 +428,7 @@ impl PyTable {
                 debug_assert_eq!(
                     array.len(),
                     batch.num_rows(),
-                    "Array and batch should have same number of rows."
+                    "Array and batch should have the same number of rows."
                 );
 
                 let mut columns = batch.columns().to_vec();
@@ -440,15 +440,14 @@ impl PyTable {
         Ok(PyTable::try_new(new_batches, new_schema)?.into())
     }
 
-    fn append_column(
-        &self,
-        field: NameOrField,
-        column: PyChunkedArray,
-    ) -> PyArrowResult<Arro3Table> {
+    fn append_column(&self, field: NameOrField, column: AnyArray) -> PyArrowResult<Arro3Table> {
+        let column: PyChunkedArray = column.into_chunked_array()?;
+
         if self.num_rows() != column.len() {
-            return Err(
-                PyValueError::new_err("Number of rows in column does not match table.").into(),
-            );
+            return Err(PyValueError::new_err(
+                "The number of rows in column does not match the table.",
+            )
+            .into());
         }
 
         let column = column.rechunk(self.chunk_lengths())?;
@@ -468,7 +467,7 @@ impl PyTable {
                 debug_assert_eq!(
                     array.len(),
                     batch.num_rows(),
-                    "Array and batch should have same number of rows."
+                    "Array and batch should have the same number of rows."
                 );
 
                 let mut columns = batch.columns().to_vec();
