@@ -399,6 +399,37 @@ impl PyTable {
         Ok(Self::try_new(batches, schema)?)
     }
 
+    fn drop_columns(&self, fields: Vec<NameOrField>) -> PyArrowResult<Arro3Table> {
+        let mut drop_indices = Vec::with_capacity(self.num_columns() - fields.len());
+        let mut missing = Vec::with_capacity(fields.len());
+
+        // If a field of a column that will be dropped
+        // does not have an index, it's an unknown column.
+        for field in fields {
+            let field_name = field.into_name();
+            match self.schema.index_of(field_name.as_str()) {
+                Ok(i) => drop_indices.push(i),
+                Err(_) => missing.push(field_name),
+            }
+        }
+
+        if !missing.is_empty() {
+            return Err(PyValueError::new_err(format!(
+                "Table does not contain column(s): {:?}",
+                missing
+            ))
+            .into());
+        }
+
+        // The indices of the columns what we will maintain, since we
+        // are going to re-use Table.select
+        let keep_indices: Vec<usize> = (0..self.num_columns())
+            .filter(|i| !drop_indices.contains(i))
+            .collect();
+
+        self.select(SelectIndices::Positions(keep_indices))
+    }
+
     fn add_column(
         &self,
         i: usize,

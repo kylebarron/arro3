@@ -21,7 +21,7 @@ use crate::PyDataType;
 /// This is a wrapper around a [FieldRef].
 #[derive(Debug)]
 #[pyclass(module = "arro3.core._core", name = "Field", subclass, frozen)]
-pub struct PyField(FieldRef);
+pub struct PyField(pub FieldRef);
 
 impl PyField {
     /// Construct a new PyField around a [FieldRef]

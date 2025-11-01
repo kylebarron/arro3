@@ -201,6 +201,13 @@ impl NameOrField {
             Self::Field(field) => field.into_inner(),
         }
     }
+
+    pub fn into_name(self) -> String {
+        match self {
+            Self::Name(s) => s,
+            Self::Field(field) => field.0.name().clone(),
+        }
+    }
 }
 
 #[derive(FromPyObject)]
