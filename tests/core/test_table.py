@@ -228,7 +228,6 @@ def test_table_add_column_chunked():
 def test_table_set_column():
     """
     Test that we can set a column from other types like Array, ChunkedArray, and ArrayReader
-    :return:
     """
     table = Table.from_arrays([pa.array([1, 2])], names=["c0"])
 
@@ -296,7 +295,7 @@ def test_table_set_column_chunked():
     assert table.chunk_lengths == [2]
 
     # Can it be set again after a rechunk?
-    c_value, c_name, c_index = [5, 6], "c0", 0  # Different column name on purpose.
+    c_value, c_name, c_index = [5, 6], "c0", 0
     table = table.set_column(c_index, c_name, Array(pa.array(c_value)))
     assert table.column(c_index).to_pylist() == c_value
     assert c_name in table.column_names
@@ -346,6 +345,54 @@ def test_nonempty_table_no_columns():
     arro3_table = Table.from_arrow(table)
     retour = pa.table(arro3_table)
     assert table == retour
+
+
+def test_drop_columns():
+    """
+    Test that several columns can be dropped at the same time.
+    """
+
+    table = pa.table({"a": [1, 2], "b": [1, 2], "c": [1, 2], "d": [1, 2], "e": [1, 2]})
+
+    table = Table.from_arrow(table)
+    del_column = "a", "c"
+    expected_columns = ["b", "d", "e"]
+
+    table = table.drop_columns(del_column)
+
+    assert table.column_names == expected_columns
+
+    with pytest.raises(
+        ValueError, match=r'Table does not contain column\(s\): \["c", "abcde"\]'
+    ):
+        # This should now raise an exception
+        # since "c" no longer exists in the table.
+        table.drop_columns(["c", "abcde"])
+
+    # All columns should be removed or none, in this case "d" exists but not "abcde"
+    with pytest.raises(ValueError):
+        table.drop_columns(["abcde", "d"])
+    assert table.column_names == expected_columns
+
+    # It's case-sensitive.
+    with pytest.raises(ValueError):
+        table.drop_columns(["D"])
+
+    with pytest.raises(ValueError):
+        table.drop_columns([Field("D", type=pa.int64())])
+
+    # Empty input should not delete any columns.
+    table = table.drop_columns([])
+    assert table.column_names == expected_columns
+
+    # Verify other sequences
+    table = table.drop_columns([][:])
+    table = table.drop_columns(tuple())
+    assert table.column_names == expected_columns
+
+    # Test a combination of `str` and `Field`
+    table = table.drop_columns(["b", Field("e", type=pa.int64())])
+    assert table.column_names == ["d"]
 
 
 class CustomException(Exception):
