@@ -8,7 +8,7 @@ use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
-use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyKeyError, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -397,6 +397,33 @@ impl PyTable {
         }
 
         Ok(Self::try_new(batches, schema)?)
+    }
+
+    fn drop_columns(&self, fields: Vec<String>) -> PyArrowResult<Arro3Table> {
+        let mut drop_indices = Vec::with_capacity(self.num_columns() - fields.len());
+        let mut missing = Vec::with_capacity(fields.len());
+
+        // If a column that will be dropped
+        // does not have an index in the current schema,
+        // it does not exist.
+        for field in fields {
+            match self.schema.index_of(field.as_str()) {
+                Ok(i) => drop_indices.push(i),
+                Err(_) => missing.push(field),
+            }
+        }
+
+        if !missing.is_empty() {
+            return Err(PyKeyError::new_err(format!("Column(s): {:?} not found", missing)).into());
+        }
+
+        // The indices of the columns what we will maintain, since we
+        // are going to re-use Table.select
+        let keep_indices: Vec<usize> = (0..self.num_columns())
+            .filter(|i| !drop_indices.contains(i))
+            .collect();
+
+        self.select(SelectIndices::Positions(keep_indices))
     }
 
     fn add_column(
