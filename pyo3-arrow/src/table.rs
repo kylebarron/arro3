@@ -8,7 +8,7 @@ use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -561,6 +561,10 @@ impl PyTable {
     }
 
     fn remove_column(&self, i: usize) -> PyArrowResult<Arro3Table> {
+        if i > self.num_columns() {
+            return Err(PyIndexError::new_err(format!("Invalid column index \"{}\"", i)).into());
+        }
+
         let mut fields = self.schema.fields().to_vec();
         fields.remove(i);
         let new_schema = Arc::new(Schema::new_with_metadata(

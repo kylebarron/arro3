@@ -348,6 +348,29 @@ def test_nonempty_table_no_columns():
     assert table == retour
 
 
+def test_remove_column():
+    """Test the removal of columns given an index"""
+    table = Table.from_arrays(
+        [pa.array([1, 2]), pa.array(["a", "b"]), pa.array([10, 20])],
+        names=["c0", "c1", "c2"],
+    )
+
+    table = table.remove_column(0)
+    assert "c0" not in table.column_names
+    assert len(table.columns) == 2
+
+    table = table.remove_column(1)
+    assert "c2" not in table.column_names
+    assert len(table.columns) == 1
+
+    with pytest.raises(IndexError, match="Invalid column index"):
+        table.remove_column(10)
+
+    # Other types than int raise an Error
+    with pytest.raises(TypeError):
+        table.remove_column("mycolumn")
+
+
 class CustomException(Exception):
     pass
 
