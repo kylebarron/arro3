@@ -51,3 +51,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Test
         run: cd pyo3-arrow && cargo check ${{ matrix.args }}
+
+      - name: Test that docs build without warnings
+        run: cd pyo3-arrow && cargo doc --all-features --document-private-items
+        env:
+          RUSTDOCFLAGS: "-D warnings"

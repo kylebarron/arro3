@@ -8,7 +8,7 @@ use chrono::{DateTime, FixedOffset, Utc};
 use chrono::{LocalResult, NaiveDate, NaiveDateTime, Offset};
 use pyo3::prelude::*;
 
-/// An [`Offset`] for [`Tz`]
+/// An [`Offset`] for [`PyArrowTz`]
 #[derive(Debug, Copy, Clone)]
 pub(crate) struct PyArrowTzOffset {
     tz: PyArrowTz,
@@ -31,7 +31,7 @@ impl Offset for PyArrowTzOffset {
 /// This is vendored from upstream so we can implement `IntoPyObject`, while also needing to
 /// implement chrono::TimeZone
 ///
-/// https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/timezone.rs#L78-L80
+/// <https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/timezone.rs#L78-L80>
 #[derive(Debug, Clone, Copy, IntoPyObject)]
 pub(crate) struct PyArrowTz(TzInner);
 
@@ -111,10 +111,10 @@ impl FromStr for PyArrowTz {
 /// Parses a fixed offset of the form "+09:00", "-09" or "+0930"
 ///
 /// Vendored from upstream
-/// https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/timezone.rs#L24-L49
+/// <https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/timezone.rs#L24-L49>
 ///
 /// Upstream doesn't want to expose the TzInner enum, only expose as string
-/// https://github.com/apache/arrow-rs/issues/7173#issuecomment-2675276458
+/// <https://github.com/apache/arrow-rs/issues/7173#issuecomment-2675276458>
 ///
 /// While we need to discern between fixed offset and tz string so that we can convert to correct
 /// Python tz class
@@ -147,7 +147,7 @@ fn parse_fixed_offset(tz: &str) -> Option<FixedOffset> {
 /// Converts an [`ArrowPrimitiveType`] to [`DateTime<Tz>`]
 ///
 /// Vendored from
-/// https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/temporal_conversions.rs#L274-L278
+/// <https://github.com/apache/arrow-rs/blob/77df2ee42d8ca1d1557a64681b240b8409deef01/arrow-array/src/temporal_conversions.rs#L274-L278>
 /// So we can use our own PyArrowTz type
 pub(crate) fn as_datetime_with_timezone<T: ArrowPrimitiveType>(
     v: i64,

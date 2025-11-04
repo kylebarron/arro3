@@ -63,8 +63,7 @@ pub fn to_array_pycapsules<'py>(
     Ok(tuple)
 }
 
-/// Export an [`ArrayIterator`][crate::ffi::ArrayIterator] to a PyCapsule holding an Arrow C Stream
-/// pointer.
+/// Export an [`ArrayIterator`] to a PyCapsule holding an Arrow C Stream pointer.
 pub fn to_stream_pycapsule<'py>(
     py: Python<'py>,
     mut array_reader: Box<dyn ArrayReader + Send>,

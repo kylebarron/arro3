@@ -10,7 +10,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum PyArrowError {
-    /// A wrapped [arrow::error::ArrowError]
+    /// A wrapped [arrow_schema::ArrowError]
     #[error(transparent)]
     ArrowError(#[from] arrow_schema::ArrowError),
 
