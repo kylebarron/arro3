@@ -85,7 +85,7 @@ impl PyArrowBuffer {
     }
 
     /// This is taken from opendal:
-    /// https://github.com/apache/opendal/blob/d001321b0f9834bc1e2e7d463bcfdc3683e968c9/bindings/python/src/utils.rs#L51-L72
+    /// <https://github.com/apache/opendal/blob/d001321b0f9834bc1e2e7d463bcfdc3683e968c9/bindings/python/src/utils.rs#L51-L72>
     unsafe fn __getbuffer__(
         slf: PyRef<Self>,
         view: *mut ffi::Py_buffer,
