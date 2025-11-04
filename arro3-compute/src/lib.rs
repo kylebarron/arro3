@@ -7,6 +7,7 @@ mod cast;
 mod concat;
 mod dictionary;
 mod filter;
+mod parse_data_type;
 mod take;
 mod temporal;
 
@@ -67,6 +68,8 @@ fn _compute(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(filter::filter))?;
     m.add_wrapped(wrap_pyfunction!(take::take))?;
     m.add_wrapped(wrap_pyfunction!(temporal::date_part))?;
+
+    m.add_wrapped(wrap_pyfunction!(parse_data_type::parse_data_type))?;
 
     Ok(())
 }
