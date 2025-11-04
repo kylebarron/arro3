@@ -137,7 +137,8 @@ impl PyTable {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
         if total_chunk_length != self.num_rows() {
             return Err(
-                PyValueError::new_err("Chunk lengths do not add up to table length").into(),
+                PyValueError::new_err(format!("Chunk lengths do not add up ({total_chunk_length})\
+                 to table length ({})", self.num_rows())).into(),
             );
         }
 
@@ -446,9 +447,11 @@ impl PyTable {
         let column: PyChunkedArray = column.into_chunked_array()?;
 
         if self.num_rows() != column.len() {
-            return Err(PyValueError::new_err(
-                "The number of rows in column does not match the table.",
-            )
+            return Err(PyValueError::new_err(format!(
+                "The number of rows in column ({}) does not match the table ({}).",
+                column.len(),
+                self.num_rows()
+            ))
             .into());
         }
 
@@ -587,7 +590,11 @@ impl PyTable {
 
     fn rename_columns(&self, names: Vec<String>) -> PyArrowResult<Arro3Table> {
         if names.len() != self.num_columns() {
-            return Err(PyValueError::new_err("When names is a list[str], must pass the same number of names as there are columns.").into());
+            return Err(PyValueError::new_err(format!(
+                "Expected ({}) column names, but got ({}). The number of names must match the number of columns.",
+                self.num_columns(),
+                names.len()
+            )).into());
         }
 
         let new_fields = self

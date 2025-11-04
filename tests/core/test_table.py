@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
-from arro3.core import Array, ArrayReader, ChunkedArray, DataType, Field, Table
+from arro3.core import Array, ArrayReader, ChunkedArray, DataType, Field, Table, list_array
 
 
 def test_table_getitem():
@@ -96,6 +96,10 @@ def test_table_append_column():
     assert c_name in table.column_names
     assert table[c_name].to_pylist() == c_value
     assert len(table.columns) == expected_num_columns
+
+    with pytest.raises(ValueError,
+                       match=r"The number of rows in column \(3\) does not match the table \(2\)"):
+        table.append_column("_", Array(pa.array([1, 2, 3])))
 
 
 def test_table_append_column_chunked():
@@ -237,7 +241,7 @@ def test_table_set_column():
     assert table.column(c_index).to_pylist() == c_value
     assert c_name in table.column_names
     assert (
-        table.column(c_index).field.name == c_name
+            table.column(c_index).field.name == c_name
     )  # check that the rename was effective.
 
     c_value, c_name, c_index = [4, 5], "c2", 0
@@ -254,6 +258,20 @@ def test_table_set_column():
     assert table.column(c_index).to_pylist() == c_value
     assert c_name in table.column_names
     assert table.column(c_index).field.name == c_name
+
+
+def test_rename_columns():
+    table = Table.from_arrays(
+        [
+            pa.array(["a", "b"]),
+            pa.array(["x", "y"])
+        ],
+        names=["c0", "c1", ]
+    )
+
+    with pytest.raises(ValueError, match=r"Expected \(2\) column names, but got \(3\)."
+                                         " The number of names must match the number of columns."):
+        table.rename_columns(['d1', 'd2', 'd3'])
 
 
 def test_table_set_column_chunked():
