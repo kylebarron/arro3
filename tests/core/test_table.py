@@ -364,7 +364,7 @@ def test_remove_column():
     assert len(table.columns) == 1
 
     with pytest.raises(IndexError, match="Invalid column index"):
-        table.remove_column(10)
+        table.remove_column(1)
 
     # Other types than int raise an Error
     with pytest.raises(TypeError):
