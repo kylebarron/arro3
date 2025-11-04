@@ -562,7 +562,7 @@ impl PyTable {
 
     fn remove_column(&self, i: usize) -> PyArrowResult<Arro3Table> {
         if i > self.num_columns() {
-            return Err(PyIndexError::new_err(format!("Invalid column index \"{}\"", i)).into());
+            return Err(PyIndexError::new_err(format!("Invalid column index \"{i}\"")).into());
         }
 
         let mut fields = self.schema.fields().to_vec();
