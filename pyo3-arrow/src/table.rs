@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -221,7 +222,6 @@ impl Display for PyTable {
         Ok(())
     }
 }
-
 #[pymethods]
 impl PyTable {
     #[new]
@@ -399,26 +399,28 @@ impl PyTable {
         Ok(Self::try_new(batches, schema)?)
     }
 
-    fn drop_columns(&self, fields: Vec<String>) -> PyArrowResult<Arro3Table> {
-        let mut drop_indices = Vec::with_capacity(self.num_columns() - fields.len());
-        let mut missing = Vec::with_capacity(fields.len());
-
-        // If a column that will be dropped
-        // does not have an index in the current schema,
-        // it does not exist.
-        for field in fields {
-            match self.schema.index_of(field.as_str()) {
-                Ok(i) => drop_indices.push(i),
-                Err(_) => missing.push(field),
-            }
+    fn drop_columns(&self, names: Vec<String>) -> PyArrowResult<Arro3Table> {
+        let current_names = self.column_names();
+        let mut pos: HashMap<&str, usize> = HashMap::with_capacity(current_names.len());
+        for (i, s) in current_names.iter().enumerate() {
+            pos.insert(s.as_str(), i);
         }
 
-        if !missing.is_empty() {
-            return Err(PyKeyError::new_err(format!("Column(s): {:?} not found", missing)).into());
+        let drop_indices: Vec<usize> = names
+            .iter()
+            .filter_map(|s| pos.get(s.as_str()).copied())
+            .collect();
+
+        if drop_indices.len() < names.len() {
+            // We have columns that don't exist
+            let missing: Vec<&str> = names
+                .iter()
+                .map(|s| s.as_str())
+                .filter(|s| !pos.contains_key(s))
+                .collect();
+            return Err(PyKeyError::new_err(format!("Column(s): {missing:?} not found")).into());
         }
 
-        // The indices of the columns what we will maintain, since we
-        // are going to re-use Table.select
         let keep_indices: Vec<usize> = (0..self.num_columns())
             .filter(|i| !drop_indices.contains(i))
             .collect();
