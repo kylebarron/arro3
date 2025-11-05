@@ -10,6 +10,14 @@ jobs:
   lint-test:
     name: Lint and Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # pyo3-arrow is not part of the top-level arro3 workspace
+        # See note in Cargo.toml
+        working-directory: [".", "pyo3-arrow"]
+    defaults:
+      run:
+        working-directory: ${{ matrix.working-directory }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,6 +29,8 @@ jobs:
           components: rustfmt, clippy
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ matrix.working-directory }}
 
       - name: Cargo fmt
         run: cargo fmt --all -- --check
