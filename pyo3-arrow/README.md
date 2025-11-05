@@ -26,7 +26,7 @@ use pyo3_arrow::PyArray;
 /// Take elements by index from an Array, creating a new Array from those
 /// indexes.
 #[pyfunction]
-pub fn take(py: Python, values: PyArray, indices: PyArray) -> PyArrowResult<PyObject> {
+pub fn take<'py>(py: Python<'py>, values: PyArray, indices: PyArray) -> PyArrowResult<Bound<'py, PyAny>> {
     // We can call py.allow_threads to ensure the GIL is released during our
     // operations
     // This example just wraps `arrow_select::take::take`
@@ -35,7 +35,7 @@ pub fn take(py: Python, values: PyArray, indices: PyArray) -> PyArrowResult<PyOb
 
     // Construct a PyArray and export it to the arro3 Python Arrow
     // implementation
-    Ok(PyArray::new(output_array, values.field().clone()).to_arro3(py)?)
+    Ok(PyArray::new(output_array, values.field().clone()).into_arro3(py)?)
 }
 ```
 
@@ -59,7 +59,7 @@ pa.array(output)
 # ]
 ```
 
-In this example, we use pyarrow to create the original array and to view the result, but the use of pyarrow is not required. It does, at least, show how the Arrow PyCapsule Interface makes it seamless to share these Arrow objects between Python Arrow implementations.
+In this example, we use PyArrow to create the original array and to view the result, but the use of PyArrow is not required. It does, at least, show how the Arrow PyCapsule Interface makes it seamless to share these Arrow objects between Python Arrow implementations.
 
 ### Using Arrow data as input
 
