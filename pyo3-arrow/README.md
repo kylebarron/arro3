@@ -61,6 +61,9 @@ pa.array(output)
 
 In this example, we use PyArrow to create the original array and to view the result, but the use of PyArrow is not required. It does, at least, show how the Arrow PyCapsule Interface makes it seamless to share these Arrow objects between Python Arrow implementations.
 
+
+**Important**: Ensure you have **owned types** like `PyArray` in your function signature, **not references** like `&PyArray`. This ensures that pyo3 uses the Arrow data extraction defined in this crate.
+
 ### Using Arrow data as input
 
 Just include one of the pyo3-arrow structs in your function signature, and user input will be transparently converted
