@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -8,7 +9,7 @@ use arrow_cast::pretty::pretty_format_batches_with_options;
 use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use arrow_select::concat::concat_batches;
 use indexmap::IndexMap;
-use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
+use pyo3::exceptions::{PyIndexError, PyKeyError, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
@@ -221,7 +222,6 @@ impl Display for PyTable {
         Ok(())
     }
 }
-
 #[pymethods]
 impl PyTable {
     #[new]
@@ -397,6 +397,35 @@ impl PyTable {
         }
 
         Ok(Self::try_new(batches, schema)?)
+    }
+
+    fn drop_columns(&self, names: Vec<String>) -> PyArrowResult<Arro3Table> {
+        let current_names = self.column_names();
+        let mut pos: HashMap<&str, usize> = HashMap::with_capacity(current_names.len());
+        for (i, s) in current_names.iter().enumerate() {
+            pos.insert(s.as_str(), i);
+        }
+
+        let drop_indices: Vec<usize> = names
+            .iter()
+            .filter_map(|s| pos.get(s.as_str()).copied())
+            .collect();
+
+        if drop_indices.len() < names.len() {
+            // We have columns that don't exist
+            let missing: Vec<&str> = names
+                .iter()
+                .map(|s| s.as_str())
+                .filter(|s| !pos.contains_key(s))
+                .collect();
+            return Err(PyKeyError::new_err(format!("Column(s): {missing:?} not found")).into());
+        }
+
+        let keep_indices: Vec<usize> = (0..self.num_columns())
+            .filter(|i| !drop_indices.contains(i))
+            .collect();
+
+        self.select(SelectIndices::Positions(keep_indices))
     }
 
     fn add_column(
