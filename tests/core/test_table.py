@@ -412,6 +412,16 @@ def test_drop_columns():
     table = table.drop_columns(tuple())
     assert table.column_names == expected_columns
 
+    # at this point, "b" exists.
+    assert "b" in table.column_names
+    # This should not raise an error.
+    # https://github.com/kylebarron/arro3/pull/440#discussion_r2495784707
+    table = table.drop_columns(["b", "b", "b"])
+    assert "b" not in table.column_names
+
+    with pytest.raises(KeyError, match="not found"):
+        table.drop_columns(["ccccde", "ccccde"])
+
 
 class CustomException(Exception):
     pass
