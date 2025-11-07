@@ -317,13 +317,13 @@ class Table:
             The rechunked table.
         """
 
-    def drop_columns(self, names: Sequence[str]) -> Table:
+    def drop_columns(self, columns: Sequence[str]) -> Table:
         """Create a new Table with the `columns` removed.
 
          An empty input does not remove any column.
 
         Args:
-            names: The name of the columns to drop, case-sensitive.
+            columns: The name of the columns to drop, case-sensitive.
 
         Returns:
             A new table without the specified columns.
