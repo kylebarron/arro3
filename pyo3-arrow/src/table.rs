@@ -399,21 +399,21 @@ impl PyTable {
         Ok(Self::try_new(batches, schema)?)
     }
 
-    fn drop_columns(&self, names: Vec<String>) -> PyArrowResult<Arro3Table> {
-        let current_names = self.column_names();
-        let mut pos: HashMap<&str, usize> = HashMap::with_capacity(current_names.len());
-        for (i, s) in current_names.iter().enumerate() {
+    fn drop_columns(&self, columns: Vec<String>) -> PyArrowResult<Arro3Table> {
+        let current_columns = self.column_names();
+        let mut pos: HashMap<&str, usize> = HashMap::with_capacity(current_columns.len());
+        for (i, s) in current_columns.iter().enumerate() {
             pos.insert(s.as_str(), i);
         }
 
-        let drop_indices: Vec<usize> = names
+        let drop_indices: Vec<usize> = columns
             .iter()
             .filter_map(|s| pos.get(s.as_str()).copied())
             .collect();
 
-        if drop_indices.len() < names.len() {
+        if drop_indices.len() < columns.len() {
             // We have columns that don't exist
-            let missing: Vec<&str> = names
+            let missing: Vec<&str> = columns
                 .iter()
                 .map(|s| s.as_str())
                 .filter(|s| !pos.contains_key(s))

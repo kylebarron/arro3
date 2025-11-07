@@ -422,6 +422,10 @@ def test_drop_columns():
     with pytest.raises(KeyError, match="not found"):
         table.drop_columns(["ccccde", "ccccde"])
 
+    # keyword argument works as intended.
+    table = table.drop_columns(columns=["d", "e"])
+    assert not table.column_names
+
 
 class CustomException(Exception):
     pass
