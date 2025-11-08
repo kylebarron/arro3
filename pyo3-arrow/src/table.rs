@@ -442,6 +442,14 @@ impl PyTable {
             .into());
         }
 
+        if i > self.num_columns() {
+            return Err(PyIndexError::new_err(format!(
+                "Column index out of range, index is {i} but should be <= {}",
+                self.num_columns()
+            ))
+            .into());
+        }
+
         let column = column.rechunk(self.chunk_lengths())?;
 
         let mut fields = self.schema.fields().to_vec();
