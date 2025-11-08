@@ -181,6 +181,11 @@ def test_table_add_column():
     table = table.add_column(col_id + 1, c_name + "extra", Array(pa.array(c_value)))
     assert table.column(col_id).to_pylist() == c_value
 
+    with pytest.raises(
+        IndexError, match="Column index out of range, index is 6 but should be <= 5"
+    ):
+        table.add_column(table.num_columns + 1, "_", Array(pa.array(c_value)))
+
 
 def test_table_add_column_chunked():
     """Test that a table is correctly added in a chunked table."""
