@@ -302,6 +302,24 @@ def test_table_set_column_chunked():
     assert table.chunk_lengths == [2]
 
 
+def test_table_rename():
+    table = Table.from_arrays(
+        [pa.array(["a", "b"]), pa.array([1, 2]), pa.array(["x", "y"])],
+        names=["c0", "c1", "c2"],
+    )
+
+    new_names = ["d1", "d2", "d3"]
+    table = table.rename_columns(new_names)
+    assert table.column_names == new_names
+
+    with pytest.raises(ValueError, match="Expected 3 names, got 1"):
+        table.rename_columns(
+            [
+                "onlyoneargument",
+            ]
+        )
+
+
 def test_table_from_batches_empty_columns_with_len():
     df = pd.DataFrame({"a": [1, 2, 3]})
     no_columns = df[[]]
