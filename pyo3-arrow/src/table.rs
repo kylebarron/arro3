@@ -624,9 +624,13 @@ impl PyTable {
 
     fn rename_columns(&self, names: Vec<String>) -> PyArrowResult<Arro3Table> {
         if names.len() != self.num_columns() {
-            return Err(PyValueError::new_err("When names is a list[str], must pass the same number of names as there are columns.").into());
+            return Err(PyValueError::new_err(format!(
+                "Expected {} names, got {}",
+                self.num_columns(),
+                names.len()
+            ))
+            .into());
         }
-
         let new_fields = self
             .schema
             .fields()
@@ -638,7 +642,16 @@ impl PyTable {
             new_fields,
             self.schema.metadata().clone(),
         ));
-        Ok(PyTable::try_new(self.batches.clone(), new_schema)?.into())
+
+        let new_batches = self
+            .batches
+            .iter()
+            .map(|batch| {
+                RecordBatch::try_new(new_schema.clone(), batch.columns().to_vec()).unwrap()
+            })
+            .collect();
+
+        Ok(PyTable::try_new(new_batches, new_schema)?.into())
     }
 
     #[getter]
