@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
+use arrow_schema::{DataType, Field, Schema, SchemaRef, SchemaBuilder};
 use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
@@ -156,10 +156,11 @@ impl Display for PyRecordBatch {
 #[pymethods]
 impl PyRecordBatch {
     #[new]
-    #[pyo3(signature = (data, *,  schema=None, metadata=None))]
+    #[pyo3(signature = (data, *, names=None, schema=None, metadata=None))]
     fn init(
         py: Python,
         data: &Bound<PyAny>,
+        names: Option<Vec<String>>,
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
@@ -171,9 +172,9 @@ impl PyRecordBatch {
             Self::from_arrays(
                 &py.get_type::<PyRecordBatch>(),
                 arrays,
-                schema.ok_or(PyValueError::new_err(
-                    "Schema must be passed with list of arrays",
-                ))?,
+                names,
+                schema,
+                metadata,
             )
         } else {
             Err(PyTypeError::new_err(
@@ -209,21 +210,51 @@ impl PyRecordBatch {
     }
 
     #[classmethod]
-    #[pyo3(signature = (arrays, *, schema))]
+    #[pyo3(signature = (arrays, *, names=None, schema=None, metadata=None))]
     fn from_arrays(
         _cls: &Bound<PyType>,
         arrays: Vec<PyArray>,
-        schema: PySchema,
+        names: Option<Vec<String>>,
+        schema: Option<PySchema>,
+        metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
+        let columns = arrays
+            .into_iter()
+            .map(|arr| {
+                let (arr, field) = arr.into_inner();
+                (arr, field)
+            })
+            .collect::<Vec<_>>();
+
+        let schema: SchemaRef = if let Some(schema) = schema {
+            schema.into_inner()
+        } else {
+            let names = names.ok_or(PyValueError::new_err(
+                "names must be passed if schema is not passed.",
+            ))?;
+
+            let fields = columns
+                .iter()
+                .zip(names.iter())
+                .map(|((_array, field), name)| Arc::new(field.as_ref().clone().with_name(name)))
+                .collect::<Vec<_>>();
+            Arc::new(
+                Schema::new(fields)
+                    .with_metadata(metadata.unwrap_or_default().into_string_hashmap().unwrap()),
+            )
+        };
+
+        if columns.is_empty() {
+            let rb = RecordBatch::try_new(schema.into(), vec![])?;
+            return Ok(Self::new(rb));
+        }
+
         let rb = RecordBatch::try_new(
             schema.into(),
-            arrays
+            columns
                 .into_iter()
-                .map(|arr| {
-                    let (arr, _field) = arr.into_inner();
-                    arr
-                })
-                .collect(),
+                .map(|(arr, _field)| arr)
+                .collect()
         )?;
         Ok(Self::new(rb))
     }
