@@ -251,10 +251,7 @@ impl PyRecordBatch {
 
         let rb = RecordBatch::try_new(
             schema.into(),
-            columns
-                .into_iter()
-                .map(|(arr, _field)| arr)
-                .collect()
+            columns.into_iter().map(|(arr, _field)| arr).collect(),
         )?;
         Ok(Self::new(rb))
     }
