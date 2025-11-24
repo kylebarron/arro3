@@ -106,7 +106,7 @@ class RecordBatch:
         *,
         names: Sequence[str],
         schema: None = None,
-        metadata: dict[str, str] | dict[bytes, bytes] | None = None
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch: ...
     @overload
     @classmethod

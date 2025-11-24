@@ -11,6 +11,7 @@ def test_nonempty_batch_no_columns():
     retour = pa.record_batch(arro3_batch)
     assert batch == retour
 
+
 def test_batch_from_arrays():
     a = pa.array([1, 2, 3, 4])
     b = pa.array(["a", "b", "c", "d"])
@@ -21,21 +22,21 @@ def test_batch_from_arrays():
     # With metadata
     metadata = {b"key": b"value"}
     arro3_batch = RecordBatch.from_arrays(
-        [a, b],
-        names=["int", "str"],
-        metadata = metadata)
+        [a, b], names=["int", "str"], metadata=metadata
+    )
     pa_batch = pa.RecordBatch.from_arrays(
-        [a, b],
-        names=["int", "str"],
-        metadata = metadata)
+        [a, b], names=["int", "str"], metadata=metadata
+    )
     assert pa.record_batch(arro3_batch) == pa_batch
     assert arro3_batch.schema.metadata == metadata
 
     # With schema
-    schema = Schema([
-        pa.field("int", type=pa.int64()),
-        pa.field("str", type=pa.utf8()),
-        ])
+    schema = Schema(
+        [
+            pa.field("int", type=pa.int64()),
+            pa.field("str", type=pa.utf8()),
+        ]
+    )
     arro3_batch = RecordBatch.from_arrays([a, b], schema=schema)
     pa_batch = pa.RecordBatch.from_arrays([a, b], schema=pa.schema(schema))
     assert pa.record_batch(arro3_batch) == pa_batch
@@ -47,8 +48,9 @@ def test_batch_from_arrays():
     assert pa.record_batch(arro3_batch) == pa_batch
 
     # No names nor schema
-    with pytest.raises(ValueError,
-                       match="names must be passed if schema is not passed"):
+    with pytest.raises(
+        ValueError, match="names must be passed if schema is not passed"
+    ):
         RecordBatch.from_arrays([a, b])
 
 
