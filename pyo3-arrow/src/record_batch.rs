@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{DataType, Field, Schema, SchemaRef, SchemaBuilder};
+use arrow_schema::{DataType, Field, Schema, SchemaBuilder, SchemaRef};
 use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
