@@ -97,6 +97,14 @@ def test_table_append_column():
     assert table[c_name].to_pylist() == c_value
     assert len(table.columns) == expected_num_columns
 
+    with pytest.raises(
+        ValueError,
+        match=r"The number of rows in column \(3\) does not match the table \(2\)",
+    ):
+        c_extra = c_value
+        c_extra.append(1)
+        table.append_column(c_name, pa.array(c_extra))
+
 
 def test_table_append_column_chunked():
     """
@@ -186,6 +194,14 @@ def test_table_add_column():
     ):
         table.add_column(table.num_columns + 1, "_", Array(pa.array(c_value)))
 
+    with pytest.raises(
+        ValueError,
+        match=r"The number of rows in column \(3\) does not match the table \(2\)",
+    ):
+        c_extra = c_value
+        c_extra.append(1)
+        table.add_column(table.num_columns, "_", pa.array(c_extra))
+
 
 def test_table_add_column_chunked():
     """Test that a table is correctly added in a chunked table."""
@@ -258,6 +274,14 @@ def test_table_set_column():
     assert table.column(c_index).to_pylist() == c_value
     assert c_name in table.column_names
     assert table.column(c_index).field.name == c_name
+
+    with pytest.raises(
+        ValueError,
+        match=r"The number of rows in column \(3\) does not match the table \(2\)",
+    ):
+        c_extra = c_value
+        c_extra.append(1)
+        table.set_column(c_index, c_name, pa.array(c_extra))
 
 
 def test_table_set_column_chunked():
@@ -346,6 +370,9 @@ def test_rechunk():
     assert rechunked2.chunk_lengths == [2, 2]
     assert rechunked2.rechunk().chunk_lengths == [4]
 
+    with pytest.raises(ValueError, match="max_chunksize must be > 0"):
+        table.rechunk(max_chunksize=0)
+
 
 def test_slice():
     a = pa.chunked_array([[1, 2], [3, 4]])
@@ -359,6 +386,11 @@ def test_slice():
     sliced2 = table.slice(1, 2)
     assert sliced2.num_rows == 2
     assert sliced2.chunk_lengths == [1, 1]
+    with pytest.raises(
+        ValueError,
+        match=r"offset \+ length \(200\) may not exceed length of array \(4\)",
+    ):
+        table.slice(100, 100)
 
 
 def test_nonempty_table_no_columns():
