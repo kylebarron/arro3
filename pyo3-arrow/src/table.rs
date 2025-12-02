@@ -137,9 +137,12 @@ impl PyTable {
     pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
         if total_chunk_length != self.num_rows() {
-            return Err(
-                PyValueError::new_err("Chunk lengths do not add up to table length").into(),
-            );
+            return Err(PyValueError::new_err(format!(
+                "Chunk lengths ({total_chunk_length})\
+                 do not add up to table length ({})",
+                self.num_rows()
+            ))
+            .into());
         }
 
         // If the desired rechunking is the existing chunking, return early
@@ -167,9 +170,12 @@ impl PyTable {
 
     pub(crate) fn slice(&self, mut offset: usize, mut length: usize) -> PyArrowResult<Self> {
         if offset + length > self.num_rows() {
-            return Err(
-                PyValueError::new_err("offset + length may not exceed length of array").into(),
-            );
+            return Err(PyValueError::new_err(format!(
+                "offset + length ({}) may not exceed length of array ({})",
+                offset + length,
+                self.num_rows()
+            ))
+            .into());
         }
 
         let mut sliced_batches: Vec<RecordBatch> = vec![];
@@ -436,9 +442,11 @@ impl PyTable {
     ) -> PyArrowResult<Arro3Table> {
         let column = column.into_chunked_array()?;
         if self.num_rows() != column.len() {
-            return Err(PyValueError::new_err(
-                "The number of rows in column does not match the table.",
-            )
+            return Err(PyValueError::new_err(format!(
+                "The number of rows in column ({}) does not match the table ({}).",
+                column.len(),
+                self.num_rows()
+            ))
             .into());
         }
 
@@ -483,9 +491,11 @@ impl PyTable {
         let column: PyChunkedArray = column.into_chunked_array()?;
 
         if self.num_rows() != column.len() {
-            return Err(PyValueError::new_err(
-                "The number of rows in column does not match the table.",
-            )
+            return Err(PyValueError::new_err(format!(
+                "The number of rows in column ({}) does not match the table ({}).",
+                column.len(),
+                self.num_rows()
+            ))
             .into());
         }
 
@@ -679,9 +689,11 @@ impl PyTable {
     ) -> PyArrowResult<Arro3Table> {
         let column = column.into_chunked_array()?;
         if self.num_rows() != column.len() {
-            return Err(PyValueError::new_err(
-                "Number of rows in column does not match the table.",
-            )
+            return Err(PyValueError::new_err(format!(
+                "The number of rows in column ({}) does not match the table ({}).",
+                column.len(),
+                self.num_rows()
+            ))
             .into());
         }
 
