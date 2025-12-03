@@ -33,8 +33,8 @@ use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchem
 /// A Python-facing Arrow table.
 ///
 /// This is a wrapper around a [SchemaRef] and a `Vec` of [RecordBatch].
-#[pyclass(module = "arro3.core._core", name = "Table", subclass, frozen)]
-#[derive(Debug)]
+#[pyclass(module = "arro3.core._core", name = "Table", subclass, frozen, eq)]
+#[derive(Debug, PartialEq)]
 pub struct PyTable {
     batches: Vec<RecordBatch>,
     schema: SchemaRef,
@@ -271,10 +271,6 @@ impl PyTable {
             self.schema.clone(),
             requested_schema,
         )
-    }
-
-    fn __eq__(&self, other: &PyTable) -> bool {
-        self.batches == other.batches && self.schema == other.schema
     }
 
     fn __getitem__(&self, key: FieldIndexInput) -> PyArrowResult<Arro3ChunkedArray> {
