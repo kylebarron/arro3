@@ -241,7 +241,7 @@ impl PyRecordBatch {
                 .zip(names.iter())
                     .map(|(field, name)| field.as_ref().clone().with_name(name))
                 .collect();
-            
+
             Arc::new(
                 Schema::new(fields)
                     .with_metadata(metadata.unwrap_or_default().into_string_hashmap()?),
