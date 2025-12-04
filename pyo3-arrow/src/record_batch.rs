@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{DataType, Field, Schema, SchemaBuilder, SchemaRef};
+use arrow_schema::{DataType, Field, FieldRef, Schema, SchemaBuilder, SchemaRef};
 use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
@@ -224,13 +224,10 @@ impl PyRecordBatch {
             ).into());
         }
 
-        let columns = arrays
+        let (arrays, fields): (Vec<ArrayRef>, Vec<FieldRef>) = arrays
             .into_iter()
-            .map(|arr| {
-                let (arr, field) = arr.into_inner();
-                (arr, field)
-            })
-            .collect::<Vec<_>>();
+            .map(|arr| arr.into_inner())
+            .unzip();
 
         let schema: SchemaRef = if let Some(schema) = schema {
             schema.into_inner()
@@ -239,25 +236,26 @@ impl PyRecordBatch {
                 "names must be passed if schema is not passed.",
             ))?;
 
-            let fields = columns
+            let fields: Vec<_> = fields
                 .iter()
                 .zip(names.iter())
-                .map(|((_array, field), name)| Arc::new(field.as_ref().clone().with_name(name)))
-                .collect::<Vec<_>>();
+                    .map(|(field, name)| Arc::new(field.as_ref().clone().with_name(name)))
+                .collect();
+            
             Arc::new(
                 Schema::new(fields)
-                    .with_metadata(metadata.unwrap_or_default().into_string_hashmap().unwrap()),
+                    .with_metadata(metadata.unwrap_or_default().into_string_hashmap()?),
             )
         };
 
-        if columns.is_empty() {
+        if arrays.is_empty() {
             let rb = RecordBatch::try_new(schema, vec![])?;
             return Ok(Self::new(rb));
         }
 
         let rb = RecordBatch::try_new(
             schema,
-            columns.into_iter().map(|(arr, _field)| arr).collect(),
+            arrays,
         )?;
         Ok(Self::new(rb))
     }
