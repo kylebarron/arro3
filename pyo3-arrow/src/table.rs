@@ -340,9 +340,7 @@ impl PyTable {
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
         if schema.is_some() && metadata.is_some() {
-            return Err(PyValueError::new_err(
-                "Cannot pass both schema and metadata"
-            ).into());
+            return Err(PyValueError::new_err("Cannot pass both schema and metadata").into());
         }
 
         let columns = arrays
@@ -413,7 +411,10 @@ impl PyTable {
     ) -> PyArrowResult<Arro3Table> {
         let column = column.into_chunked_array()?;
         if self.num_rows() != column.len() {
-            return Err(PyValueError::new_err("Cannot pass both schema and metadata").into());
+            return Err(PyValueError::new_err(
+                "The number of rows in column does not match the table.",
+            )
+            .into());
         }
 
         let column = column.rechunk(self.chunk_lengths())?;
