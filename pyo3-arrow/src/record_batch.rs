@@ -218,6 +218,12 @@ impl PyRecordBatch {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
+        if schema.is_some() && metadata.is_some() {
+            return Err(PyValueError::new_err(
+                "Cannot pass both schema and metadata"
+            ).into());
+        }
+
         let columns = arrays
             .into_iter()
             .map(|arr| {

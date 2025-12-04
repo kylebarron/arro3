@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
-from arro3.core import Array, ArrayReader, ChunkedArray, DataType, Field, Table
+from arro3.core import Array, ArrayReader, ChunkedArray, DataType, Field, Schema, Table
 
 
 def test_table_getitem():
@@ -29,6 +29,22 @@ def test_table_from_arrays():
     arro3_table = Table.from_arrays([a, b], names=["a", "b"])
     pa_table = pa.Table.from_arrays([a, b], names=["a", "b"])
     assert pa.table(arro3_table) == pa_table
+
+    # ValueError with both schema and metadata
+    msg = "Cannot pass both schema and metadata"
+    metadata = {b"key": b"value"}
+    schema = Schema(
+        [
+            pa.field("int", type=pa.int64()),
+            pa.field("str", type=pa.utf8()),
+        ]
+    )
+
+    with pytest.raises(ValueError, match=msg):
+        Table.from_arrays([a, b], schema=schema, metadata=metadata)
+
+    with pytest.raises(ValueError, match=msg):
+        pa.Table.from_arrays([a, b], schema=pa.schema(schema), metadata=metadata)
 
 
 def test_table_from_pydict():

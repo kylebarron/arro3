@@ -53,6 +53,14 @@ def test_batch_from_arrays():
     ):
         RecordBatch.from_arrays([a, b])
 
+    # ValueError with both schema and metadata
+    msg = "Cannot pass both schema and metadata"
+    with pytest.raises(ValueError, match=msg):
+        RecordBatch.from_arrays([a, b], schema=schema, metadata=metadata)
+
+    with pytest.raises(ValueError, match=msg):
+        pa.RecordBatch.from_arrays([a, b], schema=pa.schema(schema), metadata=metadata)
+
 
 class CustomException(Exception):
     pass
