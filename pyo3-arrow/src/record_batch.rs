@@ -239,7 +239,7 @@ impl PyRecordBatch {
             let fields: Vec<_> = fields
                 .iter()
                 .zip(names.iter())
-                    .map(|(field, name)| Arc::new(field.as_ref().clone().with_name(name)))
+                    .map(|(field, name)| field.as_ref().clone().with_name(name))
                 .collect();
             
             Arc::new(
