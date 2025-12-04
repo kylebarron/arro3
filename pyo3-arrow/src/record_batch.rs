@@ -219,15 +219,11 @@ impl PyRecordBatch {
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
         if schema.is_some() && metadata.is_some() {
-            return Err(PyValueError::new_err(
-                "Cannot pass both schema and metadata"
-            ).into());
+            return Err(PyValueError::new_err("Cannot pass both schema and metadata").into());
         }
 
-        let (arrays, fields): (Vec<ArrayRef>, Vec<FieldRef>) = arrays
-            .into_iter()
-            .map(|arr| arr.into_inner())
-            .unzip();
+        let (arrays, fields): (Vec<ArrayRef>, Vec<FieldRef>) =
+            arrays.into_iter().map(|arr| arr.into_inner()).unzip();
 
         let schema: SchemaRef = if let Some(schema) = schema {
             schema.into_inner()
@@ -239,7 +235,7 @@ impl PyRecordBatch {
             let fields: Vec<_> = fields
                 .iter()
                 .zip(names.iter())
-                    .map(|(field, name)| field.as_ref().clone().with_name(name))
+                .map(|(field, name)| field.as_ref().clone().with_name(name))
                 .collect();
 
             Arc::new(
@@ -253,10 +249,7 @@ impl PyRecordBatch {
             return Ok(Self::new(rb));
         }
 
-        let rb = RecordBatch::try_new(
-            schema,
-            arrays,
-        )?;
+        let rb = RecordBatch::try_new(schema, arrays)?;
         Ok(Self::new(rb))
     }
 
