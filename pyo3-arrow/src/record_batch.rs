@@ -245,12 +245,12 @@ impl PyRecordBatch {
         };
 
         if columns.is_empty() {
-            let rb = RecordBatch::try_new(schema.into(), vec![])?;
+            let rb = RecordBatch::try_new(schema, vec![])?;
             return Ok(Self::new(rb));
         }
 
         let rb = RecordBatch::try_new(
-            schema.into(),
+            schema,
             columns.into_iter().map(|(arr, _field)| arr).collect(),
         )?;
         Ok(Self::new(rb))
