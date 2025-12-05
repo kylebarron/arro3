@@ -8,12 +8,15 @@ use arrow_array::types::{
 use arrow_array::{
     Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, FixedSizeBinaryArray,
     LargeBinaryArray, LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
+    TimestampMicrosecondArray, TimestampMillisecondArray, TimestampNanosecondArray,
+    TimestampSecondArray,
 };
 use arrow_cast::cast;
 use arrow_cast::display::ArrayFormatter;
-use arrow_schema::{ArrowError, DataType, Field, FieldRef};
+use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
 use arrow_select::concat::concat;
 use arrow_select::take::take;
+use chrono::{FixedOffset, Utc};
 use numpy::PyUntypedArray;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
 use pyo3::intern;
@@ -212,6 +215,7 @@ impl PyArray {
                 "type must be passed for non-Arrow input",
             ))?
             .into_inner();
+
         let array: ArrayRef = match field.data_type() {
             DataType::Float32 => impl_primitive!(f32, Float32Type),
             DataType::Float64 => impl_primitive!(f64, Float64Type),
@@ -283,6 +287,57 @@ impl PyArray {
                     .map(|maybe_str| maybe_str.as_ref().map(|s| s.as_ref()))
                     .collect::<Vec<_>>();
                 Arc::new(StringViewArray::from(slices))
+            }
+            DataType::Timestamp(unit, tz) => {
+                // We normalize all datetimes to datetimes in UTC.
+                let values: Vec<Option<chrono::DateTime<Utc>>> = match tz {
+                    Some(_) => {
+                        let vs: Vec<Option<chrono::DateTime<FixedOffset>>> = obj.extract()?;
+                        vs.into_iter()
+                            .map(|v| v.map(|dt| dt.with_timezone(&Utc)))
+                            .collect()
+                    }
+                    None => {
+                        let vs: Vec<Option<chrono::NaiveDateTime>> = obj.extract()?;
+                        vs.into_iter()
+                            .map(|v| v.map(|naive| naive.and_utc()))
+                            .collect()
+                    }
+                };
+                match unit {
+                    TimeUnit::Second => {
+                        let values: Vec<_> =
+                            values.iter().map(|v| v.unwrap().timestamp()).collect();
+                        Arc::new(TimestampSecondArray::from(values).with_timezone_opt(tz.clone()))
+                    }
+                    TimeUnit::Millisecond => {
+                        let values: Vec<_> = values
+                            .iter()
+                            .map(|v| v.unwrap().timestamp_millis())
+                            .collect();
+                        Arc::new(
+                            TimestampMillisecondArray::from(values).with_timezone_opt(tz.clone()),
+                        )
+                    }
+                    TimeUnit::Microsecond => {
+                        let values: Vec<_> = values
+                            .iter()
+                            .map(|v| v.unwrap().timestamp_micros())
+                            .collect();
+                        Arc::new(
+                            TimestampMicrosecondArray::from(values).with_timezone_opt(tz.clone()),
+                        )
+                    }
+                    TimeUnit::Nanosecond => {
+                        let values: Vec<_> = values
+                            .iter()
+                            .map(|v| v.unwrap().timestamp_nanos_opt().unwrap())
+                            .collect();
+                        Arc::new(
+                            TimestampNanosecondArray::from(values).with_timezone_opt(tz.clone()),
+                        )
+                    }
+                }
             }
             dt => {
                 return Err(PyNotImplementedError::new_err(format!(
