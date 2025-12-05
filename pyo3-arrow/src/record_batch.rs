@@ -166,10 +166,10 @@ impl PyRecordBatch {
         if data.hasattr(intern!(py, "__arrow_c_array__"))? {
             Ok(data.extract::<PyRecordBatch>()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
-            Self::from_pydict(&py.get_type::<PyRecordBatch>(), mapping, metadata)
+            Self::from_pydict(&py.get_type::<Self>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
             Self::from_arrays(
-                &py.get_type::<PyRecordBatch>(),
+                &py.get_type::<Self>(),
                 arrays,
                 schema.ok_or(PyValueError::new_err(
                     "Schema must be passed with list of arrays",
