@@ -169,13 +169,7 @@ impl PyRecordBatch {
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
             Self::from_pydict(&py.get_type::<Self>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
-            Self::from_arrays(
-                &py.get_type::<Self>(),
-                arrays,
-                names,
-                schema,
-                metadata,
-            )
+            Self::from_arrays(&py.get_type::<Self>(), arrays, names, schema, metadata)
         } else {
             Err(PyTypeError::new_err(
                 "Expected RecordBatch-like input or dict of arrays or list of arrays.",
