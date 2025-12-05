@@ -244,9 +244,9 @@ impl PyTable {
         {
             Ok(data.extract::<AnyRecordBatch>()?.into_table()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
-            Self::from_pydict(&py.get_type::<PyTable>(), mapping, schema, metadata)
+            Self::from_pydict(&py.get_type::<Self>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {
-            Self::from_arrays(&py.get_type::<PyTable>(), arrays, names, schema, metadata)
+            Self::from_arrays(&py.get_type::<Self>(), arrays, names, schema, metadata)
         } else {
             Err(PyTypeError::new_err(
                 "Expected Table-like input or dict of arrays or sequence of arrays.",
