@@ -62,7 +62,7 @@ jobs:
                   # Note: core module must be first, because it's depended on by others
                   uv run --python ${{ matrix.python-version }} maturin dev -m arro3-core/Cargo.toml
                   uv run --python ${{ matrix.python-version }} maturin dev -m arro3-compute/Cargo.toml
-                  uv run --python ${{ matrix.python-version }} maturin dev -m arro3-io/Cargo.toml --all-features
+                  uv run --python ${{ matrix.python-version }} maturin dev -m arro3-io/Cargo.toml --features avro
 
             - name: Run python tests
               if: matrix.python-version != '3.13t'
