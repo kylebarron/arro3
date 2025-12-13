@@ -1,5 +1,7 @@
 use pyo3::prelude::*;
 
+#[cfg(feature = "avro")]
+mod avro;
 mod csv;
 mod error;
 mod ipc;
@@ -42,6 +44,11 @@ fn _io(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
     pyo3_object_store::register_store_module(py, m, "arro3.io", "store")?;
     pyo3_object_store::register_exceptions_module(py, m, "arro3.io", "exceptions")?;
+
+    #[cfg(feature = "avro")]
+    {
+        m.add_class::<avro::PySchemaStore>()?;
+    }
 
     m.add_wrapped(wrap_pyfunction!(csv::infer_csv_schema))?;
     m.add_wrapped(wrap_pyfunction!(csv::read_csv))?;

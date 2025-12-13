@@ -27,6 +27,11 @@ async = [
     "dep:object_store",
     "dep:futures",
 ]
+avro = ["dep:arrow-avro"]
+avro-snappy = ["avro", "arrow-avro/snappy"]
+avro-zstd = ["avro", "arrow-avro/zstd"]
+avro-bzip2 = ["avro", "arrow-avro/bzip2"]
+avro-xz = ["avro", "arrow-avro/xz"]
 abi3-py311 = ["pyo3/abi3-py311"]
 extension-module = ["pyo3/extension-module"]
 
@@ -34,6 +39,7 @@ extension-module = ["pyo3/extension-module"]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
 arrow-csv = { workspace = true }
+arrow-avro = { workspace = true, optional = true}
 arrow-ipc = { workspace = true }
 arrow-json = { workspace = true }
 arrow-schema = { workspace = true }
