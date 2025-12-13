@@ -76,4 +76,3 @@ class SchemaStore:
         Returns:
             One of "rabin", "id", or "id64"
         """
-

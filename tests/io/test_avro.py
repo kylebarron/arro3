@@ -76,4 +76,3 @@ def test_schema_store_confluent_register_fails():
     schema_json = '{"type":"record","name":"Test","fields":[]}'
     with pytest.raises(Exception):  # Should fail because Id requires explicit set()
         store.register(schema_json)
-
