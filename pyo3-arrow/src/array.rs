@@ -307,31 +307,31 @@ impl PyArray {
                 match unit {
                     TimeUnit::Second => {
                         let values: Vec<_> =
-                            values.iter().map(|v| v.unwrap().timestamp()).collect();
+                            values.iter().map(|v| v.map(|x| x.timestamp())).collect();
                         Arc::new(TimestampSecondArray::from(values).with_timezone_opt(tz.clone()))
                     }
                     TimeUnit::Millisecond => {
-                        let values: Vec<_> = values
+                        let values: Vec<Option<i64>> = values
                             .iter()
-                            .map(|v| v.unwrap().timestamp_millis())
+                            .map(|v| v.map(|x| x.timestamp_millis()))
                             .collect();
                         Arc::new(
                             TimestampMillisecondArray::from(values).with_timezone_opt(tz.clone()),
                         )
                     }
                     TimeUnit::Microsecond => {
-                        let values: Vec<_> = values
+                        let values: Vec<Option<i64>> = values
                             .iter()
-                            .map(|v| v.unwrap().timestamp_micros())
+                            .map(|v| v.map(|x| x.timestamp_micros()))
                             .collect();
                         Arc::new(
                             TimestampMicrosecondArray::from(values).with_timezone_opt(tz.clone()),
                         )
                     }
                     TimeUnit::Nanosecond => {
-                        let values: Vec<_> = values
+                        let values: Vec<Option<i64>> = values
                             .iter()
-                            .map(|v| v.unwrap().timestamp_nanos_opt().unwrap())
+                            .map(|v| v.map(|x| x.timestamp_nanos_opt().unwrap()))
                             .collect();
                         Arc::new(
                             TimestampNanosecondArray::from(values).with_timezone_opt(tz.clone()),
