@@ -19,7 +19,9 @@ impl AlgorithmType {
             AlgorithmType::Rabin => {
                 self.coerce_value(obj, |bytes| Fingerprint::Rabin(u64::from_le_bytes(bytes)))
             }
-            AlgorithmType::Id => self.coerce_value(obj, |bytes| Fingerprint::Id(u32::from_be_bytes(bytes))),
+            AlgorithmType::Id => {
+                self.coerce_value(obj, |bytes| Fingerprint::Id(u32::from_be_bytes(bytes)))
+            }
             AlgorithmType::Id64 => {
                 self.coerce_value(obj, |bytes| Fingerprint::Id64(u64::from_be_bytes(bytes)))
             }
@@ -155,12 +157,12 @@ impl PySchemaStore {
     ///
     /// Returns:
     ///     Schema JSON string if found
-    pub fn lookup(&mut self, key: &Bound<PyAny>) -> PyResult<Option<String>> {
+    pub fn lookup(&mut self, key: &Bound<PyAny>) -> PyResult<Option<&str>> {
         let fingerprint = self.algorithm.coerce_to_fingerprint(key)?;
         Ok(self
             .inner
             .lookup(&fingerprint)
-            .map(|s| s.json_string.clone()))
+            .map(|s| s.json_string.as_str()))
     }
 
     /// Get all fingerprints currently in the store
