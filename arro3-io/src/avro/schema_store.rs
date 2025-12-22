@@ -157,7 +157,7 @@ impl PySchemaStore {
     ///
     /// Returns:
     ///     Schema JSON string if found
-    pub fn lookup(&mut self, key: &Bound<PyAny>) -> PyResult<Option<&str>> {
+    pub fn lookup(&self, key: &Bound<PyAny>) -> PyResult<Option<&str>> {
         let fingerprint = self.algorithm.coerce_to_fingerprint(key)?;
         Ok(self
             .inner
