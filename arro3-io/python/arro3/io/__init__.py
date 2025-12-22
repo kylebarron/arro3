@@ -1,12 +1,7 @@
 from ._io import *
-from ._io import ___version, store
+from ._io import SchemaStore, ___version, store
 
-try:
-    from ._io import SchemaStore
-
-    __all_avro__ = [
-        "SchemaStore",
-    ]
-except ImportError:
-    __all_avro__ = []
+__all_avro__ = [
+    "SchemaStore",
+]
 __version__: str = ___version()

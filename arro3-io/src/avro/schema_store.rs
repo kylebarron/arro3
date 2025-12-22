@@ -1,12 +1,10 @@
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 
-#[cfg(feature = "avro")]
 use arrow_avro::schema::{
     AvroSchema, Fingerprint, FingerprintAlgorithm, SchemaStore as AvroSchemaStore,
 };
 
-#[cfg(feature = "avro")]
 #[derive(Clone, Copy)]
 pub(crate) enum AlgorithmType {
     Rabin,
@@ -14,7 +12,56 @@ pub(crate) enum AlgorithmType {
     Id64,
 }
 
-#[cfg(feature = "avro")]
+impl AlgorithmType {
+    /// Convert Python object (bytes | int | str) to Fingerprint based on this algorithm.
+    pub(crate) fn coerce_to_fingerprint(&self, obj: &Bound<PyAny>) -> PyResult<Fingerprint> {
+        match self {
+            AlgorithmType::Rabin => {
+                self.coerce_value(obj, |bytes| Fingerprint::Rabin(u64::from_le_bytes(bytes)))
+            }
+            AlgorithmType::Id => self.coerce_value(obj, |bytes| Fingerprint::Id(u32::from_be_bytes(bytes))),
+            AlgorithmType::Id64 => {
+                self.coerce_value(obj, |bytes| Fingerprint::Id64(u64::from_be_bytes(bytes)))
+            }
+        }
+    }
+
+    fn coerce_value<const N: usize>(
+        &self,
+        obj: &Bound<PyAny>,
+        fingerprint_from: impl FnOnce([u8; N]) -> Fingerprint,
+    ) -> PyResult<Fingerprint> {
+        if let Ok(bytes) = obj.extract::<[u8; N]>() {
+            return Ok(fingerprint_from(bytes));
+        }
+
+        let value: u64 = if let Ok(int_val) = obj.extract::<u64>() {
+            int_val
+        } else if let Ok(s) = obj.extract::<std::borrow::Cow<str>>() {
+            s.strip_prefix("0x")
+                .map_or_else(|| s.parse::<u64>(), |hex| u64::from_str_radix(hex, 16))
+                .map_err(|_| PyValueError::new_err(format!("Cannot parse '{s}' as integer")))?
+        } else {
+            return Err(PyTypeError::new_err(
+                "Expected int, string, or bytes for fingerprint",
+            ));
+        };
+
+        if N < 8 && value >= (1u64 << (N * 8)) {
+            return Err(PyValueError::new_err(format!(
+                "Value {value} is too large to fit in a {N}-byte fingerprint"
+            )));
+        }
+
+        let bytes: [u8; N] = match self {
+            AlgorithmType::Rabin => value.to_le_bytes()[..N].try_into()?,
+            AlgorithmType::Id | AlgorithmType::Id64 => value.to_be_bytes()[8 - N..].try_into()?,
+        };
+
+        Ok(fingerprint_from(bytes))
+    }
+}
+
 impl From<AlgorithmType> for FingerprintAlgorithm {
     fn from(val: AlgorithmType) -> Self {
         match val {
@@ -30,14 +77,12 @@ impl From<AlgorithmType> for FingerprintAlgorithm {
 /// SchemaStore manages Avro writer schemas keyed by fingerprint.
 /// Each instance is configured with a FingerprintAlgorithm that determines
 /// how fingerprints are computed.
-#[cfg(feature = "avro")]
 #[pyclass(module = "arro3.io._io", name = "SchemaStore")]
 pub struct PySchemaStore {
     inner: AvroSchemaStore,
     algorithm: AlgorithmType,
 }
 
-#[cfg(feature = "avro")]
 #[pymethods]
 impl PySchemaStore {
     /// Create a SchemaStore using Confluent fingerprints
@@ -73,7 +118,7 @@ impl PySchemaStore {
     ///     key: Fingerprint or ID (int for Rabin/Confluent/Apicurio)
     ///     schema_json: Avro schema as JSON string
     pub fn set(&mut self, key: &Bound<PyAny>, schema_json: &str) -> PyResult<()> {
-        let fingerprint = coerce_to_fingerprint(self.algorithm, key)?;
+        let fingerprint = self.algorithm.coerce_to_fingerprint(key)?;
         self.inner
             .set(fingerprint, AvroSchema::new(schema_json.to_string()))
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
@@ -111,7 +156,7 @@ impl PySchemaStore {
     /// Returns:
     ///     Schema JSON string if found
     pub fn lookup(&mut self, key: &Bound<PyAny>) -> PyResult<Option<String>> {
-        let fingerprint = coerce_to_fingerprint(self.algorithm, key)?;
+        let fingerprint = self.algorithm.coerce_to_fingerprint(key)?;
         Ok(self
             .inner
             .lookup(&fingerprint)
@@ -143,40 +188,5 @@ impl PySchemaStore {
             AlgorithmType::Id => "id",
             AlgorithmType::Id64 => "id64",
         }
-    }
-}
-
-/// Convert Python object (int | str) to Fingerprint based on the algorithm
-#[cfg(feature = "avro")]
-pub(crate) fn coerce_to_fingerprint(
-    alg: AlgorithmType,
-    obj: &Bound<PyAny>,
-) -> PyResult<Fingerprint> {
-    // Extract the numeric value from Python regardless of algorithm type.
-    // All fingerprint types (Rabin, Id, Id64) use the same parsing logic:
-    // - Try direct extraction as u64 (handles Python int)
-    // - If that fails, try extracting as string and parse it
-    //   - hex strings with "0x" prefix (e.g., "0x1234abcd")
-    //   - decimal strings (e.g., "12345")
-    let val = obj
-        .extract::<u64>()
-        .or_else(|_| {
-            obj.extract::<String>().and_then(|s| {
-                (if let Some(hex) = s.strip_prefix("0x") {
-                    u64::from_str_radix(hex, 16)
-                } else {
-                    s.parse::<u64>()
-                })
-                .map_err(|_| PyValueError::new_err(format!("Cannot parse '{}' as integer", s)))
-            })
-        })
-        .map_err(|_| PyTypeError::new_err("Expected int or string for fingerprint"))?;
-    match alg {
-        AlgorithmType::Rabin => Ok(Fingerprint::Rabin(val)),
-        AlgorithmType::Id => {
-            let id = u32::try_from(val).map_err(|_| PyValueError::new_err("ID must fit in u32"))?;
-            Ok(Fingerprint::Id(id))
-        }
-        AlgorithmType::Id64 => Ok(Fingerprint::Id64(val)),
     }
 }
