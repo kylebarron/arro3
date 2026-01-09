@@ -25,6 +25,7 @@ arrow-array = { version = "57", features = ["ffi"] }
 arrow-buffer = "57"
 arrow-cast = "57"
 arrow-csv = "57"
+arrow-avro = "57"
 arrow-ipc = { version = "57", features = ["lz4", "zstd"] }
 arrow-json = "57"
 arrow-schema = "57"

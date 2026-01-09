@@ -1,3 +1,4 @@
+from ._avro import SchemaStore
 from ._csv import infer_csv_schema, read_csv, write_csv
 from ._ipc import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
 from ._json import infer_json_schema, read_json, write_json, write_ndjson
@@ -18,4 +19,5 @@ __all__ = [
     "read_parquet",
     "read_parquet_async",
     "write_parquet",
+    "SchemaStore",
 ]

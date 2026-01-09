@@ -34,6 +34,7 @@ extension-module = ["pyo3/extension-module"]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
 arrow-csv = { workspace = true }
+arrow-avro = { workspace = true }
 arrow-ipc = { workspace = true }
 arrow-json = { workspace = true }
 arrow-schema = { workspace = true }
