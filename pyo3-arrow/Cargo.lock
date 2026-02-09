@@ -570,7 +570,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-arrow"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
