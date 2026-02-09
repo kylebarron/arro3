@@ -27,11 +27,11 @@ use pyo3_arrow::PyArray;
 /// indexes.
 #[pyfunction]
 pub fn take<'py>(py: Python<'py>, values: PyArray, indices: PyArray) -> PyArrowResult<Bound<'py, PyAny>> {
-    // We can call py.allow_threads to ensure the GIL is released during our
+    // We can call py.detach to ensure the GIL is released during our
     // operations
     // This example just wraps `arrow_select::take::take`
     let output_array =
-        py.allow_threads(|| arrow_select::take::take(values.as_ref(), indices.as_ref(), None))?;
+        py.detach(|| arrow_select::take::take(values.as_ref(), indices.as_ref(), None))?;
 
     // Construct a PyArray and export it to the arro3 Python Arrow
     // implementation
