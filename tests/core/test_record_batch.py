@@ -62,6 +62,16 @@ def test_batch_from_arrays():
         pa.RecordBatch.from_arrays([a, b], schema=pa.schema(schema), metadata=metadata)
 
 
+def test_schema_metadata_preserved_through_pycapsule():
+    """https://github.com/kylebarron/arro3/issues/473"""
+    a = pa.array([1, 2, 3])
+    metadata = {b"my_key": b"my_value"}
+    arro3_batch = RecordBatch.from_arrays([a], names=["x"], metadata=metadata)
+    assert arro3_batch.schema.metadata == metadata
+    roundtripped = pa.record_batch(arro3_batch)
+    assert roundtripped.schema.metadata == metadata
+
+
 class CustomException(Exception):
     pass
 

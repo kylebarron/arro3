@@ -115,7 +115,8 @@ impl PyRecordBatch {
         record_batch: RecordBatch,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyTuple>> {
-        let field = Field::new_struct("", record_batch.schema_ref().fields().clone(), false);
+        let field = Field::new_struct("", record_batch.schema_ref().fields().clone(), false)
+            .with_metadata(record_batch.schema_ref().metadata().clone());
         let array: ArrayRef = Arc::new(StructArray::from(record_batch.clone()));
         to_array_pycapsules(py, field.into(), &array, requested_schema)
     }
