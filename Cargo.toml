@@ -20,27 +20,28 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow-arith = "57"
-arrow-array = { version = "57", features = ["ffi"] }
-arrow-buffer = "57"
-arrow-cast = "57"
-arrow-csv = "57"
-arrow-ipc = { version = "57", features = ["lz4", "zstd"] }
-arrow-json = "57"
-arrow-schema = "57"
-arrow-select = "57"
+# We pin arrow to <57.2 because of
+# https://github.com/apache/arrow-rs/pull/8944#issuecomment-3885228879
+arrow-arith = ">=57,<57.2"
+arrow-array = { version = ">=57,<57.2", features = ["ffi"] }
+arrow-buffer = ">=57,<57.2"
+arrow-cast = ">=57,<57.2"
+arrow-csv = ">=57,<57.2"
+arrow-ipc = { version = ">=57,<57.2", features = ["lz4", "zstd"] }
+arrow-json = ">=57,<57.2"
+arrow-schema = ">=57,<57.2"
+arrow-select = ">=57,<57.2"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
-numpy = "0.26"
-object_store = "0.12.4"
-parquet = "57"
-pyo3 = { version = "0.27", features = ["macros", "indexmap"] }
-# pyo3-arrow = { path = "pyo3-arrow" }
-pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "0c59fc9e6825678e247ae5375a67301621cfbf48" }
-pyo3-async-runtimes = { version = "0.27", features = ["tokio-runtime"] }
-pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "aacc18816591f9987247bac8b7011b452b4eeb3e" }
-pyo3-object_store = "0.7"
+numpy = "0.28"
+object_store = "0.12"
+parquet = ">=57,<57.2"
+pyo3 = { version = "0.28", features = ["macros", "indexmap"] }
+pyo3-arrow = { path = "pyo3-arrow" }
+pyo3-async-runtimes = { version = "0.28", features = ["tokio-runtime"] }
+pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "f724ceaa7e06e7d227bf40b1d60adbb842963a44" }
+pyo3-object_store = "0.10"
 thiserror = "1.0.63"
 
 [profile.release]
