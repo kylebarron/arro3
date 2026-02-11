@@ -39,7 +39,7 @@ pyo3 = { version = "0.28", features = ["macros", "indexmap"] }
 pyo3-arrow = { path = "pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.28", features = ["tokio-runtime"] }
 pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "f724ceaa7e06e7d227bf40b1d60adbb842963a44" }
-pyo3-object_store = "0.8"
+pyo3-object_store = "0.10"
 thiserror = "1.0.63"
 
 [profile.release]

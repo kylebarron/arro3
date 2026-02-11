@@ -100,7 +100,7 @@ dependencies = [
  "arrow-schema",
  "bytes",
  "futures",
- "object_store 0.13.1",
+ "object_store",
  "parquet",
  "pyo3",
  "pyo3-arrow",
@@ -1392,29 +1392,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbfbfff40aeccab00ec8a910b57ca8ecf4319b335c542f2edcd19dd25a1e2a00"
 dependencies = [
  "async-trait",
- "bytes",
- "chrono",
- "futures",
- "http",
- "humantime",
- "itertools",
- "parking_lot",
- "percent-encoding",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "url",
- "wasm-bindgen-futures",
- "web-time",
-]
-
-[[package]]
-name = "object_store"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2858065e55c148d294a9f3aae3b0fa9458edadb41a108397094566f4e3c0dfb"
-dependencies = [
- "async-trait",
  "base64",
  "bytes",
  "chrono",
@@ -1433,7 +1410,7 @@ dependencies = [
  "rand",
  "reqwest",
  "ring",
- "rustls-pki-types",
+ "rustls-pemfile",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -1516,7 +1493,7 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
- "object_store 0.12.5",
+ "object_store",
  "paste",
  "seq-macro",
  "simdutf8",
@@ -1743,9 +1720,9 @@ dependencies = [
 
 [[package]]
 name = "pyo3-object_store"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3056dc8a77db5d44d32e7f740db0b01e5b65a43d181487a6917576959c6eb9a"
+checksum = "6a900d022739373b3ea71fc77bbd237e094b478f71e4b5460c4371c9dedf7457"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1754,7 +1731,7 @@ dependencies = [
  "http",
  "humantime",
  "itertools",
- "object_store 0.13.1",
+ "object_store",
  "percent-encoding",
  "pyo3",
  "pyo3-async-runtimes",
@@ -2025,6 +2002,15 @@ dependencies = [
  "rustls-pki-types",
  "schannel",
  "security-framework",
+]
+
+[[package]]
+name = "rustls-pemfile"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dce314e5fee3f39953d46bb63bb8a46d40c2f8fb7cc5a3b6cab2bde9721d6e50"
+dependencies = [
+ "rustls-pki-types",
 ]
 
 [[package]]
