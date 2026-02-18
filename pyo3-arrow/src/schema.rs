@@ -1,20 +1,26 @@
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_schema::{Schema, SchemaRef};
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use pyo3::exceptions::PyTypeError;
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyCapsule, PyDict, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
-use crate::error::PyArrowResult;
-use crate::export::{Arro3DataType, Arro3Field, Arro3Schema, Arro3Table};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_python::to_schema_pycapsule;
-use crate::input::{FieldIndexInput, MetadataInput};
-use crate::{PyDataType, PyField, PyTable};
+
+#[cfg(feature = "arro3")]
+use {
+    crate::error::PyArrowResult,
+    crate::export::{Arro3DataType, Arro3Field, Arro3Schema, Arro3Table},
+    crate::input::{FieldIndexInput, MetadataInput},
+    crate::{PyDataType, PyField, PyTable},
+    pyo3::exceptions::PyValueError,
+    pyo3::types::{PyBytes, PyDict, PyType},
+    std::collections::HashMap,
+};
 
 /// A Python-facing Arrow schema.
 ///
@@ -45,9 +51,10 @@ impl PySchema {
     /// Export this to a Python `arro3.core.Schema`.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_schema_pycapsule(py, self.0.as_ref())?;
         arro3_mod.getattr(intern!(py, "Schema"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
+            PyTuple::new(py, vec![capsule])?,
         )
     }
 
@@ -63,7 +70,8 @@ impl PySchema {
 
     /// Export this to a Python `nanoarrow.Schema`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
+        let capsule = to_schema_pycapsule(py, self.0.as_ref())?;
+        to_nanoarrow_schema(py, &capsule)
     }
 
     /// Export to a pyarrow.Schema
@@ -120,6 +128,7 @@ pub(crate) fn display_schema(schema: &Schema, f: &mut std::fmt::Formatter<'_>) -
     Ok(())
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PySchema {
     #[new]

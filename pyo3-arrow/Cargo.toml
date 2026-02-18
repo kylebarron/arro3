@@ -14,23 +14,26 @@ rust-version = "1.75"
 [features]
 default = ["buffer_protocol"]
 
+# Enable #[pyclass] and #[pymethods] definitions for arro3 Python classes.
+# External consumers that only need FFI/conversion should leave this off.
+arro3 = ["dep:indexmap", "pyo3/indexmap", "dep:chrono", "dep:chrono-tz", "arrow-array/chrono-tz", "pyo3/chrono", "pyo3/chrono-tz", "dep:half", "numpy/half"]
+
 # Support buffer protocol. Requires `abi3-py311` pyo3 feature or non-abi3
 # wheels.
 buffer_protocol = []
 
 [dependencies]
-arrow-array = { version = "57", features = ["chrono-tz", "ffi"] }
+arrow-array = { version = "57", features = ["ffi"] }
 arrow-buffer = "57"
 arrow-cast = { version = "57", features = ["prettyprint"] }
-arrow-data = "57"
 arrow-schema = "57"
 arrow-select = "57"
-chrono = "0.4"
-chrono-tz = "0.10"
-pyo3 = { version = "0.28", features = ["chrono", "chrono-tz", "indexmap"] }
-half = "2"
-indexmap = "2"
-numpy = { version = "0.28", features = ["half"] }
+chrono = { version = "0.4", optional = true }
+chrono-tz = { version = "0.10", optional = true }
+pyo3 = { version = "0.28" }
+half = { version = "2", optional = true }
+indexmap = { version = "2", optional = true }
+numpy = { version = "0.28" }
 thiserror = "1"
 
 [lib]

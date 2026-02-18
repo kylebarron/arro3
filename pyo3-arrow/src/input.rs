@@ -3,21 +3,26 @@
 //! These types tend to be used for unknown user input, and thus do not exist for return types,
 //! where the exact type is known.
 
-use std::collections::HashMap;
-use std::string::FromUtf8Error;
-use std::sync::Arc;
-
 use arrow_array::{Datum, RecordBatchIterator, RecordBatchReader};
-use arrow_schema::{ArrowError, Field, FieldRef, Fields, Schema, SchemaRef};
-use pyo3::exceptions::{PyIndexError, PyKeyError, PyValueError};
+use arrow_schema::{ArrowError, FieldRef, SchemaRef};
 use pyo3::prelude::*;
+
+#[cfg(feature = "arro3")]
+use {
+    arrow_schema::{Field, Fields, Schema},
+    pyo3::exceptions::{PyIndexError, PyKeyError, PyValueError},
+    std::collections::HashMap,
+    std::string::FromUtf8Error,
+    std::sync::Arc,
+};
 
 use crate::array_reader::PyArrayReader;
 use crate::error::PyArrowResult;
 use crate::ffi::{ArrayIterator, ArrayReader};
-use crate::{
-    PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyScalar, PyTable,
-};
+use crate::{PyArray, PyChunkedArray, PyRecordBatch, PyRecordBatchReader, PyScalar, PyTable};
+
+#[cfg(feature = "arro3")]
+use crate::PyField;
 
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.
@@ -127,12 +132,14 @@ impl Datum for AnyDatum {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[derive(FromPyObject)]
 pub(crate) enum MetadataInput {
     String(HashMap<String, String>),
     Bytes(HashMap<Vec<u8>, Vec<u8>>),
 }
 
+#[cfg(feature = "arro3")]
 impl MetadataInput {
     pub(crate) fn into_string_hashmap(self) -> PyResult<HashMap<String, String>> {
         match self {
@@ -149,18 +156,21 @@ impl MetadataInput {
     }
 }
 
+#[cfg(feature = "arro3")]
 impl Default for MetadataInput {
     fn default() -> Self {
         Self::String(Default::default())
     }
 }
 
+#[cfg(feature = "arro3")]
 #[derive(FromPyObject)]
 pub(crate) enum FieldIndexInput {
     Name(String),
     Position(usize),
 }
 
+#[cfg(feature = "arro3")]
 impl FieldIndexInput {
     /// This will additionally check that the input is valid against the given schema.
     ///
@@ -181,12 +191,14 @@ impl FieldIndexInput {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[derive(FromPyObject)]
 pub(crate) enum NameOrField {
     Name(String),
     Field(PyField),
 }
 
+#[cfg(feature = "arro3")]
 impl NameOrField {
     pub fn into_field(self, source_field: &Field) -> FieldRef {
         match self {
@@ -203,12 +215,14 @@ impl NameOrField {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[derive(FromPyObject)]
 pub(crate) enum SelectIndices {
     Names(Vec<String>),
     Positions(Vec<usize>),
 }
 
+#[cfg(feature = "arro3")]
 impl SelectIndices {
     pub fn into_positions(self, fields: &Fields) -> PyResult<Vec<usize>> {
         match self {

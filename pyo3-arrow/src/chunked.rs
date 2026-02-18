@@ -2,27 +2,34 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_array::{Array, ArrayRef};
-use arrow_cast::cast;
 use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
-use arrow_select::concat::concat;
-use pyo3::exceptions::{PyIndexError, PyTypeError, PyValueError};
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
 use crate::error::{PyArrowError, PyArrowResult};
-use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::to_schema_pycapsule;
-use crate::input::AnyArray;
-use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::utils::default_repr_options;
-use crate::{PyArray, PyDataType, PyField, PyScalar};
+
+#[cfg(feature = "arro3")]
+use {
+    crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field},
+    crate::ffi::to_schema_pycapsule,
+    crate::input::AnyArray,
+    crate::interop::numpy::to_numpy::chunked_to_numpy,
+    crate::PyArray,
+    crate::{PyDataType, PyField, PyScalar},
+    arrow_cast::cast,
+    arrow_select::concat::concat,
+    pyo3::exceptions::PyIndexError,
+    pyo3::types::PyType,
+};
 
 /// A Python-facing Arrow chunked array.
 ///
@@ -115,9 +122,10 @@ impl PyChunkedArray {
         self.chunks.iter().fold(0, |acc, arr| acc + arr.len())
     }
 
+    #[cfg(feature = "arro3")]
     pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
-        if total_chunk_length != self.length() {
+        if total_chunk_length != self.len() {
             return Err(PyValueError::new_err(
                 "Chunk lengths do not add up to chunked array length",
             )
@@ -152,8 +160,9 @@ impl PyChunkedArray {
         Ok(PyChunkedArray::try_new(chunks, self.field.clone())?)
     }
 
+    #[cfg(feature = "arro3")]
     pub(crate) fn slice(&self, mut offset: usize, mut length: usize) -> PyArrowResult<Self> {
-        if offset + length > self.length() {
+        if offset + length > self.len() {
             return Err(
                 PyValueError::new_err("offset + length may not exceed length of array").into(),
             );
@@ -196,24 +205,24 @@ impl PyChunkedArray {
             .getattr(intern!(py, "ChunkedArray"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
+                PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
             )
     }
 
     /// Export this to a Python `arro3.core.ChunkedArray`.
     pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let capsule = Self::to_stream_pycapsule(py, self.chunks.clone(), self.field.clone(), None)?;
         arro3_mod
             .getattr(intern!(py, "ChunkedArray"))?
             .call_method1(
                 intern!(py, "from_arrow_pycapsule"),
-                PyTuple::new(py, vec![capsule])?,
+                PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
             )
     }
+
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
+        to_nanoarrow_array_stream(py, &self.to_stream_pycapsule(py, None)?)
     }
 
     /// Export to a pyarrow.ChunkedArray
@@ -227,12 +236,14 @@ impl PyChunkedArray {
     }
 
     pub(crate) fn to_stream_pycapsule<'py>(
+        &self,
         py: Python<'py>,
-        chunks: Vec<ArrayRef>,
-        field: FieldRef,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
+        let array_reader = Box::new(ArrayIterator::new(
+            self.chunks.clone().into_iter().map(Ok),
+            self.field.clone(),
+        ));
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
 }
@@ -276,6 +287,7 @@ impl Display for PyChunkedArray {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyChunkedArray {
     #[new]
@@ -345,12 +357,7 @@ impl PyChunkedArray {
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        Self::to_stream_pycapsule(
-            py,
-            self.chunks.clone(),
-            self.field.clone(),
-            requested_schema,
-        )
+        self.to_stream_pycapsule(py, requested_schema)
     }
 
     fn __eq__(&self, other: &PyChunkedArray) -> bool {

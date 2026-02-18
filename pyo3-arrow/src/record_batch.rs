@@ -4,24 +4,31 @@ use std::sync::Arc;
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{DataType, Field, FieldRef, Schema, SchemaBuilder, SchemaRef};
-use arrow_select::concat::concat_batches;
-use arrow_select::take::take_record_batch;
-use indexmap::IndexMap;
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use arrow_schema::{DataType, Field, SchemaBuilder};
+use pyo3::exceptions::PyValueError;
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
 use crate::error::PyArrowResult;
-use crate::export::{Arro3Array, Arro3Field, Arro3RecordBatch, Arro3Schema};
 use crate::ffi::from_python::utils::import_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
 use crate::ffi::to_python::to_array_pycapsules;
-use crate::ffi::to_schema_pycapsule;
-use crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices};
 use crate::utils::default_repr_options;
-use crate::{PyArray, PyField, PySchema};
+
+#[cfg(feature = "arro3")]
+use {
+    crate::export::{Arro3Array, Arro3Field, Arro3RecordBatch, Arro3Schema},
+    crate::ffi::to_schema_pycapsule,
+    crate::input::{AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices},
+    crate::{PyArray, PyField, PySchema},
+    arrow_schema::{FieldRef, Schema, SchemaRef},
+    arrow_select::concat::concat_batches,
+    arrow_select::take::take_record_batch,
+    indexmap::IndexMap,
+    pyo3::exceptions::PyTypeError,
+    pyo3::types::PyType,
+};
 
 /// A Python-facing Arrow record batch.
 ///
@@ -80,10 +87,10 @@ impl PyRecordBatch {
     /// Export this to a Python `arro3.core.RecordBatch`.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        arro3_mod.getattr(intern!(py, "RecordBatch"))?.call_method1(
-            intern!(py, "from_arrow_pycapsule"),
-            self.__arrow_c_array__(py, None)?,
-        )
+        let capsules = Self::to_array_pycapsules(py, self.0.clone(), None)?;
+        arro3_mod
+            .getattr(intern!(py, "RecordBatch"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 
     /// Export this to a Python `arro3.core.RecordBatch`.
@@ -97,7 +104,8 @@ impl PyRecordBatch {
 
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array(py, self.__arrow_c_array__(py, None)?)
+        let capsules = Self::to_array_pycapsules(py, self.0.clone(), None)?;
+        to_nanoarrow_array(py, capsules)
     }
 
     /// Export to a pyarrow.RecordBatch
@@ -154,6 +162,7 @@ impl Display for PyRecordBatch {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyRecordBatch {
     #[new]

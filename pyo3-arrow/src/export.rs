@@ -34,7 +34,7 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 
-use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule, ArrayReader};
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, ArrayReader};
 use crate::{
     PyArray, PyArrayReader, PyChunkedArray, PyDataType, PyField, PyRecordBatch,
     PyRecordBatchReader, PyScalar, PySchema, PyTable,
@@ -100,7 +100,7 @@ impl<'py> IntoPyObject<'py> for Arro3ArrayReader {
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let capsule = to_stream_pycapsule(py, self.0.into_reader()?, None)?;
+        let capsule = self.0.to_stream_pycapsule(py, None)?;
 
         arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
@@ -129,12 +129,7 @@ impl<'py> IntoPyObject<'py> for Arro3ChunkedArray {
     type Error = PyErr;
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let capsule = PyChunkedArray::to_stream_pycapsule(
-            py,
-            self.0.chunks().to_vec(),
-            self.0.field().clone(),
-            None,
-        )?;
+        let capsule = self.0.to_stream_pycapsule(py, None)?;
 
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod
@@ -280,7 +275,7 @@ impl<'py> IntoPyObject<'py> for Arro3RecordBatchReader {
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let capsule = PyRecordBatchReader::to_stream_pycapsule(py, self.0.into_reader()?, None)?;
+        let capsule = self.0.to_stream_pycapsule(py, None)?;
         arro3_mod
             .getattr(intern!(py, "RecordBatchReader"))?
             .call_method1(
@@ -367,12 +362,6 @@ impl<'py> IntoPyObject<'py> for Arro3Schema {
 #[derive(Debug)]
 pub struct Arro3Table(PyTable);
 
-impl Arro3Table {
-    pub(crate) fn into_inner(self) -> PyTable {
-        self.0
-    }
-}
-
 impl From<PyTable> for Arro3Table {
     fn from(value: PyTable) -> Self {
         Self(value)
@@ -386,8 +375,7 @@ impl<'py> IntoPyObject<'py> for Arro3Table {
 
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let (batches, schema) = self.0.into_inner();
-        let capsule = PyTable::to_stream_pycapsule(py, batches, schema, None)?;
+        let capsule = self.0.to_stream_pycapsule(py, None)?;
         arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
             PyTuple::new(py, vec![capsule])?,
