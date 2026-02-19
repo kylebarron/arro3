@@ -2,6 +2,44 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.7.0] - 2026-02-19
+
+### Breaking changes
+
+* feat!: Make `Table.remove_column` return `IndexError` by @surister in https://github.com/kylebarron/arro3/pull/442
+* fix: Rename `names` to `columns` parameter in `Tables.drop_columns` by @surister in https://github.com/kylebarron/arro3/pull/453
+* fix: Properly return `IndexError` on incorrect index in `Table.add_column` by @surister in https://github.com/kylebarron/arro3/pull/455
+
+### Improvements
+
+* ci: Build 3.14t wheels by @kylebarron in https://github.com/kylebarron/arro3/pull/428
+* feat: Make `Table.append_column` support `Array` by @surister in https://github.com/kylebarron/arro3/pull/433
+* feat: Make `Table.set_column` and `Table.add_column` support `Array` and `ArrayReader` by @surister in https://github.com/kylebarron/arro3/pull/437
+* fix: off by one when checking if an index is valid by @surister in https://github.com/kylebarron/arro3/pull/443
+* feat: Implement `Table.drop_columns` by @surister in https://github.com/kylebarron/arro3/pull/440
+* fix: `Table.rename` not modifying internals batches schema by @surister in https://github.com/kylebarron/arro3/pull/457
+* fix: Improve error messaging by adding more information by @surister in https://github.com/kylebarron/arro3/pull/447
+* feat: Match `RecordBatch.from_arrays` closely to pyarrow by @AlenkaF in https://github.com/kylebarron/arro3/pull/461
+
+### Bug Fixes
+
+* fix: Preserve schema metadata in RecordBatch PyCapsule export by @bretttully in https://github.com/kylebarron/arro3/pull/474
+* fix: Update license metadata in `pyproject.toml` by @kylebarron in https://github.com/kylebarron/arro3/pull/480
+
+### Other improvements
+
+* chore: Bump to arrow 57 by @kylebarron in https://github.com/kylebarron/arro3/pull/424
+* chore: Bump arro3 to pyo3 0.27 by @kylebarron in https://github.com/kylebarron/arro3/pull/425
+
+
+## New Contributors
+
+* @surister made their first contribution in https://github.com/kylebarron/arro3/pull/433
+* @AlenkaF made their first contribution in https://github.com/kylebarron/arro3/pull/461
+* @bretttully made their first contribution in https://github.com/kylebarron/arro3/pull/474
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.6.5...py-v0.7.0
+
 ## [0.6.5] - 2025-10-13
 
 - fix(ci): Ensure we use Python 3.11 interpreter for building abi3 wheels #416
