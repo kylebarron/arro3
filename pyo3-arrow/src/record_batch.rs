@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow_array::cast::AsArray;
 use arrow_array::{Array, ArrayRef, RecordBatch, RecordBatchOptions, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{DataType, Field, Schema, SchemaBuilder};
+use arrow_schema::{DataType, Field, FieldRef, Schema, SchemaBuilder, SchemaRef};
 use arrow_select::concat::concat_batches;
 use arrow_select::take::take_record_batch;
 use indexmap::IndexMap;
@@ -121,7 +121,8 @@ impl PyRecordBatch {
         record_batch: RecordBatch,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyTuple>> {
-        let field = Field::new_struct("", record_batch.schema_ref().fields().clone(), false);
+        let field = Field::new_struct("", record_batch.schema_ref().fields().clone(), false)
+            .with_metadata(record_batch.schema_ref().metadata().clone());
         let array: ArrayRef = Arc::new(StructArray::from(record_batch.clone()));
         to_array_pycapsules(py, field.into(), &array, requested_schema)
     }
@@ -162,25 +163,20 @@ impl Display for PyRecordBatch {
 #[pymethods]
 impl PyRecordBatch {
     #[new]
-    #[pyo3(signature = (data, *,  schema=None, metadata=None))]
+    #[pyo3(signature = (data, *, names=None, schema=None, metadata=None))]
     fn init(
         py: Python,
         data: &Bound<PyAny>,
+        names: Option<Vec<String>>,
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
         if data.hasattr(intern!(py, "__arrow_c_array__"))? {
             Ok(data.extract::<PyRecordBatch>()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
-            Self::from_pydict(&py.get_type::<PyRecordBatch>(), mapping, metadata)
+            Self::from_pydict(&py.get_type::<Self>(), mapping, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
-            Self::from_arrays(
-                &py.get_type::<PyRecordBatch>(),
-                arrays,
-                schema.ok_or(PyValueError::new_err(
-                    "Schema must be passed with list of arrays",
-                ))?,
-            )
+            Self::from_arrays(&py.get_type::<Self>(), arrays, names, schema, metadata)
         } else {
             Err(PyTypeError::new_err(
                 "Expected RecordBatch-like input or dict of arrays or list of arrays.",
@@ -211,22 +207,46 @@ impl PyRecordBatch {
     }
 
     #[classmethod]
-    #[pyo3(signature = (arrays, *, schema))]
+    #[pyo3(signature = (arrays, *, names=None, schema=None, metadata=None))]
     fn from_arrays(
         _cls: &Bound<PyType>,
         arrays: Vec<PyArray>,
-        schema: PySchema,
+        names: Option<Vec<String>>,
+        schema: Option<PySchema>,
+        metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        let rb = RecordBatch::try_new(
-            schema.into(),
-            arrays
-                .into_iter()
-                .map(|arr| {
-                    let (arr, _field) = arr.into_inner();
-                    arr
-                })
-                .collect(),
-        )?;
+        if schema.is_some() && metadata.is_some() {
+            return Err(PyValueError::new_err("Cannot pass both schema and metadata").into());
+        }
+
+        let (arrays, fields): (Vec<ArrayRef>, Vec<FieldRef>) =
+            arrays.into_iter().map(|arr| arr.into_inner()).unzip();
+
+        let schema: SchemaRef = if let Some(schema) = schema {
+            schema.into_inner()
+        } else {
+            let names = names.ok_or(PyValueError::new_err(
+                "names must be passed if schema is not passed.",
+            ))?;
+
+            let fields: Vec<_> = fields
+                .iter()
+                .zip(names.iter())
+                .map(|(field, name)| field.as_ref().clone().with_name(name))
+                .collect();
+
+            Arc::new(
+                Schema::new(fields)
+                    .with_metadata(metadata.unwrap_or_default().into_string_hashmap()?),
+            )
+        };
+
+        if arrays.is_empty() {
+            let rb = RecordBatch::try_new(schema, vec![])?;
+            return Ok(Self::new(rb));
+        }
+
+        let rb = RecordBatch::try_new(schema, arrays)?;
         Ok(Self::new(rb))
     }
 

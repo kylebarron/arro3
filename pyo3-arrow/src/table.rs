@@ -244,9 +244,9 @@ impl PyTable {
         {
             Ok(data.extract::<AnyRecordBatch>()?.into_table()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, AnyArray>>() {
-            Self::from_pydict(&py.get_type::<PyTable>(), mapping, schema, metadata)
+            Self::from_pydict(&py.get_type::<Self>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<AnyArray>>() {
-            Self::from_arrays(&py.get_type::<PyTable>(), arrays, names, schema, metadata)
+            Self::from_arrays(&py.get_type::<Self>(), arrays, names, schema, metadata)
         } else {
             Err(PyTypeError::new_err(
                 "Expected Table-like input or dict of arrays or sequence of arrays.",
@@ -341,6 +341,10 @@ impl PyTable {
         schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
+        if schema.is_some() && metadata.is_some() {
+            return Err(PyValueError::new_err("Cannot pass both schema and metadata").into());
+        }
+
         let columns = arrays
             .into_iter()
             .map(|array| array.into_chunked_array())

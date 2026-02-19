@@ -98,15 +98,42 @@ class RecordBatch:
     def __eq__(self, other) -> bool: ...
     def __getitem__(self, key: int | str) -> Array: ...
     def __repr__(self) -> str: ...
+    @overload
     @classmethod
     def from_arrays(
-        cls, arrays: Sequence[ArrayInput], *, schema: ArrowSchemaExportable
+        cls,
+        arrays: Sequence[ArrayInput],
+        *,
+        names: Sequence[str],
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> RecordBatch: ...
+    @overload
+    @classmethod
+    def from_arrays(
+        cls,
+        arrays: Sequence[ArrayInput],
+        *,
+        names: None = None,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> RecordBatch: ...
+    @classmethod
+    def from_arrays(
+        cls,
+        arrays: Sequence[ArrayInput],
+        *,
+        names: Sequence[str] | None = None,
+        schema: ArrowSchemaExportable | None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch:
         """Construct a RecordBatch from multiple Arrays
 
         Args:
-            arrays: One for each field in RecordBatch
-            schema: Schema for the created batch. If not passed, names must be passed
+            arrays: Equal-length arrays, one for each field in RecordBatch
+            names: Names for the fields. If not passed, `schema` must be passed. Defaults to None.
+            schema: Schema for the created batch. If not passed, `names` must be passed. Defaults to None.
+            metadata: Optional metadata for the schema (if inferred). Defaults to None.
 
         Returns:
             _description_

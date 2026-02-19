@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pytest
-from arro3.core import RecordBatch
+from arro3.core import RecordBatch, Schema
 
 
 def test_nonempty_batch_no_columns():
@@ -10,6 +10,66 @@ def test_nonempty_batch_no_columns():
     arro3_batch = RecordBatch.from_arrow(batch)
     retour = pa.record_batch(arro3_batch)
     assert batch == retour
+
+
+def test_batch_from_arrays():
+    a = pa.array([1, 2, 3, 4])
+    b = pa.array(["a", "b", "c", "d"])
+    arro3_batch = RecordBatch.from_arrays([a, b], names=["int", "str"])
+    pa_batch = pa.RecordBatch.from_arrays([a, b], names=["int", "str"])
+    assert pa.record_batch(arro3_batch) == pa_batch
+
+    # With metadata
+    metadata = {b"key": b"value"}
+    arro3_batch = RecordBatch.from_arrays(
+        [a, b], names=["int", "str"], metadata=metadata
+    )
+    pa_batch = pa.RecordBatch.from_arrays(
+        [a, b], names=["int", "str"], metadata=metadata
+    )
+    assert pa.record_batch(arro3_batch) == pa_batch
+    assert arro3_batch.schema.metadata == metadata
+
+    # With schema
+    schema = Schema(
+        [
+            pa.field("int", type=pa.int64()),
+            pa.field("str", type=pa.utf8()),
+        ]
+    )
+    arro3_batch = RecordBatch.from_arrays([a, b], schema=schema)
+    pa_batch = pa.RecordBatch.from_arrays([a, b], schema=pa.schema(schema))
+    assert pa.record_batch(arro3_batch) == pa_batch
+
+    # Empty batch
+    pa_arr_empty = pa.array([], type=pa.int64())
+    arro3_batch = RecordBatch.from_arrays([pa_arr_empty], names=["int"])
+    pa_batch = pa.RecordBatch.from_arrays([pa_arr_empty], names=["int"])
+    assert pa.record_batch(arro3_batch) == pa_batch
+
+    # No names nor schema
+    with pytest.raises(
+        ValueError, match="names must be passed if schema is not passed"
+    ):
+        RecordBatch.from_arrays([a, b])
+
+    # ValueError with both schema and metadata
+    msg = "Cannot pass both schema and metadata"
+    with pytest.raises(ValueError, match=msg):
+        RecordBatch.from_arrays([a, b], schema=schema, metadata=metadata)
+
+    with pytest.raises(ValueError, match=msg):
+        pa.RecordBatch.from_arrays([a, b], schema=pa.schema(schema), metadata=metadata)
+
+
+def test_schema_metadata_preserved_through_pycapsule():
+    """https://github.com/kylebarron/arro3/issues/473"""
+    a = pa.array([1, 2, 3])
+    metadata = {b"my_key": b"my_value"}
+    arro3_batch = RecordBatch.from_arrays([a], names=["x"], metadata=metadata)
+    assert arro3_batch.schema.metadata == metadata
+    roundtripped = pa.record_batch(arro3_batch)
+    assert roundtripped.schema.metadata == metadata
 
 
 class CustomException(Exception):
