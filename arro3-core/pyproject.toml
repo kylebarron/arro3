@@ -6,7 +6,10 @@ build-backend = "maturin"
 name = "arro3-core"
 requires-python = ">=3.9"
 dependencies = ["typing-extensions; python_version < '3.12'"]
+license = "MIT OR Apache-2.0"
 classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
