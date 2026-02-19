@@ -2,7 +2,6 @@
 
 use std::ffi::CStr;
 use std::os::raw;
-use std::os::raw::c_int;
 use std::ptr::NonNull;
 use std::sync::Arc;
 
@@ -15,9 +14,10 @@ use arrow_buffer::{Buffer, ScalarBuffer};
 use arrow_schema::Field;
 use pyo3::buffer::{ElementType, PyBuffer};
 use pyo3::exceptions::PyValueError;
-use pyo3::ffi;
 use pyo3::prelude::*;
-use pyo3::types::PyBytes;
+
+#[cfg(feature = "arro3")]
+use {pyo3::ffi, pyo3::types::PyBytes, std::os::raw::c_int};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::PyArray;
@@ -68,6 +68,7 @@ impl PyArrowBuffer {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyArrowBuffer {
     /// new

@@ -1,26 +1,36 @@
+#[cfg(feature = "arro3")]
 mod temporal;
 
 use std::fmt::Display;
-use std::str::FromStr;
 use std::sync::Arc;
 
-use arrow_array::cast::AsArray;
-use arrow_array::types::*;
-use arrow_array::{Array, ArrayRef, Datum, UnionArray};
-use arrow_cast::cast;
+use arrow_array::{Array, ArrayRef, Datum};
 use arrow_cast::pretty::pretty_format_columns_with_options;
-use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
-use indexmap::IndexMap;
+use arrow_schema::{ArrowError, Field, FieldRef};
+use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
-use pyo3::{intern, IntoPyObjectExt};
+use pyo3::types::PyCapsule;
 
 use crate::error::PyArrowResult;
-use crate::export::{Arro3DataType, Arro3Field, Arro3Scalar};
 use crate::ffi::to_array_pycapsules;
-use crate::scalar::temporal::{as_datetime_with_timezone, PyArrowTz};
 use crate::utils::default_repr_options;
-use crate::{PyArray, PyField};
+use crate::PyArray;
+
+#[cfg(feature = "arro3")]
+use {
+    crate::export::{Arro3DataType, Arro3Field, Arro3Scalar},
+    crate::scalar::temporal::{as_datetime_with_timezone, PyArrowTz},
+    crate::PyField,
+    arrow_array::cast::AsArray,
+    arrow_array::types::*,
+    arrow_array::UnionArray,
+    arrow_cast::cast,
+    arrow_schema::{DataType, TimeUnit},
+    indexmap::IndexMap,
+    pyo3::types::{PyList, PyTuple, PyType},
+    pyo3::IntoPyObjectExt,
+    std::str::FromStr,
+};
 
 /// A Python-facing Arrow scalar
 #[derive(Debug)]
@@ -94,10 +104,10 @@ impl PyScalar {
     /// This requires that you depend on arro3-core from your Python package.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        arro3_mod.getattr(intern!(py, "Scalar"))?.call_method1(
-            intern!(py, "from_arrow_pycapsule"),
-            self.__arrow_c_array__(py, None)?,
-        )
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        arro3_mod
+            .getattr(intern!(py, "Scalar"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 
     /// Export to an arro3.core.Scalar.
@@ -136,6 +146,7 @@ impl Datum for PyScalar {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyScalar {
     #[new]
@@ -455,6 +466,7 @@ impl PyScalar {
     }
 }
 
+#[cfg(feature = "arro3")]
 fn list_values_to_py(
     py: Python,
     inner_array: ArrayRef,

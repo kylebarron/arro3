@@ -1,34 +1,42 @@
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_array::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
-use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
-use arrow_array::{RecordBatch, RecordBatchIterator};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchReader, StructArray};
 use arrow_cast::pretty::pretty_format_batches_with_options;
-use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
+use arrow_schema::{Field, SchemaRef};
 use arrow_select::concat::concat_batches;
-use indexmap::IndexMap;
-use pyo3::exceptions::{PyIndexError, PyKeyError, PyTypeError, PyValueError};
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
-use crate::error::{PyArrowError, PyArrowResult};
-use crate::export::{
-    Arro3ChunkedArray, Arro3Field, Arro3RecordBatch, Arro3RecordBatchReader, Arro3Schema,
-    Arro3Table,
-};
+use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::to_schema_pycapsule;
-use crate::input::{
-    AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
-};
 use crate::utils::{default_repr_options, schema_equals};
-use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
+
+#[cfg(feature = "arro3")]
+use {
+    crate::error::PyArrowError,
+    crate::export::{
+        Arro3ChunkedArray, Arro3Field, Arro3RecordBatch, Arro3RecordBatchReader, Arro3Schema,
+        Arro3Table,
+    },
+    crate::ffi::to_schema_pycapsule,
+    crate::input::{
+        AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
+    },
+    crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema},
+    arrow_array::RecordBatchIterator,
+    arrow_schema::{ArrowError, Schema},
+    indexmap::IndexMap,
+    pyo3::exceptions::{PyIndexError, PyKeyError},
+    pyo3::types::PyType,
+    std::collections::HashMap,
+};
 
 /// A Python-facing Arrow table.
 ///
@@ -79,29 +87,46 @@ impl PyTable {
         (self.batches, self.schema)
     }
 
+    pub(crate) fn to_stream_pycapsule<'py>(
+        &self,
+        py: Python<'py>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
+        let field = self.schema.fields();
+        let array_reader = self.batches.clone().into_iter().map(|batch| {
+            let arr: ArrayRef = Arc::new(StructArray::from(batch));
+            Ok(arr)
+        });
+        let array_reader = Box::new(ArrayIterator::new(
+            array_reader,
+            Field::new_struct("", field.clone(), false)
+                .with_metadata(self.schema.metadata.clone())
+                .into(),
+        ));
+        to_stream_pycapsule(py, array_reader, requested_schema)
+    }
+
     /// Export this to a Python `arro3.core.Table`.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
+            PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
         )
     }
 
     /// Export this to a Python `arro3.core.Table`.
     pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let capsule =
-            Self::to_stream_pycapsule(py, self.batches.clone(), self.schema.clone(), None)?;
         arro3_mod.getattr(intern!(py, "Table"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![capsule])?,
+            PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
         )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
+        to_nanoarrow_array_stream(py, &self.to_stream_pycapsule(py, None)?)
     }
 
     /// Export to a pyarrow.Table
@@ -114,26 +139,25 @@ impl PyTable {
             .call1(PyTuple::new(py, vec![self.into_pyobject(py)?])?)
     }
 
-    pub(crate) fn to_stream_pycapsule<'py>(
-        py: Python<'py>,
-        batches: Vec<RecordBatch>,
-        schema: SchemaRef,
-        requested_schema: Option<Bound<'py, PyCapsule>>,
-    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        let field = schema.fields();
-        let array_reader = batches.into_iter().map(|batch| {
-            let arr: ArrayRef = Arc::new(StructArray::from(batch));
-            Ok(arr)
-        });
-        let array_reader = Box::new(ArrayIterator::new(
-            array_reader,
-            Field::new_struct("", field.clone(), false)
-                .with_metadata(schema.metadata.clone())
-                .into(),
-        ));
-        to_stream_pycapsule(py, array_reader, requested_schema)
+    /// Return the number of rows in this table.
+    pub fn num_rows(&self) -> usize {
+        self.batches
+            .iter()
+            .fold(0, |acc, batch| acc + batch.num_rows())
     }
 
+    /// Return the number of columns in this table.
+    pub fn num_columns(&self) -> usize {
+        self.schema.fields().len()
+    }
+
+    /// Combine all batches into a single batch.
+    pub fn combine_chunks(&self) -> PyArrowResult<Self> {
+        let batch = concat_batches(&self.schema, &self.batches)?;
+        Ok(Self::try_new(vec![batch], self.schema.clone())?)
+    }
+
+    #[cfg(feature = "arro3")]
     pub(crate) fn rechunk(&self, chunk_lengths: Vec<usize>) -> PyArrowResult<Self> {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
         if total_chunk_length != self.num_rows() {
@@ -218,16 +242,14 @@ impl Display for PyTable {
             .combine_chunks()
             .map_err(|_| std::fmt::Error)?;
 
-        pretty_format_batches_with_options(
-            &head_table.into_inner().batches,
-            &default_repr_options(),
-        )
-        .map_err(|_| std::fmt::Error)?
-        .fmt(f)?;
+        pretty_format_batches_with_options(head_table.batches(), &default_repr_options())
+            .map_err(|_| std::fmt::Error)?
+            .fmt(f)?;
 
         Ok(())
     }
 }
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyTable {
     #[new]
@@ -265,12 +287,7 @@ impl PyTable {
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        Self::to_stream_pycapsule(
-            py,
-            self.batches.clone(),
-            self.schema.clone(),
-            requested_schema,
-        )
+        self.to_stream_pycapsule(py, requested_schema)
     }
 
     fn __eq__(&self, other: &PyTable) -> bool {
@@ -564,9 +581,9 @@ impl PyTable {
             .collect()
     }
 
-    fn combine_chunks(&self) -> PyArrowResult<Arro3Table> {
-        let batch = concat_batches(&self.schema, &self.batches)?;
-        Ok(PyTable::try_new(vec![batch], self.schema.clone())?.into())
+    #[pyo3(name = "combine_chunks")]
+    fn combine_chunks_py(&self) -> PyArrowResult<Arro3Table> {
+        Ok(self.combine_chunks()?.into())
     }
 
     fn field(&self, i: FieldIndexInput) -> PyArrowResult<Arro3Field> {
@@ -582,15 +599,15 @@ impl PyTable {
     }
 
     #[getter]
-    fn num_columns(&self) -> usize {
-        self.schema.fields().len()
+    #[pyo3(name = "num_columns")]
+    fn num_columns_py(&self) -> usize {
+        self.num_columns()
     }
 
     #[getter]
-    fn num_rows(&self) -> usize {
-        self.batches()
-            .iter()
-            .fold(0, |acc, batch| acc + batch.num_rows())
+    #[pyo3(name = "num_rows")]
+    fn num_rows_py(&self) -> usize {
+        self.num_rows()
     }
 
     #[pyo3(signature = (*, max_chunksize=None))]

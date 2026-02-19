@@ -2,20 +2,31 @@ use std::fmt::Display;
 use std::sync::Mutex;
 
 use arrow_schema::FieldRef;
-use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
+use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
 use crate::error::PyArrowResult;
-use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3Field};
 use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::{to_schema_pycapsule, ArrayIterator, ArrayReader};
-use crate::input::AnyArray;
-use crate::{PyArray, PyChunkedArray, PyField};
+use crate::ffi::ArrayReader;
+
+#[cfg(feature = "arro3")]
+use crate::ffi::ArrayIterator;
+use crate::PyChunkedArray;
+
+#[cfg(feature = "arro3")]
+use {
+    crate::export::{Arro3Array, Arro3ChunkedArray, Arro3Field},
+    crate::ffi::to_schema_pycapsule,
+    crate::input::AnyArray,
+    crate::{PyArray, PyField},
+    pyo3::exceptions::PyStopIteration,
+    pyo3::types::PyType,
+};
 
 /// A Python-facing Arrow array reader.
 ///
@@ -89,34 +100,41 @@ impl PyArrayReader {
         Ok(stream.field())
     }
 
-    /// Export this to a Python `arro3.core.ArrayReader`.
-    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
-            intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_stream__(py, None)?])?,
-        )
-    }
-
-    /// Export this to a Python `arro3.core.ArrayReader`.
-    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
-        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+    pub(crate) fn to_stream_pycapsule<'py>(
+        &self,
+        py: Python<'py>,
+        requested_schema: Option<Bound<'py, PyCapsule>>,
+    ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         let array_reader = self
             .0
             .lock()
             .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
-        let stream_pycapsule = to_stream_pycapsule(py, array_reader, None)?;
+        to_stream_pycapsule(py, array_reader, requested_schema)
+    }
+
+    /// Export this to a Python `arro3.core.ArrayReader`.
+    pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
         arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![stream_pycapsule])?,
+            PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
+        )
+    }
+
+    /// Export this to a Python `arro3.core.ArrayReader`.
+    pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
+        let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        arro3_mod.getattr(intern!(py, "ArrayReader"))?.call_method1(
+            intern!(py, "from_arrow_pycapsule"),
+            PyTuple::new(py, vec![self.to_stream_pycapsule(py, None)?])?,
         )
     }
 
     /// Export this to a Python `nanoarrow.ArrayStream`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array_stream(py, &self.__arrow_c_stream__(py, None)?)
+        to_nanoarrow_array_stream(py, &self.to_stream_pycapsule(py, None)?)
     }
 }
 
@@ -144,6 +162,7 @@ impl Display for PyArrayReader {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyArrayReader {
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
@@ -156,13 +175,7 @@ impl PyArrayReader {
         py: Python<'py>,
         requested_schema: Option<Bound<'py, PyCapsule>>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        let array_reader = self
-            .0
-            .lock()
-            .unwrap()
-            .take()
-            .ok_or(PyIOError::new_err("Cannot read from closed stream"))?;
-        to_stream_pycapsule(py, array_reader, requested_schema)
+        self.to_stream_pycapsule(py, requested_schema)
     }
 
     // Return self

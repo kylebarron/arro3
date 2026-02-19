@@ -1,39 +1,48 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_array::types::{
-    Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
-    UInt64Type, UInt8Type,
-};
-use arrow_array::{
-    Array, ArrayRef, BinaryArray, BinaryViewArray, BooleanArray, Datum, FixedSizeBinaryArray,
-    LargeBinaryArray, LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
-};
-use arrow_cast::cast;
+use arrow_array::{Array, ArrayRef, Datum};
 use arrow_cast::display::ArrayFormatter;
-use arrow_schema::{ArrowError, DataType, Field, FieldRef};
-use arrow_select::concat::concat;
-use arrow_select::take::take;
-use numpy::PyUntypedArray;
-use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError};
+use arrow_schema::{ArrowError, Field, FieldRef};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::pybacked::{PyBackedBytes, PyBackedStr};
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
-#[cfg(feature = "buffer_protocol")]
-use crate::buffer::AnyBufferProtocol;
-use crate::error::PyArrowResult;
-use crate::export::{Arro3Array, Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_array_pycapsules;
+use crate::ffi::to_array_pycapsules;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array;
-use crate::ffi::{to_array_pycapsules, to_schema_pycapsule};
-use crate::input::AnyArray;
-use crate::interop::numpy::from_numpy::from_numpy;
-use crate::interop::numpy::to_numpy::to_numpy;
-use crate::scalar::PyScalar;
 use crate::utils::default_repr_options;
-use crate::{PyDataType, PyField};
+
+#[cfg(feature = "arro3")]
+use {
+    crate::error::PyArrowResult,
+    crate::export::{Arro3Array, Arro3DataType, Arro3Field},
+    crate::ffi::to_schema_pycapsule,
+    crate::input::AnyArray,
+    crate::interop::numpy::from_numpy::from_numpy,
+    crate::interop::numpy::to_numpy::to_numpy,
+    crate::scalar::PyScalar,
+    crate::{PyDataType, PyField},
+    arrow_array::types::{
+        Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
+        UInt32Type, UInt64Type, UInt8Type,
+    },
+    arrow_array::{
+        BinaryArray, BinaryViewArray, BooleanArray, FixedSizeBinaryArray, LargeBinaryArray,
+        LargeStringArray, PrimitiveArray, StringArray, StringViewArray,
+    },
+    arrow_cast::cast,
+    arrow_schema::DataType,
+    arrow_select::concat::concat,
+    arrow_select::take::take,
+    numpy::PyUntypedArray,
+    pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyValueError},
+    pyo3::pybacked::{PyBackedBytes, PyBackedStr},
+    pyo3::types::PyType,
+};
+
+#[cfg(all(feature = "arro3", feature = "buffer_protocol"))]
+use crate::buffer::AnyBufferProtocol;
 
 /// A Python-facing Arrow array.
 ///
@@ -107,10 +116,10 @@ impl PyArray {
     /// This requires that you depend on arro3-core from your Python package.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        arro3_mod.getattr(intern!(py, "Array"))?.call_method1(
-            intern!(py, "from_arrow_pycapsule"),
-            self.__arrow_c_array__(py, None)?,
-        )
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        arro3_mod
+            .getattr(intern!(py, "Array"))?
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 
     /// Export to an arro3.core.Array.
@@ -118,15 +127,16 @@ impl PyArray {
     /// This requires that you depend on arro3-core from your Python package.
     pub fn into_arro3(self, py: Python) -> PyResult<Bound<PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
-        let array_capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
         arro3_mod
             .getattr(intern!(py, "Array"))?
-            .call_method1(intern!(py, "from_arrow_pycapsule"), array_capsules)
+            .call_method1(intern!(py, "from_arrow_pycapsule"), capsules)
     }
 
     /// Export this to a Python `nanoarrow.Array`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_array(py, self.__arrow_c_array__(py, None)?)
+        let capsules = to_array_pycapsules(py, self.field.clone(), &self.array, None)?;
+        to_nanoarrow_array(py, capsules)
     }
 
     /// Export to a pyarrow.Array
@@ -180,6 +190,7 @@ impl Datum for PyArray {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[pymethods]
 impl PyArray {
     #[new]

@@ -1,22 +1,31 @@
 use std::fmt::Display;
-use std::hash::{DefaultHasher, Hash, Hasher};
-use std::sync::Arc;
 
-use arrow_schema::{DataType, Field, IntervalUnit, TimeUnit};
-use pyo3::exceptions::{PyTypeError, PyValueError};
+use arrow_schema::DataType;
+use pyo3::exceptions::PyTypeError;
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyTuple};
 
-use crate::error::PyArrowResult;
-use crate::export::{Arro3DataType, Arro3Field};
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_schema;
 use crate::ffi::to_schema_pycapsule;
-use crate::PyField;
 
+#[cfg(feature = "arro3")]
+use {
+    crate::error::PyArrowResult,
+    crate::export::{Arro3DataType, Arro3Field},
+    crate::PyField,
+    arrow_schema::{Field, IntervalUnit, TimeUnit},
+    pyo3::exceptions::PyValueError,
+    pyo3::types::PyType,
+    std::hash::{DefaultHasher, Hash, Hasher},
+    std::sync::Arc,
+};
+
+#[cfg(feature = "arro3")]
 struct PyTimeUnit(arrow_schema::TimeUnit);
 
+#[cfg(feature = "arro3")]
 impl<'a> FromPyObject<'_, 'a> for PyTimeUnit {
     type Error = PyErr;
 
@@ -59,9 +68,10 @@ impl PyDataType {
     /// Export this to a Python `arro3.core.DataType`.
     pub fn to_arro3<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+        let capsule = to_schema_pycapsule(py, &self.0)?;
         arro3_mod.getattr(intern!(py, "DataType"))?.call_method1(
             intern!(py, "from_arrow_pycapsule"),
-            PyTuple::new(py, vec![self.__arrow_c_schema__(py)?])?,
+            PyTuple::new(py, vec![capsule])?,
         )
     }
 
@@ -77,7 +87,8 @@ impl PyDataType {
 
     /// Export this to a Python `nanoarrow.Schema`.
     pub fn to_nanoarrow<'py>(&'py self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
-        to_nanoarrow_schema(py, &self.__arrow_c_schema__(py)?)
+        let capsule = to_schema_pycapsule(py, &self.0)?;
+        to_nanoarrow_schema(py, &capsule)
     }
 
     /// Export to a pyarrow.DataType
@@ -125,6 +136,7 @@ impl Display for PyDataType {
     }
 }
 
+#[cfg(feature = "arro3")]
 #[allow(non_snake_case)]
 #[pymethods]
 impl PyDataType {
