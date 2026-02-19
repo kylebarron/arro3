@@ -34,7 +34,7 @@ impl<'a> FromPyObject<'_, 'a> for PyTimeUnit {
 
 /// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
-#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen)]
+#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen, eq)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {
@@ -133,10 +133,6 @@ impl PyDataType {
         py: Python<'py>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, &self.0)
-    }
-
-    fn __eq__(&self, other: PyDataType) -> bool {
-        self.equals(other, false)
     }
 
     fn __hash__(&self) -> u64 {
