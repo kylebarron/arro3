@@ -66,3 +66,4 @@ def test_data_type_exports_as_nullable():
     # Test that data type exports through `__arrow_c_schema__` as nullable
     # https://github.com/kylebarron/arro3/pull/483
     assert Array([1, 2, 3], DataType.int64()).field.nullable == True
+    assert pa.field(DataType.int64()).nullable == True
