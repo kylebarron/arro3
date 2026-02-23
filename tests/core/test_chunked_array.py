@@ -104,3 +104,12 @@ def test_chunked_array_import_preserve_exception():
 
     with pytest.raises(CustomException):
         ChunkedArray(c_array_obj)
+
+
+def test_pyarrow_equality():
+    arr = Array([1, 2, 3], DataType.int16())
+    arr2 = Array([4, 5, 6], DataType.int16())
+    ca = ChunkedArray([arr, arr2])
+    pa_ca = pa.chunked_array([arr, arr2])
+    assert ca == pa_ca
+    assert pa_ca == ca

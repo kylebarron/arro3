@@ -41,8 +41,7 @@ use crate::PyArray;
 /// The Python buffer protocol is implemented on this buffer to enable zero-copy data transfer of
 /// the core buffer into Python. This allows for zero-copy data sharing with numpy via
 /// `numpy.frombuffer`.
-#[derive(PartialEq)]
-#[pyclass(module = "arro3.core._core", name = "Buffer", subclass, frozen, eq)]
+#[pyclass(module = "arro3.core._core", name = "Buffer", subclass, frozen)]
 pub struct PyArrowBuffer(Buffer);
 
 impl AsRef<Buffer> for PyArrowBuffer {

@@ -333,7 +333,7 @@ impl PyArray {
         to_schema_pycapsule(py, self.field.as_ref())
     }
 
-    fn __eq__(&self, other: &PyArray) -> bool {
+    fn __eq__(&self, other: PyArray) -> bool {
         self.array.as_ref() == other.array.as_ref() && self.field == other.field
     }
 

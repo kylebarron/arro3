@@ -90,3 +90,14 @@ def test_record_batch_import_preserve_exception():
 
     with pytest.raises(CustomException):
         RecordBatch(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    a = pa.array([1, 2, 3, 4])
+    b = pa.array(["a", "b", "c", "d"])
+    arro3_batch = RecordBatch.from_arrays([a, b], names=["int", "str"])
+    pa_batch = pa.RecordBatch.from_arrays([a, b], names=["int", "str"])
+    assert arro3_batch == pa_batch
+    # It looks like pyarrow implements custom equality for RecordBatch instead of
+    # returning NotImplemented, so it doesn't support reflexive equality
+    assert pa_batch != arro3_batch

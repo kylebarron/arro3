@@ -34,7 +34,7 @@ impl<'a> FromPyObject<'_, 'a> for PyTimeUnit {
 
 /// A Python-facing wrapper around [DataType].
 #[derive(PartialEq, Eq, Debug)]
-#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen, eq)]
+#[pyclass(module = "arro3.core._core", name = "DataType", subclass, frozen)]
 pub struct PyDataType(DataType);
 
 impl PyDataType {
@@ -132,7 +132,14 @@ impl PyDataType {
         &'py self,
         py: Python<'py>,
     ) -> PyArrowResult<Bound<'py, PyCapsule>> {
-        to_schema_pycapsule(py, &self.0)
+        // We manually construct a field to set `nullable: true` on any exported DataType.
+        // By default, arrow-rs sets `nullable: False` in the `TryInto<FFI_ArrowSchema>` impl.
+        let field = Field::new("", self.0.clone(), true);
+        to_schema_pycapsule(py, &field)
+    }
+
+    fn __eq__(&self, other: PyDataType) -> bool {
+        self.equals(other, false)
     }
 
     fn __hash__(&self) -> u64 {

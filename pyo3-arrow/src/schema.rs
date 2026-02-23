@@ -19,8 +19,8 @@ use crate::{PyDataType, PyField, PyTable};
 /// A Python-facing Arrow schema.
 ///
 /// This is a wrapper around a [SchemaRef].
-#[derive(Debug, PartialEq)]
-#[pyclass(module = "arro3.core._core", name = "Schema", subclass, frozen, eq)]
+#[derive(Debug)]
+#[pyclass(module = "arro3.core._core", name = "Schema", subclass, frozen)]
 pub struct PySchema(SchemaRef);
 
 impl PySchema {
@@ -138,6 +138,10 @@ impl PySchema {
 
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, self.0.as_ref())
+    }
+
+    fn __eq__(&self, other: PySchema) -> bool {
+        self.0 == other.0
     }
 
     fn __getitem__(&self, key: FieldIndexInput) -> PyArrowResult<Arro3Field> {

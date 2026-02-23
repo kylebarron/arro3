@@ -19,8 +19,8 @@ use crate::PyDataType;
 /// A Python-facing Arrow field.
 ///
 /// This is a wrapper around a [FieldRef].
-#[derive(Debug, PartialEq)]
-#[pyclass(module = "arro3.core._core", name = "Field", subclass, frozen, eq)]
+#[derive(Debug)]
+#[pyclass(module = "arro3.core._core", name = "Field", subclass, frozen)]
 pub struct PyField(FieldRef);
 
 impl PyField {
@@ -127,6 +127,10 @@ impl PyField {
 
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, self.0.as_ref())
+    }
+
+    fn __eq__(&self, other: PyField) -> bool {
+        self.0 == other.0
     }
 
     fn __repr__(&self) -> String {

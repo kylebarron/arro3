@@ -516,3 +516,12 @@ def test_table_import_preserve_exception():
 
     with pytest.raises(CustomException):
         Table(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    a = pa.chunked_array([[1, 2], [3, 4]])
+    b = pa.chunked_array([["a", "b"], ["c", "d"]])
+    table = Table.from_pydict({"a": a, "b": b})
+    pa_table = pa.table(table)
+    assert table == pa_table
+    assert pa_table == table

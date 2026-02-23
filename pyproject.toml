@@ -21,6 +21,7 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "pytest-freethreaded>=0.1.0;python_version>='3.13'",
     "pre-commit>=4.3.0",
+    "ruff>=0.15.2",
 ]
 
 [tool.ruff.lint]

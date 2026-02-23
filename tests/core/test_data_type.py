@@ -1,5 +1,6 @@
+import pyarrow as pa
 import pytest
-from arro3.core import DataType, Field
+from arro3.core import Array, DataType, Field
 
 
 def test_value_type_fixed_size_list_type():
@@ -54,3 +55,14 @@ def test_schema_import_preserve_exception():
     c_stream_obj = ArrowCSchemaFails()
     with pytest.raises(CustomException):
         DataType.from_arrow(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    assert DataType.int64() == pa.int64()
+    assert pa.int64() == DataType.int64()
+
+
+def test_data_type_exports_as_nullable():
+    # Test that data type exports through `__arrow_c_schema__` as nullable
+    # https://github.com/kylebarron/arro3/pull/483
+    assert Array([1, 2, 3], DataType.int64()).field.nullable == True
