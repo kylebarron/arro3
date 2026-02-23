@@ -179,3 +179,12 @@ def test_array_import_preserve_exception():
 
     with pytest.raises(CustomException):
         Array(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    arr = Array([1, 2, 3], DataType.int64())
+    pa_arr = pa.array(arr)
+    assert arr == pa_arr
+
+    arr2 = Array([1, None, 3], pa.int64())
+    assert arr2 == pa.array([1, None, 3], pa.int64())

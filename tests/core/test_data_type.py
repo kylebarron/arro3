@@ -1,3 +1,4 @@
+import pyarrow as pa
 import pytest
 from arro3.core import DataType, Field
 
@@ -54,3 +55,8 @@ def test_schema_import_preserve_exception():
     c_stream_obj = ArrowCSchemaFails()
     with pytest.raises(CustomException):
         DataType.from_arrow(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    assert DataType.int64() == pa.int64()
+    assert DataType.int64() == DataType.int64()
