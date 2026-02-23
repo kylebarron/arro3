@@ -27,14 +27,8 @@ use crate::{PyArray, PyDataType, PyField, PyScalar};
 /// A Python-facing Arrow chunked array.
 ///
 /// This is a wrapper around a [FieldRef] and a `Vec` of [ArrayRef].
-#[derive(Debug, PartialEq)]
-#[pyclass(
-    module = "arro3.core._core",
-    name = "ChunkedArray",
-    subclass,
-    frozen,
-    eq
-)]
+#[derive(Debug)]
+#[pyclass(module = "arro3.core._core", name = "ChunkedArray", subclass, frozen)]
 pub struct PyChunkedArray {
     chunks: Vec<ArrayRef>,
     field: FieldRef,
@@ -357,6 +351,10 @@ impl PyChunkedArray {
             self.field.clone(),
             requested_schema,
         )
+    }
+
+    fn __eq__(&self, other: &PyChunkedArray) -> bool {
+        self.field == other.field && self.chunks == other.chunks
     }
 
     fn __getitem__(&self, i: isize) -> PyArrowResult<PyScalar> {

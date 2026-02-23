@@ -26,14 +26,8 @@ use crate::{PyArray, PyField, PySchema};
 /// A Python-facing Arrow record batch.
 ///
 /// This is a wrapper around a [RecordBatch].
-#[pyclass(
-    module = "arro3.core._core",
-    name = "RecordBatch",
-    subclass,
-    frozen,
-    eq
-)]
-#[derive(Debug, PartialEq)]
+#[pyclass(module = "arro3.core._core", name = "RecordBatch", subclass, frozen)]
+#[derive(Debug)]
 pub struct PyRecordBatch(RecordBatch);
 
 impl PyRecordBatch {
@@ -196,6 +190,10 @@ impl PyRecordBatch {
 
     fn __arrow_c_schema__<'py>(&'py self, py: Python<'py>) -> PyArrowResult<Bound<'py, PyCapsule>> {
         to_schema_pycapsule(py, self.0.schema_ref().as_ref())
+    }
+
+    fn __eq__(&self, other: &PyRecordBatch) -> bool {
+        self.0 == other.0
     }
 
     fn __getitem__(&self, key: FieldIndexInput) -> PyResult<Arro3Array> {
