@@ -98,4 +98,6 @@ def test_pyarrow_equality():
     arro3_batch = RecordBatch.from_arrays([a, b], names=["int", "str"])
     pa_batch = pa.RecordBatch.from_arrays([a, b], names=["int", "str"])
     assert arro3_batch == pa_batch
-    assert pa_batch == arro3_batch
+    # It looks like pyarrow implements custom equality for RecordBatch instead of
+    # returning NotImplemented, so it doesn't support reflexive equality
+    assert pa_batch != arro3_batch
