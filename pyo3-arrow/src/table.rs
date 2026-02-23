@@ -273,7 +273,7 @@ impl PyTable {
         )
     }
 
-    fn __eq__(&self, other: &PyTable) -> bool {
+    fn __eq__(&self, other: PyTable) -> bool {
         self.batches == other.batches && self.schema == other.schema
     }
 

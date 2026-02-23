@@ -59,4 +59,4 @@ def test_schema_import_preserve_exception():
 
 def test_pyarrow_equality():
     assert DataType.int64() == pa.int64()
-    assert DataType.int64() == DataType.int64()
+    assert pa.int64() == DataType.int64()

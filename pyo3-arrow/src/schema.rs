@@ -140,7 +140,7 @@ impl PySchema {
         to_schema_pycapsule(py, self.0.as_ref())
     }
 
-    fn __eq__(&self, other: &PySchema) -> bool {
+    fn __eq__(&self, other: PySchema) -> bool {
         self.0 == other.0
     }
 

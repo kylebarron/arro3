@@ -353,7 +353,7 @@ impl PyChunkedArray {
         )
     }
 
-    fn __eq__(&self, other: &PyChunkedArray) -> bool {
+    fn __eq__(&self, other: PyChunkedArray) -> bool {
         self.field == other.field && self.chunks == other.chunks
     }
 

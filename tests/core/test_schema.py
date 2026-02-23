@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pytest
-from arro3.core import Field, Schema, Table
+from arro3.core import DataType, Field, Schema, Table
 
 
 def test_schema_iterable():
@@ -28,3 +28,10 @@ def test_schema_import_preserve_exception():
     c_stream_obj = ArrowCSchemaFails()
     with pytest.raises(CustomException):
         Schema.from_arrow(c_stream_obj)
+
+
+def test_pyarrow_equality():
+    schema = Schema([Field("a", DataType.int64()), Field("b", DataType.string())])
+    pa_schema = pa.schema(schema)
+    assert schema == pa_schema
+    assert pa_schema == schema

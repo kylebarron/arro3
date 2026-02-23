@@ -192,7 +192,7 @@ impl PyRecordBatch {
         to_schema_pycapsule(py, self.0.schema_ref().as_ref())
     }
 
-    fn __eq__(&self, other: &PyRecordBatch) -> bool {
+    fn __eq__(&self, other: PyRecordBatch) -> bool {
         self.0 == other.0
     }
 

@@ -129,7 +129,7 @@ impl PyField {
         to_schema_pycapsule(py, self.0.as_ref())
     }
 
-    fn __eq__(&self, other: &PyField) -> bool {
+    fn __eq__(&self, other: PyField) -> bool {
         self.0 == other.0
     }
 
