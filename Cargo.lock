@@ -63,7 +63,7 @@ checksum = "5f0e0fee31ef5ed1ba1316088939cea399010ed7731dba877ed44aeb407a75ea"
 
 [[package]]
 name = "arro3-compute"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "arrow-arith",
  "arrow-array",
@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-core"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "arro3-io"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",

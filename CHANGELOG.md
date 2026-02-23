@@ -2,6 +2,18 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.8.0] - 2026-02-22
+
+### Breaking Changes
+
+* A bare `DataType` is now exported through `__arrow_c_schema__` (such as when passing to `pyarrow.field`) with `nullable: true`. This is required to match equality semantics with pyarrow. by @kylebarron in https://github.com/kylebarron/arro3/pull/483
+
+### Bug Fixes
+
+* fix!: Fix type equality between arro3 and pyarrow by @kylebarron in https://github.com/kylebarron/arro3/pull/483
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.7.0...py-v0.8.0
+
 ## [0.7.0] - 2026-02-19
 
 ### Breaking changes
