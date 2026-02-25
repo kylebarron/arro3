@@ -209,7 +209,7 @@ pub(crate) fn write_parquet(
         props = props.set_write_batch_size(write_batch_size);
     }
     if let Some(max_row_group_size) = max_row_group_size {
-        props = props.set_max_row_group_size(max_row_group_size);
+        props = props.set_max_row_group_row_count(Some(max_row_group_size));
     }
     if let Some(created_by) = created_by {
         props = props.set_created_by(created_by);

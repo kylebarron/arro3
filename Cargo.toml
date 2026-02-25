@@ -22,26 +22,26 @@ rust-version = "1.75"
 [workspace.dependencies]
 # We pin arrow to <57.2 because of
 # https://github.com/apache/arrow-rs/pull/8944#issuecomment-3885228879
-arrow-arith = ">=57,<57.2"
-arrow-array = { version = ">=57,<57.2", features = ["ffi"] }
-arrow-buffer = ">=57,<57.2"
-arrow-cast = ">=57,<57.2"
-arrow-csv = ">=57,<57.2"
-arrow-ipc = { version = ">=57,<57.2", features = ["lz4", "zstd"] }
-arrow-json = ">=57,<57.2"
-arrow-schema = ">=57,<57.2"
-arrow-select = ">=57,<57.2"
+arrow-arith = "58"
+arrow-array = { version = "58", features = ["ffi"] }
+arrow-buffer = "58"
+arrow-cast = "58"
+arrow-csv = "58"
+arrow-ipc = { version = "58", features = ["lz4", "zstd"] }
+arrow-json = "58"
+arrow-schema = "58"
+arrow-select = "58"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
 numpy = "0.28"
-object_store = "0.12"
-parquet = ">=57,<57.2"
+object_store = "0.13"
+parquet = "58"
 pyo3 = { version = "0.28", features = ["macros", "indexmap"] }
 pyo3-arrow = { path = "pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.28", features = ["tokio-runtime"] }
 pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "f724ceaa7e06e7d227bf40b1d60adbb842963a44" }
-pyo3-object_store = "0.10"
+pyo3-object_store = "0.9"
 thiserror = "1.0.63"
 
 [profile.release]
