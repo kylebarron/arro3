@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## [0.16.1] - 2026-02-25
+
+- fix: Preserve schema metadata in RecordBatch PyCapsule export (#474)
+
+## [0.16.0] - 2026-02-09
+
+Release with pyo3 0.28 and arrow 57.
+
 ## [0.15.0] - 2025-10-23
 
 Release with pyo3 0.27 and arrow 57.
