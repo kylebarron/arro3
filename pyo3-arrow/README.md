@@ -198,6 +198,7 @@ In this case, you must depend on `nanoarrow` and you can use the `to_nanoarrow` 
 | 0.14.x     | 0.26 | 57       |
 | 0.15.x     | 0.27 | 57       |
 | 0.16.x     | 0.28 | 57       |
+| 0.17.x     | 0.28 | 58       |
 
 ## Buffer Protocol
 
