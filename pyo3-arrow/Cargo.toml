@@ -19,12 +19,12 @@ default = ["buffer_protocol"]
 buffer_protocol = []
 
 [dependencies]
-arrow-array = { version = "57", features = ["chrono-tz", "ffi"] }
-arrow-buffer = "57"
-arrow-cast = { version = "57", features = ["prettyprint"] }
-arrow-data = "57"
-arrow-schema = "57"
-arrow-select = "57"
+arrow-array = { version = "58", features = ["chrono-tz", "ffi"] }
+arrow-buffer = "58"
+arrow-cast = { version = "58", features = ["prettyprint"] }
+arrow-data = "58"
+arrow-schema = "58"
+arrow-select = "58"
 chrono = "0.4"
 chrono-tz = "0.10"
 pyo3 = { version = "0.28", features = ["chrono", "chrono-tz", "indexmap"] }
