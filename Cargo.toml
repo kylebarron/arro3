@@ -20,8 +20,6 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-# We pin arrow to <57.2 because of
-# https://github.com/apache/arrow-rs/pull/8944#issuecomment-3885228879
 arrow-arith = "58"
 arrow-array = { version = "58", features = ["ffi"] }
 arrow-buffer = "58"
