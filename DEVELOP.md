@@ -80,4 +80,3 @@ arro3 depends on pyo3-arrow and pyo3-object_store. pyo3-object_store itself depe
 To publish to crates.io, we have Github Actions workflows set up to publish when pushing tags with specific formats.
 
 - To publish `pyo3-arrow`, push a tag like `pyo3-arrow-vX.Y.Z` where `X.Y.Z` is the new version.
-- To publish `pyo3-bytes`, push a tag like `pyo3-bytes-vX.Y.Z` where `X.Y.Z` is the new version.
