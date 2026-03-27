@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import Sequence
 
 from ._record_batch import RecordBatch
 from ._schema import Schema

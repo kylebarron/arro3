@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::sync::{Arc, Mutex};
 
-use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchReader, StructArray};
 use arrow_schema::{ArrowError, Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
