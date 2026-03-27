@@ -1,8 +1,8 @@
 use std::fmt::Display;
 use std::sync::{Arc, Mutex};
 
-use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
-use arrow_schema::{Field, SchemaRef};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
+use arrow_schema::{ArrowError, Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -18,6 +18,43 @@ use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
+
+/// A RecordBatchReader that lazily pulls batches from a Python iterator.
+///
+/// The `iter` field holds a Python object that has already been converted to
+/// an iterator (via `__iter__`). Each call to `next()` acquires the GIL and
+/// calls `__next__` on it.
+struct PyIteratorRecordBatchReader {
+    schema: SchemaRef,
+    iter: Py<PyAny>,
+}
+
+// Safety: Py<PyAny> is Send and only accessed while holding the GIL.
+unsafe impl Send for PyIteratorRecordBatchReader {}
+
+impl Iterator for PyIteratorRecordBatchReader {
+    type Item = Result<RecordBatch, ArrowError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Python::attach(|py| {
+            let iter = self.iter.bind(py);
+            match iter.call_method0(intern!(py, "__next__")) {
+                Ok(obj) => match obj.extract::<PyRecordBatch>() {
+                    Ok(batch) => Some(Ok(batch.into_inner())),
+                    Err(e) => Some(Err(ArrowError::ExternalError(Box::new(e)))),
+                },
+                Err(e) if e.is_instance_of::<PyStopIteration>(py) => None,
+                Err(e) => Some(Err(ArrowError::ExternalError(Box::new(e)))),
+            }
+        })
+    }
+}
+
+impl RecordBatchReader for PyIteratorRecordBatchReader {
+    fn schema(&self) -> SchemaRef {
+        self.schema.clone()
+    }
+}
 
 /// A Python-facing Arrow record batch reader.
 ///
@@ -217,15 +254,17 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: Vec<PyRecordBatch>) -> Self {
-        let batches = batches
-            .into_iter()
-            .map(|batch| batch.into_inner())
-            .collect::<Vec<_>>();
-        Self::new(Box::new(RecordBatchIterator::new(
-            batches.into_iter().map(Ok),
-            schema.into_inner(),
-        )))
+    fn from_batches(
+        _cls: &Bound<PyType>,
+        schema: PySchema,
+        batches: &Bound<PyAny>,
+    ) -> PyResult<Self> {
+        let py = batches.py();
+        let iter = batches.call_method0(intern!(py, "__iter__"))?;
+        Ok(Self::new(Box::new(PyIteratorRecordBatchReader {
+            schema: schema.into_inner(),
+            iter: iter.unbind(),
+        })))
     }
 
     #[classmethod]
