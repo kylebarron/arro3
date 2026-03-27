@@ -29,9 +29,6 @@ struct PyIteratorRecordBatchReader {
     iter: Py<PyAny>,
 }
 
-// Safety: The contained Py<PyAny> is only ever accessed while holding the GIL
-// (via Python::attach in Iterator::next), so sending across threads is safe.
-unsafe impl Send for PyIteratorRecordBatchReader {}
 
 impl Iterator for PyIteratorRecordBatchReader {
     type Item = Result<RecordBatch, ArrowError>;
