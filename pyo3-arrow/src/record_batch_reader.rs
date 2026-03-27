@@ -6,6 +6,7 @@ use arrow_schema::{ArrowError, Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::Borrowed;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
@@ -19,16 +20,34 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
+/// Input for `from_batches`: either a sequence (extracted eagerly) or an
+/// arbitrary iterable (consumed lazily via GIL-acquiring iterator).
+enum RecordBatchInput {
+    Sequence(Vec<PyRecordBatch>),
+    Iterator(Py<PyAny>),
+}
+
+impl<'a, 'py> FromPyObject<'a, 'py> for RecordBatchInput {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
+        if let Ok(vec) = ob.extract::<Vec<PyRecordBatch>>() {
+            Ok(Self::Sequence(vec))
+        } else {
+            let iter = ob.call_method0(intern!(ob.py(), "__iter__"))?;
+            Ok(Self::Iterator(iter.unbind()))
+        }
+    }
+}
+
 /// A RecordBatchReader that lazily pulls batches from a Python iterator.
 ///
-/// The `iter` field holds a Python object that has already been converted to
-/// an iterator (via `__iter__`). Each call to `next()` acquires the GIL and
-/// calls `__next__` on it.
+/// Each call to `next()` acquires the GIL and calls `__next__` on the
+/// underlying Python iterator.
 struct PyIteratorRecordBatchReader {
     schema: SchemaRef,
     iter: Py<PyAny>,
 }
-
 
 impl Iterator for PyIteratorRecordBatchReader {
     type Item = Result<RecordBatch, ArrowError>;
@@ -255,28 +274,24 @@ impl PyRecordBatchReader {
     fn from_batches(
         _cls: &Bound<PyType>,
         schema: PySchema,
-        batches: &Bound<PyAny>,
-    ) -> PyResult<Self> {
-        // Fast path: if batches is a sequence (list, tuple), extract eagerly
-        // to avoid per-batch GIL acquisition overhead.
-        if let Ok(vec) = batches.extract::<Vec<PyRecordBatch>>() {
-            let batches = vec
-                .into_iter()
-                .map(|batch| batch.into_inner())
-                .collect::<Vec<_>>();
-            return Ok(Self::new(Box::new(RecordBatchIterator::new(
-                batches.into_iter().map(Ok),
-                schema.into_inner(),
-            ))));
+        batches: RecordBatchInput,
+    ) -> Self {
+        let schema = schema.into_inner();
+        match batches {
+            RecordBatchInput::Sequence(vec) => {
+                let batches = vec
+                    .into_iter()
+                    .map(|batch| batch.into_inner())
+                    .collect::<Vec<_>>();
+                Self::new(Box::new(RecordBatchIterator::new(
+                    batches.into_iter().map(Ok),
+                    schema,
+                )))
+            }
+            RecordBatchInput::Iterator(iter) => {
+                Self::new(Box::new(PyIteratorRecordBatchReader { schema, iter }))
+            }
         }
-
-        // Slow path: consume lazily from any iterable (generators, etc.)
-        let py = batches.py();
-        let iter = batches.call_method0(intern!(py, "__iter__"))?;
-        Ok(Self::new(Box::new(PyIteratorRecordBatchReader {
-            schema: schema.into_inner(),
-            iter: iter.unbind(),
-        })))
     }
 
     #[classmethod]
