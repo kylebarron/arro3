@@ -6,8 +6,8 @@ use arrow_schema::{ArrowError, Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::Borrowed;
 use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::Borrowed;
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
@@ -271,11 +271,7 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    fn from_batches(
-        _cls: &Bound<PyType>,
-        schema: PySchema,
-        batches: RecordBatchInput,
-    ) -> Self {
+    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: RecordBatchInput) -> Self {
         let schema = schema.into_inner();
         match batches {
             RecordBatchInput::Sequence(vec) => {
