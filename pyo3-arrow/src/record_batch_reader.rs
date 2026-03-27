@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::sync::{Arc, Mutex};
 
-use arrow_array::{ArrayRef, RecordBatch, RecordBatchReader, StructArray};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
 use arrow_schema::{ArrowError, Field, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
@@ -29,7 +29,8 @@ struct PyIteratorRecordBatchReader {
     iter: Py<PyAny>,
 }
 
-// Safety: Py<PyAny> is Send and only accessed while holding the GIL.
+// Safety: The contained Py<PyAny> is only ever accessed while holding the GIL
+// (via Python::attach in Iterator::next), so sending across threads is safe.
 unsafe impl Send for PyIteratorRecordBatchReader {}
 
 impl Iterator for PyIteratorRecordBatchReader {
@@ -259,6 +260,20 @@ impl PyRecordBatchReader {
         schema: PySchema,
         batches: &Bound<PyAny>,
     ) -> PyResult<Self> {
+        // Fast path: if batches is a sequence (list, tuple), extract eagerly
+        // to avoid per-batch GIL acquisition overhead.
+        if let Ok(vec) = batches.extract::<Vec<PyRecordBatch>>() {
+            let batches = vec
+                .into_iter()
+                .map(|batch| batch.into_inner())
+                .collect::<Vec<_>>();
+            return Ok(Self::new(Box::new(RecordBatchIterator::new(
+                batches.into_iter().map(Ok),
+                schema.into_inner(),
+            ))));
+        }
+
+        // Slow path: consume lazily from any iterable (generators, etc.)
         let py = batches.py();
         let iter = batches.call_method0(intern!(py, "__iter__"))?;
         Ok(Self::new(Box::new(PyIteratorRecordBatchReader {
