@@ -118,7 +118,7 @@ plugins:
             - https://arrow.apache.org/docs/objects.inv
             - https://docs.pola.rs/api/python/stable/objects.inv
             - https://docs.python.org/3/objects.inv
-            - https://duckdb.org/docs/stable/clients/python/reference/objects.inv
+            - https://duckdb.org/docs/current/clients/python/reference/objects.inv
             - https://numpy.org/doc/stable/objects.inv
             - https://pandas.pydata.org/pandas-docs/stable/objects.inv
   - redirects:
