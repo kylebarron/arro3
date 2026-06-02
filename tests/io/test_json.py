@@ -1,8 +1,9 @@
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pyarrow as pa
-from arro3.io import infer_json_schema, read_json, write_ndjson
+from arro3.io import infer_json_schema, read_json, write_json, write_ndjson
 
 
 def test_json_roundtrip():
@@ -16,3 +17,15 @@ def test_json_roundtrip():
 
         table_retour = pa.table(read_json(tmp_path / "test.json", schema))
         assert table == table_retour
+
+
+def test_json_read():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    # We can't use tmp_path fixture with pytest-freethreading
+    with TemporaryDirectory() as tmp_path:
+        tmp_path = Path(tmp_path)
+        write_json(table, tmp_path / "test.json")
+
+        with tmp_path.joinpath("test.json").open("r") as f:
+            data = json.load(f)
+            assert data == [{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}]
