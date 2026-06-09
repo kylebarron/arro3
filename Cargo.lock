@@ -1633,6 +1633,7 @@ dependencies = [
 [[package]]
 name = "pyo3-arrow"
 version = "0.17.0"
+source = "git+https://github.com/kylebarron/arro3?rev=1c60c59124f2b033b1de69aebfa19d768825d4a3#1c60c59124f2b033b1de69aebfa19d768825d4a3"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
