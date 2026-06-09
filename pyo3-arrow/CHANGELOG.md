@@ -6,6 +6,8 @@
 
 Release with pyo3 0.28 and arrow 59.
 
+- ci: Fix publish of pyo3-arrow #501
+
 ## [0.17.0] - 2026-02-25
 
 Release with pyo3 0.28 and arrow 58.
