@@ -20,24 +20,23 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow-arith = "58"
-arrow-array = { version = "58", features = ["ffi"] }
-arrow-buffer = "58"
-arrow-cast = "58"
-arrow-csv = "58"
-arrow-ipc = { version = "58", features = ["lz4", "zstd"] }
-arrow-json = "58"
-arrow-schema = "58"
-arrow-select = "58"
+arrow-arith = "59"
+arrow-array = { version = "59", features = ["ffi"] }
+arrow-buffer = "59"
+arrow-cast = "59"
+arrow-csv = "59"
+arrow-ipc = { version = "59", features = ["lz4", "zstd"] }
+arrow-json = "59"
+arrow-schema = "59"
+arrow-select = "59"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
 numpy = "0.28"
 object_store = "0.13"
-parquet = "58"
+parquet = "59"
 pyo3 = { version = "0.28", features = ["macros", "indexmap"] }
-# pyo3-arrow = { path = "pyo3-arrow" }
-pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "1c60c59124f2b033b1de69aebfa19d768825d4a3" }
+pyo3-arrow = { path = "pyo3-arrow" }
 pyo3-async-runtimes = { version = "0.28", features = ["tokio-runtime"] }
 pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "f724ceaa7e06e7d227bf40b1d60adbb842963a44" }
 pyo3-object_store = "0.9"

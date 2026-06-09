@@ -235,7 +235,7 @@ pub(crate) fn write_parquet(
         props = props.set_bloom_filter_fpp(bloom_filter_fpp);
     }
     if let Some(bloom_filter_ndv) = bloom_filter_ndv {
-        props = props.set_bloom_filter_ndv(bloom_filter_ndv);
+        props = props.set_bloom_filter_max_ndv(bloom_filter_ndv);
     }
     if let Some(encoding) = encoding {
         props = props.set_encoding(encoding.0);
