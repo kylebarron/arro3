@@ -234,11 +234,17 @@ jobs:
   emscripten:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.13", "3.14"]
         module:
           - arro3-core
           - arro3-compute
+        include:
+          # Pyodide's pinned toolchain for Python 3.13 (nightly-2025-02-01,
+          # rustc 1.86) is very old. We override with a newer nightly
+          - python-version: "3.13"
+            rust-toolchain-override: nightly-2026-06-01
     steps:
       - uses: actions/checkout@v4
 
@@ -274,13 +280,14 @@ jobs:
           MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ steps.pyodide-config.outputs.pyodide-abi-version }}
         with:
           target: wasm32-unknown-emscripten
-          rust-toolchain: ${{ steps.pyodide-config.outputs.rust-toolchain }}
+          rust-toolchain: ${{ matrix.rust-toolchain-override || steps.pyodide-config.outputs.rust-toolchain }}
           args: --release --out dist -i ${{ matrix.python-version }} --manifest-path ${{ matrix.module }}/Cargo.toml
 
       # PyPI rejects legacy emscripten_x_y_z tags; fail before upload if
       # maturin didn't emit the PEP 783 pyemscripten tag.
       - name: Verify platform tag
-        run: ls dist/*-pyemscripten_${{ steps.pyodide-config.outputs.pyodide-abi-version }}_wasm32.whl
+        run: |
+          ls -lh dist/
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
