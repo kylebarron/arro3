@@ -22,7 +22,6 @@ dev-dependencies = [
     "pytest-freethreaded>=0.1.0;python_version>='3.13'",
     "pre-commit>=4.3.0",
     "ruff>=0.15.2",
-    "pyodide-build>=0.19.1",
 ]
 
 [tool.ruff.lint]
@@ -43,6 +42,8 @@ select = [
 ]
 
 [dependency-groups]
+pyodide = ["pyodide-build>=0.35.0 ; python_version >= '3.12'"]
+
 # This is separate from dev deps because mkdocs-material[imaging] doesn't
 # support Python 3.13 free-threaded
 docs = [

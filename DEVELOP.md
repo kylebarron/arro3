@@ -17,36 +17,64 @@ uv run mkdocs serve
 
 ## Emscripten Python wheels
 
-Install rust nightly and add wasm toolchain
+Emscripten wheels (PEP 783) are built once per Python version. The entire
+toolchain config (Rust toolchain, Emscripten version, ABI tag, rustflags) is
+defined by `pyodide-build` *running under that same Python version* — e.g.
+Python 3.13 maps to ABI `2025_0`/Emscripten 4.0.9 while Python 3.14 maps to
+ABI `2026_0`/Emscripten 5.0.3. Use `uvx -p` to query the config for a given
+Python version without touching the project venv:
 
 ```bash
-rustup toolchain install nightly
-rustup target add --toolchain nightly wasm32-unknown-emscripten
+PYTHON_VERSION=3.14  # or 3.13
+pyodide_config() {
+    uvx -p "$PYTHON_VERSION" --from pyodide-cli --with pyodide-build pyodide config get "$1"
+}
+RUST_TOOLCHAIN=$(pyodide_config rust_toolchain)
+EMSCRIPTEN_VERSION=$(pyodide_config emscripten_version)
+PYODIDE_ABI_VERSION=$(pyodide_config pyodide_abi_version)
+PYODIDE_RUSTFLAGS=$(pyodide_config rustflags)
+
+echo "RUST_TOOLCHAIN:     $RUST_TOOLCHAIN"
+echo "EMSCRIPTEN_VERSION: $EMSCRIPTEN_VERSION"
+echo "PYODIDE_ABI_VERSION: $PYODIDE_ABI_VERSION"
+echo "PYODIDE_RUSTFLAGS:  $PYODIDE_RUSTFLAGS"
 ```
 
-Clone emsdk. I clone this into a specific path at `~/github/emscripten-core/emsdk` so that it can be shared across projects.
+Install the matching Rust toolchain and wasm target:
+
+```bash
+rustup toolchain install $RUST_TOOLCHAIN
+rustup target add --toolchain $RUST_TOOLCHAIN wasm32-unknown-emscripten
+```
+
+Clone emsdk. I clone this into a specific path at `~/github/emscripten-core/emsdk` so that it can be shared across projects. Then install the matching Emscripten version:
 
 ```bash
 mkdir -p ~/github/emscripten-core/
 git clone https://github.com/emscripten-core/emsdk.git ~/github/emscripten-core/emsdk
-# Or, set this manually
-PYODIDE_EMSCRIPTEN_VERSION=$(uv run pyodide config get emscripten_version)
-~/github/emscripten-core/emsdk/emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
-~/github/emscripten-core/emsdk/emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+~/github/emscripten-core/emsdk/emsdk install ${EMSCRIPTEN_VERSION}
+~/github/emscripten-core/emsdk/emsdk activate ${EMSCRIPTEN_VERSION}
 source ~/github/emscripten-core/emsdk/emsdk_env.sh
 ```
 
-Build `arro3-core`:
+Build `arro3-core`. `MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION` is required for the
+wheel to get the PyPI-accepted `pyemscripten_*` platform tag instead of the
+legacy `emscripten_x_y_z` tag PyPI rejects (this also needs a recent maturin,
+hence `uvx maturin` rather than the project venv's maturin):
 
 ```bash
-RUSTUP_TOOLCHAIN=nightly \
-    uv run maturin build \
+RUSTUP_TOOLCHAIN=$RUST_TOOLCHAIN \
+CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$PYODIDE_RUSTFLAGS" \
+MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION=$PYODIDE_ABI_VERSION \
+    uvx maturin build \
     --release \
     -o dist \
     -m arro3-core/Cargo.toml \
     --target wasm32-unknown-emscripten \
-    -i python3.14
+    -i python$PYTHON_VERSION
 ```
+
+Verify the wheel filename ends in `pyemscripten_${PYODIDE_ABI_VERSION}_wasm32.whl` before considering it publishable.
 
 ## Updating pyo3 version
 

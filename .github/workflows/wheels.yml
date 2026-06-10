@@ -227,6 +227,67 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
+  # PEP 783 emscripten wheels for Pyodide. The Rust toolchain, Emscripten
+  # version, rustflags, and platform tag are all defined by pyodide-build
+  # (locked in uv.lock) running under the matrix Python version. See
+  # DEVELOP.md "Emscripten Python wheels".
+  emscripten:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13", "3.14"]
+        module:
+          - arro3-core
+          - arro3-compute
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          version: "0.9.x"
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pyodide-build
+        run: uv sync --only-group pyodide
+
+      - name: Get pyodide config
+        id: pyodide-config
+        run: |
+          {
+            echo "rust-toolchain=$(uv run --no-sync pyodide config get rust_toolchain)"
+            echo "emscripten-version=$(uv run --no-sync pyodide config get emscripten_version)"
+            echo "pyodide-abi-version=$(uv run --no-sync pyodide config get pyodide_abi_version)"
+            echo "rustflags=$(uv run --no-sync pyodide config get rustflags)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install emsdk
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ steps.pyodide-config.outputs.emscripten-version }}
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS: ${{ steps.pyodide-config.outputs.rustflags }}
+          MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ steps.pyodide-config.outputs.pyodide-abi-version }}
+        with:
+          target: wasm32-unknown-emscripten
+          rust-toolchain: ${{ steps.pyodide-config.outputs.rust-toolchain }}
+          args: --release --out dist -i ${{ matrix.python-version }} --manifest-path ${{ matrix.module }}/Cargo.toml
+
+      # PyPI rejects legacy emscripten_x_y_z tags; fail before upload if
+      # maturin didn't emit the PEP 783 pyemscripten tag.
+      - name: Verify platform tag
+        run: ls dist/*-pyemscripten_${{ steps.pyodide-config.outputs.pyodide-abi-version }}_wasm32.whl
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-emscripten-py${{ matrix.python-version }}-${{ matrix.module }}
+          path: dist
+
   sdist:
     runs-on: ubuntu-latest
     strategy:
@@ -267,16 +328,16 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    needs: [linux, musllinux, windows, macos]
+    needs: [linux, musllinux, windows, macos, emscripten]
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: wheels-*-${{ matrix.module }}
           merge-multiple: true
           path: dist
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.13
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
