@@ -282,6 +282,7 @@ jobs:
           target: wasm32-unknown-emscripten
           rust-toolchain: ${{ matrix.rust-toolchain-override || steps.pyodide-config.outputs.rust-toolchain }}
           args: --release --out dist -i ${{ matrix.python-version }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
 
       # PyPI rejects legacy emscripten_x_y_z tags; fail before upload if
       # maturin didn't emit the PEP 783 pyemscripten tag.

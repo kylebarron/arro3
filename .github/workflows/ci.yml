@@ -46,6 +46,39 @@ jobs:
           cargo test --all
           cargo test --all --all-features
 
+  check-emscripten:
+    name: Check compile for wasm32-unknown-emscripten
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep toolchains in sync with the emscripten job in
+        # .github/workflows/wheels.yml:
+        # the 3.13 line's nightly override and the 3.14 line's
+        # pyodide-pinned stable (`pyodide config get rust_toolchain`).
+        include:
+          - rust-toolchain: nightly-2026-06-01
+            python-version: "3.13"
+          - rust-toolchain: "1.93.0"
+            python-version: "3.14"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust-toolchain }}
+          targets: wasm32-unknown-emscripten
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: cargo check
+        run: cargo check --target wasm32-unknown-emscripten -p arro3-core -p arro3-compute --features pyo3/extension-module
+        env:
+          PYO3_CROSS_PYTHON_VERSION: ${{ matrix.python-version }}
+
   check-features_pyo3_arrow:
     runs-on: ubuntu-latest
     strategy:
