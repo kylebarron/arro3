@@ -22,6 +22,7 @@ dev-dependencies = [
     "pytest-freethreaded>=0.1.0;python_version>='3.13'",
     "pre-commit>=4.3.0",
     "ruff>=0.15.2",
+    "pyodide-build>=0.19.1",
 ]
 
 [tool.ruff.lint]
