@@ -227,10 +227,10 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.module }}
           path: dist
 
-  # PEP 783 emscripten wheels for Pyodide. The Rust toolchain, Emscripten
-  # version, rustflags, and platform tag are all defined by pyodide-build
-  # (locked in uv.lock) running under the matrix Python version. See
-  # DEVELOP.md "Emscripten Python wheels".
+  # PEP 783 emscripten wheels for Pyodide.
+  #
+  # The Rust toolchain, Emscripten version, rustflags, and platform tag are all
+  # defined by pyodide-build
   emscripten:
     runs-on: ubuntu-latest
     strategy:
