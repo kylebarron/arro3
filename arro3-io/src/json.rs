@@ -74,6 +74,7 @@ pub fn write_json(
     for batch in data.into_reader()? {
         writer.write(&batch?)?;
     }
+    writer.finish()?;
     Ok(())
 }
 
