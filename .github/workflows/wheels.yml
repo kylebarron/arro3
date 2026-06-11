@@ -263,18 +263,33 @@ jobs:
         run: |
           {
             echo "rust-toolchain=$(uv run --no-sync pyodide config get rust_toolchain)"
-            echo "emscripten-version=$(uv run --no-sync pyodide config get emscripten_version)"
             echo "pyodide-abi-version=$(uv run --no-sync pyodide config get pyodide_abi_version)"
             echo "rustflags=$(uv run --no-sync pyodide config get rustflags)"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Install emsdk
-        uses: mymindstorm/setup-emsdk@v16
-        with:
-          version: ${{ steps.pyodide-config.outputs.emscripten-version }}
-          # Don't reuse a cached emsdk; always install the exact version
-          # pyodide-build specifies.
-          no-cache: true
+      # Install Emscripten via the Pyodide cross-build environment rather
+      # than a stock emsdk: this pins the Emscripten version matching the
+      # target Pyodide ABI, and applies Pyodide's patches to Emscripten,
+      # several of which affect dynamic linking of Rust side modules.
+      # https://github.com/pyodide/pyodide/tree/main/emsdk/patches
+      # https://github.com/kylebarron/arro3/pull/502#discussion_r3392470467
+      - name: Install emsdk (Pyodide xbuildenv)
+        env:
+          PYODIDE_XBUILDENV_PATH: ${{ github.workspace }}/.pyodide-xbuildenv
+        run: |
+          uv run --no-sync pyodide xbuildenv install
+          uv run --no-sync pyodide xbuildenv install-emscripten
+          # shellcheck disable=SC1090
+          source "$PYODIDE_XBUILDENV_PATH/$(uv run --no-sync pyodide xbuildenv version)/emsdk/emsdk_env.sh"
+          {
+            echo "EMSDK=$EMSDK"
+            echo "EMSDK_NODE=$EMSDK_NODE"
+          } >> "$GITHUB_ENV"
+          {
+            echo "$EMSDK"
+            echo "$EMSDK/upstream/emscripten"
+            dirname "$EMSDK_NODE"
+          } >> "$GITHUB_PATH"
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1

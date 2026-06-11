@@ -26,16 +26,17 @@ Python version without touching the project venv:
 
 ```bash
 PYTHON_VERSION=3.14  # or 3.13
-pyodide_config() {
-    uvx -p "$PYTHON_VERSION" --from pyodide-cli --with pyodide-build pyodide config get "$1"
+# The `pyodide` executable lives in pyodide-cli; most subcommands (config,
+# xbuildenv) are plugins provided by pyodide-build, so both packages are
+# needed.
+pyodide_cmd() {
+    uvx -p "$PYTHON_VERSION" --from pyodide-cli --with pyodide-build pyodide "$@"
 }
-RUST_TOOLCHAIN=$(pyodide_config rust_toolchain)
-EMSCRIPTEN_VERSION=$(pyodide_config emscripten_version)
-PYODIDE_ABI_VERSION=$(pyodide_config pyodide_abi_version)
-PYODIDE_RUSTFLAGS=$(pyodide_config rustflags)
+RUST_TOOLCHAIN=$(pyodide_cmd config get rust_toolchain)
+PYODIDE_ABI_VERSION=$(pyodide_cmd config get pyodide_abi_version)
+PYODIDE_RUSTFLAGS=$(pyodide_cmd config get rustflags)
 
 echo "RUST_TOOLCHAIN:     $RUST_TOOLCHAIN"
-echo "EMSCRIPTEN_VERSION: $EMSCRIPTEN_VERSION"
 echo "PYODIDE_ABI_VERSION: $PYODIDE_ABI_VERSION"
 echo "PYODIDE_RUSTFLAGS:  $PYODIDE_RUSTFLAGS"
 ```
@@ -47,14 +48,17 @@ rustup toolchain install $RUST_TOOLCHAIN
 rustup target add --toolchain $RUST_TOOLCHAIN wasm32-unknown-emscripten
 ```
 
-Clone emsdk. I clone this into a specific path at `~/github/emscripten-core/emsdk` so that it can be shared across projects. Then install the matching Emscripten version:
+Install Emscripten via the Pyodide cross-build environment rather than a
+stock emsdk. This pins the Emscripten version matching the target Pyodide ABI
+automatically, and applies [Pyodide's patches to
+Emscripten](https://github.com/pyodide/pyodide/tree/main/emsdk/patches) —
+several of which affect dynamic linking of Rust side modules:
 
 ```bash
-mkdir -p ~/github/emscripten-core/
-git clone https://github.com/emscripten-core/emsdk.git ~/github/emscripten-core/emsdk
-~/github/emscripten-core/emsdk/emsdk install ${EMSCRIPTEN_VERSION}
-~/github/emscripten-core/emsdk/emsdk activate ${EMSCRIPTEN_VERSION}
-source ~/github/emscripten-core/emsdk/emsdk_env.sh
+export PYODIDE_XBUILDENV_PATH="$HOME/.cache/pyodide-xbuildenv"
+pyodide_cmd xbuildenv install
+pyodide_cmd xbuildenv install-emscripten
+source "$PYODIDE_XBUILDENV_PATH/$(pyodide_cmd xbuildenv version)/emsdk/emsdk_env.sh"
 ```
 
 Build `arro3-core`. `MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION` is required for the
