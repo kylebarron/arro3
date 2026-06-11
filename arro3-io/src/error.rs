@@ -48,4 +48,6 @@ impl<'a, 'py> From<CastError<'a, 'py>> for Arro3IoError {
 }
 
 /// A type wrapper around `Result<T, Arro3IoError>`.
+// Currently only referenced from async code paths.
+#[cfg(feature = "async")]
 pub type Arro3IoResult<T> = Result<T, Arro3IoError>;
