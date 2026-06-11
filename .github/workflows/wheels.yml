@@ -269,9 +269,12 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Install emsdk
-        uses: mymindstorm/setup-emsdk@v14
+        uses: mymindstorm/setup-emsdk@v16
         with:
           version: ${{ steps.pyodide-config.outputs.emscripten-version }}
+          # Don't reuse a cached emsdk; always install the exact version
+          # pyodide-build specifies.
+          no-cache: true
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
