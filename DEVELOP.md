@@ -35,10 +35,12 @@ pyodide_cmd() {
 RUST_TOOLCHAIN=$(pyodide_cmd config get rust_toolchain)
 PYODIDE_ABI_VERSION=$(pyodide_cmd config get pyodide_abi_version)
 PYODIDE_RUSTFLAGS=$(pyodide_cmd config get rustflags)
+PYODIDE_CFLAGS=$(pyodide_cmd config get cflags)
 
 echo "RUST_TOOLCHAIN:     $RUST_TOOLCHAIN"
 echo "PYODIDE_ABI_VERSION: $PYODIDE_ABI_VERSION"
 echo "PYODIDE_RUSTFLAGS:  $PYODIDE_RUSTFLAGS"
+echo "PYODIDE_CFLAGS:     $PYODIDE_CFLAGS"
 ```
 
 Install the matching Rust toolchain and wasm target:
@@ -61,14 +63,24 @@ pyodide_cmd xbuildenv install-emscripten
 source "$PYODIDE_XBUILDENV_PATH/$(pyodide_cmd xbuildenv version)/emsdk/emsdk_env.sh"
 ```
 
-Build `arro3-core`. `MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION` is required for the
-wheel to get the PyPI-accepted `pyemscripten_*` platform tag instead of the
-legacy `emscripten_x_y_z` tag PyPI rejects (this also needs a recent maturin,
-hence `uvx maturin` rather than the project venv's maturin):
+Build the wheel. Notes on the environment variables:
+
+- `MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION` is required for the wheel to get the
+  PyPI-accepted `pyemscripten_*` platform tag instead of the legacy
+  `emscripten_x_y_z` tag PyPI rejects (this also needs a recent maturin, hence
+  `uvx maturin` rather than the project venv's maturin).
+- `CFLAGS_wasm32_unknown_emscripten` is needed for crates that compile C code
+  (e.g. zstd-sys in arro3-io): Pyodide's cflags include `-fPIC`, without which
+  the C objects can't be linked into a `SIDE_MODULE` (errors like "relocation
+  R_WASM_MEMORY_ADDR_SLEB cannot be used ...; recompile with -fPIC").
+- Always build with `--release`: debug builds are ~10x larger (full DWARF) and
+  slow.
 
 ```bash
+# arro3-core
 RUSTUP_TOOLCHAIN=$RUST_TOOLCHAIN \
 CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$PYODIDE_RUSTFLAGS" \
+CFLAGS_wasm32_unknown_emscripten="$PYODIDE_CFLAGS" \
 MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION=$PYODIDE_ABI_VERSION \
     uvx maturin build \
     --release \
@@ -76,7 +88,35 @@ MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION=$PYODIDE_ABI_VERSION \
     -m arro3-core/Cargo.toml \
     --target wasm32-unknown-emscripten \
     -i python$PYTHON_VERSION
+
+# arro3-compute
+RUSTUP_TOOLCHAIN=$RUST_TOOLCHAIN \
+CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$PYODIDE_RUSTFLAGS" \
+CFLAGS_wasm32_unknown_emscripten="$PYODIDE_CFLAGS" \
+MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION=$PYODIDE_ABI_VERSION \
+    uvx maturin build \
+    --release \
+    -o dist \
+    -m arro3-compute/Cargo.toml \
+    --target wasm32-unknown-emscripten \
+    -i python$PYTHON_VERSION
+
+# arro3-io
+RUSTUP_TOOLCHAIN=$RUST_TOOLCHAIN \
+CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$PYODIDE_RUSTFLAGS" \
+CFLAGS_wasm32_unknown_emscripten="$PYODIDE_CFLAGS" \
+MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION=$PYODIDE_ABI_VERSION \
+    uvx maturin build \
+    --release \
+    -o dist \
+    -m arro3-io/Cargo.toml \
+    --target wasm32-unknown-emscripten \
+    -i python$PYTHON_VERSION \
+    --no-default-features
 ```
+
+`--no-default-features` applies to `arro3-io` only: it disables the `async`
+feature, which doesn't compile for emscripten.
 
 Verify the wheel filename ends in `pyemscripten_${PYODIDE_ABI_VERSION}_wasm32.whl` before considering it publishable.
 

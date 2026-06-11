@@ -9,6 +9,11 @@ on:
   push:
     tags:
       - "py-v*"
+  # On pull requests, only the emscripten job runs (the others are gated with
+  # `if: github.event_name != 'pull_request'`). This catches regressions in
+  # the emscripten/Pyodide build, which is the most fragile target, without
+  # building every native wheel on every PR.
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -20,6 +25,7 @@ concurrency:
 
 jobs:
   linux:
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -83,6 +89,7 @@ jobs:
           path: dist
 
   musllinux:
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -136,6 +143,7 @@ jobs:
           path: dist
 
   windows:
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -181,6 +189,7 @@ jobs:
           path: dist
 
   macos:
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -230,7 +239,11 @@ jobs:
   # PEP 783 emscripten wheels for Pyodide.
   #
   # The Rust toolchain, Emscripten version, rustflags, and platform tag are all
-  # defined by pyodide-build
+  # defined by pyodide-build.
+  #
+  # Unlike the other jobs, this also runs on every pull request, to catch
+  # emscripten build regressions (e.g. a dependency update that doesn't
+  # compile or link for this target) before release time.
   emscripten:
     runs-on: ubuntu-latest
     strategy:
@@ -240,11 +253,16 @@ jobs:
         module:
           - arro3-core
           - arro3-compute
+          - arro3-io
         include:
           # Pyodide's pinned toolchain for Python 3.13 (nightly-2025-02-01,
           # rustc 1.86) is very old. We override with a newer nightly
           - python-version: "3.13"
             rust-toolchain-override: nightly-2026-06-01
+          # arro3-io's default "async" feature (object_store/tokio) doesn't
+          # compile for emscripten; build a sync-only wheel without it.
+          - module: arro3-io
+            extra-build-args: --no-default-features
     steps:
       - uses: actions/checkout@v4
 
@@ -265,6 +283,7 @@ jobs:
             echo "rust-toolchain=$(uv run --no-sync pyodide config get rust_toolchain)"
             echo "pyodide-abi-version=$(uv run --no-sync pyodide config get pyodide_abi_version)"
             echo "rustflags=$(uv run --no-sync pyodide config get rustflags)"
+            echo "cflags=$(uv run --no-sync pyodide config get cflags)"
           } >> "$GITHUB_OUTPUT"
 
       # Install Emscripten via the Pyodide cross-build environment rather
@@ -295,11 +314,12 @@ jobs:
         uses: PyO3/maturin-action@v1
         env:
           CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS: ${{ steps.pyodide-config.outputs.rustflags }}
+          CFLAGS_wasm32_unknown_emscripten: ${{ steps.pyodide-config.outputs.cflags }}
           MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ steps.pyodide-config.outputs.pyodide-abi-version }}
         with:
           target: wasm32-unknown-emscripten
           rust-toolchain: ${{ matrix.rust-toolchain-override || steps.pyodide-config.outputs.rust-toolchain }}
-          args: --release --out dist -i ${{ matrix.python-version }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i ${{ matrix.python-version }} --manifest-path ${{ matrix.module }}/Cargo.toml ${{ matrix.extra-build-args }}
           sccache: "true"
 
       # PyPI rejects legacy emscripten_x_y_z tags; fail before upload if
@@ -315,6 +335,7 @@ jobs:
           path: dist
 
   sdist:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:
