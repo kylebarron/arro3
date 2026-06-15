@@ -38,7 +38,7 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                python-version: ["3.9", "3.12", "3.13", "3.13t"]
+                python-version: ["3.9", "3.12", "3.13", "3.14", "3.14t"]
         steps:
             - uses: actions/checkout@v4
 
@@ -65,12 +65,12 @@ jobs:
                   uv run --python ${{ matrix.python-version }} maturin dev -m arro3-io/Cargo.toml
 
             - name: Run python tests
-              if: matrix.python-version != '3.13t'
+              if: matrix.python-version != '3.14t'
               run: |
                   uv run --python ${{ matrix.python-version }} pytest tests
 
             - name: Run python tests with --require-gil-disabled
-              if: matrix.python-version == '3.13t'
+              if: matrix.python-version == '3.14t'
               run: |
                   uv run --python ${{ matrix.python-version }} pytest tests --require-gil-disabled
 
