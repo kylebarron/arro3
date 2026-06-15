@@ -31,11 +31,20 @@ ParquetEncoding = Literal[
 ]
 """Allowed Parquet encodings."""
 
-def read_parquet(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
+def read_parquet(
+    file: IO[bytes] | Path | str,
+    *,
+    batch_size: int | None = None,
+) -> core.RecordBatchReader:
     """Read a Parquet file to an Arrow RecordBatchReader
 
     Args:
         file: The input Parquet file path or buffer.
+
+    Keyword Args:
+        batch_size: The number of rows per batch in the returned reader.
+            Defaults to 1024 if not specified. Larger values reduce per-batch
+            overhead and can significantly improve read performance.
 
     Returns:
         The loaded Arrow data.

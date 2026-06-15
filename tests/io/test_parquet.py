@@ -51,3 +51,25 @@ def test_copy_parquet_kv_metadata():
 
         reader = read_parquet(pq_path)
         assert reader.schema.metadata[b"hello"] == b"world"
+
+
+def test_read_parquet_batch_size():
+    table = pa.table({"a": list(range(10_000)), "b": ["x"] * 10_000})
+    with TemporaryDirectory() as tmp_path:
+        tmp_path = Path(tmp_path)
+        pq_path = tmp_path / "test.parquet"
+        write_parquet(table, pq_path)
+
+        # Default batch_size (1024) produces many batches
+        batches_default = list(read_parquet(pq_path))
+        assert len(batches_default) > 1
+
+        # Large batch_size produces fewer batches
+        batches_large = list(read_parquet(pq_path, batch_size=10_000))
+        assert len(batches_large) == 1
+        assert batches_large[0].num_rows == 10_000
+
+        # Data is identical regardless of batch_size
+        table_default = pa.table(read_parquet(pq_path).read_all())
+        table_batched = pa.table(read_parquet(pq_path, batch_size=5_000).read_all())
+        assert table_default == table_batched
