@@ -27,10 +27,10 @@ arrow-schema = "59"
 arrow-select = "59"
 chrono = "0.4"
 chrono-tz = "0.10"
-pyo3 = { version = "0.28", features = ["chrono", "chrono-tz", "indexmap"] }
+pyo3 = { version = "0.29", features = ["chrono", "chrono-tz", "indexmap"] }
 half = "2"
 indexmap = "2"
-numpy = { version = "0.28", features = ["half"] }
+numpy = { version = "0.29", features = ["half"] }
 thiserror = "1"
 
 [lib]
