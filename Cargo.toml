@@ -32,15 +32,14 @@ arrow-select = "59"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
-numpy = "0.28"
+numpy = "0.29"
 object_store = "0.13"
 parquet = "59"
-pyo3 = { version = "0.28", features = ["macros", "indexmap"] }
-# pyo3-arrow = { path = "pyo3-arrow" }
-pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "7cfe579bab03406bf5d3e4824e171bf7204b43cc" }
-pyo3-async-runtimes = { version = "0.28", features = ["tokio-runtime"] }
-pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "f724ceaa7e06e7d227bf40b1d60adbb842963a44" }
-pyo3-object_store = "0.9"
+pyo3 = { version = "0.29", features = ["macros", "indexmap"] }
+pyo3-arrow = { path = "pyo3-arrow" }
+pyo3-async-runtimes = { version = "0.29", features = ["tokio-runtime"] }
+pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "e88695f375ea3db95d96efc53707f4e8eb1def00" }
+pyo3-object_store = "0.11"
 thiserror = "1.0.63"
 
 [profile.release]
