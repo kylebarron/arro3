@@ -62,7 +62,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
+        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -78,7 +78,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
@@ -116,7 +116,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
+        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -132,7 +132,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: musllinux_1_2
 
@@ -167,7 +167,6 @@ jobs:
           python-version: |
             ${{ join(matrix.platform.extra-interpreters, fromJSON('"\n"')) }}
             3.11
-            3.13t
             3.14t
 
       - name: Build abi3-py311 wheels
@@ -183,7 +182,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i ${{ join(matrix.platform.extra-interpreters, ' ') }} 3.13t 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i ${{ join(matrix.platform.extra-interpreters, ' ') }} 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
@@ -216,7 +215,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.13t 3.14t pypy3.11
+        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -231,7 +230,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.9 -i 3.10 -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
