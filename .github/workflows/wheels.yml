@@ -150,6 +150,11 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
+            # setup-python has no Windows arm64 builds before 3.11.
+            extra-interpreters: ["3.9", "3.10"]
+          - runner: windows-11-arm
+            target: aarch64
+            extra-interpreters: []
         module:
           - arro3-core
           - arro3-compute
@@ -160,8 +165,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.9
-            3.10
+            ${{ join(matrix.platform.extra-interpreters, fromJSON('"\n"')) }}
             3.11
             3.13t
             3.14t
@@ -179,7 +183,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.9 -i 3.10 -i 3.13t -i 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i ${{ join(matrix.platform.extra-interpreters, ' ') }} 3.13t 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
