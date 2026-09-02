@@ -2,7 +2,7 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
-## [0.8.2] - 2026-06-11
+## [0.8.2] - 2026-09-02
 
 ### What's Changed
 
