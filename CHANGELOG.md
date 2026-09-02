@@ -2,6 +2,21 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.8.2] - 2026-06-11
+
+### What's Changed
+
+* chore: Bump pyo3 to 0.29 by @kylebarron in https://github.com/kylebarron/arro3/pull/507
+* chore: Bump pyo3-arrow to 0.19 by @kylebarron in https://github.com/kylebarron/arro3/pull/508
+* chore: Bump pyo3 to 0.29 by @kylebarron in https://github.com/kylebarron/arro3/pull/509
+* ci: Add Windows ARM64 build by @ndabas in https://github.com/kylebarron/arro3/pull/510
+
+### New Contributors
+
+* @ndabas made their first contribution in https://github.com/kylebarron/arro3/pull/510
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.8.1...py-v0.8.2
+
 ## [0.8.1] - 2026-06-11
 
 ### What's Changed
