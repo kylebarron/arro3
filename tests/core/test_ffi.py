@@ -61,6 +61,40 @@ def test_table_metadata_preserved():
     assert pa_table_retour.schema.metadata == metadata
 
 
+def test_record_batch_reader_from_batches_generator():
+    """from_batches accepts a generator and consumes it lazily."""
+    a = pa.array([1, 2, 3], type=pa.int32())
+    table = Table.from_pydict({"a": a})
+    schema = table.schema
+    batches = table.to_batches()
+
+    consumed = []
+
+    def batch_gen():
+        for batch in batches:
+            consumed.append(True)
+            yield batch
+
+    gen = batch_gen()
+    reader = RecordBatchReader.from_batches(schema, gen)
+
+    # Generator not consumed yet
+    assert len(consumed) == 0
+
+    result = reader.read_all()
+    assert result.num_rows == 3
+    assert len(consumed) == 1  # consumed lazily
+
+
+def test_record_batch_reader_from_batches_list():
+    """from_batches still accepts a list (backwards compat)."""
+    a = pa.array([1, 2, 3], type=pa.int32())
+    table = Table.from_pydict({"a": a})
+    reader = RecordBatchReader.from_batches(table.schema, table.to_batches())
+    result = reader.read_all()
+    assert result.num_rows == 3
+
+
 def test_record_batch_reader_metadata_preserved():
     metadata = {b"hello": b"world"}
     pa_table = pa.table({"a": [1, 2, 3]})

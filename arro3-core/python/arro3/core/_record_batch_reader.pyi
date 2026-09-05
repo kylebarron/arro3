@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Iterable
 
 from ._record_batch import RecordBatch
 from ._schema import Schema
@@ -53,13 +53,14 @@ class RecordBatchReader:
         """Construct this object from a bare Arrow PyCapsule"""
     @classmethod
     def from_batches(
-        cls, schema: ArrowSchemaExportable, batches: Sequence[ArrowArrayExportable]
+        cls, schema: ArrowSchemaExportable, batches: Iterable[ArrowArrayExportable]
     ) -> RecordBatchReader:
         """Construct a new RecordBatchReader from existing data.
 
         Args:
             schema: The schema of the Arrow batches.
-            batches: The existing batches.
+            batches: The existing batches. Can be a list, generator, or any
+                iterable. Generators are consumed lazily.
         """
     @classmethod
     def from_stream(cls, data: ArrowStreamExportable) -> RecordBatchReader:
