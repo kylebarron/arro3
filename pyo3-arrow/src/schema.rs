@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_schema::{Schema, SchemaRef};
+use arrow_schema::{Metadata, Schema, SchemaRef};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -236,8 +236,8 @@ impl PySchema {
     }
 
     #[getter]
-    fn metadata_str(&self) -> HashMap<String, String> {
-        self.0.metadata().clone()
+    fn metadata_str(&self) -> BTreeMap<String, String> {
+        self.0.metadata().clone().into()
     }
 
     #[getter]
@@ -255,7 +255,7 @@ impl PySchema {
         self.0
             .as_ref()
             .clone()
-            .with_metadata(Default::default())
+            .with_metadata(Metadata::default())
             .into()
     }
 
