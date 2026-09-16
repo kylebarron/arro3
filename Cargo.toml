@@ -36,7 +36,8 @@ numpy = "0.29"
 object_store = "0.13"
 parquet = "59"
 pyo3 = { version = "0.29", features = ["macros", "indexmap"] }
-pyo3-arrow = { path = "pyo3-arrow" }
+# pyo3-arrow = { path = "pyo3-arrow" }
+pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "d65a1a5eeee0af3a0e292111ed077c0c181fb7fc" }
 pyo3-async-runtimes = { version = "0.29", features = ["tokio-runtime"] }
 pyo3-file = { git = "https://github.com/kylebarron/pyo3-file", rev = "e88695f375ea3db95d96efc53707f4e8eb1def00" }
 pyo3-object_store = "0.11"
