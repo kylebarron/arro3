@@ -43,7 +43,7 @@ def read_parquet(
 
     Keyword Args:
         batch_size: The number of rows per batch in the returned reader.
-            Defaults to 1024 if not specified. Larger values reduce per-batch
+            Defaults to 1024, the underlying arrow-rs default, if not specified. Larger values reduce per-batch
             overhead and can significantly improve read performance.
 
     Returns:
