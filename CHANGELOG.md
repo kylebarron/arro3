@@ -2,6 +2,19 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.8.3] - 2026-09-18
+
+### What's Changed
+
+* ci: bump pyodide-build to 0.39 to fix emscripten 3.14 builds by @kylebarron in https://github.com/kylebarron/arro3/pull/514
+* feat: add batch_size parameter to read_parquet by @kevinjacobs-delfi in https://github.com/kylebarron/arro3/pull/494
+
+### New Contributors
+
+* @kevinjacobs-delfi made their first contribution in https://github.com/kylebarron/arro3/pull/494
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.8.3
+
 ## [0.8.2] - 2026-09-02
 
 ### What's Changed
