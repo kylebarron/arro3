@@ -2,6 +2,37 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.8.2] - 2026-09-02
+
+### What's Changed
+
+* chore: Bump pyo3 to 0.29 by @kylebarron in https://github.com/kylebarron/arro3/pull/507
+* chore: Bump pyo3-arrow to 0.19 by @kylebarron in https://github.com/kylebarron/arro3/pull/508
+* chore: Bump pyo3 to 0.29 by @kylebarron in https://github.com/kylebarron/arro3/pull/509
+* ci: Add Windows ARM64 build by @ndabas in https://github.com/kylebarron/arro3/pull/510
+
+### New Contributors
+
+* @ndabas made their first contribution in https://github.com/kylebarron/arro3/pull/510
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.8.1...py-v0.8.2
+
+## [0.8.1] - 2026-06-11
+
+### What's Changed
+
+* feat: PEP 783 Emscripten wheels! by @kylebarron in https://github.com/kylebarron/arro3/pull/502
+* ci: Use trusted publishing for pypi by @kylebarron in https://github.com/kylebarron/arro3/pull/492
+* ci: Build arro3-io wheels for emscripten by @kylebarron in https://github.com/kylebarron/arro3/pull/504
+* fix: Add missing writer.finish() call by @cpnielsen in https://github.com/kylebarron/arro3/pull/497
+
+### New Contributors
+
+* @gadomski made their first contribution in https://github.com/kylebarron/arro3/pull/490
+* @cpnielsen made their first contribution in https://github.com/kylebarron/arro3/pull/497
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.8.0...py-v0.8.1
+
 ## [0.8.0] - 2026-02-22
 
 ### Breaking Changes
