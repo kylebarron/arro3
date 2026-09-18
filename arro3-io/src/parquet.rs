@@ -23,8 +23,16 @@ use pyo3_object_store::PyObjectStore;
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
-pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+#[pyo3(signature = (file, *, batch_size=None))]
+pub fn read_parquet(
+    file: FileReader,
+    batch_size: Option<usize>,
+) -> PyArrowResult<Arro3RecordBatchReader> {
+    let mut builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+
+    if let Some(batch_size) = batch_size {
+        builder = builder.with_batch_size(batch_size);
+    }
 
     let metadata = builder.schema().metadata().clone();
     let reader = builder.build().unwrap();
