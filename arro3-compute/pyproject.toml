@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "arro3-compute"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = ["arro3-core"]
 license = "MIT OR Apache-2.0"
 classifiers = [
