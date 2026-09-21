@@ -62,7 +62,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -116,7 +116,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -215,7 +215,7 @@ jobs:
           version: "0.9.x"
 
       - name: Install Python versions
-        run: uv python install 3.9 3.10 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
@@ -391,3 +391,7 @@ jobs:
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Allows re-running the job to finish a partial upload instead of
+          # erroring on the files that already made it to PyPI.
+          skip-existing: true
