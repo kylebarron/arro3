@@ -514,10 +514,14 @@ impl AnyBufferProtocol {
             return Err(PyValueError::new_err("Buffer is not C contiguous").into());
         }
 
-        if self.shape()?.contains(&0) {
-            return Err(
-                PyValueError::new_err("0-length dimension not currently supported.").into(),
-            );
+        // A 0-length first dimension is fine and produces an empty array. A 0-length trailing
+        // dimension would need a FixedSizeList of size 0, whose length can't be inferred from its
+        // values.
+        if self.shape()?.iter().skip(1).any(|size| *size == 0) {
+            return Err(PyValueError::new_err(
+                "0-length trailing dimension not currently supported.",
+            )
+            .into());
         }
 
         // Note: since we already checked for C-contiguous, we don't need to check for strides to
