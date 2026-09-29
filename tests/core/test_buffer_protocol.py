@@ -4,7 +4,7 @@ import arro3.compute as ac
 import numpy as np
 import pyarrow as pa
 import pytest
-from arro3.core import Array, Buffer
+from arro3.core import Array, Buffer, fixed_size_list_array
 
 
 def test_from_buffer():
@@ -66,6 +66,33 @@ def test_multi_dimensional():
     assert pa_arr.type.value_type.list_size == 3
     assert pa_arr.type.value_type.value_type.list_size == 2
     assert pa_arr.type.value_type.value_type.value_type == pa.uint8()
+
+
+@pytest.mark.parametrize("constructor", [Array.from_buffer, Array.from_numpy])
+@pytest.mark.parametrize("dtype", [np.float64, np.uint8])
+@pytest.mark.parametrize("shape", [(0,), (0, 2), (0, 2, 3)])
+def test_zero_length_first_dimension(constructor, dtype, shape):
+    # Should have the same type as a non-empty array with the same trailing dimensions
+    expected_type = constructor(np.zeros((1, *shape[1:]), dtype=dtype)).type
+
+    arr = constructor(np.zeros(shape, dtype=dtype))
+
+    assert len(arr) == 0
+    assert arr.type == expected_type
+
+
+def test_zero_length_trailing_dimension_raises():
+    with pytest.raises(ValueError, match="0-length"):
+        Array.from_buffer(np.zeros((2, 0)))
+
+
+def test_fixed_size_list_array_from_zero_length_numpy():
+    expected_type = fixed_size_list_array(np.zeros(2), 2).type
+
+    arr = fixed_size_list_array(np.zeros(0), 2)
+
+    assert len(arr) == 0
+    assert arr.type == expected_type
 
 
 def test_round_trip_buffer():
