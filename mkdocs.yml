@@ -40,8 +40,10 @@ nav:
           - api/io/csv.md
           - api/io/json.md
           - api/io/parquet.md
+  - changelog.md
 
 watch:
+  - CHANGELOG.md
   - arro3-compute/python
   - arro3-core/python
   - arro3-io/python
@@ -149,6 +151,7 @@ markdown_extensions:
       hide_protocol: true
       repo_url_shortener: true
   - pymdownx.smartsymbols
+  - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
