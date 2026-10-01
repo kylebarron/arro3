@@ -8,7 +8,7 @@ import arro3.core as core
 import arro3.core.types as types
 
 def infer_json_schema(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | bytes,
     *,
     max_records: int | None = None,
 ) -> core.Schema:
@@ -26,7 +26,7 @@ def infer_json_schema(
     """
 
 def read_json(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | bytes,
     schema: types.ArrowSchemaExportable,
     *,
     batch_size: int | None = None,

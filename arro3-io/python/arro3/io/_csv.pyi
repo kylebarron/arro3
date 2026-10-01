@@ -10,7 +10,7 @@ import arro3.core.types as types
 __all__ = ["infer_csv_schema", "read_csv", "write_csv"]
 
 def infer_csv_schema(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | bytes,
     *,
     has_header: bool | None = None,
     max_records: int | None = None,
@@ -42,7 +42,7 @@ def infer_csv_schema(
     """
 
 def read_csv(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | bytes,
     schema: types.ArrowSchemaExportable,
     *,
     has_header: bool | None = None,

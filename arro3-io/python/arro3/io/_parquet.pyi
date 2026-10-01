@@ -32,7 +32,7 @@ ParquetEncoding = Literal[
 """Allowed Parquet encodings."""
 
 def read_parquet(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | bytes,
     *,
     batch_size: int | None = None,
 ) -> core.RecordBatchReader:

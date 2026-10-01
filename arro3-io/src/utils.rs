@@ -3,6 +3,7 @@ use parquet::file::reader::{ChunkReader, Length};
 use pyo3_file::PyFileLikeObject;
 
 use pyo3::prelude::*;
+use pyo3::types::PyBytes;
 use std::fs::File;
 use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
@@ -27,7 +28,20 @@ impl<'py> FromPyObject<'_, 'py> for FileReader {
     type Error = PyErr;
 
     fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
-        if let Ok(path) = obj.extract::<PathBuf>() {
+        if obj.is_instance_of::<PyBytes>() {
+            // Wrap `bytes` in a `BytesIO` so it goes through the same file-like path.
+            // `BytesIO` shares the buffer of the `bytes` it is constructed from, so
+            // this does not copy the data. This check comes first so that `bytes` is
+            // never interpreted as a path.
+            let bytes_io = obj
+                .py()
+                .import("io")?
+                .getattr("BytesIO")?
+                .call1((obj.as_any().clone(),))?;
+            Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
+                bytes_io, true, false, true, false,
+            )?))
+        } else if let Ok(path) = obj.extract::<PathBuf>() {
             Ok(Self::File(File::open(path)?))
         } else if let Ok(path) = obj.extract::<String>() {
             Ok(Self::File(File::open(path)?))

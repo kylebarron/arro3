@@ -27,6 +27,14 @@ def test_parquet_round_trip_bytes_io():
     assert table == table_retour
 
 
+def test_parquet_round_trip_bytes():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    bio = BytesIO()
+    write_parquet(table, bio)
+    table_retour = pa.table(read_parquet(bio.getvalue()))
+    assert table == table_retour
+
+
 def test_copy_parquet_kv_metadata():
     metadata = {"hello": "world"}
     table = pa.table({"a": [1, 2, 3]})

@@ -55,6 +55,19 @@ def test_ipc_round_trip_buffer():
     assert table == table_retour
 
 
+def test_ipc_round_trip_bytes():
+    table = pa.table({"a": [1, 2, 3, 4]})
+    bio = BytesIO()
+    write_ipc(table, bio)
+    table_retour = pa.table(read_ipc(bio.getvalue()))
+    assert table == table_retour
+
+    bio = BytesIO()
+    write_ipc_stream(table, bio)
+    table_retour = pa.table(read_ipc_stream(bio.getvalue()))
+    assert table == table_retour
+
+
 def test_ipc_round_trip_compression():
     table = pa.table({"a": [1, 2, 3, 4]})
     # We can't use tmp_path fixture with pytest-freethreading

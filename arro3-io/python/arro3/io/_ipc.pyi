@@ -7,7 +7,7 @@ from typing import IO, Literal
 import arro3.core as core
 import arro3.core.types as types
 
-def read_ipc(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
+def read_ipc(file: IO[bytes] | Path | str | bytes) -> core.RecordBatchReader:
     """Read an Arrow IPC file into memory
 
     Args:
@@ -17,7 +17,7 @@ def read_ipc(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
         An arrow RecordBatchReader.
     """
 
-def read_ipc_stream(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
+def read_ipc_stream(file: IO[bytes] | Path | str | bytes) -> core.RecordBatchReader:
     """Read an Arrow IPC stream into memory
 
     Args:
