@@ -40,6 +40,13 @@ def test_dictionary_encode():
     assert pa.array(out) == out_pc
 
 
+def test_dictionary_encode_boolean():
+    arr = pa.array([True, False, None, True, True, False], type=pa.bool_())
+    out = dictionary_encode(arr)
+    out_pc = pc.dictionary_encode(arr)  # type: ignore
+    assert pa.array(out) == out_pc
+
+
 def test_dictionary_encode_chunked():
     arr = pa.chunked_array([[3, 2, 3], [1, 2, 2], [3, 1, 1, 1]], type=pa.uint16())
     out = ChunkedArray(dictionary_encode(arr))

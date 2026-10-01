@@ -1,12 +1,16 @@
 use std::sync::Arc;
 
-use arrow_array::builder::{GenericByteDictionaryBuilder, PrimitiveDictionaryBuilder};
+use arrow_array::builder::{
+    GenericByteDictionaryBuilder, Int32Builder, PrimitiveDictionaryBuilder,
+};
 use arrow_array::cast::AsArray;
 use arrow_array::downcast_primitive_array;
 use arrow_array::types::{
     BinaryType, ByteArrayType, Int32Type, LargeBinaryType, LargeUtf8Type, Utf8Type,
 };
-use arrow_array::{ArrayRef, ArrowPrimitiveType, GenericByteArray, PrimitiveArray};
+use arrow_array::{
+    ArrayRef, ArrowPrimitiveType, BooleanArray, DictionaryArray, GenericByteArray, PrimitiveArray,
+};
 use arrow_schema::{ArrowError, DataType, Field};
 use pyo3::prelude::*;
 use pyo3::IntoPyObjectExt;
@@ -58,12 +62,13 @@ fn dictionary_encode_array(array: ArrayRef) -> Result<ArrayRef, ArrowError> {
         array_ref => {
             primitive_dictionary_encode(array_ref)
         }
+        DataType::Boolean => boolean_dictionary_encode(array.as_boolean())?,
         DataType::Utf8 => bytes_dictionary_encode(array.as_bytes::<Utf8Type>()),
         DataType::LargeUtf8 => bytes_dictionary_encode(array.as_bytes::<LargeUtf8Type>()),
         DataType::Binary => bytes_dictionary_encode(array.as_bytes::<BinaryType>()),
         DataType::LargeBinary => bytes_dictionary_encode(array.as_bytes::<LargeBinaryType>()),
         DataType::Dictionary(_, _) => array,
-        d => return Err(ArrowError::ComputeError(format!("{d:?} not supported in rank")))
+        d => return Err(ArrowError::ComputeError(format!("{d:?} not supported in dictionary_encode")))
     );
     Ok(array)
 }
@@ -75,6 +80,33 @@ fn primitive_dictionary_encode<T: ArrowPrimitiveType>(array: &PrimitiveArray<T>)
         builder.append_option(value);
     }
     Arc::new(builder.finish())
+}
+
+#[inline(never)]
+fn boolean_dictionary_encode(array: &BooleanArray) -> Result<ArrayRef, ArrowError> {
+    // There is no dictionary builder for booleans in arrow-rs, so build the keys by
+    // hand. Dictionary values are stored in order of first appearance, matching
+    // the behavior of pyarrow's dictionary_encode.
+    let mut values: Vec<bool> = Vec::with_capacity(2);
+    let mut keys = Int32Builder::with_capacity(array.len());
+    for value in array {
+        match value {
+            Some(value) => {
+                let key = match values.iter().position(|v| *v == value) {
+                    Some(key) => key,
+                    None => {
+                        values.push(value);
+                        values.len() - 1
+                    }
+                };
+                keys.append_value(key as i32);
+            }
+            None => keys.append_null(),
+        }
+    }
+    let dictionary =
+        DictionaryArray::<Int32Type>::try_new(keys.finish(), Arc::new(BooleanArray::from(values)))?;
+    Ok(Arc::new(dictionary))
 }
 
 #[inline(never)]
