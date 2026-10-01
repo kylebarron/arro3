@@ -5,7 +5,6 @@ use std::sync::Arc;
 use arrow_array::{RecordBatchIterator, RecordBatchReader};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriterOptions;
-use parquet::arrow::async_reader::ParquetObjectReader;
 use parquet::arrow::ArrowWriter;
 use parquet::basic::{Compression, Encoding};
 use parquet::file::metadata::KeyValue;
@@ -17,15 +16,23 @@ use pyo3::pybacked::PyBackedStr;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::Arro3RecordBatchReader;
 use pyo3_arrow::input::AnyRecordBatch;
-use pyo3_arrow::{PyRecordBatchReader, PyTable};
+use pyo3_arrow::PyRecordBatchReader;
+#[cfg(feature = "async")]
 use pyo3_object_store::PyObjectStore;
 
-use crate::error::Arro3IoResult;
 use crate::utils::{FileReader, FileWriter};
 
 #[pyfunction]
-pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
-    let builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+#[pyo3(signature = (file, *, batch_size=None))]
+pub fn read_parquet(
+    file: FileReader,
+    batch_size: Option<usize>,
+) -> PyArrowResult<Arro3RecordBatchReader> {
+    let mut builder = ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+
+    if let Some(batch_size) = batch_size {
+        builder = builder.with_batch_size(batch_size);
+    }
 
     let metadata = builder.schema().metadata().clone();
     let reader = builder.build().unwrap();
@@ -45,6 +52,7 @@ pub fn read_parquet(file: FileReader) -> PyArrowResult<Arro3RecordBatchReader> {
     Ok(PyRecordBatchReader::new(iter).into())
 }
 
+#[cfg(feature = "async")]
 #[pyfunction]
 #[pyo3(signature = (path, *, store))]
 pub fn read_parquet_async<'py>(
@@ -59,11 +67,13 @@ pub fn read_parquet_async<'py>(
     Ok(fut)
 }
 
+#[cfg(feature = "async")]
 async fn read_parquet_async_inner(
     store: Arc<dyn object_store::ObjectStore>,
     path: String,
-) -> Arro3IoResult<PyTable> {
+) -> crate::error::Arro3IoResult<pyo3_arrow::PyTable> {
     use futures::TryStreamExt;
+    use parquet::arrow::async_reader::ParquetObjectReader;
     use parquet::arrow::ParquetRecordBatchStreamBuilder;
 
     let object_reader = ParquetObjectReader::new(store, path.into());
@@ -75,7 +85,7 @@ async fn read_parquet_async_inner(
     let arrow_schema = Arc::new(reader.schema().as_ref().clone().with_metadata(metadata));
 
     let batches = reader.try_collect::<Vec<_>>().await?;
-    Ok(PyTable::try_new(batches, arrow_schema)?)
+    Ok(pyo3_arrow::PyTable::try_new(batches, arrow_schema)?)
 }
 
 pub(crate) struct PyWriterVersion(WriterVersion);
@@ -235,7 +245,7 @@ pub(crate) fn write_parquet(
         props = props.set_bloom_filter_fpp(bloom_filter_fpp);
     }
     if let Some(bloom_filter_ndv) = bloom_filter_ndv {
-        props = props.set_bloom_filter_ndv(bloom_filter_ndv);
+        props = props.set_bloom_filter_max_ndv(bloom_filter_ndv);
     }
     if let Some(encoding) = encoding {
         props = props.set_encoding(encoding.0);

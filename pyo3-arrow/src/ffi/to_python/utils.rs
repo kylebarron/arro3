@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::CStr;
 use std::sync::Arc;
 
 use arrow_array::ffi::{FFI_ArrowArray, FFI_ArrowSchema};
@@ -13,6 +13,10 @@ use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::ffi_stream::new_stream;
 use crate::ffi::{ArrayIterator, ArrayReader};
 
+const ARRAY_CAPSULE_NAME: &CStr = c"arrow_array";
+const SCHEMA_CAPSULE_NAME: &CStr = c"arrow_schema";
+const STREAM_CAPSULE_NAME: &CStr = c"arrow_array_stream";
+
 /// Export a [`arrow_schema::Schema`], [`arrow_schema::Field`], or [`arrow_schema::DataType`] to a
 /// PyCapsule holding an Arrow C Schema pointer.
 pub fn to_schema_pycapsule(
@@ -20,8 +24,7 @@ pub fn to_schema_pycapsule(
     field: impl TryInto<FFI_ArrowSchema, Error = ArrowError>,
 ) -> PyArrowResult<Bound<PyCapsule>> {
     let ffi_schema: FFI_ArrowSchema = field.try_into()?;
-    let schema_capsule_name = CString::new("arrow_schema").unwrap();
-    let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
+    let schema_capsule = PyCapsule::new_with_value(py, ffi_schema, SCHEMA_CAPSULE_NAME)?;
     Ok(schema_capsule)
 }
 
@@ -53,11 +56,8 @@ pub fn to_array_pycapsules<'py>(
     let ffi_schema = FFI_ArrowSchema::try_from(&field)?;
     let ffi_array = FFI_ArrowArray::new(&array_data);
 
-    let schema_capsule_name = CString::new("arrow_schema").unwrap();
-    let array_capsule_name = CString::new("arrow_array").unwrap();
-
-    let schema_capsule = PyCapsule::new(py, ffi_schema, Some(schema_capsule_name))?;
-    let array_capsule = PyCapsule::new(py, ffi_array, Some(array_capsule_name))?;
+    let schema_capsule = PyCapsule::new_with_value(py, ffi_schema, SCHEMA_CAPSULE_NAME)?;
+    let array_capsule = PyCapsule::new_with_value(py, ffi_array, ARRAY_CAPSULE_NAME)?;
     let tuple = PyTuple::new(py, vec![schema_capsule, array_capsule])?;
 
     Ok(tuple)
@@ -89,6 +89,9 @@ pub fn to_stream_pycapsule<'py>(
     }
 
     let ffi_stream = new_stream(array_reader);
-    let stream_capsule_name = CString::new("arrow_array_stream").unwrap();
-    Ok(PyCapsule::new(py, ffi_stream, Some(stream_capsule_name))?)
+    Ok(PyCapsule::new_with_value(
+        py,
+        ffi_stream,
+        STREAM_CAPSULE_NAME,
+    )?)
 }
