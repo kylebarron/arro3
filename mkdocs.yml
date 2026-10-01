@@ -151,7 +151,6 @@ markdown_extensions:
       hide_protocol: true
       repo_url_shortener: true
   - pymdownx.smartsymbols
-  - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
