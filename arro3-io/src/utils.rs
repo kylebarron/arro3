@@ -37,8 +37,6 @@ impl<'py> FromPyObject<'_, 'py> for FileReader {
         } else if let Ok(path) = obj.extract::<String>() {
             Ok(Self::File(File::open(path)?))
         } else if let Ok(buffer) = obj.extract::<PyBytes>() {
-            // Any object supporting the buffer protocol (`bytes`, `bytearray`,
-            // `memoryview`, numpy arrays, ...). The data is referenced, not copied.
             Ok(Self::Buffer(Cursor::new(buffer.into_inner())))
         } else {
             Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
