@@ -49,11 +49,12 @@ impl PyRecordBatch {
                 let schema = SchemaBuilder::from(fields)
                     .finish()
                     .with_metadata(field.metadata().clone());
-                assert_eq!(
-                    struct_array.null_count(),
-                    0,
-                    "Cannot convert nullable StructArray to RecordBatch"
-                );
+
+                if struct_array.null_count() != 0 {
+                    return Err(PyValueError::new_err(
+                        "Cannot import a StructArray with a non-zero null count as a RecordBatch",
+                    ));
+                }
 
                 let columns = struct_array.columns().to_vec();
 

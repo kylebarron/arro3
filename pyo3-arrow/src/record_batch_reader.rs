@@ -1,12 +1,13 @@
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use std::sync::{Arc, Mutex};
 
-use arrow_array::{ArrayRef, RecordBatchIterator, RecordBatchReader, StructArray};
-use arrow_schema::{Field, SchemaRef};
-use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
+use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
+use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
+use pyo3::exceptions::{PyIOError, PyStopIteration, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyIterator, PySequence, PyTuple, PyType};
+use pyo3::Borrowed;
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
@@ -17,7 +18,131 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
+use crate::utils::schema_equals;
 use crate::{PyRecordBatch, PySchema, PyTable};
+
+/// Input to `from_batches`: either a sequence of record batches, which is read
+/// eagerly, or any other iterable, which is consumed lazily one batch at a time.
+enum RecordBatchInput {
+    Sequence(Vec<PyRecordBatch>),
+    Iterator(Py<PyIterator>),
+}
+
+impl<'a, 'py> FromPyObject<'a, 'py> for RecordBatchInput {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
+        // Only lists, tuples, and objects registered as `collections.abc.Sequence`
+        // pass this cast and are read eagerly. Generators, iterators, and other
+        // merely-iterable objects are never materialized here.
+        //
+        // Checking for a sequence before extracting means that a sequence element
+        // that is not a record batch raises immediately, instead of the error
+        // being deferred to the first read.
+        if ob.cast::<PySequence>().is_ok() {
+            return Ok(Self::Sequence(ob.extract()?));
+        }
+        match ob.try_iter() {
+            Ok(iter) => Ok(Self::Iterator(iter.unbind())),
+            Err(_) => Err(PyTypeError::new_err(format!(
+                "Expected a sequence or iterable of record batches, got {}",
+                ob.get_type().name()?
+            ))),
+        }
+    }
+}
+
+impl RecordBatchInput {
+    fn into_record_batch_reader(
+        self,
+        schema: SchemaRef,
+    ) -> PyResult<Box<dyn RecordBatchReader + Send>> {
+        match self {
+            Self::Sequence(batches) => {
+                let batches = batches
+                    .into_iter()
+                    .map(|batch| batch.into_inner())
+                    .collect::<Vec<_>>();
+                for (index, batch) in batches.iter().enumerate() {
+                    check_batch_schema(index, batch, &schema)?;
+                }
+                Ok(Box::new(RecordBatchIterator::new(
+                    batches.into_iter().map(Ok),
+                    schema,
+                )))
+            }
+            Self::Iterator(iter) => Ok(Box::new(PyIteratorRecordBatchReader {
+                schema,
+                iter,
+                index: 0,
+            })),
+        }
+    }
+}
+
+/// Check that a batch's schema matches the schema declared for the reader.
+///
+/// Uses the same comparison as table construction, which matches pyarrow's
+/// `RecordBatchReader.from_batches`: names, types, and nullability must match, metadata
+/// is ignored. The error message also mirrors pyarrow's.
+fn check_batch_schema(batch_index: usize, batch: &RecordBatch, expected: &Schema) -> PyResult<()> {
+    let actual = batch.schema();
+    if schema_equals(&actual, expected) {
+        Ok(())
+    } else {
+        Err(PyValueError::new_err(format!(
+            "Schema at index {batch_index} was different:\n{}vs\n{}",
+            SchemaDisplay(actual.as_ref()),
+            SchemaDisplay(expected),
+        )))
+    }
+}
+
+/// Formats a [Schema] one field per line, for error messages.
+struct SchemaDisplay<'a>(&'a Schema);
+
+impl Display for SchemaDisplay<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        display_schema(self.0, f)
+    }
+}
+
+/// A [RecordBatchReader] that lazily pulls batches from a Python iterator.
+///
+/// Each call to `next()` attaches to the Python interpreter and advances the
+/// underlying Python iterator by one item.
+struct PyIteratorRecordBatchReader {
+    schema: SchemaRef,
+    iter: Py<PyIterator>,
+    /// Number of batches pulled so far, for error messages.
+    index: usize,
+}
+
+impl Iterator for PyIteratorRecordBatchReader {
+    type Item = Result<RecordBatch, ArrowError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Python::attach(|py| {
+            let item = self.iter.bind(py).clone().next()?;
+            let batch = item
+                .and_then(|obj| obj.extract::<PyRecordBatch>())
+                .map(|batch| batch.into_inner())
+                .and_then(|batch| {
+                    check_batch_schema(self.index, &batch, &self.schema)?;
+                    Ok(batch)
+                })
+                .map_err(|err| ArrowError::ExternalError(Box::new(err)));
+            self.index += 1;
+            Some(batch)
+        })
+    }
+}
+
+impl RecordBatchReader for PyIteratorRecordBatchReader {
+    fn schema(&self) -> SchemaRef {
+        self.schema.clone()
+    }
+}
 
 /// A Python-facing Arrow record batch reader.
 ///
@@ -217,15 +342,14 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: Vec<PyRecordBatch>) -> Self {
-        let batches = batches
-            .into_iter()
-            .map(|batch| batch.into_inner())
-            .collect::<Vec<_>>();
-        Self::new(Box::new(RecordBatchIterator::new(
-            batches.into_iter().map(Ok),
-            schema.into_inner(),
-        )))
+    fn from_batches(
+        _cls: &Bound<PyType>,
+        schema: PySchema,
+        batches: RecordBatchInput,
+    ) -> PyResult<Self> {
+        Ok(Self::new(
+            batches.into_record_batch_reader(schema.into_inner())?,
+        ))
     }
 
     #[classmethod]
@@ -254,15 +378,19 @@ impl PyRecordBatchReader {
     }
 
     fn read_next_batch(&self) -> PyArrowResult<Arro3RecordBatch> {
-        let mut inner = self.0.lock().unwrap();
-        let stream = inner
-            .as_mut()
+        let mut stream = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+        let next_batch = stream.next();
+        // Put the stream back so the reader can be used again.
+        self.0.lock().unwrap().replace(stream);
 
-        if let Some(next_batch) = stream.next() {
-            Ok(next_batch?.into())
-        } else {
-            Err(PyStopIteration::new_err("").into())
+        match next_batch {
+            Some(batch) => Ok(batch?.into()),
+            None => Err(PyStopIteration::new_err("").into()),
         }
     }
 

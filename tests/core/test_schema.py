@@ -38,7 +38,7 @@ def test_pyarrow_equality():
 
 
 class ArrowCSchemaExporter:
-    """An object exporting ``__arrow_c_schema__`` that is not itself iterable."""
+    """An object exporting `__arrow_c_schema__` that is not itself iterable."""
 
     def __init__(self, schema: pa.Schema):
         self._schema = schema
