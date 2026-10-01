@@ -161,3 +161,23 @@ def test_record_batch_reader_from_batches_generator_exception_propagates():
     reader = RecordBatchReader.from_batches(table.schema, batch_gen())
     with pytest.raises(ValueError, match="bad row"):
         reader.read_all()
+
+
+def test_record_batch_reader_from_batches_generator_may_touch_reader():
+    """The iterator feeding a reader can use the reader itself without deadlocking.
+
+    `read_next_batch` must not hold the reader's lock while running Python code.
+    While the stream is being advanced it is checked out of the reader, which then
+    reports itself as closed.
+    """
+    table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
+    reader = None
+
+    def batch_gen():
+        for batch in table.to_batches():
+            assert reader.closed
+            yield batch
+
+    reader = RecordBatchReader.from_batches(table.schema, batch_gen())
+    assert reader.read_next_batch().num_rows == 3
+    assert not reader.closed

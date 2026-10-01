@@ -321,15 +321,19 @@ impl PyRecordBatchReader {
     }
 
     fn read_next_batch(&self) -> PyArrowResult<Arro3RecordBatch> {
-        let mut inner = self.0.lock().unwrap();
-        let stream = inner
-            .as_mut()
+        let mut stream = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
+        let next_batch = stream.next();
+        // Put the stream back so the reader can be used again.
+        self.0.lock().unwrap().replace(stream);
 
-        if let Some(next_batch) = stream.next() {
-            Ok(next_batch?.into())
-        } else {
-            Err(PyStopIteration::new_err("").into())
+        match next_batch {
+            Some(batch) => Ok(batch?.into()),
+            None => Err(PyStopIteration::new_err("").into()),
         }
     }
 
