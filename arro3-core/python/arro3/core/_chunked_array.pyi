@@ -124,6 +124,14 @@ class ChunkedArray:
     @property
     def num_chunks(self) -> int:
         """Number of underlying chunks."""
+    @overload
+    def rechunk(
+        self, *, max_chunksize: int | None = None, chunk_lengths: None = None
+    ) -> ChunkedArray: ...
+    @overload
+    def rechunk(
+        self, *, max_chunksize: None = None, chunk_lengths: Sequence[int]
+    ) -> ChunkedArray: ...
     def rechunk(
         self,
         *,

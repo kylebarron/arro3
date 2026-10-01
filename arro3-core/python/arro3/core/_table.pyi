@@ -307,6 +307,14 @@ class Table:
 
         Due to the definition of a table, all columns have the same number of rows.
         """
+    @overload
+    def rechunk(
+        self, *, max_chunksize: int | None = None, chunk_lengths: None = None
+    ) -> Table: ...
+    @overload
+    def rechunk(
+        self, *, max_chunksize: None = None, chunk_lengths: Sequence[int]
+    ) -> Table: ...
     def rechunk(
         self,
         *,
