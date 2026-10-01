@@ -1,5 +1,6 @@
 //! Contains the [`PyArrowError`], the Error returned by most fallible functions in this crate.
 
+use arrow_schema::ArrowError;
 use numpy::BorrowError;
 use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
@@ -27,6 +28,14 @@ impl From<PyArrowError> for PyErr {
     fn from(error: PyArrowError) -> Self {
         match error {
             PyArrowError::PyErr(err) => err,
+            // For a Python exception that was boxed to cross an arrow-rs API boundary, unwrap it
+            // and return the original error
+            PyArrowError::ArrowError(ArrowError::ExternalError(err)) => {
+                match err.downcast::<PyErr>() {
+                    Ok(err) => *err,
+                    Err(err) => PyException::new_err(ArrowError::ExternalError(err).to_string()),
+                }
+            }
             PyArrowError::ArrowError(err) => PyException::new_err(err.to_string()),
             PyArrowError::NumpyBorrowError(err) => PyException::new_err(err.to_string()),
         }
