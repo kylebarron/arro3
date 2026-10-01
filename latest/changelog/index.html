@@ -1,0 +1,3374 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation.">
+      
+      
+        <meta name="author" content="Kyle Barron">
+      
+      
+        <link rel="canonical" href="https://kylebarron.dev/arro3/latest/changelog/">
+      
+      
+        <link rel="prev" href="../api/io/parquet/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Changelog - arro3</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Changelog - arro3" />
+<meta property="og:description" content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." />
+<meta property="og:image" content="https://kylebarron.dev/arro3/latest/assets/images/social/changelog.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://kylebarron.dev/arro3/latest/changelog/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Changelog - arro3" />
+<meta property="twitter:description" content="A minimal Python library for Apache Arrow, binding to the Rust Arrow implementation." />
+<meta property="twitter:image" content="https://kylebarron.dev/arro3/latest/assets/images/social/changelog.png" />
+</head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="arro3" class="md-header__button md-logo" aria-label="arro3" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            arro3
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kylebarron/arro3" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kylebarron/arro3
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="arro3" class="md-nav__button md-logo" aria-label="arro3" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    arro3
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kylebarron/arro3" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kylebarron/arro3
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    arro3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    arro3.core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    arro3.core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/array/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Array
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/array-reader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArrayReader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/chunked-array/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChunkedArray
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/datatype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataType
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/field/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Field
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/record-batch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RecordBatch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/record-batch-reader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RecordBatchReader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/table/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Table
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/constructors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constructors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/accessors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accessors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    arro3.compute
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    arro3.io
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    arro3.io
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/io/arrow-ipc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arrow IPC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/io/csv/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CSV
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/io/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/io/parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parquet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#090-2026-10-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.9.0] - 2026-10-02
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.9.0] - 2026-10-02">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#083-2026-09-18-yanked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.3] - 2026-09-18 Yanked
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.3] - 2026-09-18 Yanked">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#082-2026-09-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.2] - 2026-09-02
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.2] - 2026-09-02">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#081-2026-06-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.1] - 2026-06-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.1] - 2026-06-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#080-2026-02-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.0] - 2026-02-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.0] - 2026-02-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#070-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.7.0] - 2026-02-19
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.7.0] - 2026-02-19">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#065-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.5] - 2025-10-13
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#064-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.4] - 2025-10-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.4] - 2025-10-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#063-2025-09-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.3] - 2025-09-17
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#062-2025-09-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.2] - 2025-09-09
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#061-2025-08-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.1] - 2025-08-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.1] - 2025-08-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arro3-core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="arro3-core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#060-2025-08-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.0] - 2025-08-21
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.0] - 2025-08-21">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3-core_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arro3-core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="arro3-core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updated-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updated dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#051-2025-05-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.1] - 2025-05-31
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.1] - 2025-05-31">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#050-2025-05-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.0] - 2025-05-27
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.0] - 2025-05-27">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#046-2025-03-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.6] - 2025-03-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.6] - 2025-03-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#045-2024-12-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.5] - 2024-12-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.5] - 2024-12-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#044-2024-12-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.4] - 2024-12-09
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.4] - 2024-12-09">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#043-2024-11-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.3] - 2024-11-21
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.3] - 2024-11-21">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#042-2024-10-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.2] - 2024-10-14
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.2] - 2024-10-14">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041-2024-10-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.1] - 2024-10-07
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.1] - 2024-10-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2024-10-03" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2024-10-03
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2024-10-03">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031-2024-09-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.1] - 2024-09-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.1] - 2024-09-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030-2024-08-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.0] - 2024-08-27
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.0] - 2024-08-27">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021-2024-08-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.1] - 2024-08-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.1] - 2024-08-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-2024-08-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.0] - 2024-08-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.0] - 2024-08-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-2024-07-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.0] - 2024-07-01
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#090-2026-10-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.9.0] - 2026-10-02
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.9.0] - 2026-10-02">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#083-2026-09-18-yanked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.3] - 2026-09-18 Yanked
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.3] - 2026-09-18 Yanked">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#082-2026-09-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.2] - 2026-09-02
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.2] - 2026-09-02">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#081-2026-06-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.1] - 2026-06-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.1] - 2026-06-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#080-2026-02-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.8.0] - 2026-02-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.8.0] - 2026-02-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#070-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.7.0] - 2026-02-19
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.7.0] - 2026-02-19">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#065-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.5] - 2025-10-13
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#064-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.4] - 2025-10-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.4] - 2025-10-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#063-2025-09-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.3] - 2025-09-17
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#062-2025-09-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.2] - 2025-09-09
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#061-2025-08-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.1] - 2025-08-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.1] - 2025-08-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arro3-core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="arro3-core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#060-2025-08-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.0] - 2025-08-21
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.0] - 2025-08-21">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arro3-core_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arro3-core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="arro3-core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updated-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updated dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#051-2025-05-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.1] - 2025-05-31
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.1] - 2025-05-31">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#050-2025-05-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.0] - 2025-05-27
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.0] - 2025-05-27">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#046-2025-03-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.6] - 2025-03-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.6] - 2025-03-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#045-2024-12-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.5] - 2024-12-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.5] - 2024-12-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#044-2024-12-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.4] - 2024-12-09
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.4] - 2024-12-09">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#043-2024-11-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.3] - 2024-11-21
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.3] - 2024-11-21">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#042-2024-10-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.2] - 2024-10-14
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.2] - 2024-10-14">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041-2024-10-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.1] - 2024-10-07
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.1] - 2024-10-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2024-10-03" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2024-10-03
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2024-10-03">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-contributors_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031-2024-09-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.1] - 2024-09-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.1] - 2024-09-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030-2024-08-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.0] - 2024-08-27
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.0] - 2024-08-27">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021-2024-08-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.1] - 2024-08-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.1] - 2024-08-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-2024-08-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.0] - 2024-08-13
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.0] - 2024-08-13">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhancements_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-2024-07-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.0] - 2024-07-01
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<p>This is the changelog for arro3. pyo3-arrow has a separate changelog.</p>
+<h2 id="090-2026-10-02">[0.9.0] - 2026-10-02<a class="headerlink" href="#090-2026-10-02" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed">What's Changed<a class="headerlink" href="#whats-changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat: add batch_size parameter to read_parquet by @kevinjacobs-delfi in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/494" title="GitHub Pull Request: kylebarron/arro3 #494">kylebarron/arro3!494</a></li>
+<li>chore(python)!: remove support for python 3.9 and 3.10 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/517" title="GitHub Pull Request: kylebarron/arro3 #517">kylebarron/arro3!517</a></li>
+<li>fix(pyo3-arrow): Support importing zero-length buffers through Python buffer protocol by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/520" title="GitHub Pull Request: kylebarron/arro3 #520">kylebarron/arro3!520</a></li>
+<li>feat(arro3-core): accept <strong>arrow_c_schema</strong> objects in the Schema constructor by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/524" title="GitHub Pull Request: kylebarron/arro3 #524">kylebarron/arro3!524</a></li>
+<li>docs: add changelog page to the docs website by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/527" title="GitHub Pull Request: kylebarron/arro3 #527">kylebarron/arro3!527</a></li>
+<li>feat(pyo3-arrow): add schema parameter to RecordBatch.from_pydict by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/526" title="GitHub Pull Request: kylebarron/arro3 #526">kylebarron/arro3!526</a></li>
+<li>test: Add test for reading and writing string_view arrays to Parquet files by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/405" title="GitHub Pull Request: kylebarron/arro3 #405">kylebarron/arro3!405</a></li>
+<li>feat(io): accept buffer protocol objects as input to the reader functions by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/523" title="GitHub Pull Request: kylebarron/arro3 #523">kylebarron/arro3!523</a></li>
+<li>feat(pyo3-arrow): add chunk_lengths parameter to rechunk by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/525" title="GitHub Pull Request: kylebarron/arro3 #525">kylebarron/arro3!525</a></li>
+<li>feat: accept iterables in RecordBatchReader.from_batches by @kevinjacobs-delfi in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/495" title="GitHub Pull Request: kylebarron/arro3 #495">kylebarron/arro3!495</a></li>
+</ul>
+<h3 id="new-contributors">New Contributors<a class="headerlink" href="#new-contributors" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@kevinjacobs-delfi made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/494" title="GitHub Pull Request: kylebarron/arro3 #494">kylebarron/arro3!494</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.9.0">github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.9.0</a></p>
+<h2 id="083-2026-09-18-yanked"><del>[0.8.3] - 2026-09-18</del> Yanked<a class="headerlink" href="#083-2026-09-18-yanked" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_1">What's Changed<a class="headerlink" href="#whats-changed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>ci: bump pyodide-build to 0.39 to fix emscripten 3.14 builds by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/514" title="GitHub Pull Request: kylebarron/arro3 #514">kylebarron/arro3!514</a></li>
+<li>feat: add batch_size parameter to read_parquet by @kevinjacobs-delfi in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/494" title="GitHub Pull Request: kylebarron/arro3 #494">kylebarron/arro3!494</a></li>
+</ul>
+<h3 id="new-contributors_1">New Contributors<a class="headerlink" href="#new-contributors_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@kevinjacobs-delfi made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/494" title="GitHub Pull Request: kylebarron/arro3 #494">kylebarron/arro3!494</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.8.3">github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.8.3</a></p>
+<h2 id="082-2026-09-02">[0.8.2] - 2026-09-02<a class="headerlink" href="#082-2026-09-02" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_2">What's Changed<a class="headerlink" href="#whats-changed_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>chore: Bump pyo3 to 0.29 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/507" title="GitHub Pull Request: kylebarron/arro3 #507">kylebarron/arro3!507</a></li>
+<li>chore: Bump pyo3-arrow to 0.19 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/508" title="GitHub Pull Request: kylebarron/arro3 #508">kylebarron/arro3!508</a></li>
+<li>chore: Bump pyo3 to 0.29 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/509" title="GitHub Pull Request: kylebarron/arro3 #509">kylebarron/arro3!509</a></li>
+<li>ci: Add Windows ARM64 build by @ndabas in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/510" title="GitHub Pull Request: kylebarron/arro3 #510">kylebarron/arro3!510</a></li>
+</ul>
+<h3 id="new-contributors_2">New Contributors<a class="headerlink" href="#new-contributors_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@ndabas made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/510" title="GitHub Pull Request: kylebarron/arro3 #510">kylebarron/arro3!510</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.8.1...py-v0.8.2">github.com/kylebarron/arro3/compare/py-v0.8.1...py-v0.8.2</a></p>
+<h2 id="081-2026-06-11">[0.8.1] - 2026-06-11<a class="headerlink" href="#081-2026-06-11" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_3">What's Changed<a class="headerlink" href="#whats-changed_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat: PEP 783 Emscripten wheels! by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/502" title="GitHub Pull Request: kylebarron/arro3 #502">kylebarron/arro3!502</a></li>
+<li>ci: Use trusted publishing for pypi by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/492" title="GitHub Pull Request: kylebarron/arro3 #492">kylebarron/arro3!492</a></li>
+<li>ci: Build arro3-io wheels for emscripten by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/504" title="GitHub Pull Request: kylebarron/arro3 #504">kylebarron/arro3!504</a></li>
+<li>fix: Add missing writer.finish() call by @cpnielsen in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/497" title="GitHub Pull Request: kylebarron/arro3 #497">kylebarron/arro3!497</a></li>
+</ul>
+<h3 id="new-contributors_3">New Contributors<a class="headerlink" href="#new-contributors_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@gadomski made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/490" title="GitHub Pull Request: kylebarron/arro3 #490">kylebarron/arro3!490</a></li>
+<li>@cpnielsen made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/497" title="GitHub Pull Request: kylebarron/arro3 #497">kylebarron/arro3!497</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.8.0...py-v0.8.1">github.com/kylebarron/arro3/compare/py-v0.8.0...py-v0.8.1</a></p>
+<h2 id="080-2026-02-22">[0.8.0] - 2026-02-22<a class="headerlink" href="#080-2026-02-22" title="Permanent link">&para;</a></h2>
+<h3 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A bare <code>DataType</code> is now exported through <code>__arrow_c_schema__</code> (such as when passing to <code>pyarrow.field</code>) with <code>nullable: true</code>. This is required to match equality semantics with pyarrow. by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/483" title="GitHub Pull Request: kylebarron/arro3 #483">kylebarron/arro3!483</a></li>
+</ul>
+<h3 id="bug-fixes">Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>fix!: Fix type equality between arro3 and pyarrow by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/483" title="GitHub Pull Request: kylebarron/arro3 #483">kylebarron/arro3!483</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.7.0...py-v0.8.0">github.com/kylebarron/arro3/compare/py-v0.7.0...py-v0.8.0</a></p>
+<h2 id="070-2026-02-19">[0.7.0] - 2026-02-19<a class="headerlink" href="#070-2026-02-19" title="Permanent link">&para;</a></h2>
+<h3 id="breaking-changes_1">Breaking changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat!: Make <code>Table.remove_column</code> return <code>IndexError</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/442" title="GitHub Pull Request: kylebarron/arro3 #442">kylebarron/arro3!442</a></li>
+<li>fix: Rename <code>names</code> to <code>columns</code> parameter in <code>Tables.drop_columns</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/453" title="GitHub Pull Request: kylebarron/arro3 #453">kylebarron/arro3!453</a></li>
+<li>fix: Properly return <code>IndexError</code> on incorrect index in <code>Table.add_column</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/455" title="GitHub Pull Request: kylebarron/arro3 #455">kylebarron/arro3!455</a></li>
+</ul>
+<h3 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>ci: Build 3.14t wheels by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/428" title="GitHub Pull Request: kylebarron/arro3 #428">kylebarron/arro3!428</a></li>
+<li>feat: Make <code>Table.append_column</code> support <code>Array</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/433" title="GitHub Pull Request: kylebarron/arro3 #433">kylebarron/arro3!433</a></li>
+<li>feat: Make <code>Table.set_column</code> and <code>Table.add_column</code> support <code>Array</code> and <code>ArrayReader</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/437" title="GitHub Pull Request: kylebarron/arro3 #437">kylebarron/arro3!437</a></li>
+<li>fix: off by one when checking if an index is valid by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/443" title="GitHub Pull Request: kylebarron/arro3 #443">kylebarron/arro3!443</a></li>
+<li>feat: Implement <code>Table.drop_columns</code> by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/440" title="GitHub Pull Request: kylebarron/arro3 #440">kylebarron/arro3!440</a></li>
+<li>fix: <code>Table.rename</code> not modifying internals batches schema by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/457" title="GitHub Pull Request: kylebarron/arro3 #457">kylebarron/arro3!457</a></li>
+<li>fix: Improve error messaging by adding more information by @surister in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/447" title="GitHub Pull Request: kylebarron/arro3 #447">kylebarron/arro3!447</a></li>
+<li>feat: Match <code>RecordBatch.from_arrays</code> closely to pyarrow by @AlenkaF in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/461" title="GitHub Pull Request: kylebarron/arro3 #461">kylebarron/arro3!461</a></li>
+</ul>
+<h3 id="bug-fixes_1">Bug Fixes<a class="headerlink" href="#bug-fixes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>fix: Preserve schema metadata in RecordBatch PyCapsule export by @bretttully in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/474" title="GitHub Pull Request: kylebarron/arro3 #474">kylebarron/arro3!474</a></li>
+<li>fix: Update license metadata in <code>pyproject.toml</code> by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/480" title="GitHub Pull Request: kylebarron/arro3 #480">kylebarron/arro3!480</a></li>
+</ul>
+<h3 id="other-improvements">Other improvements<a class="headerlink" href="#other-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>chore: Bump to arrow 57 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/424" title="GitHub Pull Request: kylebarron/arro3 #424">kylebarron/arro3!424</a></li>
+<li>chore: Bump arro3 to pyo3 0.27 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/425" title="GitHub Pull Request: kylebarron/arro3 #425">kylebarron/arro3!425</a></li>
+</ul>
+<h2 id="new-contributors_4">New Contributors<a class="headerlink" href="#new-contributors_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>@surister made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/433" title="GitHub Pull Request: kylebarron/arro3 #433">kylebarron/arro3!433</a></li>
+<li>@AlenkaF made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/461" title="GitHub Pull Request: kylebarron/arro3 #461">kylebarron/arro3!461</a></li>
+<li>@bretttully made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/474" title="GitHub Pull Request: kylebarron/arro3 #474">kylebarron/arro3!474</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.6.5...py-v0.7.0">github.com/kylebarron/arro3/compare/py-v0.6.5...py-v0.7.0</a></p>
+<h2 id="065-2025-10-13">[0.6.5] - 2025-10-13<a class="headerlink" href="#065-2025-10-13" title="Permanent link">&para;</a></h2>
+<ul>
+<li>fix(ci): Ensure we use Python 3.11 interpreter for building abi3 wheels #416</li>
+</ul>
+<h2 id="064-2025-10-13">[0.6.4] - 2025-10-13<a class="headerlink" href="#064-2025-10-13" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_4">What's Changed<a class="headerlink" href="#whats-changed_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat(arro3): Freethreading - module markers + CI by @H-Plus-Time in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/275" title="GitHub Pull Request: kylebarron/arro3 #275">kylebarron/arro3!275</a></li>
+<li>feat: Add support for Decimal scalar type conversion to Python by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/412" title="GitHub Pull Request: kylebarron/arro3 #412">kylebarron/arro3!412</a></li>
+<li>ci: Build abi3 wheels where possible, falling back to version-specific wheels by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/408" title="GitHub Pull Request: kylebarron/arro3 #408">kylebarron/arro3!408</a></li>
+</ul>
+<h3 id="new-contributors_5">New Contributors<a class="headerlink" href="#new-contributors_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@H-Plus-Time made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/275" title="GitHub Pull Request: kylebarron/arro3 #275">kylebarron/arro3!275</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.6.3...py-v0.6.4">github.com/kylebarron/arro3/compare/py-v0.6.3...py-v0.6.4</a></p>
+<h2 id="063-2025-09-17">[0.6.3] - 2025-09-17<a class="headerlink" href="#063-2025-09-17" title="Permanent link">&para;</a></h2>
+<ul>
+<li>feature(arro3-core): Maintain timezone info when converting scalar tz to datetime.datetime (#400)</li>
+</ul>
+<h2 id="062-2025-09-09">[0.6.2] - 2025-09-09<a class="headerlink" href="#062-2025-09-09" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Enable sdist artifacts #398</li>
+<li>sdist is now pushed to PyPI for all packages</li>
+</ul>
+<h2 id="061-2025-08-22">[0.6.1] - 2025-08-22<a class="headerlink" href="#061-2025-08-22" title="Permanent link">&para;</a></h2>
+<h3 id="arro3-core"><code>arro3-core</code><a class="headerlink" href="#arro3-core" title="Permanent link">&para;</a></h3>
+<h4 id="bug-fixes_2">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>fix(arro3-io): use patched <code>parquet</code> crate to fix building <code>arro3-io</code> for s390x architectures. #388. This also updates <code>arrow</code> crates to 56.1.0.</li>
+</ul>
+<h2 id="060-2025-08-21">[0.6.0] - 2025-08-21<a class="headerlink" href="#060-2025-08-21" title="Permanent link">&para;</a></h2>
+<h3 id="arro3-core_1"><code>arro3-core</code><a class="headerlink" href="#arro3-core_1" title="Permanent link">&para;</a></h3>
+<h4 id="breaking-changes_2">Breaking Changes <img alt="🔧" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f527.svg" title=":wrench:" /><a class="headerlink" href="#breaking-changes_2" title="Permanent link">&para;</a></h4>
+<p>No breaking changes.</p>
+<h4 id="new-features">New features <img alt="✨" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" title=":sparkles:" /><a class="headerlink" href="#new-features" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Expanded dtype support in <code>Array.from_numpy</code>. It now additionally supports <code>datetime64</code>, <code>timedelta64</code>, <a href="https://numpy.org/devdocs/user/basics.strings.html#fixed-width-data-types">fixed-width strings and bytes</a>, <a href="https://numpy.org/doc/stable/user/basics.strings.html#variable-width-strings">variable-width strings</a>, and <code>object</code> dtypes that contain <code>str</code> or <code>bytes</code>.</li>
+<li>Support FixedSizeBinary in Array constructor by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/358" title="GitHub Pull Request: kylebarron/arro3 #358">kylebarron/arro3!358</a></li>
+<li>Add mask parameter to list/struct constructors by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/382" title="GitHub Pull Request: kylebarron/arro3 #382">kylebarron/arro3!382</a></li>
+</ul>
+<h4 id="bug-fixes_3">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Preserve exceptions when Arrow PyCapsule dunder method fails by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/374" title="GitHub Pull Request: kylebarron/arro3 #374">kylebarron/arro3!374</a></li>
+</ul>
+<h4 id="updated-dependencies">Updated dependencies <img alt="⬆" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2b06.svg" title=":arrow_up:" /><a class="headerlink" href="#updated-dependencies" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Use Rust <code>arrow</code> 56 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/368" title="GitHub Pull Request: kylebarron/arro3 #368">kylebarron/arro3!368</a>. This includes all changes in the <a href="https://github.com/apache/arrow-rs/blob/56.0.0/CHANGELOG.md">upstream Changelog</a>.</li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.5.1...py-v0.6.0">github.com/kylebarron/arro3/compare/py-v0.5.1...py-v0.6.0</a></p>
+<h2 id="051-2025-05-31">[0.5.1] - 2025-05-31<a class="headerlink" href="#051-2025-05-31" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_5">What's Changed<a class="headerlink" href="#whats-changed_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>chore: Use released pyo3-file by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/341" title="GitHub Pull Request: kylebarron/arro3 #341">kylebarron/arro3!341</a></li>
+<li>feat: Support serializing binary view and string view array types to numpy by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/348" title="GitHub Pull Request: kylebarron/arro3 #348">kylebarron/arro3!348</a></li>
+<li>fix(arro3-core): Add typing-extensions as a dependency for arro3-core by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/350" title="GitHub Pull Request: kylebarron/arro3 #350">kylebarron/arro3!350</a></li>
+<li>feat(arro3-core): Improved repr for Array and ChunkedArray by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/351" title="GitHub Pull Request: kylebarron/arro3 #351">kylebarron/arro3!351</a></li>
+<li>chore: bump dev versions for geoarrow-types and pyarrow by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/352" title="GitHub Pull Request: kylebarron/arro3 #352">kylebarron/arro3!352</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.5.0...py-v0.5.1">github.com/kylebarron/arro3/compare/py-v0.5.0...py-v0.5.1</a></p>
+<h2 id="050-2025-05-27">[0.5.0] - 2025-05-27<a class="headerlink" href="#050-2025-05-27" title="Permanent link">&para;</a></h2>
+<h3 id="new-features_1">New features <img alt="✨" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" title=":sparkles:" /><a class="headerlink" href="#new-features_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat: access value_fields and inner fields by @ion-elgreco in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/334" title="GitHub Pull Request: kylebarron/arro3 #334">kylebarron/arro3!334</a></li>
+<li>feat(arro3-core): Basic data rendering in <code>__repr__</code> by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/335" title="GitHub Pull Request: kylebarron/arro3 #335">kylebarron/arro3!335</a></li>
+</ul>
+<h3 id="bug-fixes_4">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>feat(arro3-core): Make <code>DataType</code> hashable by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/336" title="GitHub Pull Request: kylebarron/arro3 #336">kylebarron/arro3!336</a></li>
+<li>test(arro3-core): Check that <code>Schema</code> is iterable by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/338" title="GitHub Pull Request: kylebarron/arro3 #338">kylebarron/arro3!338</a></li>
+</ul>
+<h3 id="documentation-updates">Documentation updates <img alt="📝" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4dd.svg" title=":memo:" /><a class="headerlink" href="#documentation-updates" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Add sphinx interlinking for <code>ArrowStreamExportable</code> by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/339" title="GitHub Pull Request: kylebarron/arro3 #339">kylebarron/arro3!339</a></li>
+</ul>
+<h3 id="new-contributors_6">New Contributors<a class="headerlink" href="#new-contributors_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@ion-elgreco made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/334" title="GitHub Pull Request: kylebarron/arro3 #334">kylebarron/arro3!334</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.4.6...py-v0.5.0">github.com/kylebarron/arro3/compare/py-v0.4.6...py-v0.5.0</a></p>
+<h2 id="046-2025-03-10">[0.4.6] - 2025-03-10<a class="headerlink" href="#046-2025-03-10" title="Permanent link">&para;</a></h2>
+<h3 id="bug-fixes_5">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use 2_24 for aarch64 wheels by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/279" title="GitHub Pull Request: kylebarron/arro3 #279">kylebarron/arro3!279</a></li>
+<li>Allow None as input into Array constructor by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/294" title="GitHub Pull Request: kylebarron/arro3 #294">kylebarron/arro3!294</a></li>
+<li>Fix rendering <code>__init__</code> in docs by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/295" title="GitHub Pull Request: kylebarron/arro3 #295">kylebarron/arro3!295</a></li>
+<li>Subclass Buffer type from collections.abc.Buffer by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/297" title="GitHub Pull Request: kylebarron/arro3 #297">kylebarron/arro3!297</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.4.5...py-v0.4.6">github.com/kylebarron/arro3/compare/py-v0.4.5...py-v0.4.6</a></p>
+<h2 id="045-2024-12-16">[0.4.5] - 2024-12-16<a class="headerlink" href="#045-2024-12-16" title="Permanent link">&para;</a></h2>
+<h3 id="bug-fixes_6">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Build wheels for linux aarch64. <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/277" title="GitHub Pull Request: kylebarron/arro3 #277">kylebarron/arro3!277</a></li>
+</ul>
+<h2 id="044-2024-12-09">[0.4.4] - 2024-12-09<a class="headerlink" href="#044-2024-12-09" title="Permanent link">&para;</a></h2>
+<h3 id="bug-fixes_7">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Raise IndexError and KeyError for invalid column access <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/272" title="GitHub Pull Request: kylebarron/arro3 #272">kylebarron/arro3!272</a></li>
+</ul>
+<h2 id="043-2024-11-21">[0.4.3] - 2024-11-21<a class="headerlink" href="#043-2024-11-21" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_6">What's Changed<a class="headerlink" href="#whats-changed_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Build wheels for Python 3.13 by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/260" title="GitHub Pull Request: kylebarron/arro3 #260">kylebarron/arro3!260</a></li>
+<li>Raise RuntimeWarning when compiled in debug mode by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/255" title="GitHub Pull Request: kylebarron/arro3 #255">kylebarron/arro3!255</a></li>
+<li>Add <code>Buffer.to_bytes</code> by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/251" title="GitHub Pull Request: kylebarron/arro3 #251">kylebarron/arro3!251</a></li>
+<li>Make buffers have a length by @martindurant in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/252" title="GitHub Pull Request: kylebarron/arro3 #252">kylebarron/arro3!252</a></li>
+</ul>
+<h2 id="new-contributors_7">New Contributors<a class="headerlink" href="#new-contributors_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li>@martindurant made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/252" title="GitHub Pull Request: kylebarron/arro3 #252">kylebarron/arro3!252</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.4.2...py-0.4.3">github.com/kylebarron/arro3/compare/py-v0.4.2...py-0.4.3</a></p>
+<h2 id="042-2024-10-14">[0.4.2] - 2024-10-14<a class="headerlink" href="#042-2024-10-14" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_7">What's Changed<a class="headerlink" href="#whats-changed_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Ensure total numpy v2 support by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/226" title="GitHub Pull Request: kylebarron/arro3 #226">kylebarron/arro3!226</a></li>
+<li>Fix segfault when releasing buffer protocol object by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/231" title="GitHub Pull Request: kylebarron/arro3 #231">kylebarron/arro3!231</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.4.1...py-v0.4.2">github.com/kylebarron/arro3/compare/py-v0.4.1...py-v0.4.2</a></p>
+<h2 id="041-2024-10-07">[0.4.1] - 2024-10-07<a class="headerlink" href="#041-2024-10-07" title="Permanent link">&para;</a></h2>
+<h3 id="whats-changed_8">What's Changed<a class="headerlink" href="#whats-changed_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Support for string view and binary view data types (upgrade to <code>arrow</code> 53.1) by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/219" title="GitHub Pull Request: kylebarron/arro3 #219">kylebarron/arro3!219</a></li>
+<li>Fix min/max with datetimes with timezones by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/220" title="GitHub Pull Request: kylebarron/arro3 #220">kylebarron/arro3!220</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.4.0...py-v0.4.1">github.com/kylebarron/arro3/compare/py-v0.4.0...py-v0.4.1</a></p>
+<h2 id="040-2024-10-03">[0.4.0] - 2024-10-03<a class="headerlink" href="#040-2024-10-03" title="Permanent link">&para;</a></h2>
+<h3 id="enhancements">Enhancements <img alt="🪄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1fa84.svg" title=":magic_wand:" /><a class="headerlink" href="#enhancements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Zero-copy buffer protocol data import by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/204" title="GitHub Pull Request: kylebarron/arro3 #204">kylebarron/arro3!204</a></p>
+</li>
+<li>
+<p>Handle multi-dimensional buffer protocol input by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/208" title="GitHub Pull Request: kylebarron/arro3 #208">kylebarron/arro3!208</a></p>
+</li>
+<li>
+<p>Prefer zero-copy in from_numpy by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/214" title="GitHub Pull Request: kylebarron/arro3 #214">kylebarron/arro3!214</a></p>
+</li>
+<li>
+<p>New compute functions:</p>
+</li>
+<li>Add date_part by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/202" title="GitHub Pull Request: kylebarron/arro3 #202">kylebarron/arro3!202</a></li>
+<li>Aggregate functions: array min, max, sum by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/193" title="GitHub Pull Request: kylebarron/arro3 #193">kylebarron/arro3!193</a></li>
+<li>Arith functions by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/194" title="GitHub Pull Request: kylebarron/arro3 #194">kylebarron/arro3!194</a></li>
+<li>More compute functions by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/104" title="GitHub Pull Request: kylebarron/arro3 #104">kylebarron/arro3!104</a></li>
+<li>Implement scalar equality by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/205" title="GitHub Pull Request: kylebarron/arro3 #205">kylebarron/arro3!205</a></li>
+<li>Improved docstrings by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/198" title="GitHub Pull Request: kylebarron/arro3 #198">kylebarron/arro3!198</a></li>
+<li>Add installation section to readme by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/189" title="GitHub Pull Request: kylebarron/arro3 #189">kylebarron/arro3!189</a></li>
+</ul>
+<h3 id="bug-fixes_8">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix data type bit width by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/190" title="GitHub Pull Request: kylebarron/arro3 #190">kylebarron/arro3!190</a></li>
+<li>Fix return type of <code>RecordBatch.column</code> by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/191" title="GitHub Pull Request: kylebarron/arro3 #191">kylebarron/arro3!191</a></li>
+</ul>
+<h2 id="new-contributors_8">New Contributors<a class="headerlink" href="#new-contributors_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>@3ok made their first contribution in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/210" title="GitHub Pull Request: kylebarron/arro3 #210">kylebarron/arro3!210</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.3.1...py-v0.4.0">github.com/kylebarron/arro3/compare/py-v0.3.1...py-v0.4.0</a></p>
+<h2 id="031-2024-09-11">[0.3.1] - 2024-09-11<a class="headerlink" href="#031-2024-09-11" title="Permanent link">&para;</a></h2>
+<h3 id="bug-fixes_9">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Enable IPC compression by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/187" title="GitHub Pull Request: kylebarron/arro3 #187">kylebarron/arro3!187</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.3.0...py-v0.3.1">github.com/kylebarron/arro3/compare/py-v0.3.0...py-v0.3.1</a></p>
+<h2 id="030-2024-08-27">[0.3.0] - 2024-08-27<a class="headerlink" href="#030-2024-08-27" title="Permanent link">&para;</a></h2>
+<h3 id="enhancements_1">Enhancements <img alt="🪄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1fa84.svg" title=":magic_wand:" /><a class="headerlink" href="#enhancements_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Wheels for pyodide are auto-built on CI and published to Github releases.</li>
+<li>Ensure Parquet schema metadata is added to arrow table by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/137" title="GitHub Pull Request: kylebarron/arro3 #137">kylebarron/arro3!137</a></li>
+<li>Access dictionary array keys and values by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/139" title="GitHub Pull Request: kylebarron/arro3 #139">kylebarron/arro3!139</a></li>
+<li>Support reading Parquet from file objects by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/142" title="GitHub Pull Request: kylebarron/arro3 #142">kylebarron/arro3!142</a></li>
+<li>Implement dictionary encoding by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/136" title="GitHub Pull Request: kylebarron/arro3 #136">kylebarron/arro3!136</a></li>
+<li>Support for Arrow scalars and converting to Python objects by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/159" title="GitHub Pull Request: kylebarron/arro3 #159">kylebarron/arro3!159</a></li>
+<li>Move functional accessors to core module by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/151" title="GitHub Pull Request: kylebarron/arro3 #151">kylebarron/arro3!151</a></li>
+<li>Support for python buffer protocol by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/156" title="GitHub Pull Request: kylebarron/arro3 #156">kylebarron/arro3!156</a></li>
+</ul>
+<h3 id="bug-fixes_10">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix field metadata propagation by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/150" title="GitHub Pull Request: kylebarron/arro3 #150">kylebarron/arro3!150</a></li>
+<li>Set strip=true for maturin builds by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/155" title="GitHub Pull Request: kylebarron/arro3 #155">kylebarron/arro3!155</a></li>
+<li>Support <code>__getitem__</code> with a negative index by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/171" title="GitHub Pull Request: kylebarron/arro3 #171">kylebarron/arro3!171</a></li>
+<li>support f16 in from_numpy by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/154" title="GitHub Pull Request: kylebarron/arro3 #154">kylebarron/arro3!154</a></li>
+<li>Fix writing to file by @kylebarron in <a class="magiclink magiclink-github magiclink-pull" href="https://github.com/kylebarron/arro3/pull/138" title="GitHub Pull Request: kylebarron/arro3 #138">kylebarron/arro3!138</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/kylebarron/arro3/compare/py-v0.2.1...py-v0.3.0">github.com/kylebarron/arro3/compare/py-v0.2.1...py-v0.3.0</a></p>
+<h2 id="021-2024-08-13">[0.2.1] - 2024-08-13<a class="headerlink" href="#021-2024-08-13" title="Permanent link">&para;</a></h2>
+<h3 id="bug-fixes_11">Bug fixes <img alt="🐛" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" title=":bug:" /><a class="headerlink" href="#bug-fixes_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix API docs (#131)</li>
+</ul>
+<h2 id="020-2024-08-13">[0.2.0] - 2024-08-13<a class="headerlink" href="#020-2024-08-13" title="Permanent link">&para;</a></h2>
+<h3 id="enhancements_2">Enhancements <img alt="🪄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1fa84.svg" title=":magic_wand:" /><a class="headerlink" href="#enhancements_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>In general, high parity with pyarrow for most data access and management. Most of the <code>Table</code>, <code>ChunkedArray</code>, <code>Array</code>, <code>RecordBatchReader</code>, <code>Schema</code>, and <code>Field</code> methods and behavior should be similar to pyarrow.</li>
+<li>An <code>ArrayReader</code>, an abstraction beyond <code>RecordBatchReader</code> to allow a stream of arrow arrays that are not RecordBatches.</li>
+<li>Readers and writers for Parquet, Arrow IPC, CSV, and JSON.</li>
+<li>Initial compute functions.</li>
+<li>Initial Python tests.</li>
+<li>Improved documentation, both in the type stubs and in the docs website.</li>
+<li>Pyodide wheel support.</li>
+</ul>
+<h2 id="010-2024-07-01">[0.1.0] - 2024-07-01<a class="headerlink" href="#010-2024-07-01" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Initial release of arro3-core v0.1.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/kylebarron" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/kylebarron2" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant", "navigation.tracking", "search.suggest", "search.share"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
