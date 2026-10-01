@@ -124,11 +124,17 @@ class ChunkedArray:
     @property
     def num_chunks(self) -> int:
         """Number of underlying chunks."""
-    def rechunk(self, *, max_chunksize: int | None = None) -> ChunkedArray:
-        """Rechunk a ChunkedArray with a maximum number of rows per chunk.
+    def rechunk(
+        self,
+        *,
+        max_chunksize: int | None = None,
+        chunk_lengths: Sequence[int] | None = None,
+    ) -> ChunkedArray:
+        """Rechunk a ChunkedArray with a maximum number of rows per chunk, or with explicit chunk lengths.
 
         Args:
-            max_chunksize: The maximum number of rows per internal array. Defaults to None, which rechunks into a single array.
+            max_chunksize: The maximum number of rows per internal array. Defaults to None, which rechunks into a single array. Cannot be passed together with `chunk_lengths`.
+            chunk_lengths: The exact number of rows in each output chunk. Must sum to the length of the ChunkedArray. Cannot be passed together with `max_chunksize`.
 
         Returns:
             The rechunked ChunkedArray.

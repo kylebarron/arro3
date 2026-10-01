@@ -468,9 +468,22 @@ impl PyChunkedArray {
         self.chunks.len()
     }
 
-    #[pyo3(signature = (*, max_chunksize=None))]
+    #[pyo3(signature = (*, max_chunksize=None, chunk_lengths=None))]
     #[pyo3(name = "rechunk")]
-    fn rechunk_py(&self, max_chunksize: Option<usize>) -> PyArrowResult<Arro3ChunkedArray> {
+    fn rechunk_py(
+        &self,
+        max_chunksize: Option<usize>,
+        chunk_lengths: Option<Vec<usize>>,
+    ) -> PyArrowResult<Arro3ChunkedArray> {
+        if max_chunksize.is_some() && chunk_lengths.is_some() {
+            return Err(
+                PyValueError::new_err("Cannot pass both max_chunksize and chunk_lengths").into(),
+            );
+        }
+        if let Some(chunk_lengths) = chunk_lengths {
+            return Ok(self.rechunk(chunk_lengths)?.into());
+        }
+
         let max_chunksize = max_chunksize.unwrap_or(self.len());
         let mut chunk_lengths = vec![];
         let mut offset = 0;

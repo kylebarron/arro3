@@ -138,7 +138,7 @@ impl PyTable {
         let total_chunk_length = chunk_lengths.iter().sum::<usize>();
         if total_chunk_length != self.num_rows() {
             return Err(PyValueError::new_err(format!(
-                "Chunk lengths ({total_chunk_length})\
+                "Chunk lengths ({total_chunk_length}) \
                  do not add up to table length ({})",
                 self.num_rows()
             ))
@@ -593,9 +593,22 @@ impl PyTable {
             .fold(0, |acc, batch| acc + batch.num_rows())
     }
 
-    #[pyo3(signature = (*, max_chunksize=None))]
+    #[pyo3(signature = (*, max_chunksize=None, chunk_lengths=None))]
     #[pyo3(name = "rechunk")]
-    fn rechunk_py(&self, max_chunksize: Option<usize>) -> PyArrowResult<Arro3Table> {
+    fn rechunk_py(
+        &self,
+        max_chunksize: Option<usize>,
+        chunk_lengths: Option<Vec<usize>>,
+    ) -> PyArrowResult<Arro3Table> {
+        if max_chunksize.is_some() && chunk_lengths.is_some() {
+            return Err(
+                PyValueError::new_err("Cannot pass both max_chunksize and chunk_lengths").into(),
+            );
+        }
+        if let Some(chunk_lengths) = chunk_lengths {
+            return Ok(self.rechunk(chunk_lengths)?.into());
+        }
+
         let max_chunksize = max_chunksize.unwrap_or(self.num_rows());
         if max_chunksize == 0 {
             return Err(PyValueError::new_err("max_chunksize must be > 0").into());
