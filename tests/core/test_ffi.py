@@ -148,3 +148,16 @@ def test_record_batch_reader_from_batches_sized_iterable_is_lazy():
     result = reader.read_all()
     assert result.num_rows == 3
     assert len(consumed) == 1
+
+
+def test_record_batch_reader_from_batches_generator_exception_propagates():
+    """An exception raised inside the generator surfaces with its original type."""
+    table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
+
+    def batch_gen():
+        yield from table.to_batches()
+        raise ValueError("bad row")
+
+    reader = RecordBatchReader.from_batches(table.schema, batch_gen())
+    with pytest.raises(ValueError, match="bad row"):
+        reader.read_all()
