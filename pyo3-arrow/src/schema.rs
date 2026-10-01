@@ -127,10 +127,7 @@ impl PySchema {
     fn init(fields: &Bound<PyAny>, metadata: Option<MetadataInput>) -> PyResult<Self> {
         let py = fields.py();
         if fields.hasattr(intern!(py, "__arrow_c_schema__"))? {
-            // Import from any object implementing the Arrow PyCapsule Interface. This
-            // check comes first because a pyarrow Schema is also an iterable of fields,
-            // and iterating it would drop the schema-level metadata. As in pyarrow,
-            // explicitly passed metadata replaces the imported metadata.
+            // Prefer import from a PyCapsule object
             let schema = fields.extract::<PySchema>()?;
             return match metadata {
                 Some(metadata) => Ok(PySchema::new(Arc::new(
