@@ -119,15 +119,15 @@ def test_record_batch_reader_from_batches_non_iterable_raises():
 def test_record_batch_reader_from_batches_bad_sequence_element_raises_eagerly():
     """A sequence whose elements are not record batches fails at construction."""
     table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="__arrow_c_array__"):
         RecordBatchReader.from_batches(table.schema, [1, 2])  # type: ignore
 
 
 def test_record_batch_reader_from_batches_sized_iterable_is_lazy():
     """An iterable with __len__ but no __getitem__ is not materialized eagerly.
 
-    pyo3 only extracts a ``Vec`` from objects passing ``PySequence_Check``, so an
-    object that is merely iterable (even if sized) must go down the lazy path.
+    Only lists, tuples, and `collections.abc.Sequence` instances take the eager
+    path, so an object that is merely iterable (even if sized) is consumed lazily.
     """
     table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
     batches = table.to_batches()

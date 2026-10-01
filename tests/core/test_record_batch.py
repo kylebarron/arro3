@@ -120,7 +120,7 @@ def test_record_batch_from_pydict_schema():
 
 
 def test_record_batch_init_dict_schema():
-    """The schema passed to ``RecordBatch(mapping, schema=...)`` must be applied."""
+    """The schema passed to `RecordBatch(mapping, schema=...)` must be applied."""
     arr = pa.array([1, 2, 3], type=pa.int64())
     schema = pa.schema([pa.field("a", pa.int64(), nullable=False, metadata={"x": "y"})])
     rb = RecordBatch({"a": arr}, schema=schema)
