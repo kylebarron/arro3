@@ -125,3 +125,10 @@ def test_record_batch_init_dict_schema():
     schema = pa.schema([pa.field("a", pa.int64(), nullable=False, metadata={"x": "y"})])
     rb = RecordBatch({"a": arr}, schema=schema)
     assert rb.schema == schema
+
+
+def test_record_batch_from_nullable_struct_array_raises():
+    """A struct array with nulls cannot be a RecordBatch; this must be an error, not a panic."""
+    arr = pa.array([{"a": 1}, None], type=pa.struct([pa.field("a", pa.int64())]))
+    with pytest.raises(ValueError, match="null"):
+        RecordBatch.from_arrow(arr)
