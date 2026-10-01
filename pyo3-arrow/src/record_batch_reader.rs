@@ -1,8 +1,8 @@
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use std::sync::{Arc, Mutex};
 
 use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
-use arrow_schema::{ArrowError, Field, SchemaRef};
+use arrow_schema::{ArrowError, Field, Schema, SchemaRef};
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -18,6 +18,7 @@ use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
+use crate::utils::schema_equals;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
 /// Input to `from_batches`: either a sequence of record batches, which is read
@@ -52,14 +53,57 @@ impl<'a, 'py> FromPyObject<'a, 'py> for RecordBatchInput {
 }
 
 impl RecordBatchInput {
-    fn into_record_batch_reader(self, schema: SchemaRef) -> Box<dyn RecordBatchReader + Send> {
+    fn into_record_batch_reader(
+        self,
+        schema: SchemaRef,
+    ) -> PyResult<Box<dyn RecordBatchReader + Send>> {
         match self {
-            Self::Sequence(batches) => Box::new(RecordBatchIterator::new(
-                batches.into_iter().map(|batch| Ok(batch.into_inner())),
+            Self::Sequence(batches) => {
+                let batches = batches
+                    .into_iter()
+                    .map(|batch| batch.into_inner())
+                    .collect::<Vec<_>>();
+                for (index, batch) in batches.iter().enumerate() {
+                    check_batch_schema(index, batch, &schema)?;
+                }
+                Ok(Box::new(RecordBatchIterator::new(
+                    batches.into_iter().map(Ok),
+                    schema,
+                )))
+            }
+            Self::Iterator(iter) => Ok(Box::new(PyIteratorRecordBatchReader {
                 schema,
-            )),
-            Self::Iterator(iter) => Box::new(PyIteratorRecordBatchReader { schema, iter }),
+                iter,
+                index: 0,
+            })),
         }
+    }
+}
+
+/// Check that a batch's schema matches the schema declared for the reader.
+///
+/// Uses the same comparison as table construction, which matches pyarrow's
+/// `RecordBatchReader.from_batches`: names, types, and nullability must match, metadata
+/// is ignored. The error message also mirrors pyarrow's.
+fn check_batch_schema(batch_index: usize, batch: &RecordBatch, expected: &Schema) -> PyResult<()> {
+    let actual = batch.schema();
+    if schema_equals(&actual, expected) {
+        Ok(())
+    } else {
+        Err(PyValueError::new_err(format!(
+            "Schema at index {batch_index} was different:\n{}vs\n{}",
+            SchemaDisplay(actual.as_ref()),
+            SchemaDisplay(expected),
+        )))
+    }
+}
+
+/// Formats a [Schema] one field per line, for error messages.
+struct SchemaDisplay<'a>(&'a Schema);
+
+impl Display for SchemaDisplay<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        display_schema(self.0, f)
     }
 }
 
@@ -70,6 +114,8 @@ impl RecordBatchInput {
 struct PyIteratorRecordBatchReader {
     schema: SchemaRef,
     iter: Py<PyIterator>,
+    /// Number of batches pulled so far, for error messages.
+    index: usize,
 }
 
 impl Iterator for PyIteratorRecordBatchReader {
@@ -78,11 +124,16 @@ impl Iterator for PyIteratorRecordBatchReader {
     fn next(&mut self) -> Option<Self::Item> {
         Python::attach(|py| {
             let item = self.iter.bind(py).clone().next()?;
-            Some(
-                item.and_then(|obj| obj.extract::<PyRecordBatch>())
-                    .map(|batch| batch.into_inner())
-                    .map_err(|err| ArrowError::ExternalError(Box::new(err))),
-            )
+            let batch = item
+                .and_then(|obj| obj.extract::<PyRecordBatch>())
+                .map(|batch| batch.into_inner())
+                .and_then(|batch| {
+                    check_batch_schema(self.index, &batch, &self.schema)?;
+                    Ok(batch)
+                })
+                .map_err(|err| ArrowError::ExternalError(Box::new(err)));
+            self.index += 1;
+            Some(batch)
         })
     }
 }
@@ -291,8 +342,14 @@ impl PyRecordBatchReader {
     }
 
     #[classmethod]
-    fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: RecordBatchInput) -> Self {
-        Self::new(batches.into_record_batch_reader(schema.into_inner()))
+    fn from_batches(
+        _cls: &Bound<PyType>,
+        schema: PySchema,
+        batches: RecordBatchInput,
+    ) -> PyResult<Self> {
+        Ok(Self::new(
+            batches.into_record_batch_reader(schema.into_inner())?,
+        ))
     }
 
     #[classmethod]
