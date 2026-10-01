@@ -40,8 +40,10 @@ nav:
           - api/io/csv.md
           - api/io/json.md
           - api/io/parquet.md
+  - changelog.md
 
 watch:
+  - CHANGELOG.md
   - arro3-compute/python
   - arro3-core/python
   - arro3-io/python
