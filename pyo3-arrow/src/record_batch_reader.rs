@@ -3,10 +3,10 @@ use std::sync::{Arc, Mutex};
 
 use arrow_array::{ArrayRef, RecordBatch, RecordBatchIterator, RecordBatchReader, StructArray};
 use arrow_schema::{ArrowError, Field, SchemaRef};
-use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
+use pyo3::exceptions::{PyIOError, PyStopIteration, PyTypeError, PyValueError};
 use pyo3::intern;
 use pyo3::prelude::*;
-use pyo3::types::{PyCapsule, PyTuple, PyType};
+use pyo3::types::{PyCapsule, PyIterator, PySequence, PyTuple, PyType};
 use pyo3::Borrowed;
 
 use crate::error::PyArrowResult;
@@ -20,33 +20,56 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::{PyRecordBatch, PySchema, PyTable};
 
-/// Input for `from_batches`: either a sequence (extracted eagerly) or an
-/// arbitrary iterable (consumed lazily via GIL-acquiring iterator).
+/// Input to `from_batches`: either a sequence of record batches, which is read
+/// eagerly, or any other iterable, which is consumed lazily one batch at a time.
 enum RecordBatchInput {
     Sequence(Vec<PyRecordBatch>),
-    Iterator(Py<PyAny>),
+    Iterator(Py<PyIterator>),
 }
 
 impl<'a, 'py> FromPyObject<'a, 'py> for RecordBatchInput {
     type Error = PyErr;
 
     fn extract(ob: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
-        if let Ok(vec) = ob.extract::<Vec<PyRecordBatch>>() {
-            Ok(Self::Sequence(vec))
-        } else {
-            let iter = ob.call_method0(intern!(ob.py(), "__iter__"))?;
-            Ok(Self::Iterator(iter.unbind()))
+        // Only objects passing pyo3's sequence check (lists, tuples, and other
+        // `__getitem__`-based sequences) are read eagerly. Generators, iterators,
+        // and other merely-iterable objects are never materialized here.
+        //
+        // Checking for a sequence before extracting means that a sequence element
+        // that is not a record batch raises immediately, instead of the error
+        // being deferred to the first read.
+        if ob.cast::<PySequence>().is_ok() {
+            return Ok(Self::Sequence(ob.extract()?));
+        }
+        match ob.try_iter() {
+            Ok(iter) => Ok(Self::Iterator(iter.unbind())),
+            Err(_) => Err(PyTypeError::new_err(format!(
+                "Expected a sequence or iterable of record batches, got {}",
+                ob.get_type().name()?
+            ))),
         }
     }
 }
 
-/// A RecordBatchReader that lazily pulls batches from a Python iterator.
+impl RecordBatchInput {
+    fn into_record_batch_reader(self, schema: SchemaRef) -> Box<dyn RecordBatchReader + Send> {
+        match self {
+            Self::Sequence(batches) => Box::new(RecordBatchIterator::new(
+                batches.into_iter().map(|batch| Ok(batch.into_inner())),
+                schema,
+            )),
+            Self::Iterator(iter) => Box::new(PyIteratorRecordBatchReader { schema, iter }),
+        }
+    }
+}
+
+/// A [RecordBatchReader] that lazily pulls batches from a Python iterator.
 ///
-/// Each call to `next()` acquires the GIL and calls `__next__` on the
-/// underlying Python iterator.
+/// Each call to `next()` attaches to the Python interpreter and advances the
+/// underlying Python iterator by one item.
 struct PyIteratorRecordBatchReader {
     schema: SchemaRef,
-    iter: Py<PyAny>,
+    iter: Py<PyIterator>,
 }
 
 impl Iterator for PyIteratorRecordBatchReader {
@@ -54,15 +77,12 @@ impl Iterator for PyIteratorRecordBatchReader {
 
     fn next(&mut self) -> Option<Self::Item> {
         Python::attach(|py| {
-            let iter = self.iter.bind(py);
-            match iter.call_method0(intern!(py, "__next__")) {
-                Ok(obj) => match obj.extract::<PyRecordBatch>() {
-                    Ok(batch) => Some(Ok(batch.into_inner())),
-                    Err(e) => Some(Err(ArrowError::ExternalError(Box::new(e)))),
-                },
-                Err(e) if e.is_instance_of::<PyStopIteration>(py) => None,
-                Err(e) => Some(Err(ArrowError::ExternalError(Box::new(e)))),
-            }
+            let item = self.iter.bind(py).clone().next()?;
+            Some(
+                item.and_then(|obj| obj.extract::<PyRecordBatch>())
+                    .map(|batch| batch.into_inner())
+                    .map_err(|err| ArrowError::ExternalError(Box::new(err))),
+            )
         })
     }
 }
@@ -272,22 +292,7 @@ impl PyRecordBatchReader {
 
     #[classmethod]
     fn from_batches(_cls: &Bound<PyType>, schema: PySchema, batches: RecordBatchInput) -> Self {
-        let schema = schema.into_inner();
-        match batches {
-            RecordBatchInput::Sequence(vec) => {
-                let batches = vec
-                    .into_iter()
-                    .map(|batch| batch.into_inner())
-                    .collect::<Vec<_>>();
-                Self::new(Box::new(RecordBatchIterator::new(
-                    batches.into_iter().map(Ok),
-                    schema,
-                )))
-            }
-            RecordBatchInput::Iterator(iter) => {
-                Self::new(Box::new(PyIteratorRecordBatchReader { schema, iter }))
-            }
-        }
+        Self::new(batches.into_record_batch_reader(schema.into_inner()))
     }
 
     #[classmethod]

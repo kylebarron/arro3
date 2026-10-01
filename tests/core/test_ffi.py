@@ -1,4 +1,5 @@
 import pyarrow as pa
+import pytest
 from arro3.core import Array, ChunkedArray, DataType, RecordBatchReader, Schema, Table
 
 
@@ -106,3 +107,44 @@ def test_record_batch_reader_metadata_preserved():
 
     pa_reader_retour = pa.RecordBatchReader.from_stream(arro3_reader)
     assert pa_reader_retour.schema.metadata == metadata
+
+
+def test_record_batch_reader_from_batches_non_iterable_raises():
+    """A non-iterable input fails eagerly with a descriptive TypeError."""
+    table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
+    with pytest.raises(TypeError, match="sequence or iterable of record batches"):
+        RecordBatchReader.from_batches(table.schema, 123)  # type: ignore
+
+
+def test_record_batch_reader_from_batches_bad_sequence_element_raises_eagerly():
+    """A sequence whose elements are not record batches fails at construction."""
+    table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
+    with pytest.raises(Exception):
+        RecordBatchReader.from_batches(table.schema, [1, 2])  # type: ignore
+
+
+def test_record_batch_reader_from_batches_sized_iterable_is_lazy():
+    """An iterable with __len__ but no __getitem__ is not materialized eagerly.
+
+    pyo3 only extracts a ``Vec`` from objects passing ``PySequence_Check``, so an
+    object that is merely iterable (even if sized) must go down the lazy path.
+    """
+    table = Table.from_pydict({"a": pa.array([1, 2, 3], type=pa.int32())})
+    batches = table.to_batches()
+    consumed = []
+
+    class SizedIterable:
+        def __len__(self):
+            return len(batches)
+
+        def __iter__(self):
+            for batch in batches:
+                consumed.append(True)
+                yield batch
+
+    reader = RecordBatchReader.from_batches(table.schema, SizedIterable())
+    assert len(consumed) == 0
+
+    result = reader.read_all()
+    assert result.num_rows == 3
+    assert len(consumed) == 1

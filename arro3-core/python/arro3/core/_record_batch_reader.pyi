@@ -59,8 +59,9 @@ class RecordBatchReader:
 
         Args:
             schema: The schema of the Arrow batches.
-            batches: The existing batches. Can be a list, generator, or any
-                iterable. Generators are consumed lazily.
+            batches: The existing batches. Either a sequence (such as a list or
+                tuple), which is read eagerly, or any other iterable (such as a
+                generator), which is consumed lazily, one batch at a time.
         """
     @classmethod
     def from_stream(cls, data: ArrowStreamExportable) -> RecordBatchReader:
