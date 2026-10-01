@@ -307,11 +307,25 @@ class Table:
 
         Due to the definition of a table, all columns have the same number of rows.
         """
-    def rechunk(self, *, max_chunksize: int | None = None) -> Table:
-        """Rechunk a table with a maximum number of rows per chunk.
+    @overload
+    def rechunk(
+        self, *, max_chunksize: int | None = None, chunk_lengths: None = None
+    ) -> Table: ...
+    @overload
+    def rechunk(
+        self, *, max_chunksize: None = None, chunk_lengths: Sequence[int]
+    ) -> Table: ...
+    def rechunk(
+        self,
+        *,
+        max_chunksize: int | None = None,
+        chunk_lengths: Sequence[int] | None = None,
+    ) -> Table:
+        """Rechunk a table with a maximum number of rows per chunk, or with explicit chunk lengths.
 
         Args:
-            max_chunksize: The maximum number of rows per internal RecordBatch. Defaults to None, which rechunks into a single batch.
+            max_chunksize: The maximum number of rows per internal RecordBatch. Defaults to None, which rechunks into a single batch. Cannot be passed together with `chunk_lengths`.
+            chunk_lengths: The exact number of rows in each output RecordBatch. Must sum to the number of rows in the table. Cannot be passed together with `max_chunksize`.
 
         Returns:
             The rechunked table.

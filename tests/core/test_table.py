@@ -390,6 +390,23 @@ def test_rechunk():
         table.rechunk(max_chunksize=0)
 
 
+def test_rechunk_chunk_lengths():
+    """https://github.com/kylebarron/arro3/issues/192"""
+    a = pa.chunked_array([[1, 2, 3, 4]])
+    b = pa.chunked_array([["a", "b", "c", "d"]])
+    table = Table.from_pydict({"a": a, "b": b})
+
+    rechunked = table.rechunk(chunk_lengths=[1, 3])
+    assert rechunked.chunk_lengths == [1, 3]
+    assert pa.table(rechunked) == pa.table(table)
+
+    with pytest.raises(ValueError, match="do not add up"):
+        table.rechunk(chunk_lengths=[1, 1])
+
+    with pytest.raises(ValueError, match="Cannot pass both"):
+        table.rechunk(max_chunksize=2, chunk_lengths=[2, 2])
+
+
 def test_slice():
     a = pa.chunked_array([[1, 2], [3, 4]])
     b = pa.chunked_array([["a", "b"], ["c", "d"]])
