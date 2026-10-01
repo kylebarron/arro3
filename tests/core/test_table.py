@@ -542,3 +542,11 @@ def test_pyarrow_equality():
     pa_table = pa.table(table)
     assert table == pa_table
     assert pa_table == table
+
+
+def test_table_from_batches_rejects_extra_columns():
+    """A batch with more columns than the schema is not the same schema."""
+    schema = pa.schema([pa.field("a", pa.int64())])
+    batch = pa.record_batch({"a": pa.array([1, 2]), "b": pa.array([3, 4])})
+    with pytest.raises(TypeError, match="same schema"):
+        Table.from_batches([batch], schema=schema)

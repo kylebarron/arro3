@@ -162,6 +162,13 @@ def test_record_batch_reader_from_batches_generator_exception_propagates():
     with pytest.raises(ValueError, match="bad row"):
         reader.read_all()
 
+    # An error while iterating leaves the reader usable rather than permanently closed.
+    reader = RecordBatchReader.from_batches(table.schema, batch_gen())
+    with pytest.raises(ValueError, match="bad row"):
+        for _ in reader:
+            pass
+    assert not reader.closed
+
 
 def test_record_batch_reader_from_batches_generator_may_touch_reader():
     """The iterator feeding a reader can use the reader itself without deadlocking.
@@ -181,3 +188,37 @@ def test_record_batch_reader_from_batches_generator_may_touch_reader():
     reader = RecordBatchReader.from_batches(table.schema, batch_gen())
     assert reader.read_next_batch().num_rows == 3
     assert not reader.closed
+
+
+def test_record_batch_reader_from_batches_sequence_schema_mismatch_raises_eagerly():
+    """A batch whose schema differs from the declared one is rejected at construction."""
+    schema = pa.schema([pa.field("a", pa.int32())])
+    batch = pa.record_batch({"a": pa.array([1, 2], pa.int64())})
+    with pytest.raises(ValueError, match="Schema at index 0 was different"):
+        RecordBatchReader.from_batches(schema, [batch])
+
+
+def test_record_batch_reader_from_batches_iterator_schema_mismatch_raises_on_read():
+    """A lazily yielded batch whose schema differs is rejected when it is pulled."""
+    schema = pa.schema([pa.field("a", pa.int32())])
+
+    def batch_gen():
+        yield pa.record_batch({"a": pa.array([1, 2], pa.int32())})
+        yield pa.record_batch({"a": pa.array([1, 2], pa.int64())})
+
+    reader = RecordBatchReader.from_batches(schema, batch_gen())
+    with pytest.raises(ValueError, match="Schema at index 1 was different"):
+        reader.read_all()
+
+
+def test_record_batch_reader_from_batches_schema_check_ignores_metadata():
+    """Like pyarrow, schema and field metadata are not part of the comparison."""
+    schema = pa.schema(
+        [pa.field("a", pa.int32(), metadata={"f": "1"})], metadata={"k": "v"}
+    )
+    batch = pa.record_batch({"a": pa.array([1, 2], pa.int32())})
+
+    table = RecordBatchReader.from_batches(schema, [batch]).read_all()
+    assert table.schema == schema
+    table = RecordBatchReader.from_batches(schema, iter([batch])).read_all()
+    assert table.schema == schema
