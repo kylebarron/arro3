@@ -6,6 +6,7 @@ from typing import IO, Literal, Sequence
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from typing_extensions import Buffer
 
 from ._pyo3_object_store import ObjectStore
 
@@ -32,7 +33,7 @@ ParquetEncoding = Literal[
 """Allowed Parquet encodings."""
 
 def read_parquet(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | Buffer,
     *,
     batch_size: int | None = None,
 ) -> core.RecordBatchReader:

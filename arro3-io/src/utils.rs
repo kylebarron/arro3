@@ -3,15 +3,18 @@ use parquet::file::reader::{ChunkReader, Length};
 use pyo3_file::PyFileLikeObject;
 
 use pyo3::prelude::*;
+use pyo3_bytes::PyBytes;
 use std::fs::File;
-use std::io::{BufReader, Read, Seek, SeekFrom, Write};
+use std::io::{BufReader, Cursor, Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 
-/// Represents either a path `File` or a file-like object `FileLike`
+/// Represents a path `File`, a file-like object `FileLike`, or an in-memory `Buffer`
 #[derive(Debug)]
 pub enum FileReader {
     File(File),
     FileLike(PyFileLikeObject),
+    /// Any Python object supporting the buffer protocol, referenced without copying.
+    Buffer(Cursor<Bytes>),
 }
 
 impl FileReader {
@@ -19,6 +22,8 @@ impl FileReader {
         match self {
             Self::File(f) => Ok(Self::File(f.try_clone()?)),
             Self::FileLike(f) => Ok(Self::FileLike(f.clone())),
+            // `Bytes` is reference counted, so this does not copy the data.
+            Self::Buffer(c) => Ok(Self::Buffer(Cursor::new(c.get_ref().clone()))),
         }
     }
 }
@@ -31,6 +36,8 @@ impl<'py> FromPyObject<'_, 'py> for FileReader {
             Ok(Self::File(File::open(path)?))
         } else if let Ok(path) = obj.extract::<String>() {
             Ok(Self::File(File::open(path)?))
+        } else if let Ok(buffer) = obj.extract::<PyBytes>() {
+            Ok(Self::Buffer(Cursor::new(buffer.into_inner())))
         } else {
             Ok(Self::FileLike(PyFileLikeObject::py_with_requirements(
                 obj.as_any().clone(),
@@ -48,6 +55,7 @@ impl Read for FileReader {
         match self {
             Self::File(f) => f.read(buf),
             Self::FileLike(f) => f.read(buf),
+            Self::Buffer(c) => c.read(buf),
         }
     }
 }
@@ -57,6 +65,7 @@ impl Seek for FileReader {
         match self {
             Self::File(f) => f.seek(pos),
             Self::FileLike(f) => f.seek(pos),
+            Self::Buffer(c) => c.seek(pos),
         }
     }
 }
@@ -65,6 +74,7 @@ impl Length for FileReader {
     fn len(&self) -> u64 {
         match self {
             Self::File(f) => f.len(),
+            Self::Buffer(c) => c.get_ref().len() as u64,
             Self::FileLike(f) => {
                 let mut file = f.clone();
                 // Keep track of current pos
@@ -88,10 +98,27 @@ impl ChunkReader for FileReader {
     fn get_read(&self, start: u64) -> parquet::errors::Result<Self::T> {
         let mut reader = self.try_clone()?;
         reader.seek(SeekFrom::Start(start))?;
-        Ok(BufReader::new(self.try_clone()?))
+        Ok(BufReader::new(reader))
     }
 
     fn get_bytes(&self, start: u64, length: usize) -> parquet::errors::Result<Bytes> {
+        if let Self::Buffer(c) = self {
+            // Slice the underlying buffer directly instead of copying through a reader.
+            let data = c.get_ref();
+            let start = usize::try_from(start)
+                .map_err(|_| parquet::errors::ParquetError::EOF("Offset out of range".into()))?;
+            let end = start
+                .checked_add(length)
+                .filter(|end| *end <= data.len())
+                .ok_or_else(|| {
+                    parquet::errors::ParquetError::EOF(format!(
+                        "Expected to read {length} bytes at offset {start}, but buffer length is {}",
+                        data.len()
+                    ))
+                })?;
+            return Ok(data.slice(start..end));
+        }
+
         let mut buffer = Vec::with_capacity(length);
         let mut reader = self.try_clone()?;
         reader.seek(SeekFrom::Start(start))?;

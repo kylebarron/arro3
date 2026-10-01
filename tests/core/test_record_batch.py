@@ -101,3 +101,27 @@ def test_pyarrow_equality():
     # It looks like pyarrow implements custom equality for RecordBatch instead of
     # returning NotImplemented, so it doesn't support reflexive equality
     assert pa_batch != arro3_batch
+
+
+def test_record_batch_from_pydict_schema():
+    """https://github.com/kylebarron/arro3/issues/464"""
+    arr = pa.array([1, 2, 3], type=pa.int64())
+    schema = pa.schema([pa.field("a", pa.int64(), nullable=False, metadata={"x": "y"})])
+
+    rb = RecordBatch.from_pydict({"a": arr}, schema=schema)
+    assert rb.schema == schema
+    assert pa.record_batch(rb) == pa.record_batch({"a": arr}, schema=schema)
+
+    with pytest.raises(ValueError, match="Cannot pass both"):
+        RecordBatch.from_pydict({"a": arr}, schema=schema, metadata={"k": "v"})
+
+    rb = RecordBatch.from_pydict({"a": arr}, metadata={"k": "v"})
+    assert rb.schema.metadata == {b"k": b"v"}
+
+
+def test_record_batch_init_dict_schema():
+    """The schema passed to ``RecordBatch(mapping, schema=...)`` must be applied."""
+    arr = pa.array([1, 2, 3], type=pa.int64())
+    schema = pa.schema([pa.field("a", pa.int64(), nullable=False, metadata={"x": "y"})])
+    rb = RecordBatch({"a": arr}, schema=schema)
+    assert rb.schema == schema

@@ -124,8 +124,25 @@ pub(crate) fn display_schema(schema: &Schema, f: &mut std::fmt::Formatter<'_>) -
 impl PySchema {
     #[new]
     #[pyo3(signature = (fields, *, metadata=None))]
-    fn init(fields: Vec<PyField>, metadata: Option<MetadataInput>) -> PyResult<Self> {
+    fn init(fields: &Bound<PyAny>, metadata: Option<MetadataInput>) -> PyResult<Self> {
+        let py = fields.py();
+        if fields.hasattr(intern!(py, "__arrow_c_schema__"))? {
+            // Prefer import from a PyCapsule object
+            let schema = fields.extract::<PySchema>()?;
+            return match metadata {
+                Some(metadata) => Ok(PySchema::new(Arc::new(
+                    schema
+                        .0
+                        .as_ref()
+                        .clone()
+                        .with_metadata(metadata.into_string_hashmap()?),
+                ))),
+                None => Ok(schema),
+            };
+        }
+
         let fields = fields
+            .extract::<Vec<PyField>>()?
             .into_iter()
             .map(|field| field.into_inner())
             .collect::<Vec<_>>();

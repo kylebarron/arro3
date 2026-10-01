@@ -138,21 +138,41 @@ class RecordBatch:
         Returns:
             _description_
         """
+    @overload
     @classmethod
     def from_pydict(
         cls,
         mapping: dict[str, ArrayInput],
         *,
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> RecordBatch: ...
+    @overload
+    @classmethod
+    def from_pydict(
+        cls,
+        mapping: dict[str, ArrayInput],
+        *,
+        schema: ArrowSchemaExportable,
+        metadata: None = None,
+    ) -> RecordBatch: ...
+    @classmethod
+    def from_pydict(
+        cls,
+        mapping: dict[str, ArrayInput],
+        *,
+        schema: ArrowSchemaExportable | None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> RecordBatch:
-        """Construct a Table or RecordBatch from Arrow arrays or columns.
+        """Construct a RecordBatch from Arrow arrays.
 
         Args:
             mapping: A mapping of strings to Arrays.
+            schema: If not passed, will be inferred from the Mapping values. Defaults to None.
             metadata: Optional metadata for the schema (if inferred). Defaults to None.
 
         Returns:
-            _description_
+            New RecordBatch.
         """
     @classmethod
     def from_struct_array(cls, struct_array: ArrowArrayExportable) -> RecordBatch:
