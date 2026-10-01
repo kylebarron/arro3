@@ -105,6 +105,7 @@ dependencies = [
  "pyo3",
  "pyo3-arrow",
  "pyo3-async-runtimes",
+ "pyo3-bytes",
  "pyo3-file",
  "pyo3-object_store",
  "thiserror 1.0.69",
@@ -1593,6 +1594,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5e2a7d2f0d013342f295c048ad19237add5154a55b1c5a254c0ec93d4109078"
 dependencies = [
  "target-lexicon",
+]
+
+[[package]]
+name = "pyo3-bytes"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3fbca288ba42ffd1b9199fa39af7423bfd9e4418e8ac9ce23ad07fe8956504f"
+dependencies = [
+ "bytes",
+ "pyo3",
 ]
 
 [[package]]

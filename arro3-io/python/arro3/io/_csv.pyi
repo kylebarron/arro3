@@ -6,11 +6,12 @@ from typing import IO
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from typing_extensions import Buffer
 
 __all__ = ["infer_csv_schema", "read_csv", "write_csv"]
 
 def infer_csv_schema(
-    file: IO[bytes] | Path | str | bytes,
+    file: IO[bytes] | Path | str | Buffer,
     *,
     has_header: bool | None = None,
     max_records: int | None = None,
@@ -42,7 +43,7 @@ def infer_csv_schema(
     """
 
 def read_csv(
-    file: IO[bytes] | Path | str | bytes,
+    file: IO[bytes] | Path | str | Buffer,
     schema: types.ArrowSchemaExportable,
     *,
     has_header: bool | None = None,

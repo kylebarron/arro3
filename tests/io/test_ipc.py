@@ -2,7 +2,9 @@ from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import numpy as np
 import pyarrow as pa
+import pytest
 from arro3.io import read_ipc, read_ipc_stream, write_ipc, write_ipc_stream
 
 
@@ -55,16 +57,22 @@ def test_ipc_round_trip_buffer():
     assert table == table_retour
 
 
-def test_ipc_round_trip_bytes():
+@pytest.mark.parametrize(
+    "wrap",
+    [bytes, bytearray, memoryview, lambda b: np.frombuffer(b, dtype=np.uint8)],
+    ids=["bytes", "bytearray", "memoryview", "numpy"],
+)
+def test_ipc_round_trip_buffer_protocol(wrap):
+    """https://github.com/kylebarron/arro3/issues/228"""
     table = pa.table({"a": [1, 2, 3, 4]})
     bio = BytesIO()
     write_ipc(table, bio)
-    table_retour = pa.table(read_ipc(bio.getvalue()))
+    table_retour = pa.table(read_ipc(wrap(bio.getvalue())))
     assert table == table_retour
 
     bio = BytesIO()
     write_ipc_stream(table, bio)
-    table_retour = pa.table(read_ipc_stream(bio.getvalue()))
+    table_retour = pa.table(read_ipc_stream(wrap(bio.getvalue())))
     assert table == table_retour
 
 
