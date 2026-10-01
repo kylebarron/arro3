@@ -9,10 +9,18 @@ class Schema:
     """An arrow Schema."""
     def __init__(
         self,
-        fields: Sequence[ArrowSchemaExportable],
+        fields: Sequence[ArrowSchemaExportable] | ArrowSchemaExportable,
         *,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
-    ) -> None: ...
+    ) -> None:
+        """Construct a new Schema.
+
+        Args:
+            fields: Either a sequence of fields, or any object implementing
+                `__arrow_c_schema__`, such as a `pyarrow.Schema`.
+            metadata: Optional metadata for the schema. If `fields` implements
+                `__arrow_c_schema__`, this replaces its metadata. Defaults to None.
+        """
     def __arrow_c_schema__(self) -> object:
         """
         An implementation of the [Arrow PyCapsule
