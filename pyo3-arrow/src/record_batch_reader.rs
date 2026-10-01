@@ -32,9 +32,9 @@ impl<'a, 'py> FromPyObject<'a, 'py> for RecordBatchInput {
     type Error = PyErr;
 
     fn extract(ob: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
-        // Only objects passing pyo3's sequence check (lists, tuples, and other
-        // `__getitem__`-based sequences) are read eagerly. Generators, iterators,
-        // and other merely-iterable objects are never materialized here.
+        // Only lists, tuples, and objects registered as `collections.abc.Sequence`
+        // pass this cast and are read eagerly. Generators, iterators, and other
+        // merely-iterable objects are never materialized here.
         //
         // Checking for a sequence before extracting means that a sequence element
         // that is not a record batch raises immediately, instead of the error
