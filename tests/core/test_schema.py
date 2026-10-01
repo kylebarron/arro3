@@ -35,3 +35,34 @@ def test_pyarrow_equality():
     pa_schema = pa.schema(schema)
     assert schema == pa_schema
     assert pa_schema == schema
+
+
+class ArrowCSchemaExporter:
+    """An object exporting ``__arrow_c_schema__`` that is not itself iterable."""
+
+    def __init__(self, schema: pa.Schema):
+        self._schema = schema
+
+    def __arrow_c_schema__(self):
+        return self._schema.__arrow_c_schema__()
+
+
+def test_schema_init_from_arrow_c_schema():
+    """https://github.com/kylebarron/arro3/issues/435"""
+    pa_schema = pa.schema([pa.field("a", pa.int32())], metadata={"k": "v"})
+    schema = Schema(ArrowCSchemaExporter(pa_schema))
+    assert schema == pa_schema
+    assert schema.metadata == {b"k": b"v"}
+
+
+def test_schema_init_from_pyarrow_schema_preserves_metadata():
+    pa_schema = pa.schema([pa.field("a", pa.int32())], metadata={"k": "v"})
+    schema = Schema(pa_schema)
+    assert schema.metadata == {b"k": b"v"}
+
+
+def test_schema_init_from_arrow_c_schema_replaces_metadata():
+    pa_schema = pa.schema([pa.field("a", pa.int32())], metadata={"k": "v"})
+    schema = Schema(ArrowCSchemaExporter(pa_schema), metadata={"k2": "v2"})
+    expected = pa.schema(ArrowCSchemaExporter(pa_schema), metadata={"k2": "v2"})
+    assert schema.metadata == expected.metadata
