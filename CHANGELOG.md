@@ -2,7 +2,28 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
-## [0.8.3] - 2026-09-18
+## [0.9.0] - 2026-10-02
+
+### What's Changed
+
+* feat: add batch_size parameter to read_parquet by @kevinjacobs-delfi in https://github.com/kylebarron/arro3/pull/494
+* chore(python)!: remove support for python 3.9 and 3.10 by @kylebarron in https://github.com/kylebarron/arro3/pull/517
+* fix(pyo3-arrow): Support importing zero-length buffers through Python buffer protocol by @kylebarron in https://github.com/kylebarron/arro3/pull/520
+* feat(arro3-core): accept __arrow_c_schema__ objects in the Schema constructor by @kylebarron in https://github.com/kylebarron/arro3/pull/524
+* docs: add changelog page to the docs website by @kylebarron in https://github.com/kylebarron/arro3/pull/527
+* feat(pyo3-arrow): add schema parameter to RecordBatch.from_pydict by @kylebarron in https://github.com/kylebarron/arro3/pull/526
+* test: Add test for reading and writing string_view arrays to Parquet files by @kylebarron in https://github.com/kylebarron/arro3/pull/405
+* feat(io): accept buffer protocol objects as input to the reader functions by @kylebarron in https://github.com/kylebarron/arro3/pull/523
+* feat(pyo3-arrow): add chunk_lengths parameter to rechunk by @kylebarron in https://github.com/kylebarron/arro3/pull/525
+* feat: accept iterables in RecordBatchReader.from_batches by @kevinjacobs-delfi in https://github.com/kylebarron/arro3/pull/495
+
+### New Contributors
+
+* @kevinjacobs-delfi made their first contribution in https://github.com/kylebarron/arro3/pull/494
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.8.2...py-v0.9.0
+
+## ~~[0.8.3] - 2026-09-18~~ Yanked
 
 ### What's Changed
 
