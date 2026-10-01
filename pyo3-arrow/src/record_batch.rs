@@ -168,7 +168,7 @@ impl PyRecordBatch {
         if data.hasattr(intern!(py, "__arrow_c_array__"))? {
             Ok(data.extract::<PyRecordBatch>()?)
         } else if let Ok(mapping) = data.extract::<IndexMap<String, PyArray>>() {
-            Self::from_pydict(&py.get_type::<Self>(), mapping, metadata)
+            Self::from_pydict(&py.get_type::<Self>(), mapping, schema, metadata)
         } else if let Ok(arrays) = data.extract::<Vec<PyArray>>() {
             Self::from_arrays(&py.get_type::<Self>(), arrays, names, schema, metadata)
         } else {
@@ -249,23 +249,15 @@ impl PyRecordBatch {
     }
 
     #[classmethod]
-    #[pyo3(signature = (mapping, *, metadata=None))]
+    #[pyo3(signature = (mapping, *, schema=None, metadata=None))]
     fn from_pydict(
-        _cls: &Bound<PyType>,
+        cls: &Bound<PyType>,
         mapping: IndexMap<String, PyArray>,
+        schema: Option<PySchema>,
         metadata: Option<MetadataInput>,
     ) -> PyArrowResult<Self> {
-        let mut fields = vec![];
-        let mut arrays = vec![];
-        mapping.into_iter().for_each(|(name, py_array)| {
-            let (arr, field) = py_array.into_inner();
-            fields.push(field.as_ref().clone().with_name(name));
-            arrays.push(arr);
-        });
-        let schema =
-            Schema::new_with_metadata(fields, metadata.unwrap_or_default().into_string_hashmap()?);
-        let rb = RecordBatch::try_new(schema.into(), arrays)?;
-        Ok(Self::new(rb))
+        let (names, arrays): (Vec<_>, Vec<_>) = mapping.into_iter().unzip();
+        Self::from_arrays(cls, arrays, Some(names), schema, metadata)
     }
 
     #[classmethod]
