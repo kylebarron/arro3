@@ -6,9 +6,10 @@ from typing import IO
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from typing_extensions import Buffer
 
 def infer_json_schema(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | Buffer,
     *,
     max_records: int | None = None,
 ) -> core.Schema:
@@ -26,7 +27,7 @@ def infer_json_schema(
     """
 
 def read_json(
-    file: IO[bytes] | Path | str,
+    file: IO[bytes] | Path | str | Buffer,
     schema: types.ArrowSchemaExportable,
     *,
     batch_size: int | None = None,

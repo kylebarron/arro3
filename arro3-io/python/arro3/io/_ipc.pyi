@@ -6,8 +6,9 @@ from typing import IO, Literal
 # will cause Array to be included in the generated docs in this module.
 import arro3.core as core
 import arro3.core.types as types
+from typing_extensions import Buffer
 
-def read_ipc(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
+def read_ipc(file: IO[bytes] | Path | str | Buffer) -> core.RecordBatchReader:
     """Read an Arrow IPC file into memory
 
     Args:
@@ -17,7 +18,7 @@ def read_ipc(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
         An arrow RecordBatchReader.
     """
 
-def read_ipc_stream(file: IO[bytes] | Path | str) -> core.RecordBatchReader:
+def read_ipc_stream(file: IO[bytes] | Path | str | Buffer) -> core.RecordBatchReader:
     """Read an Arrow IPC stream into memory
 
     Args:

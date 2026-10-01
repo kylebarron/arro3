@@ -46,6 +46,7 @@ pyo3-arrow = { workspace = true }
 pyo3-async-runtimes = { workspace = true, features = [
     "tokio-runtime",
 ], optional = true }
+pyo3-bytes = { workspace = true }
 pyo3-file = { workspace = true }
 pyo3-object_store = { workspace = true, optional = true }
 thiserror = { workspace = true }
