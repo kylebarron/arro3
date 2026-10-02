@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_schema::{Field, FieldRef};
+use arrow_schema::{Field, FieldRef, Metadata};
 use pyo3::exceptions::PyTypeError;
 use pyo3::intern;
 use pyo3::prelude::*;
@@ -167,8 +167,8 @@ impl PyField {
     }
 
     #[getter]
-    fn metadata_str(&self) -> HashMap<String, String> {
-        self.0.metadata().clone()
+    fn metadata_str(&self) -> BTreeMap<String, String> {
+        self.0.metadata().clone().into()
     }
 
     #[getter]
@@ -186,7 +186,7 @@ impl PyField {
             self.0
                 .as_ref()
                 .clone()
-                .with_metadata(Default::default())
+                .with_metadata(Metadata::default())
                 .into(),
         )
         .into()

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.20.0] - 2026-09-16
+
+Release with pyo3 0.29 and arrow 60.
+
 ## [0.19.0] - 2026-06-15
 
 Release with pyo3 0.29 and arrow 59.
