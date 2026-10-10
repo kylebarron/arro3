@@ -59,16 +59,24 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.9.x"
+          version: "0.13.x"
 
       - name: Install Python versions
-        run: uv python install 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t 3.15t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: ${{ matrix.platform.manylinux }}
+
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
@@ -113,16 +121,24 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.9.x"
+          version: "0.13.x"
 
       - name: Install Python versions
-        run: uv python install 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t 3.15t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: musllinux_1_2
+
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: musllinux_1_2
 
@@ -164,12 +180,20 @@ jobs:
           python-version: |
             3.11
             3.14t
+            3.15t
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Build version-specific wheels
@@ -208,16 +232,23 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          version: "0.9.x"
+          version: "0.13.x"
 
       - name: Install Python versions
-        run: uv python install 3.11 3.14t pypy3.11
+        run: uv python install 3.11 3.14t 3.15t pypy3.11
 
       - name: Build abi3-py311 wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Build version-specific wheels
