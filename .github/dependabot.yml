@@ -1,0 +1,80 @@
+version: 2
+updates:
+  # arro3-* workspace
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # arrow-rs crates must be upgraded in lockstep
+      arrow-rs:
+        patterns:
+          - "arrow*"
+          - "parquet"
+      pyo3:
+        patterns:
+          - "pyo3*"
+          - "numpy"
+      other:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "arrow*"
+          - "parquet"
+          - "pyo3*"
+          - "numpy"
+
+  # pyo3-arrow is excluded from the workspace and has its own lockfile
+  - package-ecosystem: cargo
+    directory: "/pyo3-arrow"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      arrow-rs:
+        patterns:
+          - "arrow*"
+      pyo3:
+        patterns:
+          - "pyo3*"
+          - "numpy"
+      other:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "arrow*"
+          - "pyo3*"
+          - "numpy"
+
+  # Python dev environment
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      python:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"
