@@ -45,7 +45,12 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Cache per Python version. maturin (as of 1.15) gives 3.14 and 3.14t the
+      # same PYO3_ENVIRONMENT_SIGNATURE, so pyo3's build script doesn't rerun
+      # and a shared cache can link a GIL build against a free-threaded config.
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.python-version }}
 
       - name: Install a specific version of uv
         uses: astral-sh/setup-uv@v7
