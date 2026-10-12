@@ -19,7 +19,7 @@ jobs:
       run:
         working-directory: ${{ matrix.working-directory }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: "recursive"
 
@@ -54,7 +54,7 @@ jobs:
         args:
           - "--no-default-features"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: "recursive"
       - uses: dtolnay/rust-toolchain@stable
