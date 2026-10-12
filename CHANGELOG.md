@@ -2,6 +2,16 @@
 
 This is the changelog for arro3. pyo3-arrow has a separate changelog.
 
+## [0.9.1] - 2026-10-12
+
+### What's Changed
+
+* ci: Build version-specific wheels for free-threaded Python 3.15 by @kylebarron in https://github.com/kylebarron/arro3/pull/533
+* ci: Key the Python test job's Rust cache by Python version by @kylebarron in https://github.com/kylebarron/arro3/pull/534
+* ci: add dependabot config by @kylebarron in https://github.com/kylebarron/arro3/pull/531
+
+**Full Changelog**: https://github.com/kylebarron/arro3/compare/py-v0.9.0...py-v0.9.1
+
 ## [0.9.0] - 2026-10-02
 
 ### What's Changed
