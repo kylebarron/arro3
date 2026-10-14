@@ -154,7 +154,8 @@ class DataType:
 
         Args:
             unit: one of `'s'` [second], `'ms'` [millisecond], `'us'` [microsecond], or `'ns'` [nanosecond]
-            tz: Time zone name. None indicates time zone naive. Defaults to None.
+            tz: Time zone name. None indicates time zone naive. Defaults to None. Supported
+                values are IANA time-zones, see `pytz.all_timezones` for a list of supported values.
 
         Returns:
             _description_
