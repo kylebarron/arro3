@@ -20,21 +20,21 @@ categories = []
 rust-version = "1.75"
 
 [workspace.dependencies]
-arrow-arith = "59"
-arrow-array = { version = "59", features = ["ffi"] }
-arrow-buffer = "59"
-arrow-cast = "59"
-arrow-csv = "59"
-arrow-ipc = { version = "59", features = ["lz4", "zstd"] }
-arrow-json = "59"
-arrow-schema = "59"
-arrow-select = "59"
+arrow-arith = "60"
+arrow-array = { version = "60", features = ["ffi"] }
+arrow-buffer = "60"
+arrow-cast = "60"
+arrow-csv = "60"
+arrow-ipc = { version = "60", features = ["lz4", "zstd"] }
+arrow-json = "60"
+arrow-schema = "60"
+arrow-select = "60"
 bytes = "1.7.0"
 half = "2"
 indexmap = "2.11"
 numpy = "0.29"
 object_store = "0.13"
-parquet = "59"
+parquet = "60"
 pyo3 = { version = "0.29", features = ["macros", "indexmap"] }
 # pyo3-arrow = { path = "pyo3-arrow" }
 pyo3-arrow = { git = "https://github.com/kylebarron/arro3", rev = "5475f33de206435029f2069773666e0d2c52b2b4" }
