@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## [0.20.0] - 2026-10-15
+
+Release with pyo3 0.30 and arrow 59.
+
+### Bug Fixes
+
+- Support importing zero-length buffers through the Python buffer protocol (#520)
+
+### Other
+
+- Bump pyo3 and numpy to 0.30 (#544)
+
 ## [0.19.0] - 2026-06-15
 
 Release with pyo3 0.29 and arrow 59.
