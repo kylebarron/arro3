@@ -6,14 +6,7 @@
 
 Release with pyo3 0.30 and arrow 59.
 
-### New Features :sparkles:
-
-- Accept iterables in `RecordBatchReader.from_batches` (#495)
-- Accept `__arrow_c_schema__` objects in the `Schema` constructor (#524)
-- Add `chunk_lengths` parameter to `rechunk` (#525)
-- Add `schema` parameter to `RecordBatch.from_pydict` (#526)
-
-### Bug Fixes :bug:
+### Bug Fixes
 
 - Support importing zero-length buffers through the Python buffer protocol (#520)
 
