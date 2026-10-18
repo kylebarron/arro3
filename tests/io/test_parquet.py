@@ -43,6 +43,18 @@ def test_parquet_round_trip_buffer_protocol(wrap):
     assert table == table_retour
 
 
+def test_parquet_writable_buffer_input_is_copied():
+    table = pa.table(
+        {"a": pa.array([f"value-{i:020d}" for i in range(100)], pa.string_view())}
+    )
+    bio = BytesIO()
+    pq.write_table(table, bio, compression="none", use_dictionary=False)
+    buf = bytearray(bio.getvalue())
+    table_retour = pa.table(read_parquet(buf))
+    memoryview(buf)[:] = bytes(len(buf))
+    assert table == table_retour
+
+
 def test_copy_parquet_kv_metadata():
     metadata = {"hello": "world"}
     table = pa.table({"a": [1, 2, 3]})

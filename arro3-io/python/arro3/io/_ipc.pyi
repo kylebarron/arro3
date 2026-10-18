@@ -9,7 +9,11 @@ import arro3.core.types as types
 from typing_extensions import Buffer
 
 def read_ipc(file: IO[bytes] | Path | str | Buffer) -> core.RecordBatchReader:
-    """Read an Arrow IPC file into memory
+    """Read an Arrow IPC file
+
+    Uncompressed data in a read-only buffer, such as `bytes` or an `mmap.mmap` opened
+    with `access=mmap.ACCESS_READ`, is not copied: the batches reference the buffer, so
+    it must not change while they are alive. A writable buffer is read like a file.
 
     Args:
         file: The input Arrow IPC file path or buffer.
@@ -19,7 +23,11 @@ def read_ipc(file: IO[bytes] | Path | str | Buffer) -> core.RecordBatchReader:
     """
 
 def read_ipc_stream(file: IO[bytes] | Path | str | Buffer) -> core.RecordBatchReader:
-    """Read an Arrow IPC stream into memory
+    """Read an Arrow IPC stream
+
+    Uncompressed data in a read-only buffer, such as `bytes` or an `mmap.mmap` opened
+    with `access=mmap.ACCESS_READ`, is not copied: the batches reference the buffer, so
+    it must not change while they are alive. A writable buffer is read like a file.
 
     Args:
         file: The input Arrow IPC stream path or buffer.
