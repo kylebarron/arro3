@@ -40,7 +40,7 @@ def write_ipc(
     data: types.ArrowStreamExportable | types.ArrowArrayExportable,
     file: IO[bytes] | Path | str,
     *,
-    compression: Literal["LZ4", "lz4", "ZSTD", "zstd"] | None = None,
+    compression: Literal["LZ4", "lz4", "ZSTD", "zstd"] | None = "LZ4",
 ) -> None:
     """Write Arrow data to an Arrow IPC file
 
@@ -49,14 +49,14 @@ def write_ipc(
         file: the output file or buffer to write to
 
     Other Args:
-        compression: Compression to apply to file.
+        compression: Compression to apply to file. Pass `None` to write uncompressed.
     """
 
 def write_ipc_stream(
     data: types.ArrowStreamExportable | types.ArrowArrayExportable,
     file: IO[bytes] | Path | str,
     *,
-    compression: Literal["LZ4", "lz4", "ZSTD", "zstd"] | None = None,
+    compression: Literal["LZ4", "lz4", "ZSTD", "zstd"] | None = "LZ4",
 ) -> None:
     """Write Arrow data to an Arrow IPC stream
 
@@ -65,5 +65,5 @@ def write_ipc_stream(
         file: the output file or buffer to write to
 
     Other Args:
-        compression: Compression to apply to file.
+        compression: Compression to apply to file. Pass `None` to write uncompressed.
     """
