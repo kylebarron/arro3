@@ -480,7 +480,6 @@ dev = [
     { name = "pre-commit" },
     { name = "pyarrow" },
     { name = "pytest" },
-    { name = "pytest-freethreaded", marker = "python_full_version >= '3.13'" },
     { name = "ruff" },
 ]
 docs = [
@@ -491,6 +490,9 @@ docs = [
     { name = "mkdocs-material", extra = ["imaging"] },
     { name = "mkdocs-redirects" },
     { name = "mkdocstrings", extra = ["python"] },
+]
+freethreaded = [
+    { name = "pytest-freethreaded", marker = "python_full_version >= '3.13'" },
 ]
 pyodide = [
     { name = "pyodide-build", marker = "python_full_version >= '3.12'" },
@@ -510,7 +512,6 @@ dev = [
     { name = "pre-commit", specifier = ">=4.3.0" },
     { name = "pyarrow", specifier = ">=21.0.0" },
     { name = "pytest", specifier = ">=8.3.3" },
-    { name = "pytest-freethreaded", marker = "python_full_version >= '3.13'", specifier = ">=0.1.0" },
     { name = "ruff", specifier = ">=0.15.2" },
 ]
 docs = [
@@ -522,6 +523,7 @@ docs = [
     { name = "mkdocs-redirects", specifier = ">=1.2.2" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.28.3" },
 ]
+freethreaded = [{ name = "pytest-freethreaded", marker = "python_full_version >= '3.13'", specifier = ">=0.1.0" }]
 pyodide = [{ name = "pyodide-build", marker = "python_full_version >= '3.12'", specifier = ">=0.39.0" }]
 
 [[package]]

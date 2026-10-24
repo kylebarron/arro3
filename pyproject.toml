@@ -19,7 +19,6 @@ dev-dependencies = [
     "pip>=24.2",
     "pyarrow>=21.0.0",
     "pytest>=8.3.3",
-    "pytest-freethreaded>=0.1.0;python_version>='3.13'",
     "pre-commit>=4.3.0",
     "ruff>=0.15.2",
 ]
@@ -43,6 +42,11 @@ select = [
 
 [dependency-groups]
 pyodide = ["pyodide-build>=0.39.0 ; python_version >= '3.12'"]
+
+# pytest-freethreaded runs every test many times on a thread pool whenever it is
+# installed, whether or not the GIL is disabled. Keep it out of the default dev
+# environment and only install it for the free-threaded test run.
+freethreaded = ["pytest-freethreaded>=0.1.0 ; python_version >= '3.13'"]
 
 # This is separate from dev deps because mkdocs-material[imaging] doesn't
 # support Python 3.13 free-threaded
