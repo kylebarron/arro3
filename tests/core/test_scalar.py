@@ -52,6 +52,26 @@ def test_as_py():
     assert fixed_list_arr[1].as_py() == [3, 4]
 
 
+def test_as_py_month_day_nano_interval():
+    pa_arr = pa.array(
+        [
+            pa.MonthDayNano([1, 2, 3]),
+            pa.MonthDayNano([-1, -2, -3_000_000_000]),
+            None,
+        ],
+        type=pa.month_day_nano_interval(),
+    )
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr.type == DataType.month_day_nano_interval()
+
+    assert arro3_arr[0].as_py() == (1, 2, 3)
+    assert arro3_arr[1].as_py() == (-1, -2, -3_000_000_000)
+    assert arro3_arr[2].as_py() is None
+
+    for i in range(len(pa_arr)):
+        assert arro3_arr[i].as_py() == pa_arr[i].as_py()
+
+
 time_units = ["s", "ms", "us", "ns"]
 
 

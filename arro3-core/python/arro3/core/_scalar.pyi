@@ -59,7 +59,15 @@ class Scalar:
     def from_arrow_pycapsule(cls, schema_capsule, array_capsule) -> Scalar:
         """Construct this object from bare Arrow PyCapsules"""
     def as_py(self) -> Any:
-        """Convert this scalar to a pure-Python object."""
+        """Convert this scalar to a pure-Python object.
+
+        Interval scalars are converted to plain Python values that hold each
+        component of the interval:
+
+        - `month_day_nano` intervals become a `(months, days, nanoseconds)` tuple.
+        - `day_time` intervals become a `(days, milliseconds)` tuple.
+        - `year_month` intervals become an `int` number of months.
+        """
     def cast(self, target_type: ArrowSchemaExportable) -> Scalar:
         """Cast scalar to another data type
 

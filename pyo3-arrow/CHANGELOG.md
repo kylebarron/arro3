@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Convert interval scalars to Python objects in `PyScalar::as_py` instead of panicking
+
 ## [0.20.0] - 2026-10-15
 
 Release with pyo3 0.30 and arrow 59.
