@@ -25,7 +25,7 @@ pub struct ArrowArrayStreamReader {
 fn get_stream_schema(stream_ptr: *mut FFI_ArrowArrayStream) -> Result<FieldRef, ArrowError> {
     let mut schema = FFI_ArrowSchema::empty();
 
-    let ret_code = unsafe { (*stream_ptr).get_schema.unwrap()(stream_ptr, &mut schema) };
+    let ret_code = unsafe { (*stream_ptr).get_schema().unwrap()(stream_ptr, &mut schema) };
 
     if ret_code == 0 {
         let field = Field::try_from(&schema)?;
@@ -42,7 +42,7 @@ impl ArrowArrayStreamReader {
     /// This is used to import from the C Stream Interface.
     #[allow(dead_code)]
     pub fn try_new(mut stream: FFI_ArrowArrayStream) -> Result<Self, ArrowError> {
-        if stream.release.is_none() {
+        if stream.release().is_none() {
             return Err(ArrowError::CDataInterface(
                 "input stream is already released".to_string(),
             ));
@@ -59,7 +59,7 @@ impl ArrowArrayStreamReader {
 
     /// Get the last error from `ArrowArrayStreamReader`
     fn get_stream_last_error(&mut self) -> Option<String> {
-        let get_last_error = self.stream.get_last_error?;
+        let get_last_error = self.stream.get_last_error()?;
 
         let error_str = unsafe { get_last_error(&mut self.stream) };
         if error_str.is_null() {
@@ -77,7 +77,7 @@ impl Iterator for ArrowArrayStreamReader {
     fn next(&mut self) -> Option<Self::Item> {
         let mut array = FFI_ArrowArray::empty();
 
-        let ret_code = unsafe { self.stream.get_next.unwrap()(&mut self.stream, &mut array) };
+        let ret_code = unsafe { self.stream.get_next().unwrap()(&mut self.stream, &mut array) };
 
         if ret_code == 0 {
             // The end of stream has been reached
