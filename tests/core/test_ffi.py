@@ -170,6 +170,19 @@ def test_record_batch_reader_from_batches_generator_exception_propagates():
     assert not reader.closed
 
 
+def test_chunked_array_import_error_from_c_stream_producer():
+    """A C stream producer's mid-stream error surfaces with its message on import."""
+    schema = pa.schema([pa.field("a", pa.int32())])
+
+    def batch_gen():
+        yield pa.record_batch({"a": pa.array([1, 2], pa.int32())})
+        raise ValueError("bad row")
+
+    pa_reader = pa.RecordBatchReader.from_batches(schema, batch_gen())
+    with pytest.raises(Exception, match="bad row"):
+        ChunkedArray.from_arrow(pa_reader)
+
+
 def test_record_batch_reader_from_batches_generator_may_touch_reader():
     """The iterator feeding a reader can use the reader itself without deadlocking.
 

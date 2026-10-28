@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use arrow_array::cast::AsArray;
+use arrow_array::ArrayIterator;
 use arrow_array::{ArrayRef, Int32Array, Int64Array, OffsetSizeTrait};
 use arrow_buffer::{OffsetBuffer, ScalarBuffer};
 use arrow_schema::{ArrowError, DataType, Field};
@@ -8,7 +9,6 @@ use pyo3::prelude::*;
 use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
-use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::PyArrayReader;
 
@@ -88,7 +88,7 @@ fn slice_offsets<O: OffsetSizeTrait>(
     length: usize,
 ) -> ScalarBuffer<O> {
     let sliced = offsets.slice(offset, length);
-    let first_offset = sliced.first().copied().unwrap_or(O::zero());
+    let first_offset = sliced.first();
     if first_offset.to_usize().unwrap() == 0 {
         sliced.into_inner()
     } else {

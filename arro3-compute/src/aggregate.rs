@@ -28,7 +28,7 @@ pub fn max(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
-            let field = reader.field();
+            let field = reader.field().clone();
 
             // Call max_array on each array in stream
             let mut intermediate_outputs = vec![];
@@ -123,7 +123,7 @@ pub fn min(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
-            let field = reader.field();
+            let field = reader.field().clone();
 
             // Call min_array on each array in stream
             let mut intermediate_outputs = vec![];
@@ -218,7 +218,7 @@ pub fn sum(input: AnyArray) -> PyArrowResult<Arro3Scalar> {
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
-            let field = reader.field();
+            let field = reader.field().clone();
 
             // Call sum_array on each array in stream
             let mut intermediate_outputs = vec![];

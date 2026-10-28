@@ -12,7 +12,6 @@ use pyo3::Borrowed;
 use crate::error::PyArrowResult;
 use crate::export::{Arro3RecordBatch, Arro3Schema, Arro3Table};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
-use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
@@ -20,6 +19,7 @@ use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::utils::schema_equals;
 use crate::{PyRecordBatch, PySchema, PyTable};
+use arrow_array::ArrayIterator;
 
 /// Input to `from_batches`: either a sequence of record batches, which is read
 /// eagerly, or any other iterable, which is consumed lazily one batch at a time.
@@ -164,7 +164,7 @@ impl PyRecordBatchReader {
     /// Construct from a raw Arrow C Stream capsule
     pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = arrow_array::ffi_stream::ArrowArrayStreamReader::try_new(stream)
+        let stream_reader = arrow_array::ffi_stream::RecordBatchStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
         Ok(Self::new(Box::new(stream_reader)))
