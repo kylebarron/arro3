@@ -4,7 +4,7 @@
 
 ### New Features
 
-- Convert interval scalars to Python objects in `PyScalar::as_py` instead of panicking
+- Convert interval scalars to Python objects in `PyScalar::as_py` instead of panicking (#549)
 
 ## [0.20.0] - 2026-10-15
 

@@ -52,12 +52,6 @@ def test_as_py():
     assert fixed_list_arr[1].as_py() == [3, 4]
 
 
-@pytest.mark.skip(
-    reason=(
-        "arro3 pins pyo3-arrow to git rev 5475f33 until the workspace moves to "
-        "pyo3 0.30, so the interval as_py change isn't in the built wheel yet"
-    )
-)
 def test_as_py_month_day_nano_interval():
     pa_arr = pa.array(
         [
