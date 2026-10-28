@@ -104,9 +104,9 @@ You can use the helper functions `to_array_pycapsules`, `to_schema_pycapsule`, a
 To export stream data, add a method to your class with the following signature:
 
 ```rs
-use arrow_array::ArrayRef;
+use arrow_array::{ArrayIterator, ArrayRef};
 use arrow_schema::FieldRef;
-use pyo3_arrow::ffi::{to_stream_pycapsule, ArrayIterator};
+use pyo3_arrow::ffi::to_stream_pycapsule;
 use pyo3::types::PyCapsule;
 
 fn __arrow_c_stream__<'py>(

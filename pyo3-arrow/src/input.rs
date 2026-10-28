@@ -14,10 +14,10 @@ use pyo3::prelude::*;
 
 use crate::array_reader::PyArrayReader;
 use crate::error::PyArrowResult;
-use crate::ffi::{ArrayIterator, ArrayReader};
 use crate::{
     PyArray, PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PyScalar, PyTable,
 };
+use arrow_array::{ArrayIterator, ArrayReader};
 
 /// An enum over [PyRecordBatch] and [PyRecordBatchReader], used when a function accepts either
 /// Arrow object as input.

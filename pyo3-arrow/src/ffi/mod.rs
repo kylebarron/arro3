@@ -3,5 +3,4 @@
 pub(crate) mod from_python;
 pub(crate) mod to_python;
 
-pub use arrow_array::{ArrayIterator, ArrayReader};
 pub use to_python::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule};

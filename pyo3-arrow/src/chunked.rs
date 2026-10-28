@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use arrow_array::ffi_stream::ArrayStreamReader;
-use arrow_array::{Array, ArrayReader, ArrayRef};
+use arrow_array::{Array, ArrayIterator, ArrayReader, ArrayRef};
 use arrow_cast::cast;
 use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
@@ -18,7 +18,6 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
-use crate::ffi::ArrayIterator;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::utils::default_repr_options;

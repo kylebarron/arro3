@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::sync::Mutex;
 
 use arrow_array::ffi_stream::ArrayStreamReader;
+use arrow_array::{ArrayIterator, ArrayReader};
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
@@ -13,7 +14,7 @@ use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3Field};
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
-use crate::ffi::{to_schema_pycapsule, ArrayIterator, ArrayReader};
+use crate::ffi::to_schema_pycapsule;
 use crate::input::AnyArray;
 use crate::{PyArray, PyChunkedArray, PyField};
 

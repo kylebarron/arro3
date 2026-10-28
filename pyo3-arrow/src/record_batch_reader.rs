@@ -15,11 +15,11 @@ use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
-use crate::ffi::ArrayIterator;
 use crate::input::AnyRecordBatch;
 use crate::schema::display_schema;
 use crate::utils::schema_equals;
 use crate::{PyRecordBatch, PySchema, PyTable};
+use arrow_array::ArrayIterator;
 
 /// Input to `from_batches`: either a sequence of record batches, which is read
 /// eagerly, or any other iterable, which is consumed lazily one batch at a time.

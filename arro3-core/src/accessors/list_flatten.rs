@@ -1,11 +1,11 @@
 use arrow_array::cast::AsArray;
+use arrow_array::ArrayIterator;
 use arrow_array::ArrayRef;
 use arrow_schema::{ArrowError, DataType, FieldRef};
 use pyo3::prelude::*;
 use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
-use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::{PyArray, PyArrayReader};
 
