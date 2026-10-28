@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -7,7 +8,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 from arro3.core import Array, DataType, Table
-from arro3.io import read_parquet, write_parquet
+from arro3.io import read_parquet, read_parquet_async, write_parquet
+from arro3.io.store import LocalStore
 
 
 def test_parquet_round_trip():
@@ -68,6 +70,24 @@ def test_copy_parquet_kv_metadata():
 
         reader = read_parquet(pq_path)
         assert reader.schema.metadata[b"hello"] == b"world"
+
+
+async def _read_parquet_async(path, store):
+    # `read_parquet_async` needs a running event loop when it's called.
+    return await read_parquet_async(path, store=store)
+
+
+def test_read_parquet_async():
+    table = pa.table(
+        {"a": [1, 2, 3, 4], "b": ["w", "x", "y", "z"]}, metadata={"hello": "world"}
+    )
+    # We can't use tmp_path fixture with pytest-freethreading
+    with TemporaryDirectory() as tmp_path:
+        tmp_path = Path(tmp_path)
+        write_parquet(table, tmp_path / "test.parquet")
+        store = LocalStore(tmp_path)
+        table_retour = pa.table(asyncio.run(_read_parquet_async("test.parquet", store)))
+        assert table_retour.equals(table, check_metadata=True)
 
 
 def test_read_parquet_batch_size():

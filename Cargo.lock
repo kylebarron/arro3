@@ -1595,7 +1595,6 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
- "object_store",
  "seq-macro",
  "simdutf8",
  "snap",
