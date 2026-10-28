@@ -1,9 +1,9 @@
+use arrow_array::ArrayIterator;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::IntoPyObjectExt;
 use pyo3_arrow::error::PyArrowResult;
 use pyo3_arrow::export::{Arro3Array, Arro3ArrayReader};
-use pyo3_arrow::ffi::ArrayIterator;
 use pyo3_arrow::input::AnyArray;
 use pyo3_arrow::{PyArrayReader, PyDataType, PyField};
 

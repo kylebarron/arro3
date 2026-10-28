@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_array::ffi_stream::ArrowArrayStreamReader as ArrowRecordBatchStreamReader;
+use arrow_array::ffi_stream::RecordBatchStreamReader;
 use arrow_array::{ArrayRef, RecordBatchReader, StructArray};
 use arrow_array::{RecordBatch, RecordBatchIterator};
 use arrow_cast::pretty::pretty_format_batches_with_options;
@@ -20,7 +20,6 @@ use crate::export::{
     Arro3Table,
 };
 use crate::ffi::from_python::utils::import_stream_pycapsule;
-use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
@@ -29,6 +28,7 @@ use crate::input::{
 };
 use crate::utils::{default_repr_options, schema_equals};
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
+use arrow_array::ArrayIterator;
 
 /// A Python-facing Arrow table.
 ///
@@ -56,7 +56,7 @@ impl PyTable {
     /// Construct from a raw Arrow C Stream capsule
     pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = ArrowRecordBatchStreamReader::try_new(stream)
+        let stream_reader = RecordBatchStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
         let schema = stream_reader.schema();
 
