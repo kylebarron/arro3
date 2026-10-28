@@ -15,7 +15,7 @@ use arrow_array::ffi_stream::FFI_ArrowArrayStream;
 use arrow_array::Array;
 use arrow_schema::ArrowError;
 
-use crate::ffi::to_python::chunked::ArrayReader;
+use crate::ffi::ArrayReader;
 
 const ENOMEM: i32 = 12;
 const EIO: i32 = 5;

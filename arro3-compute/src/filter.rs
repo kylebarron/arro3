@@ -41,7 +41,7 @@ pub fn filter<'py>(
                 return Err(PyValueError::new_err("Expected boolean array for predicate").into());
             }
 
-            let values_field = values.field();
+            let values_field = values.field().clone();
 
             let iter = values
                 .into_iter()

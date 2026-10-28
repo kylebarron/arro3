@@ -75,7 +75,7 @@ impl AnyArray {
     /// All arrays from the stream will be materialized in memory.
     pub fn into_chunked_array(self) -> PyArrowResult<PyChunkedArray> {
         let reader = self.into_reader()?;
-        let field = reader.field();
+        let field = reader.field().clone();
         let chunks = reader.collect::<Result<_, ArrowError>>()?;
         Ok(PyChunkedArray::try_new(chunks, field)?)
     }

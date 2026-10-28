@@ -1,7 +1,8 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use arrow_array::{Array, ArrayRef};
+use arrow_array::ffi_stream::ArrayStreamReader;
+use arrow_array::{Array, ArrayReader, ArrayRef};
 use arrow_cast::cast;
 use arrow_cast::display::ArrayFormatter;
 use arrow_schema::{ArrowError, DataType, Field, FieldRef};
@@ -13,12 +14,11 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::{PyArrowError, PyArrowResult};
 use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3DataType, Arro3Field};
-use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
-use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
+use crate::ffi::ArrayIterator;
 use crate::input::AnyArray;
 use crate::interop::numpy::to_numpy::chunked_to_numpy;
 use crate::utils::default_repr_options;
@@ -77,10 +77,10 @@ impl PyChunkedArray {
     pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
 
-        let stream_reader = ArrowArrayStreamReader::try_new(stream)
+        let stream_reader = ArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
-        let field = stream_reader.field();
+        let field = stream_reader.field().clone();
 
         let mut chunks = vec![];
         for array in stream_reader {

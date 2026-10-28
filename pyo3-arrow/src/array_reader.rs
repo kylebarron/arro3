@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::sync::Mutex;
 
+use arrow_array::ffi_stream::ArrayStreamReader;
 use arrow_schema::FieldRef;
 use pyo3::exceptions::{PyIOError, PyStopIteration, PyValueError};
 use pyo3::intern;
@@ -9,7 +10,6 @@ use pyo3::types::{PyCapsule, PyTuple, PyType};
 
 use crate::error::PyArrowResult;
 use crate::export::{Arro3Array, Arro3ChunkedArray, Arro3Field};
-use crate::ffi::from_python::ffi_stream::ArrowArrayStreamReader;
 use crate::ffi::from_python::utils::import_stream_pycapsule;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
@@ -32,7 +32,7 @@ impl PyArrayReader {
     /// Import from a raw Arrow C Stream capsule
     pub fn from_arrow_pycapsule(capsule: &Bound<PyCapsule>) -> PyResult<Self> {
         let stream = import_stream_pycapsule(capsule)?;
-        let stream_reader = ArrowArrayStreamReader::try_new(stream)
+        let stream_reader = ArrayStreamReader::try_new(stream)
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
         Ok(Self::new(Box::new(stream_reader)))
     }
@@ -70,7 +70,7 @@ impl PyArrayReader {
             .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot write from closed stream."))?;
-        let field = stream.field();
+        let field = stream.field().clone();
         let mut arrays = vec![];
         for array in stream {
             arrays.push(array?);
@@ -86,7 +86,7 @@ impl PyArrayReader {
         let stream = inner
             .as_ref()
             .ok_or(PyIOError::new_err("Stream already closed."))?;
-        Ok(stream.field())
+        Ok(stream.field().clone())
     }
 
     /// Export this to a Python `arro3.core.ArrayReader`.
@@ -228,7 +228,7 @@ impl PyArrayReader {
             .unwrap()
             .take()
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
-        let field = stream.field();
+        let field = stream.field().clone();
         let mut arrays = vec![];
         for array in stream {
             arrays.push(array?);
@@ -243,7 +243,7 @@ impl PyArrayReader {
             .ok_or(PyIOError::new_err("Cannot read from closed stream."))?;
 
         if let Some(next_batch) = stream.next() {
-            Ok(PyArray::new(next_batch?, stream.field()).into())
+            Ok(PyArray::new(next_batch?, stream.field().clone()).into())
         } else {
             Err(PyStopIteration::new_err("").into())
         }

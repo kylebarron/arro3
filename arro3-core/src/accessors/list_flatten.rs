@@ -21,7 +21,7 @@ pub fn list_flatten<'py>(py: Python<'py>, input: AnyArray) -> PyArrowResult<Boun
         }
         AnyArray::Stream(stream) => {
             let reader = stream.into_reader()?;
-            let flatten_field = flatten_field(reader.field())?;
+            let flatten_field = flatten_field(reader.field().clone())?;
 
             let iter = reader.into_iter().map(move |array| {
                 let out = flatten_array(array?)?;
