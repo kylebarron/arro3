@@ -4,6 +4,8 @@ mod csv;
 mod error;
 mod ipc;
 mod json;
+#[cfg(feature = "async")]
+mod object_store_reader;
 mod parquet;
 mod utils;
 

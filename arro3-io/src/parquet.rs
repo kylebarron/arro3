@@ -68,18 +68,16 @@ pub fn read_parquet_async<'py>(
 }
 
 #[cfg(feature = "async")]
-// `ParquetObjectReader` is deprecated in favor of implementing `AsyncFileReader` directly:
-// https://github.com/apache/arrow-rs/issues/10308
-#[allow(deprecated)]
 async fn read_parquet_async_inner(
     store: Arc<dyn object_store::ObjectStore>,
     path: String,
 ) -> crate::error::Arro3IoResult<pyo3_arrow::PyTable> {
     use futures::TryStreamExt;
-    use parquet::arrow::async_reader::ParquetObjectReader;
     use parquet::arrow::ParquetRecordBatchStreamBuilder;
 
-    let object_reader = ParquetObjectReader::new(store, path.into());
+    use crate::object_store_reader::ObjectStoreReader;
+
+    let object_reader = ObjectStoreReader::new(store, path.into());
     let builder = ParquetRecordBatchStreamBuilder::new(object_reader).await?;
 
     let metadata = builder.schema().metadata().clone();
