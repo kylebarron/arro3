@@ -29,12 +29,16 @@ pub fn new_stream(array_reader: Box<dyn ArrayReader + Send>) -> FFI_ArrowArraySt
         last_error: None,
     });
 
-    FFI_ArrowArrayStream {
-        get_schema: Some(get_schema),
-        get_next: Some(get_next),
-        get_last_error: Some(get_last_error),
-        release: Some(release_stream),
-        private_data: Box::into_raw(private_data) as *mut c_void,
+    // SAFETY: the callbacks implement the C stream interface over `ArrayStreamPrivateData`, and
+    // `release_stream` frees that private data exactly once.
+    unsafe {
+        FFI_ArrowArrayStream::new_unchecked(
+            Some(get_schema),
+            Some(get_next),
+            Some(get_last_error),
+            Some(release_stream),
+            Box::into_raw(private_data) as *mut c_void,
+        )
     }
 }
 
@@ -43,16 +47,13 @@ unsafe extern "C" fn release_stream(stream: *mut FFI_ArrowArrayStream) {
     if stream.is_null() {
         return;
     }
-    let stream = &mut *stream;
+    let private_data = (*stream).private_data() as *mut ArrayStreamPrivateData;
 
-    stream.get_schema = None;
-    stream.get_next = None;
-    stream.get_last_error = None;
+    // Mark the stream as released by clearing all of its callbacks. `ptr::write` doesn't drop the
+    // old value, so this doesn't call `release_stream` again.
+    std::ptr::write(stream, FFI_ArrowArrayStream::empty());
 
-    let private_data = Box::from_raw(stream.private_data as *mut ArrayStreamPrivateData);
-    drop(private_data);
-
-    stream.release = None;
+    drop(Box::from_raw(private_data));
 }
 
 struct ArrayStreamPrivateData {
@@ -93,7 +94,7 @@ struct ExportedArrayStream {
 
 impl ExportedArrayStream {
     fn get_private_data(&mut self) -> &mut ArrayStreamPrivateData {
-        unsafe { &mut *((*self.stream).private_data as *mut ArrayStreamPrivateData) }
+        unsafe { &mut *((*self.stream).private_data() as *mut ArrayStreamPrivateData) }
     }
 
     pub fn get_schema(&mut self, out: *mut FFI_ArrowSchema) -> i32 {
