@@ -12,6 +12,7 @@ from arro3.core import (
     Array,
     DataType,
     Field,
+    MonthDayNano,
     Scalar,
     fixed_size_list_array,
     list_array,
@@ -68,8 +69,13 @@ def test_as_py_month_day_nano_interval():
     assert arro3_arr[1].as_py() == (-1, -2, -3_000_000_000)
     assert arro3_arr[2].as_py() is None
 
+    value = arro3_arr[0].as_py()
+    assert isinstance(value, MonthDayNano)
+    assert (value.months, value.days, value.nanoseconds) == (1, 2, 3)
+
     for i in range(len(pa_arr)):
         assert arro3_arr[i].as_py() == pa_arr[i].as_py()
+        assert repr(arro3_arr[i].as_py()) == repr(pa_arr[i].as_py())
 
 
 time_units = ["s", "ms", "us", "ns"]

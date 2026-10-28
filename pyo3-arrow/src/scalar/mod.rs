@@ -320,8 +320,13 @@ impl PyScalar {
                     (value.days, value.milliseconds).into_py_any(py)?
                 }
                 IntervalUnit::MonthDayNano => {
+                    let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+                    let month_day_nano = arro3_mod.getattr(intern!(py, "MonthDayNano"))?;
+
                     let value = arr.as_primitive::<IntervalMonthDayNanoType>().value(0);
-                    (value.months, value.days, value.nanoseconds).into_py_any(py)?
+                    month_day_nano
+                        .call1((value.months, value.days, value.nanoseconds))?
+                        .unbind()
                 }
             },
             DataType::Binary => arr.as_binary::<i32>().value(0).into_py_any(py)?,
