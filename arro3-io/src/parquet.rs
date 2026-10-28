@@ -68,6 +68,9 @@ pub fn read_parquet_async<'py>(
 }
 
 #[cfg(feature = "async")]
+// `ParquetObjectReader` is deprecated in favor of implementing `AsyncFileReader` directly:
+// https://github.com/apache/arrow-rs/issues/10308
+#[allow(deprecated)]
 async fn read_parquet_async_inner(
     store: Arc<dyn object_store::ObjectStore>,
     path: String,
