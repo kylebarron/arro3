@@ -88,7 +88,7 @@ fn slice_offsets<O: OffsetSizeTrait>(
     length: usize,
 ) -> ScalarBuffer<O> {
     let sliced = offsets.slice(offset, length);
-    let first_offset = sliced.first().copied().unwrap_or(O::zero());
+    let first_offset = sliced.first();
     if first_offset.to_usize().unwrap() == 0 {
         sliced.into_inner()
     } else {
