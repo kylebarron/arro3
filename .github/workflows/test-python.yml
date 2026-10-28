@@ -77,7 +77,7 @@ jobs:
       - name: Run python tests with --require-gil-disabled
         if: matrix.python-version == '3.14t'
         run: |
-          uv run --python ${{ matrix.python-version }} pytest tests --require-gil-disabled
+          uv run --python ${{ matrix.python-version }} --group freethreaded pytest tests --require-gil-disabled
 
       # Ensure docs build without warnings
       - name: Check docs
