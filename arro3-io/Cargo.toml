@@ -28,6 +28,7 @@ async = [
     "dep:futures",
 ]
 abi3-py311 = ["pyo3/abi3-py311"]
+abi3t-py315 = ["pyo3/abi3t-py315"]
 extension-module = ["pyo3/extension-module"]
 
 [dependencies]
