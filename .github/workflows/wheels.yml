@@ -38,14 +38,14 @@ jobs:
             manylinux: auto
             # rust-numpy supports free-threaded Python on 32-bit platforms
             # only from 3.15
-            version-specific-interpreters: -i 3.15t -i pypy3.11
+            version-specific-interpreters: -i pypy3.11
           - runner: ubuntu-latest
             target: aarch64
             manylinux: "2_24"
           - runner: ubuntu-latest
             target: armv7
             manylinux: auto
-            version-specific-interpreters: -i 3.15t -i pypy3.11
+            version-specific-interpreters: -i pypy3.11
           - runner: ubuntu-latest
             target: s390x
             manylinux: auto
@@ -76,13 +76,21 @@ jobs:
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: ${{ matrix.platform.manylinux }}
+
       - name: Build version-specific wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist ${{ matrix.platform.version-specific-interpreters || '-i 3.14t -i 3.15t -i pypy3.11' }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist ${{ matrix.platform.version-specific-interpreters || '-i 3.14t -i pypy3.11' }} --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: ${{ matrix.platform.manylinux }}
 
@@ -104,12 +112,12 @@ jobs:
             target: x86
             # rust-numpy supports free-threaded Python on 32-bit platforms
             # only from 3.15
-            version-specific-interpreters: -i 3.15t -i pypy3.11
+            version-specific-interpreters: -i pypy3.11
           - runner: ubuntu-latest
             target: aarch64
           - runner: ubuntu-latest
             target: armv7
-            version-specific-interpreters: -i 3.15t -i pypy3.11
+            version-specific-interpreters: -i pypy3.11
         module:
           - arro3-core
           - arro3-compute
@@ -134,13 +142,21 @@ jobs:
           sccache: "true"
           manylinux: musllinux_1_2
 
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+          manylinux: musllinux_1_2
+
       - name: Build version-specific wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist ${{ matrix.platform.version-specific-interpreters || '-i 3.14t -i 3.15t -i pypy3.11' }} --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist ${{ matrix.platform.version-specific-interpreters || '-i 3.14t -i pypy3.11' }} --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
           manylinux: musllinux_1_2
 
@@ -181,13 +197,20 @@ jobs:
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
       - name: Build version-specific wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.14t -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.14t --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
@@ -229,13 +252,20 @@ jobs:
           args: --release --out dist --features abi3-py311 --features extension-module -i 3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
+      - name: Build abi3t-py315 wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --features abi3t-py315 --features extension-module -i 3.15t --manifest-path ${{ matrix.module }}/Cargo.toml
+          sccache: "true"
+
       - name: Build version-specific wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
           # As of Nov 2024, it was necessary to manually specify -i 3.13 to get
           # maturin to find the executable. --find-interpreter did not find it.
-          args: --release --out dist -i 3.14t -i 3.15t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
+          args: --release --out dist -i 3.14t -i pypy3.11 --manifest-path ${{ matrix.module }}/Cargo.toml
           sccache: "true"
 
       - name: Upload wheels
