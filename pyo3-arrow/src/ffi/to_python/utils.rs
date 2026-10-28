@@ -11,7 +11,7 @@ use pyo3::types::{PyCapsule, PyTuple};
 use crate::error::PyArrowResult;
 use crate::ffi::from_python::utils::import_schema_pycapsule;
 use crate::ffi::to_python::ffi_stream::new_stream;
-use crate::ffi::{ArrayIterator, ArrayReader};
+use arrow_array::{ArrayIterator, ArrayReader};
 
 const ARRAY_CAPSULE_NAME: &CStr = c"arrow_array";
 const SCHEMA_CAPSULE_NAME: &CStr = c"arrow_schema";

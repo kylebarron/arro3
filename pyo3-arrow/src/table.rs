@@ -20,7 +20,6 @@ use crate::export::{
     Arro3Table,
 };
 use crate::ffi::from_python::utils::import_stream_pycapsule;
-use crate::ffi::to_python::chunked::ArrayIterator;
 use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
@@ -29,6 +28,7 @@ use crate::input::{
 };
 use crate::utils::{default_repr_options, schema_equals};
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
+use arrow_array::ArrayIterator;
 
 /// A Python-facing Arrow table.
 ///

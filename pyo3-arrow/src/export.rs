@@ -34,11 +34,12 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 
-use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule, ArrayReader};
+use crate::ffi::{to_array_pycapsules, to_schema_pycapsule, to_stream_pycapsule};
 use crate::{
     PyArray, PyArrayReader, PyChunkedArray, PyDataType, PyField, PyRecordBatch,
     PyRecordBatchReader, PyScalar, PySchema, PyTable,
 };
+use arrow_array::ArrayReader;
 
 /// A wrapper around a [PyArray] that implements [IntoPyObject] to convert to a runtime-available
 /// `arro3.core.Array`.
