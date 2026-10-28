@@ -41,7 +41,7 @@ pyo3-async-runtimes = { version = "0.30", features = ["tokio-runtime"] }
 pyo3-bytes = "0.8"
 pyo3-file = "0.18"
 pyo3-object_store = "0.13"
-thiserror = "1.0.63"
+thiserror = "2.0.18"
 
 [profile.release]
 lto = true
