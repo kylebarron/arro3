@@ -6,11 +6,13 @@ from decimal import Decimal
 from time import sleep
 from zoneinfo import ZoneInfo
 
+import nanoarrow as na
 import pyarrow as pa
 import pytest
 from arro3.core import (
     Array,
     DataType,
+    DayTime,
     Field,
     MonthDayNano,
     Scalar,
@@ -76,6 +78,25 @@ def test_as_py_month_day_nano_interval():
     for i in range(len(pa_arr)):
         assert arro3_arr[i].as_py() == pa_arr[i].as_py()
         assert repr(arro3_arr[i].as_py()) == repr(pa_arr[i].as_py())
+
+    assert arro3_arr.to_pylist() == na.Array(pa_arr).to_pylist()
+
+
+def test_as_py_day_time_interval():
+    na_arr = na.Array([(5, 1500), (-1, -250), None], na.interval_day_time())
+    arro3_arr = Array(na_arr)
+
+    value = arro3_arr[0].as_py()
+    assert isinstance(value, DayTime)
+    assert (value.days, value.milliseconds) == (5, 1500)
+
+    assert arro3_arr.to_pylist() == na_arr.to_pylist()
+
+
+def test_as_py_year_month_interval():
+    na_arr = na.Array([14, -3, None], na.interval_months())
+    arro3_arr = Array(na_arr)
+    assert arro3_arr.to_pylist() == na_arr.to_pylist()
 
 
 time_units = ["s", "ms", "us", "ns"]
