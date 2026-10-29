@@ -16,7 +16,9 @@ class ChunkedArray:
     """An Arrow ChunkedArray."""
     @overload
     def __init__(
-        self, arrays: ArrayInput | ArrowStreamExportable, type: None = None
+        self,
+        arrays: ArrayInput | ArrowStreamExportable,
+        type: ArrowSchemaExportable | None = None,
     ) -> None: ...
     @overload
     def __init__(
@@ -32,8 +34,8 @@ class ChunkedArray:
         """Construct a new ChunkedArray.
 
         Args:
-            arrays: _description_
-            type: _description_. Defaults to None.
+            arrays: Arrow data (an object with an `__arrow_c_array__` or `__arrow_c_stream__` method), or a sequence of arrays.
+            type: The type of the ChunkedArray. Arrow data is cast to this type. Defaults to None.
         """
     def __array__(self, dtype=None, copy=None) -> NDArray:
         """

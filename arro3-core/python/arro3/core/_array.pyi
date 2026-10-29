@@ -16,7 +16,9 @@ from .types import (
 class Array:
     """An Arrow Array."""
     @overload
-    def __init__(self, obj: ArrayInput, /, type: None = None) -> None: ...
+    def __init__(
+        self, obj: ArrayInput, /, type: ArrowSchemaExportable | None = None
+    ) -> None: ...
     @overload
     def __init__(self, obj: Sequence[Any], /, type: ArrowSchemaExportable) -> None: ...
     def __init__(
@@ -29,7 +31,7 @@ class Array:
 
         Args:
             obj: A sequence of input objects.
-            type: Explicit type to attempt to coerce to. You may pass in a `Field` to `type` in order to associate extension metadata with this array.
+            type: Explicit type to attempt to coerce to. You may pass in a `Field` to `type` in order to associate extension metadata with this array. Arrow input is cast to this type.
         """
     def __array__(self, dtype=None, copy=None) -> NDArray:
         """
