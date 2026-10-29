@@ -15,6 +15,7 @@ from arro3.compute._boolean import is_not_null as is_not_null
 from arro3.compute._boolean import is_null as is_null
 from arro3.compute._cast import can_cast_types as can_cast_types
 from arro3.compute._cast import cast as cast
+from arro3.compute._concat import concat as concat
 from arro3.compute._dictionary import dictionary_encode as dictionary_encode
 from arro3.compute._filter import filter as filter
 from arro3.compute._take import take as take

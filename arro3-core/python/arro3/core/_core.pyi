@@ -81,11 +81,11 @@ def dictionary_indices(
     """
 
 @overload
-def list_flatten(input: ArrowArrayExportable) -> Array: ...
+def list_flatten(input: ArrayInput) -> Array: ...
 @overload
 def list_flatten(input: ArrowStreamExportable) -> ArrayReader: ...
 def list_flatten(
-    input: ArrowArrayExportable | ArrowStreamExportable,
+    input: ArrayInput | ArrowStreamExportable,
 ) -> Array | ArrayReader:
     """Unnest this ListArray, LargeListArray or FixedSizeListArray.
 
