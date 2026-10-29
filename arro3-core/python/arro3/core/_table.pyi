@@ -223,7 +223,7 @@ class Table:
         self,
         i: int,
         field: str | ArrowSchemaExportable,
-        column: ArrowStreamExportable | ArrowArrayExportable,
+        column: ArrayInput | ArrowStreamExportable,
     ) -> Table:
         """Add column to Table at position.
 
@@ -240,7 +240,7 @@ class Table:
     def append_column(
         self,
         field: str | ArrowSchemaExportable,
-        column: ArrowStreamExportable | ArrowArrayExportable,
+        column: ArrayInput | ArrowStreamExportable,
     ) -> Table:
         """Append column at the end of columns.
 
@@ -387,7 +387,7 @@ class Table:
         self,
         i: int,
         field: str | ArrowSchemaExportable,
-        column: ArrowStreamExportable | ArrowArrayExportable,
+        column: ArrayInput | ArrowStreamExportable,
     ) -> Table:
         """Replace column in Table at position.
 

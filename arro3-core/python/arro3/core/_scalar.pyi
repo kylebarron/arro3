@@ -7,7 +7,7 @@ from .types import ArrayInput, ArrowArrayExportable, ArrowSchemaExportable
 class Scalar:
     """An arrow Scalar."""
     @overload
-    def __init__(self, obj: ArrayInput, /, type: None = None) -> None: ...
+    def __init__(self, obj: ArrowArrayExportable, /, type: None = None) -> None: ...
     @overload
     def __init__(self, obj: Any, /, type: ArrowSchemaExportable) -> None: ...
     def __init__(
@@ -43,7 +43,7 @@ class Scalar:
         """
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowArrayExportable) -> Scalar:
+    def from_arrow(cls, input: ArrayInput) -> Scalar:
         """Construct this from an existing Arrow Scalar.
 
         It can be called on anything that exports the Arrow data interface (has a

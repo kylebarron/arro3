@@ -29,21 +29,21 @@ class RecordBatch:
         schema: None = None,
         metadata: None = None,
     ) -> None: ...
-    # @overload
-    # def __init__(
-    #     self,
-    #     data: Sequence[ArrowArrayExportable],
-    #     *,
-    #     names: Sequence[str],
-    #     schema: None = None,
-    #     metadata: dict[str, str] | dict[bytes, bytes] | None = None,
-    # ) -> None: ...
     @overload
     def __init__(
         self,
         data: Sequence[ArrayInput],
         *,
-        # names: None = None,
+        names: Sequence[str],
+        schema: None = None,
+        metadata: dict[str, str] | dict[bytes, bytes] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        data: Sequence[ArrayInput],
+        *,
+        names: None = None,
         schema: ArrowSchemaExportable,
         metadata: None = None,
     ) -> None: ...
@@ -52,7 +52,7 @@ class RecordBatch:
         self,
         data: dict[str, ArrayInput],
         *,
-        # names: None = None,
+        names: None = None,
         schema: None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> None: ...
@@ -61,14 +61,15 @@ class RecordBatch:
         self,
         data: dict[str, ArrayInput],
         *,
-        # names: None = None,
+        names: None = None,
         schema: ArrowSchemaExportable,
         metadata: None = None,
     ) -> None: ...
     def __init__(
         self,
-        data: ArrayInput | dict[str, ArrayInput],
+        data: ArrowArrayExportable | Sequence[ArrayInput] | dict[str, ArrayInput],
         *,
+        names: Sequence[str] | None = None,
         schema: ArrowSchemaExportable | None = None,
         metadata: dict[str, str] | dict[bytes, bytes] | None = None,
     ) -> None: ...
@@ -297,7 +298,7 @@ class RecordBatch:
     @property
     def schema(self) -> Schema:
         """Access the schema of this RecordBatch"""
-    def select(self, columns: list[int] | list[str]) -> RecordBatch:
+    def select(self, columns: Sequence[int] | Sequence[str]) -> RecordBatch:
         """
         Select columns of the RecordBatch.
 
