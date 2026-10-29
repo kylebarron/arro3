@@ -294,21 +294,6 @@ impl PyArray {
         Ok(Self::new(array, field))
     }
 
-    #[cfg(feature = "buffer_protocol")]
-    fn buffer(&self) -> crate::buffer::PyArrowBuffer {
-        use arrow_array::cast::AsArray;
-
-        match self.array.data_type() {
-            DataType::Int64 => {
-                let arr = self.array.as_primitive::<Int64Type>();
-                let values = arr.values();
-                let buffer = values.inner().clone();
-                crate::buffer::PyArrowBuffer::new(buffer)
-            }
-            _ => todo!(),
-        }
-    }
-
     #[pyo3(signature = (dtype=None, copy=None))]
     #[allow(unused_variables)]
     fn __array__<'py>(
