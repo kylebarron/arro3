@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import itertools
+import sysconfig
 from datetime import date, datetime
 from decimal import Decimal
 from time import sleep
 from zoneinfo import ZoneInfo
 
-import nanoarrow as na
 import pyarrow as pa
 import pytest
 from arro3.core import (
@@ -79,10 +79,19 @@ def test_as_py_month_day_nano_interval():
         assert arro3_arr[i].as_py() == pa_arr[i].as_py()
         assert repr(arro3_arr[i].as_py()) == repr(pa_arr[i].as_py())
 
-    assert arro3_arr.to_pylist() == na.Array(pa_arr).to_pylist()
+
+@pytest.fixture
+def na():
+    # nanoarrow hasn't declared free-threading support, so importing it would
+    # re-enable the GIL for the rest of a free-threaded test run.
+    if sysconfig.get_config_var("Py_GIL_DISABLED"):
+        pytest.skip("importing nanoarrow re-enables the GIL")
+    import nanoarrow
+
+    return nanoarrow
 
 
-def test_as_py_day_time_interval():
+def test_as_py_day_time_interval(na):
     na_arr = na.Array([(5, 1500), (-1, -250), None], na.interval_day_time())
     arro3_arr = Array(na_arr)
 
@@ -93,7 +102,7 @@ def test_as_py_day_time_interval():
     assert arro3_arr.to_pylist() == na_arr.to_pylist()
 
 
-def test_as_py_year_month_interval():
+def test_as_py_year_month_interval(na):
     na_arr = na.Array([14, -3, None], na.interval_months())
     arro3_arr = Array(na_arr)
     assert arro3_arr.to_pylist() == na_arr.to_pylist()
