@@ -13,7 +13,6 @@ from ._schema import Schema
 from ._table import Table
 from .types import (
     ArrayInput,
-    ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
 )
@@ -41,11 +40,11 @@ __all__ = [
 ]
 
 @overload
-def dictionary_dictionary(array: ArrowArrayExportable) -> Array: ...
+def dictionary_dictionary(array: ArrayInput) -> Array: ...
 @overload
 def dictionary_dictionary(array: ArrowStreamExportable) -> ArrayReader: ...
 def dictionary_dictionary(
-    array: ArrowArrayExportable | ArrowStreamExportable,
+    array: ArrayInput | ArrowStreamExportable,
 ) -> Array | ArrayReader:
     """
     Access the `dictionary` of a dictionary array.
@@ -61,11 +60,11 @@ def dictionary_dictionary(
     """
 
 @overload
-def dictionary_indices(array: ArrowArrayExportable) -> Array: ...
+def dictionary_indices(array: ArrayInput) -> Array: ...
 @overload
 def dictionary_indices(array: ArrowStreamExportable) -> ArrayReader: ...
 def dictionary_indices(
-    array: ArrowArrayExportable | ArrowStreamExportable,
+    array: ArrayInput | ArrowStreamExportable,
 ) -> Array | ArrayReader:
     """
     Access the indices of a dictionary array.
@@ -100,13 +99,13 @@ def list_flatten(
     """
 
 @overload
-def list_offsets(input: ArrowArrayExportable, *, logical: bool = True) -> Array: ...
+def list_offsets(input: ArrayInput, *, logical: bool = True) -> Array: ...
 @overload
 def list_offsets(
     input: ArrowStreamExportable, *, logical: bool = True
 ) -> ArrayReader: ...
 def list_offsets(
-    input: ArrowArrayExportable | ArrowStreamExportable,
+    input: ArrayInput | ArrowStreamExportable,
     *,
     logical: bool = True,
 ) -> Array | ArrayReader:
@@ -124,7 +123,7 @@ def list_offsets(
     """
 
 def struct_field(
-    values: ArrowArrayExportable,
+    values: ArrayInput,
     /,
     indices: int | Sequence[int],
 ) -> Array:
@@ -146,7 +145,7 @@ def fixed_size_list_array(
     list_size: int,
     *,
     type: ArrowSchemaExportable | None = None,
-    mask: ArrowArrayExportable | None = None,
+    mask: ArrayInput | None = None,
 ) -> Array:
     """Construct a new fixed size list array
 
@@ -167,7 +166,7 @@ def list_array(
     values: ArrayInput,
     *,
     type: ArrowSchemaExportable | None = None,
-    mask: ArrowArrayExportable | None = None,
+    mask: ArrayInput | None = None,
 ) -> Array:
     """Construct a new list array
 
@@ -188,7 +187,7 @@ def struct_array(
     *,
     fields: Sequence[ArrowSchemaExportable],
     type: ArrowSchemaExportable | None = None,
-    mask: ArrowArrayExportable | None = None,
+    mask: ArrayInput | None = None,
 ) -> Array:
     """Construct a new struct array
 

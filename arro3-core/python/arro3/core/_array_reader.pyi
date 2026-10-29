@@ -3,7 +3,7 @@ from typing import Sequence
 from ._array import Array
 from ._chunked_array import ChunkedArray
 from ._field import Field
-from .types import ArrowArrayExportable, ArrowSchemaExportable, ArrowStreamExportable
+from .types import ArrayInput, ArrowSchemaExportable, ArrowStreamExportable
 
 class ArrayReader:
     """A stream of Arrow `Array`s.
@@ -37,9 +37,7 @@ class ArrayReader:
     def __next__(self) -> Array: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(
-        cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> ArrayReader:
+    def from_arrow(cls, input: ArrayInput | ArrowStreamExportable) -> ArrayReader:
         """Construct this from an existing Arrow object.
 
         It can be called on anything that exports the Arrow stream interface
@@ -50,7 +48,7 @@ class ArrayReader:
         """Construct this object from a bare Arrow PyCapsule"""
     @classmethod
     def from_arrays(
-        cls, field: ArrowSchemaExportable, arrays: Sequence[ArrowArrayExportable]
+        cls, field: ArrowSchemaExportable, arrays: Sequence[ArrayInput]
     ) -> ArrayReader:
         """Construct an ArrayReader from existing data.
 

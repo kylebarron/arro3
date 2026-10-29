@@ -1,7 +1,7 @@
 from typing import overload
 
 from arro3.core import Array, ArrayReader
-from arro3.core.types import ArrowArrayExportable, ArrowStreamExportable
+from arro3.core.types import ArrayInput, ArrowStreamExportable
 
 from .enums import DatePart
 from .types import DatePartT
@@ -20,13 +20,13 @@ from .types import DatePartT
 # ```
 
 @overload
-def date_part(input: ArrowArrayExportable, part: DatePart | DatePartT) -> Array: ...
+def date_part(input: ArrayInput, part: DatePart | DatePartT) -> Array: ...
 @overload
 def date_part(
     input: ArrowStreamExportable, part: DatePart | DatePartT
 ) -> ArrayReader: ...
 def date_part(
-    input: ArrowArrayExportable | ArrowStreamExportable, part: DatePart | DatePartT
+    input: ArrayInput | ArrowStreamExportable, part: DatePart | DatePartT
 ) -> Array | ArrayReader:
     """
     Given an array, return a new array with the extracted [`DatePart`] as signed 32-bit

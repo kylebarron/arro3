@@ -8,7 +8,6 @@ from ._field import Field
 from ._scalar import Scalar
 from .types import (
     ArrayInput,
-    ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
 )
@@ -71,9 +70,7 @@ class ChunkedArray:
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(
-        cls, input: ArrowArrayExportable | ArrowStreamExportable
-    ) -> ChunkedArray:
+    def from_arrow(cls, input: ArrayInput | ArrowStreamExportable) -> ChunkedArray:
         """Construct this from an existing Arrow object.
 
         It can be called on anything that exports the Arrow stream interface (has an

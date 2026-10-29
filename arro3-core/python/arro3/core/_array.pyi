@@ -8,7 +8,6 @@ from ._field import Field
 from ._scalar import Scalar
 from .types import (
     ArrayInput,
-    ArrowArrayExportable,
     ArrowSchemaExportable,
     ArrowStreamExportable,
     _SupportsBuffer,
@@ -68,7 +67,7 @@ class Array:
     def __len__(self) -> int: ...
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowArrayExportable | ArrowStreamExportable) -> Array:
+    def from_arrow(cls, input: ArrayInput | ArrowStreamExportable) -> Array:
         """
         Construct this object from an existing Arrow object.
 

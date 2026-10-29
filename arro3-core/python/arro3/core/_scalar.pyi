@@ -43,7 +43,7 @@ class Scalar:
         """
     def __repr__(self) -> str: ...
     @classmethod
-    def from_arrow(cls, input: ArrowArrayExportable) -> Scalar:
+    def from_arrow(cls, input: ArrayInput) -> Scalar:
         """Construct this from an existing Arrow Scalar.
 
         It can be called on anything that exports the Arrow data interface (has a
