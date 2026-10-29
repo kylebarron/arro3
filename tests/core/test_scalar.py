@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import sysconfig
 from datetime import date, datetime
 from decimal import Decimal
 from time import sleep
@@ -11,7 +12,9 @@ import pytest
 from arro3.core import (
     Array,
     DataType,
+    DayTime,
     Field,
+    MonthDayNano,
     Scalar,
     fixed_size_list_array,
     list_array,
@@ -50,6 +53,59 @@ def test_as_py():
     fixed_list_arr = fixed_size_list_array(int_arr, 2)
     assert fixed_list_arr[0].as_py() == [1, 2]
     assert fixed_list_arr[1].as_py() == [3, 4]
+
+
+def test_as_py_month_day_nano_interval():
+    pa_arr = pa.array(
+        [
+            pa.MonthDayNano([1, 2, 3]),
+            pa.MonthDayNano([-1, -2, -3_000_000_000]),
+            None,
+        ],
+        type=pa.month_day_nano_interval(),
+    )
+    arro3_arr = Array(pa_arr)
+    assert arro3_arr.type == DataType.month_day_nano_interval()
+
+    assert arro3_arr[0].as_py() == (1, 2, 3)
+    assert arro3_arr[1].as_py() == (-1, -2, -3_000_000_000)
+    assert arro3_arr[2].as_py() is None
+
+    value = arro3_arr[0].as_py()
+    assert isinstance(value, MonthDayNano)
+    assert (value.months, value.days, value.nanoseconds) == (1, 2, 3)
+
+    for i in range(len(pa_arr)):
+        assert arro3_arr[i].as_py() == pa_arr[i].as_py()
+        assert repr(arro3_arr[i].as_py()) == repr(pa_arr[i].as_py())
+
+
+@pytest.fixture
+def na():
+    # nanoarrow hasn't declared free-threading support, so importing it would
+    # re-enable the GIL for the rest of a free-threaded test run.
+    if sysconfig.get_config_var("Py_GIL_DISABLED"):
+        pytest.skip("importing nanoarrow re-enables the GIL")
+    import nanoarrow
+
+    return nanoarrow
+
+
+def test_as_py_day_time_interval(na):
+    na_arr = na.Array([(5, 1500), (-1, -250), None], na.interval_day_time())
+    arro3_arr = Array(na_arr)
+
+    value = arro3_arr[0].as_py()
+    assert isinstance(value, DayTime)
+    assert (value.days, value.milliseconds) == (5, 1500)
+
+    assert arro3_arr.to_pylist() == na_arr.to_pylist()
+
+
+def test_as_py_year_month_interval(na):
+    na_arr = na.Array([14, -3, None], na.interval_months())
+    arro3_arr = Array(na_arr)
+    assert arro3_arr.to_pylist() == na_arr.to_pylist()
 
 
 time_units = ["s", "ms", "us", "ns"]

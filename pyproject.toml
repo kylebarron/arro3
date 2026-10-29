@@ -14,6 +14,7 @@ dev-dependencies = [
     "geoarrow-types>=0.3.0",
     "ipykernel>=6.29.5",
     "maturin>=1.9.4",
+    "nanoarrow>=0.9.0",
     "pandas-stubs",
     "pandas>=2.2.3",
     "pip>=24.2",

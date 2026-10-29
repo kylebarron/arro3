@@ -9,7 +9,7 @@ use arrow_array::types::*;
 use arrow_array::{Array, ArrayRef, Datum, UnionArray};
 use arrow_cast::cast;
 use arrow_cast::pretty::pretty_format_columns_with_options;
-use arrow_schema::{ArrowError, DataType, Field, FieldRef, TimeUnit};
+use arrow_schema::{ArrowError, DataType, Field, FieldRef, IntervalUnit, TimeUnit};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use pyo3::types::{PyCapsule, PyList, PyTuple, PyType};
@@ -310,10 +310,28 @@ impl PyScalar {
                     .value_as_duration(0)
                     .into_py_any(py)?,
             },
-            DataType::Interval(_) => {
-                // https://github.com/apache/arrow-rs/blob/6c59b7637592e4b67b18762b8313f91086c0d5d8/arrow-array/src/temporal_conversions.rs#L219
-                todo!("interval is not yet fully documented [ARROW-3097]")
-            }
+            DataType::Interval(unit) => match unit {
+                IntervalUnit::YearMonth => arr
+                    .as_primitive::<IntervalYearMonthType>()
+                    .value(0)
+                    .into_py_any(py)?,
+                IntervalUnit::DayTime => {
+                    let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+                    let day_time = arro3_mod.getattr(intern!(py, "DayTime"))?;
+
+                    let value = arr.as_primitive::<IntervalDayTimeType>().value(0);
+                    day_time.call1((value.days, value.milliseconds))?.unbind()
+                }
+                IntervalUnit::MonthDayNano => {
+                    let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+                    let month_day_nano = arro3_mod.getattr(intern!(py, "MonthDayNano"))?;
+
+                    let value = arr.as_primitive::<IntervalMonthDayNanoType>().value(0);
+                    month_day_nano
+                        .call1((value.months, value.days, value.nanoseconds))?
+                        .unbind()
+                }
+            },
             DataType::Binary => arr.as_binary::<i32>().value(0).into_py_any(py)?,
             DataType::FixedSizeBinary(_) => arr.as_fixed_size_binary().value(0).into_py_any(py)?,
             DataType::LargeBinary => arr.as_binary::<i64>().value(0).into_py_any(py)?,
