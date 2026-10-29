@@ -61,7 +61,9 @@ pub fn read_parquet_async<'py>(
     store: PyObjectStore,
 ) -> PyArrowResult<Bound<'py, PyAny>> {
     let fut = pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        Ok(read_parquet_async_inner(store.into_inner(), path).await?)
+        Ok(pyo3_arrow::export::Arro3Table::from(
+            read_parquet_async_inner(store.into_inner(), path).await?,
+        ))
     })?;
 
     Ok(fut)
