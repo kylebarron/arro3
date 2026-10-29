@@ -5,3 +5,5 @@
       members:
 
 ::: arro3.core.MonthDayNano
+
+::: arro3.core.DayTime

@@ -65,7 +65,7 @@ class Scalar:
         of the interval:
 
         - `month_day_nano` intervals become a [`MonthDayNano`][arro3.core.MonthDayNano].
-        - `day_time` intervals become a `(days, milliseconds)` tuple.
+        - `day_time` intervals become a [`DayTime`][arro3.core.DayTime].
         - `year_month` intervals become an `int` number of months.
         """
     def cast(self, target_type: ArrowSchemaExportable) -> Scalar:

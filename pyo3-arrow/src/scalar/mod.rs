@@ -316,8 +316,11 @@ impl PyScalar {
                     .value(0)
                     .into_py_any(py)?,
                 IntervalUnit::DayTime => {
+                    let arro3_mod = py.import(intern!(py, "arro3.core"))?;
+                    let day_time = arro3_mod.getattr(intern!(py, "DayTime"))?;
+
                     let value = arr.as_primitive::<IntervalDayTimeType>().value(0);
-                    (value.days, value.milliseconds).into_py_any(py)?
+                    day_time.call1((value.days, value.milliseconds))?.unbind()
                 }
                 IntervalUnit::MonthDayNano => {
                     let arro3_mod = py.import(intern!(py, "arro3.core"))?;
