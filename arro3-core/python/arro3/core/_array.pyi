@@ -130,7 +130,7 @@ class Array:
         """Take specific indices from this Array."""
     def to_numpy(self) -> NDArray:
         """Return a numpy copy of this array."""
-    def to_pylist(self) -> NDArray:
+    def to_pylist(self) -> list:
         """Convert to a list of native Python objects."""
 
     @property

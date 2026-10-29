@@ -159,7 +159,7 @@ class ChunkedArray:
         """
     def to_numpy(self) -> NDArray:
         """Copy this array to a `numpy` NDArray"""
-    def to_pylist(self) -> NDArray:
+    def to_pylist(self) -> list:
         """Convert to a list of native Python objects."""
     @property
     def type(self) -> DataType:
