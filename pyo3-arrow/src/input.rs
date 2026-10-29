@@ -227,3 +227,19 @@ impl SelectIndices {
         }
     }
 }
+
+/// A single column name or a sequence of column names.
+#[derive(FromPyObject)]
+pub(crate) enum ColumnNames {
+    Name(String),
+    Names(Vec<String>),
+}
+
+impl ColumnNames {
+    pub fn into_names(self) -> Vec<String> {
+        match self {
+            Self::Name(name) => vec![name],
+            Self::Names(names) => names,
+        }
+    }
+}

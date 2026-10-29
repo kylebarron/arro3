@@ -515,6 +515,16 @@ def test_drop_columns():
     assert not table.column_names
 
 
+def test_drop_columns_single_name():
+    pa_table = pa.table({"a": [1, 2], "b": [1, 2], "c": [1, 2]})
+    table = Table.from_arrow(pa_table)
+
+    assert pa.table(table.drop_columns("b")) == pa_table.drop_columns("b")
+
+    with pytest.raises(KeyError, match="not found"):
+        table.drop_columns("d")
+
+
 class CustomException(Exception):
     pass
 

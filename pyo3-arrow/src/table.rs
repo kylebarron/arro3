@@ -24,7 +24,8 @@ use crate::ffi::to_python::nanoarrow::to_nanoarrow_array_stream;
 use crate::ffi::to_python::to_stream_pycapsule;
 use crate::ffi::to_schema_pycapsule;
 use crate::input::{
-    AnyArray, AnyRecordBatch, FieldIndexInput, MetadataInput, NameOrField, SelectIndices,
+    AnyArray, AnyRecordBatch, ColumnNames, FieldIndexInput, MetadataInput, NameOrField,
+    SelectIndices,
 };
 use crate::utils::{default_repr_options, schema_equals};
 use crate::{PyChunkedArray, PyField, PyRecordBatch, PyRecordBatchReader, PySchema};
@@ -409,7 +410,8 @@ impl PyTable {
         Ok(Self::try_new(batches, schema)?)
     }
 
-    fn drop_columns(&self, columns: Vec<String>) -> PyArrowResult<Arro3Table> {
+    fn drop_columns(&self, columns: ColumnNames) -> PyArrowResult<Arro3Table> {
+        let columns = columns.into_names();
         let current_columns = self.column_names();
         let mut pos: HashMap<&str, usize> = HashMap::with_capacity(current_columns.len());
         for (i, s) in current_columns.iter().enumerate() {
