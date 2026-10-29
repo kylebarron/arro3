@@ -23,7 +23,7 @@ default = ["async"]
 async = [
     "dep:pyo3-object_store",
     "dep:pyo3-async-runtimes",
-    "parquet/object_store",
+    "parquet/async",
     "dep:object_store",
     "dep:futures",
 ]
