@@ -139,6 +139,15 @@ impl PyArray {
             .getattr(intern!(py, "array"))?
             .call1(PyTuple::new(py, vec![cloned.into_pyobject(py)?])?)
     }
+
+    /// Cast to `r#type` if one is passed, as pyarrow does for Arrow input to `pa.array`.
+    fn cast_to_type(self, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        let Some(r#type) = r#type else {
+            return Ok(self);
+        };
+        let field = r#type.into_inner();
+        Ok(Self::new(cast(self.as_ref(), field.data_type())?, field))
+    }
 }
 
 impl From<ArrayRef> for PyArray {
@@ -194,10 +203,10 @@ impl PyArray {
         // Then we also need to check if we can extract a PyArray, since we also support buffer
         // protocol input there.
         if obj.hasattr(intern!(py, "__arrow_c_array__"))? {
-            return Ok(obj.extract::<PyArray>()?);
+            return obj.extract::<PyArray>()?.cast_to_type(r#type);
         }
         if let Ok(data) = obj.extract::<PyArray>() {
-            return Ok(data);
+            return data.cast_to_type(r#type);
         }
 
         macro_rules! impl_primitive {

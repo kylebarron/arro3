@@ -234,6 +234,21 @@ impl PyChunkedArray {
         let array_reader = Box::new(ArrayIterator::new(chunks.into_iter().map(Ok), field));
         to_stream_pycapsule(py, array_reader, requested_schema)
     }
+
+    /// Cast to `r#type` if one is passed, as pyarrow does for Arrow input to
+    /// `pa.chunked_array`.
+    fn cast_to_type(self, r#type: Option<PyField>) -> PyArrowResult<Self> {
+        let Some(r#type) = r#type else {
+            return Ok(self);
+        };
+        let field = r#type.into_inner();
+        let chunks = self
+            .chunks
+            .iter()
+            .map(|chunk| cast(chunk, field.data_type()))
+            .collect::<Result<Vec<_>, ArrowError>>()?;
+        Ok(Self::try_new(chunks, field)?)
+    }
 }
 
 impl TryFrom<Vec<ArrayRef>> for PyChunkedArray {
@@ -283,9 +298,12 @@ impl PyChunkedArray {
         if arrays.hasattr(intern!(py, "__arrow_c_array__"))?
             || arrays.hasattr(intern!(py, "__arrow_c_stream__"))?
         {
-            Ok(arrays.extract::<AnyArray>()?.into_chunked_array()?)
+            arrays
+                .extract::<AnyArray>()?
+                .into_chunked_array()?
+                .cast_to_type(r#type)
         } else if let Ok(data) = arrays.extract::<AnyArray>() {
-            Ok(data.into_chunked_array()?)
+            data.into_chunked_array()?.cast_to_type(r#type)
         } else if let Ok(arrays) = arrays.extract::<Vec<PyArray>>() {
             // TODO: move this into from_arrays?
             let (chunks, fields): (Vec<_>, Vec<_>) =

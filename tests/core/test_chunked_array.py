@@ -128,3 +128,13 @@ def test_rechunk_chunk_lengths():
 
     with pytest.raises(ValueError, match="Cannot pass both"):
         ca.rechunk(max_chunksize=2, chunk_lengths=[2, 2])
+
+
+def test_constructor_arrow_input_with_type():
+    pa_ca = pa.chunked_array([[1, 2], [3]])
+    expected = pa.chunked_array(pa_ca, type=pa.int32())
+    assert pa.chunked_array(ChunkedArray(pa_ca, type=DataType.int32())) == expected
+
+    pa_arr = pa.array([1, 2, 3])
+    expected = pa.chunked_array([pa.array(pa_arr, type=pa.int32())])
+    assert pa.chunked_array(ChunkedArray(pa_arr, type=DataType.int32())) == expected

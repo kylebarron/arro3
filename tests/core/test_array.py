@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from textwrap import dedent
 
+import numpy as np
 import pyarrow as pa
 import pytest
 from arro3.core import Array, DataType, Table
@@ -44,6 +45,20 @@ def test_constructor_null():
 
     arr = Array([b"1", None, b"3"], DataType.binary(1))
     assert pa.array(arr) == pa.array([b"1", None, b"3"], pa.binary(1))
+
+
+def test_constructor_arrow_input_with_type():
+    pa_arr = pa.array([1, 2, 3])
+    for pa_type, arro3_type in [
+        (pa.int32(), DataType.int32()),
+        (pa.string(), DataType.string()),
+    ]:
+        expected = pa.array(pa_arr, type=pa_type)
+        assert pa.array(Array(pa_arr, type=arro3_type)) == expected
+
+    np_arr = np.array([1, 2, 3], dtype=np.int64)
+    expected = pa.array(np_arr, type=pa.int32())
+    assert pa.array(Array(np_arr, type=DataType.int32())) == expected
 
 
 def test_extension_array_meta_persists():
