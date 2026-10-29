@@ -86,7 +86,9 @@ def test_read_parquet_async():
         tmp_path = Path(tmp_path)
         write_parquet(table, tmp_path / "test.parquet")
         store = LocalStore(tmp_path)
-        table_retour = pa.table(asyncio.run(_read_parquet_async("test.parquet", store)))
+        result = asyncio.run(_read_parquet_async("test.parquet", store))
+        assert isinstance(result, Table)
+        table_retour = pa.table(result)
         assert table_retour.equals(table, check_metadata=True)
 
 
