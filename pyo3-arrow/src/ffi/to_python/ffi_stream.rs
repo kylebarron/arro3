@@ -3,6 +3,7 @@
 //! This is derived from
 //! <https://github.com/apache/arrow-rs/blob/9d0abcc6f4e11594c23811c2c2d297f2eb2963af/arrow/src/ffi_stream.rs>
 
+use std::mem::ManuallyDrop;
 use std::ptr::addr_of;
 use std::{
     convert::TryFrom,
@@ -25,7 +26,7 @@ const ENOSYS: i32 = 78;
 /// Create a new [`FFI_ArrowArrayStream`] from an [`ArrayReader`].
 pub fn new_stream(array_reader: Box<dyn ArrayReader + Send>) -> FFI_ArrowArrayStream {
     let private_data = Box::new(ArrayStreamPrivateData {
-        array_reader,
+        array_reader: ManuallyDrop::new(array_reader),
         last_error: None,
     });
 
@@ -57,8 +58,31 @@ unsafe extern "C" fn release_stream(stream: *mut FFI_ArrowArrayStream) {
 }
 
 struct ArrayStreamPrivateData {
-    array_reader: Box<dyn ArrayReader + Send>,
+    array_reader: ManuallyDrop<Box<dyn ArrayReader + Send>>,
     last_error: Option<CString>,
+}
+
+impl Drop for ArrayStreamPrivateData {
+    fn drop(&mut self) {
+        // SAFETY: `array_reader` isn't used again after this.
+        let array_reader = unsafe { ManuallyDrop::take(&mut self.array_reader) };
+
+        // The reader can own Python objects, such as the iterator behind
+        // `RecordBatchReader.from_batches`, so drop it with the GIL held. The consumer may release
+        // the stream without the GIL: pyarrow releases it before destroying a reader.
+        // `Python::attach` isn't enough here, because pyo3 tracks attachment per thread: if a pyo3
+        // frame further up the stack attached before the consumer released the GIL, pyo3 still
+        // considers this thread attached and would decref without the GIL.
+        unsafe {
+            if pyo3::ffi::Py_IsInitialized() != 0 {
+                let gstate = pyo3::ffi::PyGILState_Ensure();
+                drop(array_reader);
+                pyo3::ffi::PyGILState_Release(gstate);
+            } else {
+                drop(array_reader);
+            }
+        }
+    }
 }
 
 // The callback used to get array schema
@@ -156,5 +180,45 @@ fn get_error_code(err: &ArrowError) -> i32 {
         ArrowError::MemoryError(_) => ENOMEM,
         ArrowError::IoError(_, _) => EIO,
         _ => EINVAL,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use arrow_array::ArrayRef;
+    use arrow_schema::{ArrowError, DataType, Field};
+    use pyo3::prelude::*;
+
+    use super::new_stream;
+    use crate::ffi::ArrayIterator;
+
+    /// pyarrow releases the GIL before it destroys a reader, and so before it releases a stream it
+    /// imported. If a pyo3 frame further up the stack is attached at that point, pyo3 still
+    /// considers the thread attached. Releasing the stream must still drop the Python objects its
+    /// reader owns with the GIL held.
+    #[test]
+    fn release_drops_python_objects_with_gil_held() {
+        Python::initialize();
+        Python::attach(|py| {
+            let generator = py
+                .eval(c"(i for i in range(3))", None, None)
+                .unwrap()
+                .unbind();
+            let arrays: Vec<Result<ArrayRef, ArrowError>> = vec![];
+            let owns_generator = arrays.into_iter().inspect(move |_| {
+                let _ = &generator;
+            });
+            let field = Arc::new(Field::new("a", DataType::Int32, false));
+            let stream = new_stream(Box::new(ArrayIterator::new(owns_generator, field)));
+
+            // Release the stream the way pyarrow does: with the GIL released.
+            unsafe {
+                let tstate = pyo3::ffi::PyEval_SaveThread();
+                drop(stream);
+                pyo3::ffi::PyEval_RestoreThread(tstate);
+            }
+        });
     }
 }
