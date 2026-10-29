@@ -302,7 +302,10 @@ impl PyChunkedArray {
 
             let field = r#type
                 .map(|py_data_type| py_data_type.into_inner())
-                .unwrap_or_else(|| fields[0].clone());
+                .or_else(|| fields.first().cloned())
+                .ok_or(PyValueError::new_err(
+                    "Cannot create a ChunkedArray from an empty list without a type.",
+                ))?;
 
             Ok(PyChunkedArray::try_new(
                 chunks,

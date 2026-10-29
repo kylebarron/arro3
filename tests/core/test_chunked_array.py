@@ -12,6 +12,14 @@ def test_constructor():
     assert pa.chunked_array(ca) == pa.chunked_array([arr, arr2])
 
 
+def test_constructor_empty_list():
+    with pytest.raises(ValueError, match="empty list without a type"):
+        ChunkedArray([])
+
+    ca = ChunkedArray([], type=DataType.int64())
+    assert pa.chunked_array(ca) == pa.chunked_array([], type=pa.int64())
+
+
 def test_repr():
     arr = Array([1, 2, 3], DataType.int16())
     arr2 = Array([4, 5, 6], DataType.int16())
