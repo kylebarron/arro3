@@ -9,7 +9,7 @@ repository = "https://github.com/kylebarron/arro3"
 license = "MIT OR Apache-2.0"
 keywords = ["python", "arrow"]
 categories = []
-rust-version = "1.75"
+rust-version = "1.88"
 
 [features]
 default = ["buffer_protocol"]
