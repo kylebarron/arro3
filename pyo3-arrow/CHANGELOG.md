@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Other
+
+- Declare Rust 1.88 as the minimum supported version (`rust-version`), which arrow 60.1 requires. 0.21.0 still declared 1.75 (#574)
+
 ## [0.21.0] - 2026-11-04
 
 Release with pyo3 0.30 and arrow 60.
@@ -17,7 +21,6 @@ Release with pyo3 0.30 and arrow 60.
 ### Other
 
 - Bump arrow to 60.1 (#551)
-- Declare Rust 1.88 as the minimum supported version (`rust-version`), which arrow 60.1 requires
 
 ## [0.20.0] - 2026-10-15
 
