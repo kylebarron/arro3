@@ -9,17 +9,9 @@ Release with pyo3 0.30 and arrow 60.
 ### Breaking
 
 - `ArrayReader` and `ArrayIterator` are now the arrow-rs types: import them from `arrow_array` instead of `pyo3_arrow::ffi`. `ArrayReader::field` returns `&FieldRef` (#559)
-- Remove the undocumented `Array.buffer` method, which only handled Int64 arrays (#568)
-
-### New Features
-
-- Convert interval scalars to Python objects in `PyScalar::as_py` instead of panicking. Month-day-nano and day-time intervals become `arro3.core.MonthDayNano` and `arro3.core.DayTime` named tuples, so converting them needs `arro3.core` installed (#549)
-- Accept a single column name in `Table.drop_columns` (#571)
 
 ### Bug Fixes
 
-- Cast Arrow and buffer-protocol input to the `type` passed to `Array` and `ChunkedArray` instead of ignoring it (#570)
-- Raise `ValueError` for `ChunkedArray([])` without a type instead of panicking (#569)
 - Importing a C stream no longer panics when the producer's `get_last_error` returns NULL, and its errors include the producer's error code (#559)
 
 ### Other
