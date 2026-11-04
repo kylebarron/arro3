@@ -2,9 +2,21 @@
 
 ## Unreleased
 
-### New Features
+## [0.21.0] - 2026-11-04
 
-- Convert interval scalars to Python objects in `PyScalar::as_py` instead of panicking (#549)
+Release with pyo3 0.30 and arrow 60.
+
+### Breaking
+
+- `ArrayReader` and `ArrayIterator` are now the arrow-rs types: import them from `arrow_array` instead of `pyo3_arrow::ffi`. `ArrayReader::field` returns `&FieldRef` (#559)
+
+### Bug Fixes
+
+- Importing a C stream no longer panics when the producer's `get_last_error` returns NULL, and its errors include the producer's error code (#559)
+
+### Other
+
+- Bump arrow to 60.1 (#551)
 
 ## [0.20.0] - 2026-10-15
 
